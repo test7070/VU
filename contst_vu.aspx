@@ -31,7 +31,7 @@
 			brwNowPage = 0;
 			brwKey = 'Datea';
 			aPop = new Array(
-				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick', 'txtCustno,txtComp,txtNick', 'cust_b.aspx'],
+				['txtTggno', 'lblTgg', 'tgg', 'noa,comp,nick', 'txtTggno,txtComp,txtNick', 'tgg_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx']
 			);
 			$(document).ready(function() {
@@ -88,6 +88,7 @@
 				$('#lblChka1').text('含運');
 				$('#lblTotal').text('合約金額');
 				$('#lblEnda').text('終止');
+				$('#lblAcomp').text('簽約公司');
 				document.title='進貨合約';
 
 			}
@@ -124,7 +125,7 @@
 
 			function btnOk() {
 				t_err = '';
-				t_err = q_chkEmpField([['txtNoa', q_getMsg('lblNoa')], ['txtCustno', q_getMsg('lblCust')], ['txtDatea', q_getMsg('lblDatea')]]);
+				t_err = q_chkEmpField([['txtNoa', '合約號碼'], ['txtTggno', '合約廠商'], ['txtDatea', '訂約日期']]);
 				if (t_err.length > 0) {
 					alert(t_err);
 					return;
@@ -156,7 +157,7 @@
 				if (q_cur > 0 && q_cur < 4)
 					return;
 
-				q_box('cont_vu_s.aspx', q_name + '_s', "500px", "310px", q_getMsg("popSeek"));
+				q_box('contst_vu_s.aspx', q_name + '_s', "500px", "310px", q_getMsg("popSeek"));
 			}
 
 			function bbsAssign() {
@@ -181,6 +182,9 @@
 				$('#lblTotal_s').text('小計');
 				$('#lblMemo_s').text('備註');
 				$('#lblEnda_s').text('終止');
+				$('#vewDatea').text('訂約日期');
+				$('#vewNoa').text('合約號碼');
+				$('#vewComp').text('合約廠商');
 			}
 
 			function btnIns() {
@@ -231,7 +235,7 @@
 				q_nowf();
 				as['datea'] = abbm2['datea'];
 				as['odate'] = abbm2['odate'];
-				as['custno'] = abbm2['custno'];
+				as['tggno'] = abbm2['tggno'];
 				as['apv'] = abbm2['apv'];
 				return true;
 			}
@@ -473,7 +477,7 @@
 						<td><input id="chkBrow.*" type="checkbox" style=''/></td>
 						<td align="center" id='datea'>~datea</td>
 						<td align="center" id='noa'>~noa</td>
-						<td align="center" id='custno comp,4'>~custno ~comp,4</td>
+						<td align="center" id='tggno comp,4'>~tggno ~comp,4</td>
 					</tr>
 				</table>
 			</div>
@@ -499,8 +503,8 @@
 						<td colspan="2"><input id="txtAcomp" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id='lblCust' class="lbl btn"> </a></td>
-						<td><input id="txtCustno" type="text" class="txt c1"/></td>
+						<td><span> </span><a id='lblTgg' class="lbl btn"> </a></td>
+						<td><input id="txtTggno" type="text" class="txt c1"/></td>
 						<td colspan="2">
 							<input id="txtComp" type="text" class="txt c1"/>
 							<input id="txtNick" type="text" class="txt c1" style="display: none;"/>

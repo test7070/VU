@@ -79,6 +79,7 @@
 				
 				$('#lblNoa').text('合約號碼');
 				$('#lblDatea').text('訂約日期');
+				$('#lblCust').text('合約客戶');
 				$('#lblBoss').text('開工日');
 				$('#lblConn').text('完工日');
 				$('#lblWeight').text('合約重量');
@@ -88,6 +89,7 @@
 				$('#lblChka1').text('含運');
 				$('#lblTotal').text('合約金額');
 				$('#lblEnda').text('終止');
+				$('#lblAcomp').text('簽約公司');
 				document.title='出貨合約';
 
 			}
@@ -124,7 +126,7 @@
 
 			function btnOk() {
 				t_err = '';
-				t_err = q_chkEmpField([['txtNoa', q_getMsg('lblNoa')], ['txtCustno', q_getMsg('lblCust')], ['txtDatea', q_getMsg('lblDatea')]]);
+				t_err = q_chkEmpField([['txtNoa', '合約號碼'], ['txtCustno', '合約客戶'], ['txtDatea', '訂約日期']]);
 				if (t_err.length > 0) {
 					alert(t_err);
 					return;
@@ -181,6 +183,9 @@
 				$('#lblTotal_s').text('小計');
 				$('#lblMemo_s').text('備註');
 				$('#lblEnda_s').text('終止');
+				$('#vewDatea').text('訂約日期');
+				$('#vewNoa').text('合約號碼');
+				$('#vewComp').text('合約客戶');
 			}
 
 			function btnIns() {

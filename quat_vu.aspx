@@ -18,7 +18,7 @@
 			q_desc = 1;
 			q_tables = 's';
 			var q_name = "quat";
-			var q_readonly = ['txtNoa','txtWorker', 'txtWorker2','txtComp', 'txtAcomp','txtWeight','txtGweight','txtEweight','txtMoney'];
+			var q_readonly = ['txtNoa','txtWorker', 'txtWorker2','txtComp', 'txtAcomp','txtWeight','txtGweight','txtEweight','txtTotal'];
 			var q_readonlys = ['txtNo3'];
 			var bbmNum = [];
 			var bbsNum = [];
@@ -64,7 +64,7 @@
 					t1 = q_add(t1, dec($('#txtTotal_' + j).val()));//金額合計
 				}
 				
-				$('#txtMoney').val(round(t1, 0));
+				$('#txtTotal').val(round(t1, 0));
 				$('#txtWeight').val(t_weight);
 				$('#txtEweight').val(t_weight-q_float('txtGweight'));
 			}
@@ -73,7 +73,7 @@
 				q_getFormat();
 				bbmMask = [['txtDatea', '9999/99/99'],['txtBoss', '9999/99/99'],['txtConn', '9999/99/99']];
 				q_mask(bbmMask);
-				bbmNum = [['txtMoney', 15, 0, 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtEweight', 15, q_getPara('vcc.weightPrecision'), 1]];
+				bbmNum = [['txtTotal', 15, 0, 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtEweight', 15, q_getPara('vcc.weightPrecision'), 1]];
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,
 				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
@@ -86,15 +86,9 @@
 				$('#lblEweight').text('合約餘量');
 				$('#lblAtax').text('含稅');
 				$('#lblChka1').text('含運');
-				$('#lblMoney').text('合約金額');
+				$('#lblTotal').text('合約金額');
+				$('#lblEnda').text('終止');
 				document.title='出貨合約';
-				
-				$('#txtFloata').change(function() {
-					sum();
-				});
-				$('#txtTotal').change(function() {
-					sum();
-				});
 
 			}
 
@@ -186,6 +180,7 @@
 				$('#lblPrice_s').text('單價');
 				$('#lblTotal_s').text('小計');
 				$('#lblMemo_s').text('備註');
+				$('#lblEnda_s').text('終止');
 			}
 
 			function btnIns() {
@@ -205,9 +200,6 @@
 
 				$('#txtCno').val(z_cno);
 				$('#txtAcomp').val(z_acomp);
-
-				var t_where = "where=^^ 1=1 group by post,addr^^";
-				q_gt('custaddr', t_where, 0, 0, 0, "");
 			}
 
 			function btnModi() {
@@ -215,11 +207,7 @@
 					return;
 				_btnModi();
 				$('#txtProduct').focus();
-
-				if (!emp($('#txtCustno').val())) {
-					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-					q_gt('custaddr', t_where, 0, 0, 0, "");
-				}
+				
 			}
 
 			function btnPrint() {
@@ -325,12 +313,7 @@
 
 			function q_popPost(s1) {
 				switch (s1) {
-					case 'txtCustno':
-						if (!emp($('#txtCustno').val())) {
-							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-							q_gt('custaddr', t_where, 0, 0, 0, "");
-						}
-						break;
+					
 				}
 			}
 		</script>
@@ -537,8 +520,8 @@
 						<td><input id="txtEweight" type="text" class="txt num c1"></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id='lblMoney' class="lbl"> </a></td>
-						<td><input id="txtMoney" type="text" class="txt c1 num" /></td>
+						<td><span> </span><a id='lblTotal' class="lbl"> </a></td>
+						<td><input id="txtTotal" type="text" class="txt c1 num" /></td>
 						<td><span> </span><a id='lblAtax' class="lbl"> </a></td>
 						<td colspan="2">
 							<input id="chkAtax" type="checkbox"/>

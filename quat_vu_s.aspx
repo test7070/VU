@@ -36,6 +36,8 @@
                 
                 $('#lblDatea').text('訂約日期');
                 $('#lblNoa').text('合約號碼');
+                $('#lblCustno').text('客戶編號');
+                $('#lblCust').text('客戶名稱');
             }
 
             function q_seekStr() {

@@ -16,6 +16,7 @@ set @t_option01 = case when '#non'=[7] then char(255) else [7] end
 
 declare @tmp table(
 	gno nvarchar(1),
+	no3 nvarchar(1),
 	datea nvarchar(50),
 	noa nvarchar(50),
 	comp nvarchar(50),
@@ -26,13 +27,18 @@ declare @tmp table(
 )
 
 insert into @tmp
-select '0',a.datea,a.noa,a.acomp,a.price,a.mount,a.eweight,a.conn from quat104 a
+select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.acomp,a.price,a.mount,a.eweight,a.conn 
+from quat104 a
 
 insert into @tmp(gno,noa,mount,eweight)
-select '1',noa,sum(mount),sum(eweight) from @tmp
-group by noa
+select '1',noa,sum(mount),sum(eweight) 
+from @tmp where gno = '0' group by noa
 
-select * from @tmp order by noa,gno
+insert into @tmp(gno,noa,mount,eweight)
+select '2','zzzzzzzzzzz',sum(mount),sum(eweight) 
+from @tmp where gno = '0'
+
+select * from @tmp order by noa,gno;
 
 
 

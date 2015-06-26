@@ -14,11 +14,14 @@ set @t_option01 = case when '#non'=[7] then char(255) else [7] end
 
 ---------------------------------------------------------------------------------
 
+
 declare @tmp table(
 	gno nvarchar(1),
+	no3 nvarchar(20),
 	datea nvarchar(50),
 	noa nvarchar(50),
 	comp nvarchar(50),
+	product nvarchar(50),
 	price float,
 	mount float,
 	eweight float,
@@ -26,7 +29,8 @@ declare @tmp table(
 )
 
 insert into @tmp
-select '0',datea,noa,comp,price,mount,eweight,conn from quat104
-where (datea between @t_bdate and @t_edate)and (cno between @t_bacomp and @t_eacomp)
+select '0',b.no3,a.datea,a.noa,a.acomp,b.product,b.price,b.mount,b.eweight,conn from quat104 a
+left join quats104 b on a.noa = b.noa
+where (b.datea between @t_bdate and @t_edate)and (a.cno between @t_bacomp and @t_eacomp)
 
 select * from @tmp;

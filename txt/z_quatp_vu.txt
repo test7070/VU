@@ -19,6 +19,7 @@ declare @tmp table(
 	no3 nvarchar(1),
 	datea nvarchar(50),
 	noa nvarchar(50),
+	cno nvarchar(50),
 	comp nvarchar(50),
 	price float,
 	mount float,
@@ -27,8 +28,9 @@ declare @tmp table(
 )
 
 insert into @tmp
-select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.acomp,a.price,a.mount,a.eweight,a.conn 
+select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.cno,a.acomp,a.price,a.mount,a.eweight,a.conn 
 from quat104 a
+where (a.cno between @t_bacomp and @t_eacomp ) and (a.datea between @t_bdate and @t_edate ) 
 
 insert into @tmp(gno,noa,mount,eweight)
 select '1',noa,sum(mount),sum(eweight) 

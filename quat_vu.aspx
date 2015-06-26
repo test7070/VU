@@ -133,11 +133,9 @@
 				}
 				
 				//1030419 當專案沒有勾 BBM的取消和結案被打勾BBS也要寫入
-				if(!$('#chkIsproj').prop('checked')){
-					for (var j = 0; j < q_bbsCount; j++) {
-						if($('#chkEnda').prop('checked'))
-							$('#chkEnda_'+j).prop('checked','true');
-					}
+				for (var j = 0; j < q_bbsCount; j++) {
+					if($('#chkEnda').prop('checked'))
+						$('#chkEnda_'+j).prop('checked','true');
 				}
 				
 				if (q_cur == 1)
@@ -534,6 +532,7 @@
 							<input id="chkChka1" type="checkbox"/>
 							<span> </span><a id='lblEnda' class="lbl"  style="float: none;"> </a>
 							<input id="chkEnda" type="checkbox"/>
+							<input id="chkIsproj" type="checkbox" style="display: none;"/>
 						</td>
 					</tr>
 					<tr>

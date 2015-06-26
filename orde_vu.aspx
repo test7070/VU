@@ -283,86 +283,6 @@
 							z_nick = as[0].nick;
 						}
 						break;
-					case 'msg_ucc':
-						var as = _q_appendData("ucc", "", true);
-						t_msg = '';
-						if (as[0] != undefined) {
-							t_msg = "銷售單價：" + dec(as[0].saleprice) + "<BR>";
-						}
-						//客戶售價
-						var t_where = "where=^^ custno='" + $('#txtCustno').val() + "' and datea<'" + q_date() + "' ^^ stop=1";
-						q_gt('quat', t_where, 0, 0, 0, "msg_quat", r_accy);	
-						
-						break;
-					case 'msg_quat':
-						var as = _q_appendData("quats", "", true);
-						var quat_price = 0;
-						if (as[0] != undefined) {
-							for (var i = 0; i < as.length; i++) {
-								if (as[0].productno == $('#txtProductno_' + b_seq).val())
-									quat_price = dec(as[i].price);
-							}
-						}
-						t_msg = t_msg + "最近報價單價：" + quat_price + "<BR>";
-						//最新出貨單價
-						var t_where = "where=^^ custno='" + $('#txtCustno').val() + "' and noa in (select noa from vccs" + r_accy + " where productno='" + $('#txtProductno_' + b_seq).val() + "' and price>0 ) ^^ stop=1";
-						q_gt('vcc', t_where, 0, 0, 0, "msg_vcc", r_accy);
-						break;
-					case 'msg_vcc':
-						var as = _q_appendData("vccs", "", true);
-						var vcc_price = 0;
-						if (as[0] != undefined) {
-							for (var i = 0; i < as.length; i++) {
-								if (as[0].productno == $('#txtProductno_' + b_seq).val())
-									vcc_price = dec(as[i].price);
-							}
-						}
-						t_msg = t_msg + "最近出貨單價：" + vcc_price;
-						q_msg($('#txtPrice_' + b_seq), t_msg);
-						break;
-					case 'msg_stk':
-						var as = _q_appendData("stkucc", "", true);
-						var stkmount = 0;
-						t_msg = '';
-						for (var i = 0; i < as.length; i++) {
-							stkmount = q_add(stkmount, dec(as[i].mount));
-						}
-						t_msg = "庫存量：" + stkmount;
-						//平均成本
-						var t_where = "where=^^ productno ='" + $('#txtProductno_' + b_seq).val() + "' order by datea desc ^^ stop=1";
-						q_gt('wcost', t_where, 0, 0, 0, "msg_wcost", r_accy);
-						break;
-					case 'msg_wcost':
-						var as = _q_appendData("wcost", "", true);
-						var wcost_price;
-						if (as[0] != undefined) {
-							if (dec(as[0].mount) == 0) {
-								wcost_price = 0;
-							} else {
-								wcost_price = round(q_div(q_add(q_add(q_add(dec(as[0].costa), dec(as[0].costb)), dec(as[0].costc)), dec(as[0].costd)), dec(as[0].mount)), 0)
-								//wcost_price=round((dec(as[0].costa)+dec(as[0].costb)+dec(as[0].costc)+dec(as[0].costd))/dec(as[0].mount),0);
-							}
-						}
-						if (wcost_price != undefined) {
-							t_msg = t_msg + "<BR>平均成本：" + wcost_price;
-							q_msg($('#txtMount_' + b_seq), t_msg);
-						} else {
-							//原料成本
-							var t_where = "where=^^ productno ='" + $('#txtProductno_' + b_seq).val() + "' order by mon desc ^^ stop=1";
-							q_gt('costs', t_where, 0, 0, 0, "msg_costs", r_accy);
-						}
-						break;
-					case 'msg_costs':
-						var as = _q_appendData("costs", "", true);
-						var costs_price;
-						if (as[0] != undefined) {
-							costs_price = as[0].price;
-						}
-						if (costs_price != undefined) {
-							t_msg = t_msg + "<BR>平均成本：" + costs_price;
-						}
-						q_msg($('#txtMount_' + b_seq), t_msg);
-						break;
 					case 'custaddr':
 						var as = _q_appendData("custaddr", "", true);
 						var t_item = " @ ";
@@ -490,33 +410,6 @@
 						$('#txtTotal_' + j).focusout(function() {
 							sum();
 						});
-
-						$('#txtMount_' + j).focusin(function() {
-							if (q_cur == 1 || q_cur == 2) {
-								t_IdSeq = -1;
-								q_bodyId($(this).attr('id'));
-								b_seq = t_IdSeq;
-								if (!emp($('#txtProductno_' + b_seq).val())) {
-									//庫存
-									//var t_where = "where=^^ ['" + q_date() + "','','"+$('#txtProductno_' + b_seq).val()+"')  ^^";
-									//q_gt('calstk', t_where, 0, 0, 0, "msg_stk", r_accy);
-								}
-							}
-						});
-						
-						$('#txtPrice_' + j).focusin(function() {
-							if (q_cur == 1 || q_cur == 2) {
-								t_IdSeq = -1;
-								q_bodyId($(this).attr('id'));
-								b_seq = t_IdSeq;
-								if (!emp($('#txtProductno_' + b_seq).val())) {
-									//金額
-									//var t_where = "where=^^ noa='" + $('#txtProductno_' + b_seq).val() + "' ^^ stop=1";
-									//q_gt('ucc', t_where, 0, 0, 0, "msg_ucc", r_accy);
-								}
-							}
-						});
-
 					}
 				}
 				_bbsAssign();
@@ -793,28 +686,6 @@
 	</head>
 	<body>
 		<!--#include file="../inc/toolbar.inc"-->
-		<div id="div_ordb" style="position:absolute; top:180px; left:20px; display:none; width:1020px; background-color: #CDFFCE; border: 5px solid gray;">
-			<table id="table_ordb" style="width:100%;" border="1" cellpadding='2' cellspacing='0'>
-				<tr>
-					<td style="width:45px;background-color: #f8d463;" align="center">訂序</td>
-					<td style="width:200px;background-color: #f8d463;" align="center">品名</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">訂單數量</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">安全庫存</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">庫存數量</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">在途數量</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">採購數量</td>
-					<td style="width:200px;background-color: #f8d463;" align="center">供應商</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">進貨單價</td>
-				</tr>
-				<tr id='ordb_close'>
-					<td align="center" colspan='9'>
-						<input id="btnClose_div_ordb" type="button" value="確定">
-						<input id="btnClose_div_ordb2" type="button" value="取消">
-					</td>
-				</tr>
-			</table>
-		</div>
-		
 		<div id="div_addr2" style="position:absolute; top:244px; left:500px; display:none; width:530px; background-color: #CDFFCE; border: 5px solid gray;">
 			<table id="table_addr2" style="width:100%;" border="1" cellpadding='2' cellspacing='0'>
 				<tr>

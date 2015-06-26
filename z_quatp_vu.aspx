@@ -34,67 +34,30 @@
                         type : '0',
                         name : 'xname',
                         value : r_name 
-                    }, {/*1 [3][4]*/
+                    }, {/*1-1[3][4]*/
                         type : '2',
                         name : 'acomp',
-                        dbf  : 'comp',
-                        index: 'nao,comp',
-                        src  : 'comp_b.axp'
-                    }, {/*2 [5][6]*/
-                        type : '2',
-                        name : 'tgg',
-                        dbf : 'tgg',
-                        index : 'noa,comp',
-                        src : 'tgg_b.aspx'
-                    }, {/*3 [7]*/
-                        type : '6',
-                        name : 'xcarno'
-                    }, {/*4 [8]*/
-                        type : '6',
-                        name : 'xmoney'
-                    }, {/*5 [9]*/
+                        dbf  : 'acomp',
+                        index: 'noa,acomp',
+                        src  : 'acomp_b.aspx'
+                    }, {/*1-2 [5][6]*/
+                        type : '1',
+                        name : 'date'
+                    }, {/*1-3 [7]*/
                         type : '8',
                         name : 'xoption01',
                         value : q_getMsg('toption01').split('&')
-                    }, {/*6 [10]*/
-                        type : '6',
-                        name : 'xtireno'
-                    }, {/*7 [11][12]*/
-                        type : '2',
-                        name : 'fixucc',
-                        dbf : 'fixucc',
-                        index : 'noa,namea',
-                        src : 'fixucc_b.aspx'
-                    }, {/*8 [13]*/
-                        type : '6',
-                        name : 'xproduct'
-                    }, {/*2 [14][15]*/
-                        type : '2',
-                        name : 'driver',
-                        dbf : 'driver',
-                        index : 'noa,namea',
-                        src : 'driver_b.aspx'
                     }]
                 });
                 q_popAssign();
 				q_getFormat();
 				q_langShow();
 
-				$('#txtMon1').mask('999/99');
-				$('#txtMon2').mask('999/99');
-				$('#txtDate1').mask('999/99/99');
+				
+				$('#txtDate1').mask('9999/99/99');
                 $('#txtDate1').datepicker();
-                $('#txtDate2').mask('999/99/99');
+                $('#txtDate2').mask('9999/99/99');
                 $('#txtDate2').datepicker();
-                
-                $('#txtYdate1').mask('999/99/99');
-                $('#txtYdate1').datepicker();
-                $('#txtYdate2').mask('999/99/99');
-                $('#txtYdate2').datepicker();
-				$('#txtYfixadate1').mask('999/99/99');
-                $('#txtYfixadate1').datepicker();
-                $('#txtYfixadate2').mask('999/99/99');
-                $('#txtYfixadate2').datepicker();
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();
@@ -105,7 +68,7 @@
 				t_month = t_month > 9 ? t_month + '' : '0' + t_month;
 				t_day = t_date.getUTCDate();
 				t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-				$('#txtMon1').val(t_year + '/' + t_month);
+				$('#txtDate1').val(t_year + '/' + t_month + '/' + t_day);
 
 				t_date = new Date();
 				t_date.setDate(35);
@@ -116,7 +79,7 @@
 				t_month = t_month > 9 ? t_month + '' : '0' + t_month;
 				t_day = t_date.getUTCDate();
 				t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-				$('#txtMon2').val(t_year + '/' + t_month);
+				$('#txtDate2').val(t_year + '/' + t_month + '/' + t_day );
 				
 				$('#btnOk').hide();
                 $('#btnOk2').click(function(e) {

@@ -1,0 +1,39 @@
+﻿z_quatp_vu01:--z_quatp_vu01
+
+declare @t_bacomp nvarchar(10)
+declare @t_eacomp nvarchar(10)
+declare @t_bdate nvarchar(10)
+declare @t_edate nvarchar(10)
+declare @t_option01 nvarchar(10)
+
+set @t_bacomp = case when '#non'=[3] then '' else [3] end
+set @t_eacomp = case when '#non'=[4] then '' else [4] end
+set @t_bdate = case when '#non'=[5] then '' else [5] end
+set @t_edate = case when '#non'=[6] then char(255) else [6] end
+set @t_option01 = case when '#non'=[7] then char(255) else [7] end
+
+---------------------------------------------------------------------------------
+
+declare @tmp table(
+	gno nvarchar(1),
+	datea nvarchar(50),
+	noa nvarchar(50),
+	comp nvarchar(50),
+	price float,
+	mount float,
+	eweight float,
+	conn nvarchar(50)
+)
+
+insert into @tmp
+select '0',a.datea,a.noa,a.acomp,a.price,a.mount,a.eweight,a.conn from quat104 a
+
+insert into @tmp(gno,noa,mount,eweight)
+select '1',noa,sum(mount),sum(eweight) from @tmp
+group by noa
+
+select * from @tmp order by noa,gno
+
+
+
+

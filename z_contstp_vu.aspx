@@ -15,7 +15,7 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
-			aPop = new Array(['txtCustno', 'lblCustno', 'tgg', 'tggno,comp', 'txtCustno', 'cust_b.aspx']
+			aPop = new Array(/*['txtCustno', 'lblCustno', 'tgg', 'tggno,comp', 'txtCustno', 'cust_b.aspx']
 			/*,['txtXcarplateno', 'lblXcarplate', 'carplate', 'noa,carplate,driver', 'txtXcarplateno', 'carplate_b.aspx']
 			,['txtXproductno', 'lblXproductno', 'fixucc', 'noa,namea', 'txtXproductno', 'fixucc_b.aspx']*/);
 			$(document).ready(function() {
@@ -36,7 +36,7 @@
                         value : r_name 
                     }, {/*1-1[3][4]*/
                         type : '2',
-                        name : 'cust',
+                        name : 'custno',
                         dbf  : 'cust',
                         index: 'noa,comp',
                         src  : 'cust_b.aspx'

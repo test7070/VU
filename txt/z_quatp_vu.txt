@@ -1,4 +1,4 @@
-﻿z_contst_vu01:--z_contst_vu01
+﻿z_quatp_vu01:--z_quatp_vu01
 
 declare @t_bcustno nvarchar(20)
 declare @t_ecustno nvarchar(20)
@@ -61,9 +61,9 @@ end
 if(patindex('%sel1%',@t_option01) = 1)
 begin
 	insert into @tmp
-	select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.custno,a.comp,b.product,b.price,b.mount,b.eweight,a.econtdate
-	from cont a 
-	left join conts b on a.noa = b.noa
+	select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.custno,a.comp,b.product,b.price,b.mount,b.eweight,a.conn 
+	from quat104 a 
+	left join quats104 b on a.noa = b.noa
 	where (b.enda=0 or CHARINDEX('sel2',@t_option01)>0) and (a.custno between @t_bcustno and @t_ecustno ) and (a.datea between @t_bdate and @t_edate ) 
 	
 	insert into @tmp (gno,noa,product,price,mount,eweight)

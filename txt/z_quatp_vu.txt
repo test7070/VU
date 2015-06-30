@@ -1,13 +1,13 @@
-﻿z_quatp_vu01:--z_quatp_vu01
+﻿z_contst_vu01:--z_contst_vu01
 
-declare @t_bacomp nvarchar(10)
-declare @t_eacomp nvarchar(10)
+declare @t_bcustno nvarchar(20)
+declare @t_ecustno nvarchar(20)
 declare @t_bdate nvarchar(10)
 declare @t_edate nvarchar(10)
 declare @t_option01 nvarchar(10)
 
-set @t_bacomp = case when '#non'=[3] then '' else [3] end
-set @t_eacomp = case when '#non'=[4] then '' else [4] end
+set @t_bcustno = case when '#non'=[3] then '' else [3] end
+set @t_ecustno = case when '#non'=[4] then '' else [4] end
 set @t_bdate = case when '#non'=[5] then '' else [5] end
 set @t_edate = case when '#non'=[6] then char(255) else [6] end
 set @t_option01 = case when '#non'=[7] then '' else [7] end
@@ -16,7 +16,7 @@ set @t_option01 = case when '#non'=[7] then '' else [7] end
 
 declare @tmp table(
 	gno nvarchar(1),
-	no3 nvarchar(1),
+	no3 nvarchar(10),
 	datea nvarchar(50),
 	noa nvarchar(50),
 	cno nvarchar(50),
@@ -25,7 +25,7 @@ declare @tmp table(
 	price float,
 	mount float,
 	eweight float,
-	conn nvarchar(50)
+	edate nvarchar(50)
 )
 
 
@@ -33,20 +33,26 @@ if(patindex('%sel1%',@t_option01) = 0)
 begin
 
 	insert into @tmp
-	select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.cno,a.comp,'',a.price,a.mount,a.eweight,a.conn 
+	select '9',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.custno,a.comp,b.product,a.price,a.mount,a.eweight,a.conn 
 	from quat104 a
 	left join quats104 b on a.noa = b.noa
-	where (b.enda=0 or CHARINDEX('sel2',@t_option01)>0) and (a.cno between @t_bacomp and @t_eacomp ) and (a.datea between @t_bdate and @t_edate)
+	where (b.enda=0 or CHARINDEX('sel2',@t_option01)>0) and (a.custno between @t_bcustno and @t_ecustno ) and (a.datea between @t_bdate and @t_edate)
 	
 	insert into @tmp(gno,noa,mount,eweight)
 	select '1',noa,sum(mount),sum(eweight) 
-	from @tmp where gno = '0' group by noa
+	from @tmp where gno = '9' group by noa
 	
 	insert into @tmp(gno,noa,mount,eweight)
 	select '3','zzzzzzzzzzz',sum(mount),sum(eweight) 
-	from @tmp where gno = '0'
+	from @tmp where gno = '9'
 	
-	select distinct gno, dense_rank() over(order by noa) as no3 ,datea,noa,comp,product,price,mount,eweight,conn
+	insert into @tmp(gno,no3,datea,noa,comp,price,mount,eweight,edate)
+	select '0',no3,datea,noa,comp,price,mount,eweight,edate
+	from @tmp where no3 in (select min(no3) FROM @tmp group by noa)
+	
+	delete @tmp where gno = '9'
+	
+	select distinct gno, dense_rank() over(order by noa) as no3 ,datea,noa,comp,product,price,mount,eweight,edate
 	from @tmp order by noa,gno
 end	
 
@@ -55,18 +61,20 @@ end
 if(patindex('%sel1%',@t_option01) = 1)
 begin
 	insert into @tmp
-	select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.cno,a.comp,'',b.price,b.mount,b.eweight,a.conn 
-	from quat104 a 
-	left join quats104 b on a.noa = b.noa
-	where (a.cno between @t_bacomp and @t_eacomp ) and (a.datea between @t_bdate and @t_edate ) 
+	select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.custno,a.comp,b.product,b.price,b.mount,b.eweight,a.econtdate
+	from cont a 
+	left join conts b on a.noa = b.noa
+	where (b.enda=0 or CHARINDEX('sel2',@t_option01)>0) and (a.custno between @t_bcustno and @t_ecustno ) and (a.datea between @t_bdate and @t_edate ) 
 	
 	insert into @tmp (gno,noa,product,price,mount,eweight)
 	select '2',noa,product,price,mount,eweight
-	from quats104  
-	where (quats104.enda=0 or CHARINDEX('sel2',@t_option01)>0)
+	from @tmp where (gno ='0')
 	
-	select gno, dense_rank() over(order by noa) as no3 ,datea,noa,comp,product,price,mount,eweight,conn from @tmp 
-	where (gno = '0' and (no3 in (select min(no3) from @tmp group by noa)))or gno = '2' 
+	update @tmp set product = '' where gno = '0'
+	
+	select gno, dense_rank() over(order by noa) as no3,datea,noa,comp,product,price,mount,eweight,edate
+	from @tmp 
+	where (gno = '0' and (no3 in (select min(no3) from @tmp group by noa))) or (gno = '2')
 	order by noa,gno
 end	
 

@@ -36,10 +36,10 @@
                         value : r_name 
                     }, {/*1-1[3][4]*/
                         type : '2',
-                        name : 'custno',
-                        dbf  : 'cust',
+                        name : 'tgg',
+                        dbf  : 'tgg',
                         index: 'noa,comp',
-                        src  : 'cust_b.aspx'
+                        src  : 'tgg.aspx'
                     }, {/*1-2 [5][6]*/
                         type : '1',
                         name : 'date'

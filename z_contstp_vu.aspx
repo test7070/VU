@@ -54,9 +54,9 @@
 				q_langShow();
 
 				
-				$('#txtDate1').mask('9999/99/99');
+				$('#txtDate1').mask('999/99/99');
                 $('#txtDate1').datepicker();
-                $('#txtDate2').mask('9999/99/99');
+                $('#txtDate2').mask('999/99/99');
                 $('#txtDate2').datepicker();
                 
 				var t_date, t_year, t_month, t_day;

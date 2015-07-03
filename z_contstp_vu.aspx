@@ -15,17 +15,17 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
-			/*aPop = new Array(['txtXcarno', 'lblXcarno', 'car2', 'a.noa,driverno,driver', 'txtXcarno', 'car2_b.aspx']
-			,['txtXcarplateno', 'lblXcarplate', 'carplate', 'noa,carplate,driver', 'txtXcarplateno', 'carplate_b.aspx']
-			,['txtXproductno', 'lblXproductno', 'fixucc', 'noa,namea', 'txtXproductno', 'fixucc_b.aspx']);*/
+			aPop = new Array(/*['txtCustno', 'lblCustno', 'tgg', 'tggno,comp', 'txtCustno', 'cust_b.aspx']
+			/*,['txtXcarplateno', 'lblXcarplate', 'carplate', 'noa,carplate,driver', 'txtXcarplateno', 'carplate_b.aspx']
+			,['txtXproductno', 'lblXproductno', 'fixucc', 'noa,namea', 'txtXproductno', 'fixucc_b.aspx']*/);
 			$(document).ready(function() {
 				_q_boxClose();
 				q_getId();
-				q_gf('', 'z_quatp_vu');
+				q_gf('', 'z_contstp_vu');
 			});  
             function q_gfPost() {
                 $('#q_report').q_report({
-                    fileName : 'z_quatp_vu',
+                    fileName : 'z_contstp_vu',
                     options : [{/* [1]*/
                         type : '0',
                         name : 'accy',
@@ -36,10 +36,10 @@
                         value : r_name 
                     }, {/*1-1[3][4]*/
                         type : '2',
-                        name : 'cust',
-                        dbf  : 'cust',
+                        name : 'tgg',
+                        dbf  : 'tgg',
                         index: 'noa,comp',
-                        src  : 'cust_b.aspx'
+                        src  : 'tgg.aspx'
                     }, {/*1-2 [5][6]*/
                         type : '1',
                         name : 'date'

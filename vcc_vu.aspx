@@ -17,7 +17,7 @@
  
 			q_tables = 's';
 			var q_name = "vcc";
-			var q_readonly = ['txtNoa', 'txtAccno', 'txtComp','txtCardeal','txtSales', 'txtAcomp', 'txtMoney', 'txtTax', 'txtTotal', 'txtTotalus', 'txtWorker', 'txtWorker2','txtTranstart'];
+			var q_readonly = ['txtNoa', 'txtAccno', 'txtComp','txtCardeal','txtSales', 'txtAcomp', 'txtMoney', 'txtTotal', 'txtTotalus', 'txtWorker', 'txtWorker2','txtTranstart'];
 			var q_readonlys = ['txtTotal', 'txtOrdeno', 'txtNo2','txtNoq'];
 			var bbmNum = [
 				['txtPrice', 10, 3, 1], ['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],	['txtTotal', 15, 0, 1]
@@ -35,18 +35,13 @@
 			aPop = new Array(
 				['txtCustno', 'lblCust', 'cust', 'noa,nick,tel,fax,zip_comp,addr_comp,paytype,trantype,salesno,sales', 'txtCustno,txtComp,txtTel,txtFax,txtPost,txtAddr,txtPaytype,cmbTrantype,txtSalesno,txtSales', 'cust_b.aspx'],
 				['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'],
-				['txtRackno_', 'btnRackno_', 'rack', 'noa,rack,storeno,store', 'txtRackno_', 'rack_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
-				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],
-				['txtSalesno2', 'lblSales2', 'sss', 'noa,namea', 'txtSalesno2,txtSales2', 'sss_b.aspx'],
-				['txtCustno2', 'lblCust2', 'cust', 'noa,comp', 'txtCustno2,txtComp2', 'cust_b.aspx'],
+				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],				
 				//['txtPost', 'lblAddr', 'addr', 'post,addr', 'txtPost,txtAddr', 'addr_b.aspx'],
 				//['txtPost2', 'lblAddr2', 'addr', 'post,addr', 'txtPost2,txtAddr2', 'addr_b.aspx'],
-				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost', 'addr2_b.aspx'],
-				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2', 'addr2_b.aspx'],
-				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_', 'ucaucc_b.aspx'],
-				['txtTranstartno', 'lblTranstart', 'addr2', 'noa,post','txtTranstartno,txtTranstart', 'addr2_b.aspx']
+				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
+				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx']
 			);
 
 			$(document).ready(function() {
@@ -90,18 +85,20 @@
 
 			function mainPost() {
 				q_getFormat();
-				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99']];
+				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99'],['txtPaydate','99:99']];
 				q_mask(bbmMask);
 				bbmNum = [	['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],['txtTotal', 15, 0, 1]];
 				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtTotal', 15, 0, 1]];
 				q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
 				q_cmbParse("cmbTypea", q_getPara('vcc.typea'));
 				q_cmbParse("cmbStype", q_getPara('vcc.stype'));
-				q_cmbParse("cmbTaxtype", q_getPara('sys.taxtype'));
+				//q_cmbParse("cmbTaxtype", q_getPara('sys.taxtype'));
 				q_cmbParse("combPay", q_getPara('vcc.paytype'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
 				var t_where = "where=^^ 1=1  group by post,addr^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
+				
+				$('#lblPaydate').text('入廠時間');
 				
 				//限制帳款月份的輸入 只有在備註的第一個字為*才能手動輸入					
 				$('#txtMemo').change(function(){
@@ -532,6 +529,17 @@
 				_bbsAssign();
 				HiddenTreat();
 				refreshBbm();
+				
+				$('#lblNoq_s').text('項序');
+				$('#lblProduct_s').text('品名');
+				$('#lblSpec_s').text('號數');
+				$('#lblLengthb_s').text('米數');
+				$('#lblUnit_s').text('單位');
+				$('#lblMount_s').text('數量');
+				$('#lblWeight_s').text('重量');
+				$('#lblPrice_s').text('單價');
+				$('#lblTotal_s').text('小計');
+				$('#lblMemo_s').text('備註');
 			}
 
 			function btnIns() {
@@ -971,13 +979,19 @@
 						<td class="td1"><span> </span><a id='lblSales' class="lbl btn"> </a></td>
 						<td class="td2"><input id="txtSalesno" type="text" class="txt c1"/></td>
 						<td class="td3"><input id="txtSales" type="text" class="txt c1"/></td>
+						<td class="td1"> </td>
+						<td class="td2"> </td>
+						<td class="td3"> </td>
 					</tr>
 					<tr>
 						<td class="td1"><span> </span><a id="lblMoney" class="lbl"> </a></td>
 						<td class="td2" colspan='2'><input id="txtMoney" type="text" class="txt num c1"/></td>
 						<td class="td4"><span> </span><a id='lblTax' class="lbl"> </a></td>
 						<td class="td5"><input id="txtTax" type="text" class="txt num c1 istax"/></td>
-						<td class="td6"><select id="cmbTaxtype" class="txt c1" onchange='sum()' > </select></td>
+						<td class="td6">
+							<input id="chkAtax" type="checkbox" onchange='sum()' />
+							<!--<select id="cmbTaxtype" class="txt c1" onchange='sum()' > </select>-->
+						</td>
 						<td class="td7"><span> </span><a id='lblTotal' class="lbl istax"> </a></td>
 						<td class="td8"><input id="txtTotal" type="text" class="txt num c1 istax"/></td>
 					</tr>
@@ -987,6 +1001,8 @@
 						<td class="td3"><input id="txtWorker2" type="text" class="txt c1"/></td>
 						<td class="td4"><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
 						<td class="td5" colspan='2'><input id="txtAccno" type="text" class="txt c1"/></td>
+						<td class="td1"><span> </span><a id='lblPaydate' class="lbl"> </a></td>
+						<td class="td2"><input id="txtPaydate" type="text"  class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td class="td1"><span> </span><a id="lblMemo" class="lbl"> </a></td>
@@ -1003,11 +1019,11 @@
 					<td align="center" style="width:200px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:80px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:80px;"><a id='lblLengthb_s'> </a></td>
-					<td align="center" style="width:55px;"><a id='lblUnit'> </a></td>
-					<td align="center" style="width:85px;"><a id='lblMount'> </a></td>
-					<td align="center" style="width:85px;"><a id='lblWeights'> </a></td>
-					<td align="center" style="width:85px;"><a id='lblPrices'> </a></td>
-					<td align="center" style="width:100px;"><a id='lblTotals'> </a></td>
+					<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>
+					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
+					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
+					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
 					<td align="center" style="width:120px;"><a id='lblStore_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblMemo_s'> </a></td>
 				</tr>
@@ -1029,8 +1045,8 @@
 					</td>
 					<td>
 						<input id="txtMemo.*" type="text" class="txt c1"/>
-						<input id="txtOrdeno.*" type="text"  class="txt" style="width:60%;"/>
-						<input id="txtNo2.*" type="text" class="txt" style="width:18%;"/>
+						<input id="txtOrdeno.*" type="text"  class="txt" style="width:70%;"/>
+						<input id="txtNo2.*" type="text" class="txt" style="width:23%;"/>
 					</td>
 				</tr>
 			</table>

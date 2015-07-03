@@ -21,7 +21,7 @@
 			q_desc = 1;
 			q_tables = 's';
 			var q_name = "orde";
-			var q_readonly = ['txtNoa', 'txtWorker', 'txtWorker2', 'txtComp', 'txtAcomp', 'txtMoney', 'txtTax', 'txtTotal', 'txtTotalus', 'txtSales', 'txtOrdbno', 'txtOrdcno'];
+			var q_readonly = ['txtNoa', 'txtWorker', 'txtWorker2', 'txtComp', 'txtAcomp', 'txtMoney','txtTotal', 'txtTotalus', 'txtSales', 'txtOrdbno', 'txtOrdcno'];
 			var q_readonlys = ['txtTotal', 'txtQuatno', 'txtNo2', 'txtNo3', 'txtC1', 'txtNotv'];
 			var bbmNum = [['txtTotal', 10, 0, 1], ['txtMoney', 10, 0, 1], ['txtTax', 10, 0, 1]];
 			var bbsNum = [];
@@ -37,7 +37,9 @@
 			aPop = new Array(
 				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
-				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,paytype,trantype,tel,fax,zip_comp,addr_fact', 'txtCustno,txtComp,txtNick,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx']
+				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,paytype,trantype,tel,fax,zip_comp,addr_fact', 'txtCustno,txtComp,txtNick,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
+				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
+				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx']
 			);
 			
 			$(document).ready(function() {
@@ -71,9 +73,19 @@
 					t1 = q_add(t1, dec($('#txtTotal_' + j).val()));//金額合計
 				}
 				
-				$('#txtMoney').val(round(t1, 0));
+				if($('#chkAtax').prop('checked')){
+					var t_taxrate = q_div(parseFloat(q_getPara('sys.taxrate')), 100);
+					t_tax = round(q_mul(t1, t_taxrate), 0);
+					t_total = q_add(t1, t_tax);
+				}else{
+					t_tax = q_float('txtTax');
+					t_total = q_add(t1, t_tax);
+				}
 				
-				calTax();
+				$('#txtMoney').val(FormatNumber(round(t1, 0)));
+				$('#txtTax').val(FormatNumber(t_tax));
+				$('#txtTotal').val(FormatNumber(t_total));
+				
 			}
 
 			function mainPost() {
@@ -88,7 +100,7 @@
 				q_cmbParse("cmbStype", q_getPara('orde.stype'));
 				q_cmbParse("combPaytype", q_getPara('vcc.paytype'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
-				q_cmbParse("cmbTaxtype", q_getPara('sys.taxtype'));
+				//q_cmbParse("cmbTaxtype", q_getPara('sys.taxtype'));
 
 				var t_where = "where=^^ 1=1 group by post,addr^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
@@ -100,6 +112,9 @@
 					if (t_custno.length > 0) {
 						t_where = " isnull(enda,0)=0 and isnull(cancel,0)=0 "
 						t_where = t_where + " and custno='"+t_custno+"'";
+						var t_contract=$('#txtContract').val();
+						if(t_contract.length>0)
+							t_where = t_where + " and noa='"+t_contract+"'";
 					}else {
 						alert(q_getMsg('msgCustEmp'));
 						return;
@@ -108,6 +123,15 @@
 				});
 				
 				$('#cmbTaxtype').change(function() {
+					sum();
+				});
+				
+				$('#chkAtax').click(function() {
+					refreshBbm();
+					sum();
+				});
+				
+				$('#txtTax').change(function() {
 					sum();
 				});
 				
@@ -413,7 +437,7 @@
 					}
 				}
 				_bbsAssign();
-				
+				refreshBbm();
 				$('#lblSpec_s').text('號數');
 				$('#lblLengthb_s').text('米數');
 			}
@@ -484,6 +508,7 @@
 					browTicketForm($(this).get(0));
 				});
 				$('#div_addr2').hide();
+				refreshBbm();
 			}
 
 			function readonly(t_para, empty) {
@@ -502,7 +527,7 @@
 				
 				$('#div_addr2').hide();
 				readonly_addr2();
-				
+				refreshBbm();
 			}
 
 			function btnMinus(id) {
@@ -570,6 +595,28 @@
 				}
 			}
 			
+			function FormatNumber(n) {
+				var xx = "";
+				if (n < 0) {
+					n = Math.abs(n);
+					xx = "-";
+				}
+				n += "";
+				var arr = n.split(".");
+				var re = /(\d{1,3})(?=(\d{3})+$)/g;
+				return xx + arr[0].replace(re, "$1,") + (arr.length == 2 ? "." + arr[1] : "");
+			}
+			
+			function refreshBbm() {
+                if (q_cur == 1 || q_cur==2) {
+					if($('#chkAtax').prop('checked'))
+						$('#txtTax').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+					else
+						$('#txtTax').css('color', 'black').css('background', 'white').removeAttr('readonly');  
+                }else{
+                	$('#txtTax').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+                }
+            }
 		</script>
 		<style type="text/css">
 			#dmain {
@@ -799,7 +846,10 @@
 						</td>
 						<td class="td4"><span> </span><a id='lblTax' class="lbl"> </a></td>
 						<td class="td5"><input id="txtTax" type="text" class="txt num c1"/></td>
-						<td class="td6"><select id="cmbTaxtype" class="txt c1" onchange='sum()' > </select></td>
+						<td class="td6">
+							<input id="chkAtax" type="checkbox" onchange='sum()' />
+							<!--<select id="cmbTaxtype" class="txt c1" onchange='sum()' > </select>-->
+						</td>
 						<td class="td7"><span> </span><a id='lblTotal' class="lbl"> </a></td>
 						<td class="td8"><input id="txtTotal" type="text" class="txt num c1"/></td>
 					</tr>

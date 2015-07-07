@@ -28,10 +28,9 @@
 				bbmMask = [['txtMon', r_picm],['txtBdate', r_picd],['txtEdate', r_picd]];
 				q_mask(bbmMask);
 				q_gt('acomp', '', 0, 0, 0, "");
-				q_gt('part', '', 0, 0, 0, "");
-				q_cmbParse("cmbStatus", "@全部,Y@已收完,N@未收完");
 				q_cmbParse("cmbStype", '@全部,'+q_getPara('vcc.stype'));
 				q_cmbParse("cmbTypea", '@全部,'+q_getPara('vcc.typea'));
+				$('#lblQuatno').text('合約號碼');
 				$('#txtNoa').focus();
 			}
 			function q_gtPost(t_name) {
@@ -44,23 +43,11 @@
                         }
                         q_cmbParse("cmbCno", t_acomp);
                         break;
-                    case 'part':
-                        t_part = '@全部';
-                        var as = _q_appendData("part", "", true);
-                        for ( i = 0; i < as.length; i++) {
-                            t_part += (t_part.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].part;
-                        }
-                        q_cmbParse("cmbPart", t_part);
-                        q_cmbParse("cmbPart2", t_part);
-                        break;
                 }
             }
 
 			function q_seekStr() {
-				t_status = $('#cmbStatus').val();
 				t_cno = $('#cmbCno').val();
-				t_partno = $('#cmbPart').val();
-				t_partno2 = $('#cmbPart2').val();
 				t_noa = $.trim($('#txtNoa').val());
 				t_mon = $('#txtMon').val();
 				t_bdate = $('#txtBdate').val();
@@ -69,14 +56,13 @@
 				t_accno = $('#txtAccno').val();
 				t_invono = $('#txtInvono').val();
 				t_ordeno = $('#txtOrdeno').val();
+				t_quatno = $('#txtQuatno').val();
 				t_salesno = $('#txtSalesno').val();
 				t_stype = $('#cmbStype').val();
 				t_typea = $('#cmbTypea').val();
 				
 				var t_where = " 1=1 "
 				+ q_sqlPara2("cno", t_cno)
-				+ q_sqlPara2("partno", t_partno)
-				+ q_sqlPara2("partno2", t_partno2)
 				+q_sqlPara2("typea", t_typea)
 				+q_sqlPara2("stype", t_stype)
 				+ q_sqlPara2("noa", t_noa)
@@ -88,14 +74,12 @@
 				
 				if(t_salesno.length>0)
 					t_where += " and (salesno='"+t_salesno+"' or salesno2='"+t_salesno+"') ";
-				
-                if(t_status=='Y')
-                	t_where += " and unpay=0";
-                if(t_status=='N')
-                	t_where += " and unpay!=0";
                 	
 				if(t_ordeno.length>0)
                 	t_where += " and (noa in (select noa from view_vccs where ordeno='"+t_ordeno+"') or noa in (select noa from view_vcc where ordeno='"+t_ordeno+"'))";
+                if(t_quatno.length>0)
+                	t_where += " and (noa in (select noa from view_vccs where itemno='"+t_quatno+"') or noa in (select noa from view_vcc where zipcode='"+t_quatno+"'))";	
+                	
                 	
 				t_where = ' where=^^ ' + t_where + ' ^^ ';
 				return t_where;
@@ -128,18 +112,6 @@
 				<tr class='seek_tr'>
 					<td style="width: 30%;"><a id='lblAcomp'> </a></td>
 					<td style="width: 70%;"><select id="cmbCno"> </select></td>
-				</tr>
-				<tr class='seek_tr'>
-					<td style="width: 30%;"><a id='lblPart'> </a></td>
-					<td style="width: 70%;"><select id="cmbPart"> </select></td>
-				</tr>
-				<tr class='seek_tr'>
-					<td style="width: 30%;"><a id='lblPart2'> </a></td>
-					<td style="width: 70%;"><select id="cmbPart2"> </select></td>
-				</tr>
-				<tr class='seek_tr'>
-					<td style="width: 30%;"><a id='lblStatus'> </a></td>
-					<td style="width: 70%;"><select id="cmbStatus"> </select></td>
 				</tr>
 				<tr class='seek_tr'>
 	                <td class='seek'  style="width:20%;"><a id='lblTypea'> </a></td>
@@ -184,6 +156,10 @@
 				<tr class='seek_tr'>
 					<td><a id='lblOrdeno'> </a></td>
 					<td><input id="txtOrdeno" type="text"/></td>
+				</tr>
+				<tr class='seek_tr'>
+					<td><a id='lblQuatno'> </a></td>
+					<td><input id="txtQuatno" type="text"/></td>
 				</tr>
 			</table>
 			<!--#include file="../inc/seek_ctrl.inc"-->

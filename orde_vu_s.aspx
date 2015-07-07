@@ -28,9 +28,6 @@
 
                 bbmMask = [['txtBdate', '9999/99/99'], ['txtEdate', '9999/99/99']];
                 q_mask(bbmMask);
-                /*if(q_getPara('sys.comp').indexOf('永勝') > -1)
-                 q_cmbParse("cmbStype", '@全部,'+q_getPara('orde.stype_uu'));
-                 else*/
                 q_cmbParse("cmbStype", '@全部,' + q_getPara('orde.stype'));
 
                 $('#txtBdate').focus();

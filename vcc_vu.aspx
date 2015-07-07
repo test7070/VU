@@ -27,7 +27,7 @@
 			var bbsMask = [];
 			q_sqlCount = 6;
 			brwCount = 6;
-			brwCount2 = 12;
+			brwCount2 = 11;
 			brwList = [];
 			brwNowPage = 0;
 			brwKey = 'datea';
@@ -88,7 +88,7 @@
 				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99'],['txtPaydate','99:99']];
 				q_mask(bbmMask);
 				bbmNum = [	['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],['txtTotal', 15, 0, 1]];
-				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtTotal', 15, 0, 1]];
+				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
 				q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
 				q_cmbParse("cmbTypea", q_getPara('vcc.typea'));
 				q_cmbParse("cmbStype", q_getPara('vcc.stype'));
@@ -99,6 +99,7 @@
 				q_gt('custaddr', t_where, 0, 0, 0, "");
 				
 				$('#lblPaydate').text('入廠時間');
+				$('#lblZipcode').text('合約號碼');
 				
 				//限制帳款月份的輸入 只有在備註的第一個字為*才能手動輸入					
 				$('#txtMemo').change(function(){
@@ -140,11 +141,15 @@
 						alert(q_getMsg('msgCustEmp'));
 						return;
 					}
-					q_box("ordes_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'ordes', "95%", "650px", q_getMsg('popOrde'));
+					q_box("ordes_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'ordes', "95%", "650px", q_getMsg('popOrde'));
 				});
 
 				$('#lblOrdeno').click(function() {
-					q_pop('txtOrdeno', "orde.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";charindex(noa,'" + $('#txtOrdeno').val() + "')>0;" + r_accy + '_' + r_cno, 'orde', 'noa', '', "92%", "1024px", q_getMsg('lblOrdeno'), true);
+					q_pop('txtOrdeno', "orde_vu.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";charindex(noa,'" + $('#txtOrdeno').val() + "')>0;" + r_accy + '_' + r_cno, 'orde', 'noa', '', "92%", "1024px", '訂單作業', true);
+				});
+				
+				$('#lblZipcode').click(function() {
+					q_pop('txtZipcode', "quat_vu.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";charindex(noa,'" + $('#txtZipcode').val() + "')>0;" + r_accy + '_' + r_cno, 'quat', 'noa', '', "92%", "1024px", '出貨合約', true);
 				});
 
 				$('#lblAccc').click(function() {
@@ -156,16 +161,7 @@
 					t_invo = $('#txtInvono').val();
 					if (t_invo.length > 0) {
 						t_where = "noa='" + t_invo + "'";
-						q_box("vcca.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'vcca', "95%", "95%", $('#lblInvono').val());
-					}
-				});
-				
-				$('#lblInvo').click(function() {
-					t_where = '';
-					t_invo = $('#txtInvo').val();
-					if (t_invo.length > 0) {
-						t_where = "noa='" + t_invo + "'";
-						q_box("invo.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'invo', "95%", "95%", $('#lblInvo').val());
+						q_box("vcca.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'vcca', "95%", "95%", '開立發票');
 					}
 				});
 				
@@ -201,11 +197,6 @@
 				$('#btnClose_div_stk').click(function() {
 					$('#div_stk').hide();
 				});
-					
-				if (q_getPara('sys.menu').substr(0,3)!='qra'){
-					$('#lblTranadd').hide()
-					$('#txtTranadd').hide()
-				}
 			}
 			
 			function refreshBbm() {
@@ -239,16 +230,14 @@
 							if (!b_ret || b_ret.length == 0)
 								return;
 							
-							if (q_getPara('sys.project').toUpperCase()=='RB'){
-								ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProductno,txtProduct,txtSpec,txtSize,txtDime,txtWidth,txtLengthb,txtUnit,txtOrdeno,txtNo2,txtPrice,txtMount,txtMemo', b_ret.length, b_ret, 'productno,product,spec,size,dime,width,lengthb,unit,noa,no2,price,notv,memo', 'txtProductno,txtProduct,txtSpec');
-							}else{
-								ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProductno,txtProduct,txtSpec,txtSize,txtDime,txtWidth,txtLengthb,txtUnit,txtOrdeno,txtNo2,txtPrice,txtMount,txtMemo', b_ret.length, b_ret, 'productno,product,spec,size,dime,width,lengthb,unit,noa,no2,price,mount,memo', 'txtProductno,txtProduct,txtSpec');
-							}
+							ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtSpec,txtLengthb,txtUnit,txtPrice,txtMount,txtWeight,txtOrdeno,txtNo2,txtItemno,txtItem', b_ret.length, b_ret, 'product,spec,lengthb,unit,price,mount,weight,noa,no2,quatno,no3', 'txtProduct,txtSpec');
 							//寫入訂單號碼
-							var t_oredeno = '';
+							var t_oredeno = '',t_quatno='';
 							for (var i = 0; i < b_ret.length; i++) {
 								if (t_oredeno.indexOf(b_ret[i].noa) == -1)
 									t_oredeno = t_oredeno + (t_oredeno.length > 0 ? (',' + b_ret[i].noa) : b_ret[i].noa);
+								if (t_quatno.indexOf(b_ret[i].quatno) == -1)
+									t_quatno = t_quatno + (t_quatno.length > 0 ? (',' + b_ret[i].quatno) : b_ret[i].quatno);
 							}
 							//取得訂單備註 + 指定地址
 							if (t_oredeno.length > 0) {
@@ -257,6 +246,7 @@
 							}
 
 							$('#txtOrdeno').val(t_oredeno);
+							$('#txtZipcode').val(t_quatno);
 							sum();
 						}
 						break;
@@ -466,7 +456,7 @@
 			function _btnSeek() {
 				if (q_cur > 0 && q_cur < 4)// 1-3
 					return;
-				q_box('vcc_s.aspx', q_name + '_s', "500px", "630px", q_getMsg("popSeek"));
+				q_box('vcc_vu_s.aspx', q_name + '_s', "500px", "630px", q_getMsg("popSeek"));
 			}
 
 			function combPay_chg() {
@@ -918,15 +908,8 @@
 						<td class="td7"><span> </span><a id='lblMon' class="lbl"> </a></td>
 						<td class="td8"><input id="txtMon" type="text" class="txt c1"/></td>
 						<td class="td8"> </td>
-						<td class="td7">
-							<span> </span>
-							<a id='lblInvono' class="lbl btn vcca"> </a>
-							<a id='lblInvo' class="lbl btn invo"> </a>
-						</td>
-						<td class="td8">
-							<input id="txtInvono" type="text" class="txt c1 vcca"/>
-							<input id="txtInvo" type="text" class="txt c1 invo"/>
-						</td>
+						<td class="td1"><span> </span><a id='lblPaydate' class="lbl"> </a></td>
+						<td class="td2"><input id="txtPaydate" type="text"  class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td class="td1"><span> </span><a id="lblCust" class="lbl btn"> </a></td>
@@ -959,8 +942,8 @@
 							<input id="txtAddr2"  type="text" class="txt c1" style="width: 412px;"/>
 							<select id="combAddr" style="width: 20px" onchange='combAddr_chg()'> </select>
 						</td>
-						<td class="td7"><span> </span><a id='lblTranmoney' class="lbl"> </a></td>
-						<td class="td8"><input id="txtTranmoney" type="text" class="txt num c1"/></td>
+						<td class="td7"><span> </span><a id='lblZipcode' class="lbl btn"> </a></td>
+						<td class="td8"><input id="txtZipcode" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td class="td1"><span> </span><a id="lblCardeal" class="lbl btn"> </a></td>
@@ -979,9 +962,10 @@
 						<td class="td1"><span> </span><a id='lblSales' class="lbl btn"> </a></td>
 						<td class="td2"><input id="txtSalesno" type="text" class="txt c1"/></td>
 						<td class="td3"><input id="txtSales" type="text" class="txt c1"/></td>
-						<td class="td1"> </td>
-						<td class="td2"> </td>
-						<td class="td3"> </td>
+						<td class="td4"><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
+						<td class="td5" colspan='2'><input id="txtAccno" type="text" class="txt c1"/></td>
+						<td class="td7"><span> </span><a id='lblTranmoney' class="lbl"> </a></td>
+						<td class="td8"><input id="txtTranmoney" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
 						<td class="td1"><span> </span><a id="lblMoney" class="lbl"> </a></td>
@@ -996,17 +980,16 @@
 						<td class="td8"><input id="txtTotal" type="text" class="txt num c1 istax"/></td>
 					</tr>
 					<tr>
-						<td class="td1"><span> </span><a id="lblWorker" class="lbl"> </a></td>
-						<td class="td2"><input id="txtWorker" type="text" class="txt c1"/></td>
-						<td class="td3"><input id="txtWorker2" type="text" class="txt c1"/></td>
-						<td class="td4"><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
-						<td class="td5" colspan='2'><input id="txtAccno" type="text" class="txt c1"/></td>
-						<td class="td1"><span> </span><a id='lblPaydate' class="lbl"> </a></td>
-						<td class="td2"><input id="txtPaydate" type="text"  class="txt c1"/></td>
-					</tr>
-					<tr>
 						<td class="td1"><span> </span><a id="lblMemo" class="lbl"> </a></td>
 						<td class="td2" colspan='7'><textarea id="txtMemo" cols="10" rows="5" style="width: 99%;height: 50px;"> </textarea></td>
+					</tr>
+					<tr>
+						<td class="td1"><span> </span><a id="lblWorker" class="lbl"> </a></td>
+						<td class="td2" colspan='2'><input id="txtWorker" type="text" class="txt c1"/></td>
+						<td class="td1"><span> </span><a id="lblWorker2" class="lbl"> </a></td>
+						<td class="td3" colspan='2'><input id="txtWorker2" type="text" class="txt c1"/></td>
+						<td class="td7"><span> </span><a id='lblInvono' class="lbl btn"> </a></td>
+						<td class="td8"><input id="txtInvono" type="text" class="txt c1"/></td>
 					</tr>
 				</table>
 			</div>
@@ -1028,7 +1011,7 @@
 					<td align="center" style="width:150px;"><a id='lblMemo_s'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
-					<td><input class="btn"  id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
+					<td align="center"><input class="btn"  id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td align="center"><input id="txtNoq.*" type="text" class="txt c1"/></td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
@@ -1047,6 +1030,8 @@
 						<input id="txtMemo.*" type="text" class="txt c1"/>
 						<input id="txtOrdeno.*" type="text"  class="txt" style="width:70%;"/>
 						<input id="txtNo2.*" type="text" class="txt" style="width:23%;"/>
+						<input id="txtItemno.*" type="text"  class="txt" style="width:70%;display: none;"/><!--存合約編號-->
+						<input id="txtItem.*" type="text" class="txt" style="width:23%;display: none;"/>
 					</td>
 				</tr>
 			</table>

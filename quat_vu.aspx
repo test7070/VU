@@ -565,7 +565,7 @@
 					<td align="center" style="width:40px;"><a id='lblEnda_s'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
-					<td><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
+					<td align="center"><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td align="center"><input id="txtNo3.*" type="text" class="txt c1" /></td>
 					<td align="center"><input id="txtProduct.*" type="text" class="txt c1" /></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>

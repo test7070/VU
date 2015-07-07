@@ -79,9 +79,7 @@
 	<div id="dbbs">
 		<table id="tbbs" class='tbbs'  border="2"  cellpadding='2' cellspacing='1' style='width:100%'  >
 			<tr style='color:White; background:#003366;' >
-				<td align="center">
-					<input type="checkbox" id="checkAllCheckbox"/>
-				</td>
+				<td align="center"><input type="checkbox" id="checkAllCheckbox"/></td>
 				<td align="center"><a id='lblProduct'> </a></td>
 				<td align="center"><a id='lblSpec'> </a></td>
 				<td align="center"><a id='lblLengthb'> </a></td>
@@ -97,7 +95,7 @@
 				<td style="width:1%;" align="center"><input id="chkSel.*" type="checkbox"  /></td>
 				<td style="width:15%;"><input class="txt" id="txtProduct.*" type="text" style="width:98%;" /></td>
 				<td style="width:8%;"><input class="txt" id="txtSpec.*" type="text" style="width:98%;" /></td>
-				<td style="width:8%;"><input class="txt" id="txtLengthb.*" type="text" style="width:98%;" /></td>
+				<td style="width:8%;"><input class="txt" id="txtLengthb.*" type="text" style="width:98%;text-align:right;" /></td>
 				<td style="width:4%;"><input class="txt" id="txtUnit.*" type="text" style="width:94%;"/></td>
 				<td style="width:8%;"><input class="txt" id="txtMount.*" type="text" style="width:94%; text-align:right;"/></td>
 				<td style="width:8%;"><input class="txt" id="txtWeight.*" type="text" style="width:94%; text-align:right;"/></td>

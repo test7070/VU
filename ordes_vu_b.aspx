@@ -113,6 +113,7 @@
 						<input class="txt" id="txtMemo.*" type="text" style="width:98%;"/>
 						<input class="txt" id="txtQuatno.*" type="hidden" style="width:98%;"/>
 						<input class="txt" id="txtNo3.*" type="hidden" style="width:98%;"/>
+						<input class="txt" id="txtUno.*" type="hidden" style="width:98%;"/>
 						<input id="recno.*" type="hidden" />
 					</td>
 				</tr>

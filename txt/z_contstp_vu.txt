@@ -7,7 +7,7 @@ declare @t_edate nvarchar(10)
 declare @t_option01 nvarchar(10)
 
 set @t_bcustno = case when '#non'=[3] then '' else [3] end
-set @t_ecustno = case when '#non'=[4] then '' else [4] end
+set @t_ecustno = case when '#non'=[4] then char(255) else [4] end
 set @t_bdate = case when '#non'=[5] then '' else [5] end
 set @t_edate = case when '#non'=[6] then char(255) else [6] end
 set @t_option01 = case when '#non'=[7] then '' else [7] end

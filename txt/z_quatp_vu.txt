@@ -7,7 +7,7 @@ declare @t_edate nvarchar(10)
 declare @t_option01 nvarchar(10)
 
 set @t_bcustno = case when '#non'=[3] then '' else [3] end
-set @t_ecustno = case when '#non'=[4] then '' else [4] end
+set @t_ecustno = case when '#non'=[4] then char(255) else [4] end
 set @t_bdate = case when '#non'=[5] then '' else [5] end
 set @t_edate = case when '#non'=[6] then char(255) else [6] end
 set @t_option01 = case when '#non'=[7] then '' else [7] end
@@ -34,8 +34,8 @@ begin
 
 	insert into @tmp
 	select '9',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.custno,a.comp,b.product,a.price,a.mount,a.eweight,a.conn 
-	from quat104 a
-	left join quats104 b on a.noa = b.noa
+	from view_quat a
+	left join view_quats b on a.noa = b.noa
 	where (b.enda=0 or CHARINDEX('sel2',@t_option01)>0) and (a.custno between @t_bcustno and @t_ecustno ) and (a.datea between @t_bdate and @t_edate)
 	
 	insert into @tmp(gno,noa,mount,eweight)
@@ -62,8 +62,8 @@ if(patindex('%sel1%',@t_option01) = 1)
 begin
 	insert into @tmp
 	select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.custno,a.comp,b.product,b.price,b.mount,b.eweight,a.conn 
-	from quat104 a 
-	left join quats104 b on a.noa = b.noa
+	from view_quat a 
+	left join view_quats b on a.noa = b.noa
 	where (b.enda=0 or CHARINDEX('sel2',@t_option01)>0) and (a.custno between @t_bcustno and @t_ecustno ) and (a.datea between @t_bdate and @t_edate ) 
 	
 	insert into @tmp (gno,noa,product,price,mount,eweight)

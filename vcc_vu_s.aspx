@@ -25,7 +25,7 @@
 				q_getFormat();
 				q_langShow();
 
-				bbmMask = [['txtMon', r_picm],['txtBdate', r_picd],['txtEdate', r_picd]];
+				bbmMask = [['txtMon', '9999/99'],['txtBdate', '9999/99/99'],['txtEdate', '9999/99/99']];
 				q_mask(bbmMask);
 				q_gt('acomp', '', 0, 0, 0, "");
 				q_cmbParse("cmbStype", '@全部,'+q_getPara('vcc.stype'));

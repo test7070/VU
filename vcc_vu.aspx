@@ -89,7 +89,7 @@
 				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99'],['txtPaydate','99:99']];
 				q_mask(bbmMask);
 				bbmNum = [	['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],['txtTotal', 15, 0, 1]];
-				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
+				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
 				q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
 				q_cmbParse("cmbTypea", q_getPara('vcc.typea'));
 				q_cmbParse("cmbStype", q_getPara('vcc.stype'));
@@ -505,16 +505,23 @@
 							$(this).val('');
 						});
 						$('#txtUnit_' + i).focusout(function() {
-							sum();
+							if (q_cur == 1 || q_cur == 2)
+								sum();
 						});
 						$('#txtPrice_' + i).focusout(function() {
-							sum();
+							if (q_cur == 1 || q_cur == 2)
+								sum();
 						});
 						
 						$('#txtMount_' + i).focusout(function() {
 							if (q_cur == 1 || q_cur == 2)
 								sum();
 								$('#btnClose_div_stk').click();
+						});
+						
+						$('#txtWeight_' + i).focusout(function() {
+							if (q_cur == 1 || q_cur == 2)
+								sum();
 						});
 						
 						$('#btnRecord_' + i).click(function() {

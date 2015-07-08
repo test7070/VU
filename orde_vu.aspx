@@ -253,12 +253,20 @@
 							b_ret = getb_ret();
 							if (!b_ret || b_ret.length == 0)
 								return;
+							var t_quatno='';
+							for (var i = 0; i < b_ret.length; i++) {
+								if (t_quatno.indexOf(b_ret[i].noa) == -1)
+									t_quatno = t_quatno + (t_quatno.length > 0 ? (',' + b_ret[i].noa) : b_ret[i].noa);
+							}
+							$('#txtContract').val(t_quatno);
+							
 							//取得報價的第一筆匯率等資料
 							var t_where = "where=^^ noa='" + b_ret[0].noa + "' ^^";
 							q_gt('quat', t_where, 0, 0, 0, "", r_accy);
 
 							var i, j = 0;
-							ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtSpec,txtLengthb,txtUnit,txtPrice,txtMount,txtWeight,txtQuatno,txtNo3', b_ret.length, b_ret, 'product,spec,lengthb,unit,price,mount,weight,noa,no3', 'txtProduct,txtSpec');
+							ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProductno,txtProduct,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtPrice,txtMount,txtWeight,txtQuatno,txtNo3'
+							, b_ret.length, b_ret, 'productno,product,spec,size,class,lengthb,unit,price,mount,weight,noa,no3', 'txtProduct,txtSpec');
 							/// 最後 aEmpField 不可以有【數字欄位】
 							sum();
 							bbsAssign();

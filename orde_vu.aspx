@@ -37,7 +37,7 @@
 			aPop = new Array(
 				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
-				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,paytype,trantype,tel,fax,zip_comp,addr_fact', 'txtCustno,txtComp,txtNick,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
+				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,paytype,trantype,tel,fax,zip_home,addr_home', 'txtCustno,txtComp,txtNick,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
 				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
 				['txtUno_', 'btnUno_', 'view_uccc2', 'uno,uno,product,spec,emount,eweight,lengthb', '0txtUno_,txtUno_,txtProduct_,txtSpec_,txtMount_,txtWeight_,Lengthb_', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
@@ -94,7 +94,7 @@
 				q_mask(bbmMask);
 				bbsMask = [['txtDatea', '9999/99/99']];
 				bbsNum = [['txtPrice', 15, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],  
-				['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]
+				['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1], ['txtSpec', 15, 0, 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]
 				];
 				
 				q_cmbParse("cmbStype", q_getPara('orde.stype'));
@@ -119,7 +119,7 @@
 						alert(q_getMsg('msgCustEmp'));
 						return;
 					}
-					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quats', "95%", "95%", $('#btnQuat').val());
+					q_box("quats_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quats', "95%", "95%", $('#btnQuat').val());
 				});
 				
 				$('#cmbTaxtype').change(function() {
@@ -792,7 +792,10 @@
 						<td><input id="txtCno" type="text" class="txt c1"/></td>
 						<td colspan="2"><input id="txtAcomp" type="text" class="txt c1"/></td>
 						<td ><span> </span><a id='lblContract' class="lbl"> </a></td>
-						<td colspan="2"><input id="txtContract" type="text" class="txt c1"/></td>
+						<td colspan="2">
+							<input id="txtContract" type="text" class="txt c1"/>
+							<input id="txtPostname" type="hidden" class="txt c1"/><!--由進貨單轉來 進貨單號-->
+						</td>
 						<td align="center"><input id="btnOrdem" type="button"/></td>
 					</tr>
 					<tr>

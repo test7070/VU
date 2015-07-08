@@ -87,7 +87,7 @@
 				q_mask(bbmMask);
 				bbmNum = [['txtMoney', 15, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 15, 0, 1],['txtPrice', 10, q_getPara('rc2.pricePrecision'), 1],['txtTranmoney',15,0,1]];
 				bbsNum = [['txtMount', 15, q_getPara('rc2.mountPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1], ['txtPrice', 15, q_getPara('rc2.pricePrecision'), 1]
-								, ['txtTotal', 15, 0, 1], ['txtDime', 15, 2, 1], ['txtLengthb', 15, 2, 1]];
+								, ['txtTotal', 15, 0, 1], ['txtLengthb', 15, 2, 1]];
 				
 				q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
 				q_cmbParse("cmbTypea", q_getPara('rc2.typea'));
@@ -535,11 +535,12 @@
 				$('#div_orde').hide();
 				$('#lblNoq_s').text('項序');
 				$('#lblProductno_s').text('品編');
+				$('#lblProduct_s').text('鋼種');
 				$('#lblStyle_s').text('型');
-				$('#lblDime_s').text('號數');
 				$('#lblSpec_s').text('材質');
+				$('#lblSize_s').text('號數');
 				$('#lblLengthb_s').text('米數');
-				$('#lblSource_s').text('廠牌');
+				$('#lblClass_s').text('廠牌');
 			}
 
 			function btnIns() {
@@ -945,14 +946,19 @@
 						<td><span> </span><a id='lblTel' class="lbl"> </a></td>
 						<td><input id="txtTel" type="text" class="txt c1"/></td>
 						<td><span> </span><a id='lblOrdc' class="lbl btn"> </a></td>
-						<td><input id="txtOrdcno" type="text" class="txt c1"/></td>
+						<td>
+							<input id="txtOrdcno" type="text" class="txt c1"/>
+							<input id="txtPostname" type="hidden" class="txt c1"/><!--由出貨單轉來 出貨單號-->
+						</td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblAddr' class="lbl btn"> </a></td>
 						<td><input id="txtPost" type="text" class="txt c1"/></td>
 						<td colspan='4' ><input id="txtAddr" type="text" class="txt" style="width: 98%;"/></td>
-						<td><input id="btnToOrde" type="button" value="轉訂單" style="float: right;"></td>
-						<td><input id="txtOrdeno" type="text" class="txt c1"/></td>
+						<!--104/07/08 改成出貨轉進貨
+							<td><input id="btnToOrde" type="button" value="轉訂單" style="float: right;"></td>
+							<td><input id="txtOrdeno" type="text" class="txt c1"/></td>
+						-->
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblAddr2' class="lbl btn"> </a></td>
@@ -1019,13 +1025,13 @@
 					<td align="center" style="width:1%;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:55px;"><a id='lblNoq_s'> </a></td>
 					<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>
-					<td align="center" style="width:180px;"><a id='lblProductno_s'> </a></td>
-					<td align="center" style="width:220px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:50px;"><a id='lblStyle_s'> </a></td>
-					<td align="center" style="width:100px;"><a id='lblDime_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
-					<td align="center" style="width:100px;"><a id='lblSource_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblUnit_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblWeight_s'> </a></td>
@@ -1045,10 +1051,10 @@
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
 					<td><input id="txtStyle.*" type="text" class="txt c1"/></td>
-					<td><input id="txtDime.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
+					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
-					<td><input id="txtSource.*" type="text" class="txt c1"/></td>
+					<td><input id="txtClass.*" type="text" class="txt c1"/></td>
 					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
 					<td><input id="txtMount.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtWeight.*" type="text" class="txt num c1" /></td>

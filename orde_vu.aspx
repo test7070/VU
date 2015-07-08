@@ -94,7 +94,7 @@
 				q_mask(bbmMask);
 				bbsMask = [['txtDatea', '9999/99/99']];
 				bbsNum = [['txtPrice', 15, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],  
-				['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1], ['txtSpec', 15, 0, 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]
+				['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]
 				];
 				
 				q_cmbParse("cmbStype", q_getPara('orde.stype'));
@@ -438,8 +438,13 @@
 				}
 				_bbsAssign();
 				refreshBbm();
-				$('#lblSpec_s').text('號數');
+				$('#lblProductno_s').text('品編');
+				$('#lblProduct_s').text('鋼種');
+				$('#lblStyle_s').text('型');
+				$('#lblSpec_s').text('材質');
+				$('#lblSize_s').text('號數');
 				$('#lblLengthb_s').text('米數');
+				$('#lblClass_s').text('廠牌');
 			}
 
 			function btnIns() {
@@ -794,7 +799,7 @@
 						<td ><span> </span><a id='lblContract' class="lbl"> </a></td>
 						<td colspan="2">
 							<input id="txtContract" type="text" class="txt c1"/>
-							<input id="txtPostname" type="hidden" class="txt c1"/><!--由進貨單轉來 進貨單號-->
+							<!--<input id="txtPostname" type="hidden" class="txt c1"/>由進貨單轉來 進貨單號-->
 						</td>
 						<td align="center"><input id="btnOrdem" type="button"/></td>
 					</tr>
@@ -879,14 +884,17 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1650px;">
+		<div class='dbbs' style="width: 1750px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:45px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:60px;"><a id='lblNo2'> </a></td>
-					<td align="center" style="width:200px;"><a id='lblProduct_s'> </a></td>
-					<td align="center" style="width:80px;"><a id='lblSpec_s'> </a></td>
-					<td align="center" style="width:80px;"><a id='lblLengthb_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
 					<td align="center" style="width:55px;"><a id='lblUnit'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblMount'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblWeights'> </a></td>
@@ -894,7 +902,6 @@
 					<td align="center" style="width:100px;"><a id='lblTotals'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblGemounts'> </a></td>
 					<td align="center" ><a id='lblMemo_s'> </a></td>
-					<td align="center" style="width:200px;"><a id='lblUno'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblDateas'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblEndas'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblCancels'> </a></td>
@@ -902,9 +909,15 @@
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td><input id="txtNo2.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
+						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
+					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
-					<td><input id="txtLengthb.*" type="text" class="txt num c1"/></td>
+					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
+					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
+					<td><input id="txtClass.*" type="text" class="txt c1"/></td>
 					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
 					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
@@ -919,7 +932,6 @@
 						<input class="txt" id="txtQuatno.*" type="text" style="width: 70%;" />
 						<input class="txt" id="txtNo3.*" type="text" style="width: 20%;"/>
 					</td>
-					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
 					<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
 					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
 					<td align="center"><input id="chkCancel.*" type="checkbox"/></td>

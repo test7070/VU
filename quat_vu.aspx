@@ -75,7 +75,7 @@
 				q_mask(bbmMask);
 				bbmNum = [['txtTotal', 15, 0, 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtEweight', 15, q_getPara('vcc.weightPrecision'), 1]];
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,
-				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtSpec', 15, 0, 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
+				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
 				$('#lblNoa').text('合約號碼');
 				$('#lblDatea').text('訂約日期');
@@ -171,9 +171,13 @@
 				_bbsAssign();
 				HiddenField();
 				$('#lblNo3_s').text('項序');
-				$('#lblProduct_s').text('品名');
-				$('#lblSpec_s').text('號數');
+				$('#lblProductno_s').text('品編');
+				$('#lblProduct_s').text('鋼種');
+				$('#lblStyle_s').text('型');
+				$('#lblSpec_s').text('材質');
+				$('#lblSize_s').text('號數');
 				$('#lblLengthb_s').text('米數');
+				$('#lblClass_s').text('廠牌');
 				$('#lblUnit_s').text('單位');
 				$('#lblMount_s').text('數量');
 				$('#lblWeight_s').text('重量');
@@ -548,14 +552,17 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1270px;">
+		<div class='dbbs' style="width: 1570px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:40px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:70px;"><a id='lblNo3_s'> </a></td>
-					<td align="center" style="width:200px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
 					<td align="center" style="width:50px;"><a id='lblUnit_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblWeight_s'> </a></td>
@@ -567,9 +574,15 @@
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td align="center"><input id="txtNo3.*" type="text" class="txt c1" /></td>
-					<td align="center"><input id="txtProduct.*" type="text" class="txt c1" /></td>
+					<td>
+						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
+						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
+					</td>
+					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
-					<td><input id="txtLengthb.*" type="text" class="txt c1 num"/></td>
+					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
+					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
+					<td><input id="txtClass.*" type="text" class="txt c1"/></td>
 					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
 					<td><input id="txtMount.*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtWeight.*" type="text" class="txt c1 num"/></td>

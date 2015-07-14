@@ -266,7 +266,7 @@
 
 							var i, j = 0;
 							ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProductno,txtProduct,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtPrice,txtMount,txtWeight,txtQuatno,txtNo3'
-							, b_ret.length, b_ret, 'productno,product,spec,size,class,lengthb,unit,price,mount,weight,noa,no3', 'txtProduct,txtSpec');
+							, b_ret.length, b_ret, 'productno,product,spec,size,lengthb,class,unit,price,mount,weight,noa,no3', 'txtProduct,txtSpec');
 							/// 最後 aEmpField 不可以有【數字欄位】
 							sum();
 							bbsAssign();

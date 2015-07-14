@@ -40,9 +40,11 @@
 
             function bbsAssign() {
                 _bbsAssign();
-                $('#lblProduct').text('品名');
-                $('#lblSpec').text('號數');
-                $('#lblLengthb').text('米數');
+               $('#lblProduct').text('鋼種');
+				$('#lblSpec').text('材質');
+				$('#lblSize').text('號數');
+				$('#lblLengthb').text('米數');
+				$('#lblClass').text('廠牌');
                 $('#lblUnit').text('單位');
                 $('#lblMount').text('數量');
                 $('#lblWeight').text('重量');
@@ -87,12 +89,14 @@
 					<td align="center"><input type="checkbox" id="checkAllCheckbox"/></td>
 					<td align="center"><a id='lblProduct'> </a></td>
 					<td align="center"><a id='lblSpec'> </a></td>
+					<td align="center"><a id='lblSize'> </a></td>
 					<td align="center"><a id='lblLengthb'> </a></td>
+					<td align="center"><a id='lblClass'> </a></td>
 					<td align="center"><a id='lblUnit'> </a></td>
 					<td align="center"><a id='lblMount'> </a></td>
 					<td align="center"><a id='lblWeight'> </a></td>
 					<td align="center"><a id='lblPrice'> </a></td>
-					<td align="center"><a id='lblNotv'> </a></td>
+					<!--<td align="center"><a id='lblNotv'> </a></td>-->
 					<td align="center"><a id='lblNoa'> </a></td>
 					<td align="center"><a id='lblMemo'> </a></td>
 				</tr>
@@ -100,12 +104,14 @@
 					<td style="width:1%;" align="center"><input id="chkSel.*" type="checkbox"  /></td>
 					<td style="width:15%;"><input class="txt" id="txtProduct.*" type="text" style="width:98%;" /></td>
 					<td style="width:8%;"><input class="txt" id="txtSpec.*" type="text" style="width:98%;" /></td>
+					<td style="width:8%;"><input class="txt" id="txtSize.*" type="text" style="width:98%;" /></td>
 					<td style="width:8%;"><input class="txt" id="txtLengthb.*" type="text" style="width:98%;text-align:right;" /></td>
+					<td style="width:8%;"><input class="txt" id="txtClass.*" type="text" style="width:98%;" /></td>
 					<td style="width:4%;"><input class="txt" id="txtUnit.*" type="text" style="width:94%;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtMount.*" type="text" style="width:94%; text-align:right;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtWeight.*" type="text" style="width:94%; text-align:right;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtPrice.*" type="text" style="width:96%; text-align:right;"/></td>
-					<td style="width:8%;"><input class="txt" id="txtNotv.*" type="text" style="width:96%; text-align:right;"/></td>
+					<!--<td style="width:8%;"><input class="txt" id="txtNotv.*" type="text" style="width:96%; text-align:right;"/></td>-->
 					<td style="width:15%;"><input class="txt" id="txtNoa.*" type="text" style="width:70%;"/>
 						<input class="txt" id="txtNo2.*" type="text" style="width:25%;" />
 					</td>

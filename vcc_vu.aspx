@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
-		<title></title>
+		<title> </title>
 		<script src="../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -935,7 +935,10 @@
 					<tr>
 						<td><span> </span><a id="lblCust" class="lbl btn"> </a></td>
 						<td><input id="txtCustno" type="text" class="txt c1"/></td>
-						<td><input id="txtComp" type="text" class="txt c1"/></td>
+						<td>
+							<input id="txtComp" type="text" class="txt c1"/>
+							<input id="txtNick" type="hidden" class="txt c1"/>
+						</td>
 						<td><span> </span><a id='lblPay' class="lbl"> </a></td>
 						<td><input id="txtPaytype" type="text" class="txt c1"/></td>
 						<td><select id="combPay" style="width: 100%;" onchange='combPay_chg()'> </select></td>

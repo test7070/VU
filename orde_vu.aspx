@@ -39,8 +39,9 @@
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
 				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,paytype,trantype,tel,fax,zip_home,addr_home', 'txtCustno,txtComp,txtNick,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
-				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
-				['txtUno_', 'btnUno_', 'view_uccc2', 'uno,uno,product,spec,emount,eweight,lengthb', '0txtUno_,txtUno_,txtProduct_,txtSpec_,txtMount_,txtWeight_,Lengthb_', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
+				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx']
+				//['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,spec,size,lengthb,class,unit,emount,eweight'
+            	//, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtMount__,txtWeight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
 			);
 			
 			$(document).ready(function() {
@@ -453,6 +454,7 @@
 				$('#lblSize_s').text('號數');
 				$('#lblLengthb_s').text('米數');
 				$('#lblClass_s').text('廠牌');
+				$('#lblUno_s').text('批號');
 			}
 
 			function btnIns() {
@@ -482,7 +484,7 @@
 
 			function btnPrint() {
                 var t_where = "noa='" + $.trim($('#txtNoa').val()) + "'";
-               	q_box("z_ordep.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
+               	q_box("z_ordep_vu.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
 			}
 
 			function wrServer(key_value) {
@@ -892,7 +894,7 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1750px;">
+		<div class='dbbs' style="width: 1930px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:45px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
@@ -910,6 +912,7 @@
 					<td align="center" style="width:100px;"><a id='lblTotals'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblGemounts'> </a></td>
 					<td align="center" ><a id='lblMemo_s'> </a></td>
+					<td align="center" style="width: 180px;"><a id='lblUno_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblDateas'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblEndas'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblCancels'> </a></td>
@@ -940,6 +943,7 @@
 						<input class="txt" id="txtQuatno.*" type="text" style="width: 70%;" />
 						<input class="txt" id="txtNo3.*" type="text" style="width: 20%;"/>
 					</td>
+					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
 					<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
 					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
 					<td align="center"><input id="chkCancel.*" type="checkbox"/></td>

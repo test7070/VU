@@ -40,7 +40,8 @@
 				//['txtPost2', 'lblAddr2', 'addr', 'post,addr', 'txtPost2,txtAddr2', 'addr_b.aspx'],
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
 				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
-				['txtUno_', 'btnUno_', 'view_uccc2', 'uno,uno,product,spec,emount,eweight,lengthb', '0txtUno_,txtUno_,txtProduct_,txtSpec_,txtMount_,txtWeight_,Lengthb_', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
+				['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,spec,size,lengthb,class,unit,emount,eweight'
+            	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtMount__,txtWeight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
 			);
 
 			$(document).ready(function() {
@@ -238,7 +239,7 @@
 								return;
 							
 							ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProductno,txtProduct,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtPrice,txtMount,txtWeight,txtOrdeno,txtNo2,txtItemno,txtItem'
-							, b_ret.length, b_ret, 'productno,product,spec,size,class,unit,price,mount,weight,noa,no2,quatno,no3', 'txtProduct,txtSpec');
+							, b_ret.length, b_ret, 'productno,product,spec,size,lengthb,class,unit,price,mount,weight,noa,no2,quatno,no3', 'txtProduct,txtSpec');
 							//寫入訂單號碼
 							var t_oredeno = '',t_quatno='';
 							for (var i = 0; i < b_ret.length; i++) {
@@ -575,12 +576,7 @@
 			}
 
 			function btnPrint() {
-				var hasStyle = q_getPara('sys.isstyle');
-				if(hasStyle=='1'){
-					q_box('z_vcc_ra.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", q_getMsg("popPrint"));
-				}else{
-					q_box('z_vccp.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", q_getMsg("popPrint"));
-				}
+				q_box('z_vccp_vu.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", q_getMsg("popPrint"));
 			}
 
 			function wrServer(key_value) {

@@ -172,7 +172,8 @@
 				HiddenField();
 				$('#lblNo3_s').text('項序');
 				$('#lblProductno_s').text('品編');
-				$('#lblProduct_s').text('鋼種');
+				$('#lblProduct_s').text('品名');
+				$('#lblUcolor_s').text('類別');
 				$('#lblStyle_s').text('型');
 				$('#lblSpec_s').text('材質');
 				$('#lblSize_s').text('號數');
@@ -552,13 +553,14 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1570px;">
+		<div class='dbbs' style="width: 1750px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:40px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:70px;"><a id='lblNo3_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
@@ -579,6 +581,7 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
+					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>

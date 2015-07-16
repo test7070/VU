@@ -33,7 +33,7 @@
 		function bbsAssign() {  /// checked 
 			_bbsAssign();
 			
-			$('#lblProduct').text('鋼種');
+			$('#lblProduct').text('品名');
 			$('#lblSpec').text('材質');
 			$('#lblSize').text('號數');
 			$('#lblLengthb').text('米數');

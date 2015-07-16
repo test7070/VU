@@ -173,7 +173,7 @@
 				HiddenField();
 				$('#lblNoq_s').text('項次');
 				$('#lblProductno_s').text('品編');
-				$('#lblProduct_s').text('鋼種');
+				$('#lblProduct_s').text('品名');
 				$('#lblSpec_s').text('材質');
 				$('#lblSize_s').text('號數');
 				$('#lblLengthb_s').text('米數');

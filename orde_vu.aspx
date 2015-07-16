@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
-		<title></title>
+		<title> </title>
 		<script src="../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -23,7 +23,7 @@
 			var q_name = "orde";
 			var q_readonly = ['txtNoa', 'txtWorker', 'txtWorker2', 'txtComp', 'txtAcomp', 'txtMoney','txtTotal', 'txtTotalus', 'txtSales', 'txtOrdbno', 'txtOrdcno'];
 			var q_readonlys = ['txtTotal', 'txtQuatno', 'txtNo2', 'txtNo3', 'txtC1', 'txtNotv'];
-			var bbmNum = [['txtTotal', 10, 0, 1], ['txtMoney', 10, 0, 1], ['txtTax', 10, 0, 1]];
+			var bbmNum = [];
 			var bbsNum = [];
 			var bbmMask = [];
 			var bbsMask = [];
@@ -94,14 +94,27 @@
 				bbmMask = [['txtOdate', '9999/99/99']];
 				q_mask(bbmMask);
 				bbsMask = [['txtDatea', '9999/99/99']];
-				bbsNum = [['txtPrice', 15, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],  
-				['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]
-				];
+				bbmNum = [['txtTranadd', 15, q_getPara('vcc.weightPrecision'), 1],['txtBenifit', 15, q_getPara('vcc.weightPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]
+								,['txtTotal', 15, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15,0 , 1]];
+				bbsNum = [['txtPrice', 15, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 15, q_getPara('vcc.mountPrecision'), 1]
+								,['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
 				
 				q_cmbParse("cmbStype", q_getPara('orde.stype'));
 				q_cmbParse("combPaytype", q_getPara('vcc.paytype'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
 				//q_cmbParse("cmbTaxtype", q_getPara('sys.taxtype'));
+				
+				$('#lblAddr2').text('工地名稱');
+				$('#lblTranadd').text('車空重');
+				$('#lblBenifit').text('車總重');
+				$('#lblWeight').text('淨重');
+				
+				$('#txtTranadd').change(function() {
+					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
+				});
+				$('#txtBenifit').change(function() {
+					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
+				});
 
 				var t_where = "where=^^ 1=1 group by post,addr^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
@@ -447,8 +460,10 @@
 				}
 				_bbsAssign();
 				refreshBbm();
+				
 				$('#lblProductno_s').text('品編');
-				$('#lblProduct_s').text('鋼種');
+				$('#lblProduct_s').text('品名');
+				$('#lblUcolor_s').text('類別');
 				$('#lblStyle_s').text('型');
 				$('#lblSpec_s').text('材質');
 				$('#lblSize_s').text('號數');
@@ -858,6 +873,14 @@
 						<td><input id="txtCustorde" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
+						<td><span> </span><a id='lblTranadd' class="lbl"> </a></td>
+						<td colspan="2"><input id="txtTranadd" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id='lblBenifit' class="lbl"> </a></td>
+						<td colspan="2"><input id="txtBenifit" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id='lblWeight' class="lbl"> </a></td>
+						<td><input id="txtWeight" type="text" class="txt num c1"/></td>
+					</tr>
+					<tr>
 						<td><span> </span><a id='lblMoney' class="lbl"> </a></td>
 						<td colspan='2'>
 							<input id="txtMoney" type="text" class="txt c1" style="text-align: center;"/>
@@ -894,13 +917,14 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1930px;">
+		<div class='dbbs' style="width: 2100px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:45px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:60px;"><a id='lblNo2'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
@@ -925,6 +949,7 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
+					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>

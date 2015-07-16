@@ -307,7 +307,7 @@
                 
                 $('#lblCust_s').text('客戶');
                 $('#lblProductno_s').text('品編');
-                $('#lblProduct_s').text('鋼種');
+                $('#lblProduct_s').text('品名');
                 $('#lblSpec_s').text('材質');
                 $('#lblSize_s').text('號數');
                 $('#lblLengthb_s').text('米數');
@@ -359,7 +359,7 @@
                 
                 $('#lblUno_t').text('領料批號');
                 $('#lblProductno_t').text('品編');
-                $('#lblProduct_t').text('鋼種');
+                $('#lblProduct_t').text('品名');
                 $('#lblSpec_t').text('材質');
                 $('#lblSize_t').text('號數');
                 $('#lblLengthb_t').text('米數');

@@ -87,7 +87,8 @@
 				q_getFormat();
 				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99'],['txtPaydate','99:99']];
 				q_mask(bbmMask);
-				bbmNum = [	['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],['txtTotal', 15, 0, 1]];
+				bbmNum = [	['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],['txtTotal', 15, 0, 1]
+				,['txtTranadd', 15, q_getPara('vcc.weightPrecision'), 1],['txtBenifit', 15, q_getPara('vcc.weightPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]];
 				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
 				q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
 				q_cmbParse("cmbTypea", q_getPara('vcc.typea'));
@@ -100,6 +101,17 @@
 				
 				$('#lblPaydate').text('入廠時間');
 				$('#lblZipcode').text('合約號碼');
+				$('#lblAddr2').text('工地名稱');
+				$('#lblTranadd').text('車空重');
+				$('#lblBenifit').text('車總重');
+				$('#lblWeight').text('淨重');
+				
+				$('#txtTranadd').change(function() {
+					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
+				});
+				$('#txtBenifit').change(function() {
+					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
+				});
 				
 				//限制帳款月份的輸入 只有在備註的第一個字為*才能手動輸入					
 				$('#txtMemo').change(function(){
@@ -538,7 +550,8 @@
 				
 				$('#lblNoq_s').text('項序');
 				$('#lblProductno_s').text('品編');
-				$('#lblProduct_s').text('鋼種');
+				$('#lblProduct_s').text('品名');
+				$('#lblUcolor_s').text('類別');
 				$('#lblStyle_s').text('型');
 				$('#lblSpec_s').text('材質');
 				$('#lblSize_s').text('號數');
@@ -950,14 +963,14 @@
 						<td><select id="cmbTrantype" style="width: 100%;"> </select></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblAddr" class="lbl btn"> </a></td>
+						<td><span> </span><a id="lblAddr" class="lbl"> </a></td>
 						<td><input id="txtPost" type="text" class="txt c1"/></td>
 						<td colspan='4'><input id="txtAddr" type="text" class="txt c1"/></td>
 						<td><span> </span><a id='lblOrdeno' class="lbl btn"> </a></td>
 						<td><input id="txtOrdeno" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id='lblAddr2' class="lbl btn"> </a></td>
+						<td><span> </span><a id='lblAddr2' class="lbl"> </a></td>
 						<td><input id="txtPost2"  type="text" class="txt c1"/></td>
 						<td colspan='4'>
 							<input id="txtAddr2"  type="text" class="txt c1" style="width: 412px;"/>
@@ -965,6 +978,14 @@
 						</td>
 						<td><span> </span><a id='lblZipcode' class="lbl btn"> </a></td>
 						<td><input id="txtZipcode" type="text" class="txt c1"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id='lblTranadd' class="lbl"> </a></td>
+						<td colspan="2"><input id="txtTranadd" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id='lblBenifit' class="lbl"> </a></td>
+						<td colspan="2"><input id="txtBenifit" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id='lblWeight' class="lbl"> </a></td>
+						<td><input id="txtWeight" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblCardeal" class="lbl btn"> </a></td>
@@ -1015,7 +1036,7 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1900px;">
+		<div class='dbbs' style="width: 2100px;">
 			<table id="tbbs" class='tbbs'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:40px;"><input class="btn"  id="btnPlus" type="button" value='＋' style="font-weight: bold;width:" /></td>
@@ -1023,6 +1044,7 @@
 					<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
@@ -1044,6 +1066,7 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
+					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>

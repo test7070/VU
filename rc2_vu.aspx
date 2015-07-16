@@ -85,7 +85,8 @@
 				q_getFormat();
 				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99']];
 				q_mask(bbmMask);
-				bbmNum = [['txtMoney', 15, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 15, 0, 1],['txtPrice', 10, q_getPara('rc2.pricePrecision'), 1],['txtTranmoney',15,0,1]];
+				bbmNum = [['txtMoney', 15, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 15, 0, 1],['txtPrice', 10, q_getPara('rc2.pricePrecision'), 1],['txtTranmoney',15,0,1]
+								,['txtTranadd', 15, q_getPara('rc2.weightPrecision'), 1],['txtBenifit', 15, q_getPara('rc2.weightPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1]];
 				bbsNum = [['txtMount', 15, q_getPara('rc2.mountPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1], ['txtPrice', 15, q_getPara('rc2.pricePrecision'), 1]
 								, ['txtTotal', 15, 0, 1], ['txtLengthb', 15, 2, 1]];
 				
@@ -99,6 +100,16 @@
 				q_gt('custaddr', t_where, 0, 0, 0, "");
 				
 				$('#lblOrdc').text('合約號碼');
+				$('#lblTranadd').text('車空重');
+				$('#lblBenifit').text('車總重');
+				$('#lblWeight').text('淨重');
+				
+				$('#txtTranadd').change(function() {
+					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
+				});
+				$('#txtBenifit').change(function() {
+					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
+				});
 				
 				//限制帳款月份的輸入 只有在備註的第一個字為*才能手動輸入					
 				$('#txtMemo').change(function(){
@@ -535,7 +546,8 @@
 				$('#div_orde').hide();
 				$('#lblNoq_s').text('項序');
 				$('#lblProductno_s').text('品編');
-				$('#lblProduct_s').text('鋼種');
+				$('#lblProduct_s').text('品名');
+				$('#lblUcolor_s').text('類別');
 				$('#lblStyle_s').text('型');
 				$('#lblSpec_s').text('材質');
 				$('#lblSize_s').text('號數');
@@ -964,6 +976,14 @@
 						</td>
 					</tr>
 					<tr>
+						<td><span> </span><a id='lblTranadd' class="lbl"> </a></td>
+						<td colspan="2"><input id="txtTranadd" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id='lblBenifit' class="lbl"> </a></td>
+						<td colspan="2"><input id="txtBenifit" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id='lblWeight' class="lbl"> </a></td>
+						<td><input id="txtWeight" type="text" class="txt num c1"/></td>
+					</tr>
+					<tr>
 						<td><span> </span><a id='lblPaytype' class="lbl"> </a></td>
 						<td><input id="txtPaytype" type="text" class="txt c1"/></td>
 						<td><select id="combPaytype" class="txt c1" onchange='cmbPaytype_chg()'> </select></td>
@@ -1014,7 +1034,7 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 2000px;">
+		<div class='dbbs' style="width: 2200px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
@@ -1022,6 +1042,7 @@
 					<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:50px;"><a id='lblStyle_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
@@ -1045,6 +1066,7 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
+					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
 					<td><input id="txtStyle.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>

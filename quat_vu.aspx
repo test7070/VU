@@ -32,7 +32,8 @@
 			brwKey = 'Datea';
 			aPop = new Array(
 				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick', 'txtCustno,txtComp,txtNick', 'cust_b.aspx'],
-				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx']
+				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
+				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
 			);
 			$(document).ready(function() {
 				bbmKey = ['noa'];
@@ -53,7 +54,7 @@
 			function sum() {
 				var t1 = 0, t_unit, t_mount=0, t_weight = 0;
 				for (var j = 0; j < q_bbsCount; j++) {
-					t_unit = $('#txtUnit_' + j).val();
+					t_unit = trim($('#txtUnit_' + j).val());
 					if (t_unit.length == 0 || t_unit == 'KG' || t_unit == 'M2' || t_unit == 'M' || t_unit == '批' || t_unit == '公斤' || t_unit == '噸' || t_unit == '頓' || t_unit == 'T') {
 						t_mount = $('#txtWeight_' + j).val();
 					}else{

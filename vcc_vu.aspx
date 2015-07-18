@@ -238,13 +238,10 @@
             }
             
 			function q_funcPost(t_func, result) {
-				if (result.substr(0, 5) == '<Data') {
-					var Asss = _q_appendData('sss', '', true);
-					var Acar = _q_appendData('car', '', true);
-					var Acust = _q_appendData('cust', '', true);
-					alert(Asss[0]['namea'] + '^' + Acar[0]['car'] + '^' + Acust[0]['comp']);
-				} else
-					alert(t_func + '\r' + result);
+				switch(t_func) {
+					case 'qtxt.query.changequatgweight':
+						break;
+				}
 			}
 
 			function q_boxClose(s2) {
@@ -302,24 +299,24 @@
 							if(as[i].noa==$('#textQno1').val()){
 								qno1_exists=true;
 								q1_weight=dec(as[i].weight);
-								qcust1=as[i].custno;
+								qcust1=trim(as[i].custno);
 							}
 							if(as[i].noa==$('#textQno2').val()){
 								qno2_exists=true;
 								q2_weight=dec(as[i].weight);
-								qcust2=as[i].custno;
+								qcust2=trim(as[i].custno);
 							}
 						}
 						
-						if(qcust1!=$('#txtCustno').val() || qcust2!=$('#txtCustno').val()){
-							alert('合約客戶與出貨客戶不同!!');
-						}else if (!qno1_exists || !qno2_exists) {
+						if (!qno1_exists || !qno2_exists) {
 							var t_qno='';
 							if(!qno1_exists)
 								t_qno=$('#textQno1').val();
 							if(!qno2_exists)
 								t_qno=t_qno+(t_qno.length>0?',':'')+$('#textQno2').val();
 							alert(t_qno+'合約號碼不存在!!');
+						}else if(qcust1!=trim($('#txtCustno').val()) || qcust2!=trim($('#txtCustno').val())){
+							alert('合約客戶與出貨客戶不同!!');
 						}else{
 							var t_where = "where=^^ (1=0 "+(!emp($('#textQno1').val())?" or charindex('"+$('#textQno1').val()+"',apvmemo)>0 ":'')+(!emp($('#textQno2').val())?" or charindex('"+$('#textQno2').val()+"',apvmemo)>0 ":'')+ ") and noa!='"+$('#txtNoa').val()+"' ^^";
 							q_gt('view_vcc', t_where, 0, 0, 0, "quat_view_vcc", r_accy);
@@ -722,6 +719,9 @@
 				if (q_cur == 1 || q_cur == 2) {
 					var s2 = xmlString.split(';');
 					abbm[q_recno]['accno'] = s2[0];
+					$('#txtAccno').val(s2[0]);
+					if((!emp($('#textQno1').val()) || !emp($('#textQno2').val())))
+						q_func('qtxt.query.changequatgweight', 'vcc.txt,changequat_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
 				}
 			}
 

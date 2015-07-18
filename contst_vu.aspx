@@ -76,7 +76,7 @@
 				q_mask(bbmMask);
 				bbmNum = [['txtTotal', 15, 0, 1],['txtOrdeweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtEweight', 15, q_getPara('vcc.weightPrecision'), 1]];
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,
-				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtSpec', 15, 0, 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
+				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
 				$('#lblNoa').text('合約號碼');
 				$('#lblDatea').text('訂約日期');

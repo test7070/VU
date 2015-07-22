@@ -11,72 +11,133 @@ set @t_ecustno = case when '#non'=[4] then char(255) else [4] end
 set @t_bdate = case when '#non'=[5] then '' else [5] end
 set @t_edate = case when '#non'=[6] then char(255) else [6] end
 set @t_option01 = case when '#non'=[7] then '' else [7] end
-
+--sel1含明細表--sel2含合約終止
 ---------------------------------------------------------------------------------
 
 declare @tmp table(
 	gno nvarchar(1),
-	no3 nvarchar(10),
+	recno nvarchar(10),
 	datea nvarchar(50),
 	noa nvarchar(50),
 	cno nvarchar(50),
-	comp nvarchar(50),
+	acomp nvarchar(100),
+	custno  nvarchar(50),
+	comp nvarchar(100),
+	pno nvarchar(50),
 	product nvarchar(50),
+	spec nvarchar(50),
 	price float,
-	mount float,
+	weight float,
 	eweight float,
-	edate nvarchar(50)
-)
+	emoney float,
+	opay float,
+	vmoney float,
+	enddate nvarchar(50),
+	memo nvarchar(MAX)
+)	
 
+insert @tmp
+select '0',row_number() over(order by a.custno,a.datea,a.noa),a.datea,a.noa
+,a.cno,a.acomp,a.custno,left(a.comp,6),'','','',isnull(b.price,0),a.weight,a.eweight,isnull(b.price,0)*a.eweight
+,isnull(c.opay,0),0,a.conn,a.memo
+from view_quat a
+outer apply (select top 1 price from view_quats where noa=a.noa order by no3 )b
+outer apply (select sum(opay) opay from umm where payc=a.noa) c
+where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
+and (a.custno between @t_bcustno and @t_ecustno ) 
+and (a.datea between @t_bdate and @t_edate)
 
-if(patindex('%sel1%',@t_option01) = 0)
+--處理應收比例
+declare @noa nvarchar(50)
+declare @qweight nvarchar(MAX)
+declare @tweight float
+declare @weight float
+declare @total float
+declare @ttotal float
+
+declare cursor_table cursor for
+select noa from @tmp
+open cursor_table
+fetch next from cursor_table
+into @noa
+while(@@FETCH_STATUS <> -1)
 begin
+	set @ttotal=0
+	
+	declare cursor_table2 cursor for
+	select apvmemo,total from view_vcc where CHARINDEX(@noa,apvmemo)>0
+	open cursor_table2
+	fetch next from cursor_table2
+	into @qweight,@total
+	while(@@FETCH_STATUS <> -1)
+	begin
+		set @weight=0
+		set @tweight=0
+		
+		if(len(@qweight)>0)
+		begin
+			if(dbo.split(dbo.split(@qweight,'##',0),'@',0)=@noa)
+			begin
+				set @weight=cast(dbo.split(dbo.split(@qweight,'##',0),'@',1) as float)
+			end
+			
+			set @tweight=@tweight+cast(dbo.split(dbo.split(@qweight,'##',0),'@',1) as float)
+			
+			if(dbo.split(dbo.split(@qweight,'##',1),'@',0)=@noa)
+			begin
+				set @weight=cast(dbo.split(dbo.split(@qweight,'##',1),'@',1) as float)
+			end
+			set @tweight=@tweight+cast(dbo.split(dbo.split(@qweight,'##',1),'@',1) as float)
+		end
+		
+		set @ttotal=@ttotal+(@total*@weight/@tweight)
+		
+		fetch next from cursor_table2
+		into @qweight,@total
+	end
+	close cursor_table2
+	deallocate cursor_table2
+	
+	update @tmp
+	set vmoney=@ttotal
+	where noa=@noa
+	
+	fetch next from cursor_table
+	into @noa
+end
+close cursor_table
+deallocate cursor_table
 
-	insert into @tmp
-	select '9',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.custno,a.comp,b.product,a.price,a.mount,a.eweight,a.conn 
-	from view_quat a
-	left join view_quats b on a.noa = b.noa
-	where (b.enda=0 or CHARINDEX('sel2',@t_option01)>0) and (a.custno between @t_bcustno and @t_ecustno ) and (a.datea between @t_bdate and @t_edate)
-	
-	insert into @tmp(gno,noa,mount,eweight)
-	select '1',noa,sum(mount),sum(eweight) 
-	from @tmp where gno = '9' group by noa
-	
-	insert into @tmp(gno,noa,mount,eweight)
-	select '3','zzzzzzzzzzz',sum(mount),sum(eweight) 
-	from @tmp where gno = '9'
-	
-	insert into @tmp(gno,no3,datea,noa,comp,price,mount,eweight,edate)
-	select '0',no3,datea,noa,comp,price,mount,eweight,edate
-	from @tmp where no3 in (select min(no3) FROM @tmp group by noa)
-	
-	delete @tmp where gno = '9'
-	
-	select distinct gno, dense_rank() over(order by noa) as no3 ,datea,noa,comp,product,price,mount,eweight,edate
-	from @tmp order by noa,gno
-end	
-
-
-
-if(patindex('%sel1%',@t_option01) = 1)
+if(CHARINDEX('sel1',@t_option01)>0)
 begin
-	insert into @tmp
-	select '0',row_number() over(order by a.noa) as no3,a.datea,a.noa,a.custno,a.comp,b.product,b.price,b.mount,b.eweight,a.conn 
-	from view_quat a 
-	left join view_quats b on a.noa = b.noa
-	where (b.enda=0 or CHARINDEX('sel2',@t_option01)>0) and (a.custno between @t_bcustno and @t_ecustno ) and (a.datea between @t_bdate and @t_edate ) 
+		insert into @tmp (gno,recno,custno,datea,noa,pno,product,spec,price,eweight)
+		select '2',row_number() over(partition by noa order by noa,no3),custno,datea,noa,productno,product+' '+size,spec,price,eweight
+		from view_quats a
+		where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
+		and (a.custno between @t_bcustno and @t_ecustno ) 
+		and (a.datea between @t_bdate and @t_edate)
+		and exists (select * from @tmp where noa=a.noa)
+end
+
+if((select count(*) from @tmp )>0)
+begin
+	insert into @tmp(gno,custno,noa,datea,weight,eweight)
+	select '1',custno,char(255),char(255),sum(weight),sum(eweight) 
+	from @tmp where gno = '0' group by custno
+		
+	insert into @tmp(gno,custno,datea,weight,eweight)
+	select '3',char(255),char(255),sum(weight),sum(eweight) 
+	from @tmp where gno = '0'
+end
 	
-	insert into @tmp (gno,noa,product,price,mount,eweight)
-	select '2',noa,product,price,mount,eweight
-	from @tmp where (gno ='0')
-	
-	update @tmp set product = '' where gno = '0'
-	
-	select gno, dense_rank() over(order by noa) as no3,datea,noa,comp,product,price,mount,eweight,edate
-	from @tmp 
-	where (gno = '0' and (no3 in (select min(no3) from @tmp group by noa))) or (gno = '2')
-	order by noa,gno
-end	
+select 
+dbo.getComma(weight,2)weight,
+dbo.getComma(eweight,2)eweight,
+dbo.getComma(emoney,0)emoney,
+dbo.getComma(opay,0)opay,
+dbo.getComma(vmoney,0)vmoney,
+* from @tmp
+order by custno,datea,noa,case when gno='1' then '2' when gno='2' then '1' else gno end,recno
 
 ;
 

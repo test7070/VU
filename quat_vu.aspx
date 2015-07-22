@@ -572,7 +572,7 @@
 					<td align="center" style="width:100px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
 					<td align="center"><a id='lblMemo_s'> </a></td>
-					<td align="center" style="width:40px;"><a id='lblEnda_s'> </a></td>
+					<!--<td align="center" style="width:40px;"><a id='lblEnda_s'> </a></td>-->
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
@@ -593,7 +593,7 @@
 					<td><input id="txtPrice.*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtTotal.*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
-					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
+					<!--<td align="center"><input id="chkEnda.*" type="checkbox"/></td>-->
 				</tr>
 			</table>
 		</div>

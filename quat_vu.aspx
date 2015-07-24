@@ -32,7 +32,8 @@
 			brwKey = 'Datea';
 			aPop = new Array(
 				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick', 'txtCustno,txtComp,txtNick', 'cust_b.aspx'],
-				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx']
+				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
+				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
 			);
 			$(document).ready(function() {
 				bbmKey = ['noa'];
@@ -53,7 +54,7 @@
 			function sum() {
 				var t1 = 0, t_unit, t_mount=0, t_weight = 0;
 				for (var j = 0; j < q_bbsCount; j++) {
-					t_unit = $('#txtUnit_' + j).val();
+					t_unit = trim($('#txtUnit_' + j).val());
 					if (t_unit.length == 0 || t_unit == 'KG' || t_unit == 'M2' || t_unit == 'M' || t_unit == '批' || t_unit == '公斤' || t_unit == '噸' || t_unit == '頓' || t_unit == 'T') {
 						t_mount = $('#txtWeight_' + j).val();
 					}else{
@@ -571,7 +572,7 @@
 					<td align="center" style="width:100px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
 					<td align="center"><a id='lblMemo_s'> </a></td>
-					<td align="center" style="width:40px;"><a id='lblEnda_s'> </a></td>
+					<!--<td align="center" style="width:40px;"><a id='lblEnda_s'> </a></td>-->
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
@@ -592,7 +593,7 @@
 					<td><input id="txtPrice.*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtTotal.*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
-					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
+					<!--<td align="center"><input id="chkEnda.*" type="checkbox"/></td>-->
 				</tr>
 			</table>
 		</div>

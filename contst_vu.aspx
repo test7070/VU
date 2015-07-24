@@ -32,7 +32,8 @@
 			brwKey = 'Datea';
 			aPop = new Array(
 				['txtTggno', 'lblTgg', 'tgg', 'noa,comp,nick', 'txtTggno,txtComp,txtNick', 'tgg_b.aspx'],
-				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx']
+				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
+				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
 			);
 			$(document).ready(function() {
 				bbmKey = ['noa'];
@@ -53,7 +54,7 @@
 			function sum() {
 				var t1 = 0, t_unit, t_mount=0, t_weight = 0;
 				for (var j = 0; j < q_bbsCount; j++) {
-					t_unit = $('#txtUnit_' + j).val();
+					t_unit = trim($('#txtUnit_' + j).val());
 					if (t_unit.length == 0 || t_unit == 'KG' || t_unit == 'M2' || t_unit == 'M' || t_unit == '批' || t_unit == '公斤' || t_unit == '噸' || t_unit == '頓' || t_unit == 'T') {
 						t_mount = $('#txtWeight_' + j).val();
 					}else{
@@ -75,7 +76,7 @@
 				q_mask(bbmMask);
 				bbmNum = [['txtTotal', 15, 0, 1],['txtOrdeweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtEweight', 15, q_getPara('vcc.weightPrecision'), 1]];
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,
-				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtSpec', 15, 0, 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
+				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
 				$('#lblNoa').text('合約號碼');
 				$('#lblDatea').text('訂約日期');
@@ -567,7 +568,7 @@
 					<td align="center" style="width:100px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
 					<td align="center"><a id='lblMemo_s'> </a></td>
-					<td align="center" style="width:40px;"><a id='lblEnda_s'> </a></td>
+					<!--<td align="center" style="width:40px;"><a id='lblEnda_s'> </a></td>-->
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
@@ -586,7 +587,7 @@
 					<td><input id="txtPrice.*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtTotal.*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
-					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
+					<!--<td align="center"><input id="chkEnda.*" type="checkbox"/></td>-->
 				</tr>
 			</table>
 		</div>

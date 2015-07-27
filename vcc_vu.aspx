@@ -167,7 +167,7 @@
                 	t_noa = $('#txtNoa').val();
                 	if(t_noa.length > 0){
                 		t_where = "noa='" + t_noa + "'";
-                		q_box("packing_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'pack', "95%", "95%", $('#btnPack').val());
+                		q_box("packing_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'pack', "870px", "95%", $('#btnPack').val());
                 	}
 				});
 
@@ -1151,12 +1151,12 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 2150px;">
+		<div class='dbbs' style="width: 1950px;">
 			<table id="tbbs" class='tbbs'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:40px;"><input class="btn"  id="btnPlus" type="button" value='＋' style="font-weight: bold;width:" /></td>
 					<td align="center" style="width:55px;"><a id='lblNoq_s'> </a></td>
-					<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>
+					<!--<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:200px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
@@ -1175,7 +1175,7 @@
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn"  id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td align="center"><input id="txtNoq.*" type="text" class="txt c1"/></td>
-					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->
 					<td>
 						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />

@@ -1,0 +1,141 @@
+﻿z_ucc_vu01:--z_ucc_vu01批號庫存表
+
+declare @t_bpno nvarchar(50)
+declare @t_epno nvarchar(50)
+declare @t_uno nvarchar(50)
+declare @t_edate nvarchar(20)
+
+set @t_bpno = case when '#non'=[5] then '' else [5] end
+set @t_epno = case when '#non'=[6] then char(255) else [6] end
+set @t_uno = case when '#non'=[7] then '' else [7] end
+set @t_edate = case when '#non'=[8] then char(255) else [8] end
+--sel1含明細表--sel2含合約終止
+---------------------------------------------------------------------------------
+
+declare @tmp table(
+	gno nvarchar(1),
+	recno nvarchar(10),
+	datea nvarchar(50),
+	noa nvarchar(50),
+	cno nvarchar(50),
+	acomp nvarchar(100),
+	custno  nvarchar(50),
+	comp nvarchar(100),
+	pno nvarchar(50),
+	product nvarchar(50),
+	spec nvarchar(50),
+	price float,
+	weight float,
+	eweight float,
+	emoney float,
+	opay float,
+	vmoney float,
+	enddate nvarchar(50),
+	memo nvarchar(MAX)
+)	
+
+insert @tmp
+select '0',row_number() over(order by a.custno,a.datea,a.noa),a.datea,a.noa
+,a.cno,a.acomp,a.custno,left(a.comp,6),'','','',isnull(b.price,0),a.weight,a.eweight,isnull(b.price,0)*a.eweight
+,isnull(c.opay,0),0,a.conn,a.memo
+from view_quat a
+outer apply (select top 1 price from view_quats where noa=a.noa order by no3 )b
+outer apply (select sum(opay) opay from umm where payc=a.noa) c
+where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
+and (a.custno between @t_bcustno and @t_ecustno ) 
+and (a.datea between @t_bdate and @t_edate)
+
+--處理應收比例
+declare @noa nvarchar(50)
+declare @qweight nvarchar(MAX)
+declare @tweight float
+declare @weight float
+declare @total float
+declare @ttotal float
+
+declare cursor_table cursor for
+select noa from @tmp
+open cursor_table
+fetch next from cursor_table
+into @noa
+while(@@FETCH_STATUS <> -1)
+begin
+	set @ttotal=0
+	
+	declare cursor_table2 cursor for
+	select apvmemo,total from view_vcc where CHARINDEX(@noa,apvmemo)>0
+	open cursor_table2
+	fetch next from cursor_table2
+	into @qweight,@total
+	while(@@FETCH_STATUS <> -1)
+	begin
+		set @weight=0
+		set @tweight=0
+		
+		if(len(@qweight)>0)
+		begin
+			if(dbo.split(dbo.split(@qweight,'##',0),'@',0)=@noa)
+			begin
+				set @weight=cast(dbo.split(dbo.split(@qweight,'##',0),'@',1) as float)
+			end
+			
+			set @tweight=@tweight+cast(dbo.split(dbo.split(@qweight,'##',0),'@',1) as float)
+			
+			if(dbo.split(dbo.split(@qweight,'##',1),'@',0)=@noa)
+			begin
+				set @weight=cast(dbo.split(dbo.split(@qweight,'##',1),'@',1) as float)
+			end
+			set @tweight=@tweight+cast(dbo.split(dbo.split(@qweight,'##',1),'@',1) as float)
+		end
+		
+		set @ttotal=@ttotal+(@total*@weight/@tweight)
+		
+		fetch next from cursor_table2
+		into @qweight,@total
+	end
+	close cursor_table2
+	deallocate cursor_table2
+	
+	update @tmp
+	set vmoney=@ttotal
+	where noa=@noa
+	
+	fetch next from cursor_table
+	into @noa
+end
+close cursor_table
+deallocate cursor_table
+
+if(CHARINDEX('sel1',@t_option01)>0)
+begin
+		insert into @tmp (gno,recno,custno,datea,noa,pno,product,spec,price,eweight)
+		select '2',row_number() over(partition by a.noa order by a.noa,a.no3),a.custno,a.datea,a.noa,a.productno,a.product+' '+a.size,a.spec,a.price,a.eweight
+		from view_quats a left join view_quat b on a.noa=b.noa
+		where (isnull(b.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
+		and (a.custno between @t_bcustno and @t_ecustno ) 
+		and (a.datea between @t_bdate and @t_edate)
+		and exists (select * from @tmp where noa=a.noa)
+end
+
+if((select count(*) from @tmp )>0)
+begin
+	insert into @tmp(gno,custno,noa,datea,weight,eweight)
+	select '1',custno,char(255),char(255),sum(weight),sum(eweight) 
+	from @tmp where gno = '0' group by custno
+		
+	insert into @tmp(gno,custno,datea,weight,eweight)
+	select '3',char(255),char(255),sum(weight),sum(eweight) 
+	from @tmp where gno = '0'
+end
+	
+select 
+dbo.getComma(weight,2)weight,
+dbo.getComma(eweight,2)eweight,
+dbo.getComma(emoney,0)emoney,
+dbo.getComma(opay,0)opay,
+dbo.getComma(vmoney,0)vmoney,
+* from @tmp
+order by custno,datea,noa,case when gno='1' then '2' when gno='2' then '1' else gno end,recno
+
+;
+

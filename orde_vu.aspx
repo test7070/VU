@@ -913,7 +913,7 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 2100px;">
+		<div class='dbbs' style="width: 1900px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:45px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
@@ -932,7 +932,7 @@
 					<td align="center" style="width:100px;"><a id='lblTotals'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblGemounts'> </a></td>
 					<td align="center" ><a id='lblMemo_s'> </a></td>
-					<td align="center" style="width: 180px;"><a id='lblUno_s'> </a></td>
+					<!--<td align="center" style="width: 180px;"><a id='lblUno_s'> </a></td>-->
 					<td align="center" style="width:85px;"><a id='lblDateas'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblEndas'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblCancels'> </a></td>
@@ -964,7 +964,7 @@
 						<!--<input class="txt" id="txtQuatno.*" type="text" style="width: 70%;" />
 						<input class="txt" id="txtNo3.*" type="text" style="width: 20%;"/>-->
 					</td>
-					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->
 					<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
 					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
 					<td align="center"><input id="chkCancel.*" type="checkbox"/></td>

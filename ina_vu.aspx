@@ -262,7 +262,7 @@
                 
                 var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
                 if (s1.length == 0 || s1 == "AUTO")
-                    q_gtnoa(q_name, replaceAll('G' + $('#txtDatea').val(), '/', ''));
+                    q_gtnoa(q_name, replaceAll(q_getPara('sys.key_ina')+ $('#txtDatea').val(), '/', ''));
                 else
                     wrServer(s1);
             }
@@ -271,7 +271,7 @@
                 if (q_cur > 0 && q_cur < 4)// 1-3
                     return;
 
-                q_box('ina_s.aspx', q_name + '_s', "500px", "330px", q_getMsg("popSeek"));
+                q_box('ina_vu_s.aspx', q_name + '_s', "500px", "400px", q_getMsg("popSeek"));
             }
 
             function combPay_chg() {

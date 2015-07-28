@@ -13,6 +13,7 @@ set @t_showprice = case when '#non' = [4] then 0 else [4] end
 set @t_acomp = case when '#non' = '[5]' then '' else '[5]' end
 set @t_yacomp = case when '#non' = [6] then '0' else [6] end
 ---------------------------------------------------------------------------------
+
 declare @tmp table(
 	gno nvarchar(1),
 	idno int identity(0,1),
@@ -49,6 +50,7 @@ declare @tmp table(
 	b_products nvarchar(30),
 	b_unit nvarchar(15),
 	b_mount float,
+	b_weight float,
 	b_price float,
 	b_total float,
 	b_memo nvarchar(max)
@@ -61,7 +63,9 @@ insert into @tmp
 		,(case when a.taxtype='1' then round(a.money*0.05,0) when a.taxtype='3' then a.total-e.money else 0 end)
 		,(case when a.taxtype='1' then a.money when a.taxtype='3' then e.money else a.money end)
 		,(case when a.taxtype='1' then a.money+round(a.money*0.05,0) when a.taxtype='3' then a.total else a.money end)
-		,b.uno,b.productno,b.product,b.unit,b.mount,b.price,b.total,b.memo
+		,b.uno,b.productno,
+		REPLACE(b.product,' ','') + case when b.size is null or LEN(b.size) = 0 then '' else size end + '(' + CAST(b.lengthb as nvarchar(20)) + 'M)',
+		b.unit,b.mount,b.weight,b.price,b.total,b.memo
 	from view_vcc a
 	left join view_vccs b on a.noa = b.noa
 	left join cust c on a.custno = c.noa
@@ -160,13 +164,15 @@ select
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a_money),1)),4,12)) a_money,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a_total),1)),4,12)) a_total,
 	b_productno,dbo.charbr(b_products,38) b_products,b_unit,
-	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_mount),1)),4,12)) b_mount,b_price,
+	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_mount),1)),4,12)) b_mount,
+	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_weight),1)),4,12)) b_weight,b_price,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_total),1)),4,12)) b_total
 	,b_uno+(case when len(b_uno)>0 and len(b_memo)>0 then '<BR> &nbsp' else '' end)+b_memo  b_memo
 	,topage,pageno,a_cno,a_acomp,a_ctel,a_cfax,a_caddr
 	,(case when (charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) then
 	'依民法及消費者保護法之規定，如有發票或是商品異常問題請於到貨後七日內告知，逾期恕不受理。<BR><BR>白：會計聯　　　綠：客戶簽回會計留底聯　　　藍：客戶簽回銷貨留底聯　　　紅：客戶留底聯　　　黃：倉庫留底聯' else '' end) x_memo
 from @tmp order by a_noa desc,pageno,gno,orderno;
+
 
 
 
@@ -223,11 +229,11 @@ update @tmp1 set tweight = case when tweight is null then 0 else tweight end,
 where gno = '0'
 
 update @tmp1 set product = REPLACE(product,' ','') + 
-						  case when size is null or LEN(size) = 0 then '' else size end +
-						  + '(' + CAST(long as nvarchar(20)) + 'M)'
+						   case when size is null or LEN(size) = 0 then '' else size end +
+						   '(' + CAST(long as nvarchar(20)) + 'M)'
 where gno = '0'
 
-
+declare @idno int
 declare @noa nvarchar(max)
 declare @qno nvarchar(max)
 declare @str nvarchar(max)
@@ -235,10 +241,10 @@ declare @cnt int
 declare @i int
 
 declare cursor_table cursor for 
-select noa,qno from @tmp1
+select idno,noa,qno from @tmp1
 open cursor_table 
 fetch next from cursor_table 
-into @noa,@qno 
+into @idno,@noa,@qno 
 while(@@FETCH_STATUS <> -1) 
 begin
 	set @cnt = 0
@@ -266,10 +272,10 @@ begin
 			set @i = @i + 1
 		end
 	end
-	update @tmp1 set qno = @str where noa =@noa
+	update @tmp1 set qno = @str where idno = @idno and noa =@noa
 	
 	fetch next from cursor_table 
-	into @noa,@qno
+	into @idno,@noa,@qno
 end 
 close cursor_table 
 deallocate cursor_table

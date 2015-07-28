@@ -87,7 +87,7 @@
 				q_getFormat();
 				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99']];
 				q_mask(bbmMask);
-				bbmNum = [['txtMoney', 15, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 15, 0, 1],['txtPrice', 10, q_getPara('rc2.pricePrecision'), 1],['txtTranmoney',15,0,1]
+				bbmNum = [['txtMoney', 15, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 15, 0, 1],['txtTranmoney',15,0,1]
 								,['txtTranadd', 15, q_getPara('rc2.weightPrecision'), 1],['txtBenifit', 15, q_getPara('rc2.weightPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1]
 								,['textQweight1', 15, q_getPara('rc2.weightPrecision'), 1],['textQweight2', 15, q_getPara('rc2.weightPrecision'), 1]];
 				bbsNum = [['txtMount', 15, q_getPara('rc2.mountPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1], ['txtPrice', 15, q_getPara('rc2.pricePrecision'), 1]
@@ -327,8 +327,21 @@
 						}
 						q1_weight=0,q2_weight=0;
 						break;
+					case 'btnOk_uccb':
+						var as = _q_appendData("view_uccb", "", true);
+                        if (as[0] != undefined) {
+                        	var t_uno='';
+                        	for ( i = 0; i < as.length; i++) {
+                        		t_uno=((t_uno.length>0)?',':'')+as[i].uno;
+                        	}
+                            alert(t_uno+"批號已存在!!");
+                        }else{
+                        	check_uccb_uno=true;
+                        	btnOk();
+                        }
+                        break;
 					case 'getuno':
-						var as = _q_appendData("uccy", "", true);
+						var as = _q_appendData("view_uccb", "", true);
 						var maxnoq=0; 
 						if(as[0] != undefined){
 							maxnoq=dec(as[0].uno.slice(-3));
@@ -498,6 +511,7 @@
 			}
 			
 			var check_startdate=false;
+			var check_uccb_uno=false;
 			var get_uno=false,get_maxuno=false;
 			var check_cont=false;
 			function btnOk() {
@@ -527,6 +541,18 @@
 					return;
 				}
 				
+				//判斷批號是否已使用
+				if(!check_uccb_uno){
+                	var t_uno = "1=0";
+                    for (var i = 0; i < q_bbsCount; i++) {
+                        if ($.trim($('#txtUno_' + i).val()).length > 0)
+                            t_uno += " or uno='" + $.trim($('#txtUno_' + i).val()) + "'";
+                    }
+					var t_where = "where=^^ ("+t_uno+") and noa!='"+$('#txtNoa').val()+"' ^^";
+					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_uccb", r_accy);
+					return;
+                }
+				
 				//產生批號當天最大批號數
 				//判斷是否要產生批號
 				if(!get_uno){
@@ -539,11 +565,12 @@
 				}
 				
 				if(get_uno && !get_maxuno){
-					var t_where = "where=^^ uno=isnull((select MAX(uno) from uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
-					q_gt('uccy', t_where, 0, 0, 0, "getuno", r_accy);
+					var t_where = "where=^^ uno=isnull((select MAX(uno) view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
+					q_gt('view_uccb', t_where, 0, 0, 0, "getuno", r_accy);
 					return;
 				}
 				
+				check_uccb_uno=false;
 				check_startdate=false;
 				get_uno=false;
 				get_maxuno=false;
@@ -1051,8 +1078,8 @@
 						<td><select id="combPaytype" class="txt c1" onchange='cmbPaytype_chg()'> </select></td>
 						<td><span> </span><a id='lblTrantype' class="lbl"> </a></td>
 						<td colspan="2"><select id="cmbTrantype" class="txt c1"> </select></td>
-						<td><span> </span><a id='lblPrice' class="lbl"> </a></td>
-						<td><input id="txtPrice" type="text" class="txt num c1" /></td>
+						<td><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
+						<td><input id="txtAccno" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblCardeal' class="lbl btn"> </a></td>
@@ -1093,20 +1120,16 @@
 						<td colspan='2'><input id="textQno1" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblQweight1" class="lbl">合約1重量</a></td>
 						<td colspan='2'><input id="textQweight1" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id='lblWorker' class="lbl"> </a></td>
+						<td><input id="txtWorker" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblQno2" class="lbl">合約2號碼</a></td>
 						<td colspan='2'><input id="textQno2" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblQweight2" class="lbl">合約2重量</a></td>
 						<td colspan='2'><input id="textQweight2" type="text" class="txt num c1"/></td>
-					</tr>
-					<tr>
-						<td><span> </span><a id='lblWorker' class="lbl"> </a></td>
-						<td colspan="2"><input id="txtWorker" type="text" class="txt c1"/></td>
 						<td><span> </span><a id='lblWorker2' class="lbl"> </a></td>
-						<td colspan="2"><input id="txtWorker2" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
-						<td><input id="txtAccno" type="text" class="txt c1"/></td>
+						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
 					</tr>
 				</table>
 			</div>

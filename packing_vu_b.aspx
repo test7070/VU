@@ -80,7 +80,7 @@
 		    }
 		
 		    function bbsSave(as) {
-		        if (!as['product']) {  // Dont Save Condition
+		        if (!as['uno']) {  // Dont Save Condition
 		           as[bbsKey[0]] = '';   /// noa  empty --> dont save
             	return;
         		}

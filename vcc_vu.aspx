@@ -92,7 +92,7 @@
 				q_getFormat();
 				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99'],['txtPaydate','99:99']];
 				q_mask(bbmMask);
-				bbmNum = [	['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],['txtTotal', 15, 0, 1]
+				bbmNum = [['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],['txtTotal', 15, 0, 1]
 				,['txtTranadd', 15, q_getPara('vcc.weightPrecision'), 1],['txtBenifit', 15, q_getPara('vcc.weightPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]
 				,['textQweight1', 15, q_getPara('vcc.weightPrecision'), 1],['textQweight2', 15, q_getPara('vcc.weightPrecision'), 1]];
 				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
@@ -242,6 +242,8 @@
 				switch(t_func) {
 					case 'qtxt.query.changequatgweight':
 						break;
+					case 'qtxt.query.packing':
+						break;
 				}
 			}
 
@@ -274,6 +276,10 @@
 							$('#txtZipcode').val(t_quatno);
 							sum();
 						}
+						break;
+					case 'pack':						
+						if(!emp($('#txtNoa').val()))
+							q_func('qtxt.query.packing', 'vcc.txt,changepacking_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(r_name));
 						break;
 					case q_name + '_s':
 						q_boxClose2(s2);
@@ -1101,8 +1107,8 @@
 							<select id="combCarno" style="width: 20%;"> </select>
 						</td>
 						<td><select id="cmbTranstyle" style="width: 100%;"> </select></td>
-						<td><span> </span><a id='lblPrice' class="lbl"> </a></td>
-						<td><input id="txtPrice" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id='lblTranmoney' class="lbl"> </a></td>
+						<td><input id="txtTranmoney" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblSales' class="lbl btn"> </a></td>
@@ -1110,8 +1116,6 @@
 						<td><input id="txtSales" type="text" class="txt c1"/></td>
 						<td><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
 						<td colspan='2'><input id="txtAccno" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lblTranmoney' class="lbl"> </a></td>
-						<td><input id="txtTranmoney" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMoney" class="lbl"> </a></td>

@@ -85,7 +85,8 @@
                     //t_where += ' and (cut=1)';
                     q_box("ordes_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'ordes', "95%", "95%", q_getMsg('popOrde'));
                 });
-
+				
+				$('#btnCubu_vu').hide();
                 $('#btnCubu_vu').click(function() {
                     if (q_cur == 0 || q_cur == 4) {
                         var t_where = "noa='" + trim($('#txtNoa').val()) + "'";

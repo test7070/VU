@@ -73,6 +73,8 @@
                 bbsMask = [['txtDate2', '9999/99/99'], ['txtDatea', '9999/99/99']];
                 q_mask(bbmMask);
                 //q_cmbParse("cmbTypea", q_getPara('cub.typea'));
+                q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
+                q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'t');
 
                 $('#btnOrdes_vu').click(function() {
                     var t_bdate = trim($('#txtBdate').val());
@@ -274,12 +276,14 @@
                 for (var i = 0; i < q_bbsCount; i++) {
                     $('#lblNo_' + i).text(i + 1);
                     if (!$('#btnMinus_' + i).hasClass('isAssign')) {
-                        $('#txtDime_' + i).change(function() {
-                            var n = $(this).attr('id').split('_')[$(this).attr('id').split('_').length - 1];
-                            var t_dime = dec($('#txtDime_' + n).val());
-                            $('#txtBdime_' + n).val(round(t_dime * 0.93, 2));
-                            $('#txtEdime_' + n).val(round(t_dime * 1.07, 2));
-                        });
+                    	$('#combUcolor_' + i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
+						});
+                        
                         $('#btnUccc_' + i).click(function() {
                             var n = $(this).attr('id').split('_')[$(this).attr('id').split('_').length - 1];
                             var t_where = ' 1=1 and radius=0 ';
@@ -309,6 +313,7 @@
                 $('#lblCust_s').text('客戶');
                 $('#lblProductno_s').text('品編');
                 $('#lblProduct_s').text('品名');
+                $('#lblUcolor_s').text('類別');
                 $('#lblSpec_s').text('材質');
                 $('#lblSize_s').text('號數');
                 $('#lblLengthb_s').text('米數');
@@ -354,6 +359,13 @@
                 for (var i = 0; i < q_bbtCount; i++) {
                     $('#lblNo__' + i).text(i + 1);
                     if (!$('#btnMinut__' + i).hasClass('isAssign')) {
+                    	$('#combUcolor__' + i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtUcolor__'+b_seq).val($('#combUcolor__'+b_seq).find("option:selected").text());
+						});
                     }
                 }
                 _bbtAssign();
@@ -361,6 +373,7 @@
                 $('#lblUno_t').text('領料批號');
                 $('#lblProductno_t').text('品編');
                 $('#lblProduct_t').text('品名');
+                $('#lblUcolor_t').text('類別');
                 $('#lblSpec_t').text('材質');
                 $('#lblSize_t').text('號數');
                 $('#lblLengthb_t').text('米數');
@@ -516,11 +529,11 @@
                 margin: -1px;
                 float: left;
             }
-            input[type="text"], input[type="button"] {
+            input[type="text"], input[type="button"] ,select{
                 font-size: medium;
             }
             .dbbs {
-                width: 2400px;
+                width: 2600px;
             }
             .dbbs .tbbs {
                 margin: 0;
@@ -548,7 +561,7 @@
                 font-size: medium;
             }
             #dbbt {
-                width: 1500px;
+                width: 1700px;
             }
             #tbbt {
                 margin: 0;
@@ -638,6 +651,7 @@
 						<td style="width:200px;"><a id='lblCust_s'> </a></td>
 						<td style="width:150px;"><a id='lblProductno_s'> </a></td>
 						<td style="width:150px;"><a id='lblProduct_s'> </a></td>
+						<td style="width:150px;"><a id='lblUcolor_s'> </a></td>
 						<td style="width:100px;"><a id='lblSpec_s'> </a></td>
 						<td style="width:100px;"><a id='lblSize_s'> </a></td>
 						<td style="width:100px;"><a id='lblLengthb_s'> </a></td>
@@ -671,6 +685,10 @@
 							<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 						</td>
 						<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
+						<td>
+							<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
+							<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
+						</td>
 						<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 						<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 						<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
@@ -701,6 +719,7 @@
 					<td style="width:150px;"><a id='lblUno_t'> </a></td>
 					<td style="width:150px;"><a id='lblProductno_t'> </a></td>
 					<td style="width:150px;"><a id='lblProduct_t'> </a></td>
+					<td style="width:150px;"><a id='lblUcolor_t'> </a></td>
 					<td style="width:100px;"><a id='lblSpec_t'> </a></td>
 					<td style="width:100px;"><a id='lblSize_t'> </a></td>
 					<td style="width:100px;"><a id='lblLengthb_t'> </a></td>
@@ -722,6 +741,10 @@
 						<input class="btn" id="btnProductno..*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct..*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtUcolor..*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combUcolor..*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtSpec..*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize..*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb..*" type="text" class="txt num c1" /></td>

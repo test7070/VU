@@ -104,6 +104,7 @@
 				q_cmbParse("combPaytype", q_getPara('vcc.paytype'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
 				//q_cmbParse("cmbTaxtype", q_getPara('sys.taxtype'));
+				q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
 				
 				$('#lblAddr2').text('工地名稱');
 				$('#lblTranadd').text('車空重');
@@ -457,6 +458,13 @@
 						$('#txtTotal_' + j).focusout(function() {
 							sum();
 						});
+						$('#combUcolor_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
+						});
 					}
 				}
 				_bbsAssign();
@@ -760,6 +768,9 @@
 			input[type="text"], input[type="button"] {
 				font-size: medium;
 			}
+			select {
+				font-size: medium;
+			}
 		</style>
 	</head>
 	<body>
@@ -913,7 +924,7 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1900px;">
+		<div class='dbbs' style="width: 1950px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:45px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
@@ -945,7 +956,10 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
-					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>

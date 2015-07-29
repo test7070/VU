@@ -78,6 +78,8 @@
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,
 				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
+				q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
+				
 				$('#lblNoa').text('合約號碼');
 				$('#lblDatea').text('訂約日期');
 				$('#lblCust').text('合約客戶');
@@ -167,6 +169,13 @@
 						$('#txtMount_' + j).change(function() {sum();});
 						$('#txtWeight_' + j).change(function () {sum();});
 						$('#txtPrice_' + j).change(function() {sum();});
+						$('#combUcolor_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
+						});
 					}
 				}
 				_bbsAssign();
@@ -464,6 +473,9 @@
 			input[type="text"], input[type="button"] {
 				font-size: medium;
 			}
+			select {
+				font-size: medium;
+			}
 		</style>
 	</head>
 	<body>
@@ -582,7 +594,10 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
-					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>

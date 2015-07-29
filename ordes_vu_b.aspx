@@ -40,7 +40,8 @@
 
             function bbsAssign() {
                 _bbsAssign();
-               $('#lblProduct').text('品名');
+				$('#lblProduct').text('品名');
+				$('#lblUcolor').text('類別');
 				$('#lblSpec').text('材質');
 				$('#lblSize').text('號數');
 				$('#lblLengthb').text('米數');
@@ -88,6 +89,7 @@
 				<tr style='color:White; background:#003366;' >
 					<td align="center"><input type="checkbox" id="checkAllCheckbox"/></td>
 					<td align="center"><a id='lblProduct'> </a></td>
+					<td align="center"><a id='lblUcolor'> </a></td>
 					<td align="center"><a id='lblSpec'> </a></td>
 					<td align="center"><a id='lblSize'> </a></td>
 					<td align="center"><a id='lblLengthb'> </a></td>
@@ -102,10 +104,11 @@
 				</tr>
 				<tr  style='background:#cad3ff;'>
 					<td style="width:1%;" align="center"><input id="chkSel.*" type="checkbox"  /></td>
-					<td style="width:15%;"><input class="txt" id="txtProduct.*" type="text" style="width:98%;" /></td>
+					<td style="width:10%;"><input class="txt" id="txtProduct.*" type="text" style="width:98%;" /></td>
+					<td style="width:8%;"><input class="txt" id="txtUcolor.*" type="text" style="width:98%;" /></td>
 					<td style="width:8%;"><input class="txt" id="txtSpec.*" type="text" style="width:98%;" /></td>
 					<td style="width:8%;"><input class="txt" id="txtSize.*" type="text" style="width:98%;" /></td>
-					<td style="width:8%;"><input class="txt" id="txtLengthb.*" type="text" style="width:98%;text-align:right;" /></td>
+					<td style="width:6%;"><input class="txt" id="txtLengthb.*" type="text" style="width:98%;text-align:right;" /></td>
 					<td style="width:8%;"><input class="txt" id="txtClass.*" type="text" style="width:98%;" /></td>
 					<td style="width:4%;"><input class="txt" id="txtUnit.*" type="text" style="width:94%;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtMount.*" type="text" style="width:94%; text-align:right;"/></td>

@@ -35,8 +35,8 @@
             brwCount2 = 5;
             aPop = new Array(
             	['txtProductno_', 'btnProduct_', 'ucaucc', 'noa,product', 'txtProductno_,txtProduct_', 'ucaucc_b.aspx'],
-            	['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,spec,size,lengthb,class,unit,emount,eweight'
-            	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtGmount__,txtGweight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
+            	['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,ucolor,spec,size,lengthb,class,unit,emount,eweight'
+            	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtUcolor__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtGmount__,txtGweight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
             	
             );
 
@@ -151,8 +151,8 @@
                                 }
                             }
                             if (b_ret && b_ret[0] != undefined) {
-                                ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtCustno,txtComp,txtProductno,txtProduct,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtPrice,txtOrdeno,txtNo2,txtWeight,txtMount,txtUno,txtMemo'
-                                , b_ret.length, b_ret, 'custno,comp,productno,product,spec,size,lengthb,class,unit,price,noa,no2,mount,weight,uno,memo', 'txtProductno');
+                                ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtCustno,txtComp,txtProductno,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtPrice,txtOrdeno,txtNo2,txtWeight,txtMount,txtUno,txtMemo'
+                                , b_ret.length, b_ret, 'custno,comp,productno,product,ucolor,spec,size,lengthb,class,unit,price,noa,no2,mount,weight,uno,memo', 'txtProductno');
                             }
                             sum();
                             b_ret = '';

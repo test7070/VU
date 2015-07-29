@@ -81,6 +81,7 @@
                 
 				q_cmbParse("cmbItype", q_getPara('ina.typea'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
+				q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
                 /* 若非本會計年度則無法存檔 */
                 $('#txtDatea').focusout(function() {
                     if ($(this).val().substr(0, 3) != r_accy) {
@@ -321,6 +322,14 @@
 						$('#txtTotal_' + j).focusout(function() {
 							sum();
 						});
+						
+						$('#combUcolor_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
+						});
                         //-------------------------------------------------------------------------------------
                     }
                 }
@@ -552,7 +561,7 @@
                 font-size: medium;
             }
 
-            input[type="text"], input[type="button"] {
+            input[type="text"], input[type="button"] ,select{
                 font-size: medium;
             }
             .dbbs .tbbs {
@@ -681,7 +690,10 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
-					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>

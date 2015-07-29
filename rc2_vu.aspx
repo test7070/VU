@@ -98,6 +98,7 @@
 				q_cmbParse("cmbStype", q_getPara('rc2.stype'));
 				q_cmbParse("combPaytype", q_getPara('rc2.paytype'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
+				q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
 				//q_cmbParse("cmbTaxtype", q_getPara('sys.taxtype'));
 				var t_where = "where=^^ 1=1 group by post,addr^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
@@ -649,6 +650,14 @@
 							var n = replaceAll($(this).attr('id'), 'btnRecord_', '');
 							q_box("z_rc2record.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";tgg=" + $('#txtTggno').val() + "&product=" + $('#txtProductno_' + n).val() + ";" + r_accy, 'z_vccstp', "95%", "95%", q_getMsg('popPrint'));
 						});
+						
+						$('#combUcolor_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
+						});
 					}
 				}
 				_bbsAssign();
@@ -973,7 +982,7 @@
 			.tbbm td {
 				width: 9%;
 			}
-			input[type="text"], input[type="button"] {
+			input[type="text"], input[type="button"] ,select{
 				font-size: medium;
 			}
 			.dbbs .tbbs {
@@ -1166,7 +1175,10 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
-					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtStyle.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>

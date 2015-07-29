@@ -78,6 +78,8 @@
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,
 				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
+				q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
+				
 				$('#lblNoa').text('合約號碼');
 				$('#lblDatea').text('訂約日期');
 				$('#lblBcontdate').text('開工日');
@@ -168,6 +170,13 @@
 						$('#txtMount_' + j).change(function() {sum();});
 						$('#txtWeight_' + j).change(function () {sum();});
 						$('#txtPrice_' + j).change(function() {sum();});
+						$('#combUcolor_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
+						});
 					}
 				}
 				_bbsAssign();
@@ -175,6 +184,7 @@
 				$('#lblNoq_s').text('項次');
 				$('#lblProductno_s').text('品編');
 				$('#lblProduct_s').text('品名');
+				$('#lblUcolor_s').text('類別');
 				$('#lblSpec_s').text('材質');
 				$('#lblSize_s').text('號數');
 				$('#lblLengthb_s').text('米數');
@@ -460,7 +470,7 @@
 			.tbbs tr.error input[type="text"] {
 				color: red;
 			}
-			input[type="text"], input[type="button"] {
+			input[type="text"], input[type="button"],select {
 				font-size: medium;
 			}
 		</style>
@@ -552,13 +562,14 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1450px;">
+		<div class='dbbs' style="width: 1650px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:40px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:70px;"><a id='lblNoq_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
@@ -578,6 +589,10 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>

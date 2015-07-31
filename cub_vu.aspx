@@ -36,8 +36,8 @@
             aPop = new Array(
             	['txtProductno_', 'btnProduct_', 'ucaucc', 'noa,product', 'txtProductno_,txtProduct_', 'ucaucc_b.aspx'],
             	['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,ucolor,spec,size,lengthb,class,unit,emount,eweight'
-            	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtUcolor__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtGmount__,txtGweight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
-            	
+            	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtUcolor__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtGmount__,txtGweight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%'],
+            	['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
             );
 
             $(document).ready(function() {
@@ -120,6 +120,44 @@
                             _btnDele();
                         }
                         break;
+					case 'btnOk_uccb':
+						var as = _q_appendData("view_uccb", "", true);
+                        if (as[0] != undefined) {
+                        	var t_uno='';
+                        	for ( i = 0; i < as.length; i++) {
+                        		t_uno=((t_uno.length>0)?',':'')+as[i].uno;
+                        	}
+                            alert(t_uno+"批號已存在!!");
+                        }else{
+                        	check_uccb_uno=true;
+                        	btnOk();
+                        }
+                        break;
+					case 'btnOk_getuno':
+						var as = _q_appendData("view_uccb", "", true);
+						var maxnoq=0; 
+						if(as[0] != undefined){
+							maxnoq=dec(as[0].uno.slice(-3));
+						}
+						
+						//判斷表身批號是否已被使用
+						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
+							if(replaceAll($('#txtDatea').val(),'/','')+(('000'+maxnoq).slice(-3))==$('#txtUno_'+j).val() && !emp($('#txtUno_'+j).val())){
+								maxnoq=maxnoq+1;
+							}
+						}
+						
+						//寫入批號
+						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
+							if(emp($('#txtUno_'+j).val()) && (!emp($('#txtProductno_'+j).val()) || !emp($('#txtProduct_'+j).val()))){
+								maxnoq=maxnoq+1;
+								$('#txtUno_'+j).val(replaceAll($('#txtDatea').val(),'/','')+(('000'+maxnoq).slice(-3)));
+							}
+						}
+						
+						get_maxuno=true;
+						btnOk();
+						break;
                     case q_name:
                         if (q_cur == 4)
                             q_Seek_gtPost();
@@ -130,7 +168,23 @@
             function q_stPost() {
                 if (!(q_cur == 1 || q_cur == 2))
                     return false;
+				if(!emp($('#txtNoa').val())){
+					q_func('cubu_post.post.a1', r_accy + ',' + $('#txtNoa').val() + ',0');
+				}
             }
+            
+            function q_funcPost(t_func, result) {
+				switch(t_func) {
+					case 'cubu_post.post.a1':					
+						q_func('qtxt.query.cubstocubt', 'cub.txt,cubstocubt,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
+						break;
+					case 'qtxt.query.cubstocubt':
+						q_func('cubu_post.post.a2', r_accy + ',' + $('#txtNoa').val() + ',1');
+						break;
+					case 'cubu_post.post.a2':					
+						break;
+				}
+			}
 
             function q_boxClose(s2) {
                 var ret;
@@ -210,12 +264,68 @@
             function btnPrint() {
                 //q_box('z_cubp_vu.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", q_getMsg("popPrint"));
             }
-
+			
+			var check_uccb_uno=false;
+			var get_uno=false,get_maxuno=false;
             function btnOk() {
                 if ($('#txtDatea').val().length == 0 || !q_cd($('#txtDatea').val())) {
                     alert(q_getMsg('lblDatea') + '錯誤。');
                     return;
                 }
+                
+                //判斷批號是否已使用
+				if(!check_uccb_uno){
+                	var t_uno = "1=0";
+                    for (var i = 0; i < q_bbsCount; i++) {
+                        if ($.trim($('#txtUno_' + i).val()).length > 0)
+                            t_uno += " or uno='" + $.trim($('#txtUno_' + i).val()) + "'";
+                    }
+					var t_where = "where=^^ ("+t_uno+") and noa!='"+$('#txtNoa').val()+"' ^^";
+					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_uccb", r_accy);
+					return;
+                }
+                
+                //產生批號當天最大批號數
+				//判斷是否要產生批號
+				if(!get_uno){
+					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
+						if((!emp($('#txtProductno_'+j).val()) || !emp($('#txtProduct_'+j).val()))&& emp($('#txtUno_'+j).val())){
+							get_uno=true;
+							break;
+						}
+					}
+				}
+				
+				//預設產生批號
+                if(get_uno && !get_maxuno){
+	                var t_where = "where=^^ uno=isnull((select MAX(uno) from view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
+					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_getuno", r_accy);
+					return;
+                }
+				
+				check_uccb_uno=false;
+				get_uno=false;
+				get_maxuno=false;
+                
+                //檢查是否批號重複
+                var uno_repeat=false;
+                for (var i = 0; i < q_bbsCount; i++) {
+                	if(!emp($('#txtUno_'+i).val())){
+	                	for (var j = i+1; j < q_bbsCount; j++) {
+	                		if($('#txtUno_'+i).val()==$('#txtUno_'+j).val()){
+	                			uno_repeat=true;
+	                			break;
+	                		}
+	                	}
+                	}
+                	if(uno_repeat)
+                		break;
+                }
+                if(uno_repeat){
+                	alert("批號重複!!");
+                    return;
+                }
+                
                 sum();
                 $('#txtWorker').val(r_name);
 
@@ -325,6 +435,7 @@
                 $('#lblUno_s').text('批號');
                 $('#lblNeed_s').text('需求');
                 $('#lblMemo_s').text('備註');
+                $('#lblStore_s').text('入庫倉庫');
                 $('#lblDate2_s').text('交期');
                 $('#lblEnda_s').text('手結');
                 $('#lblOrdeno_s').text('訂單編號');
@@ -660,10 +771,11 @@
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
 						<td style="width:100px;"><a id='lblPrice_s'> </a></td>
-						<td style="width:200px;"><a id='lblUno_s'> </a></td>
 						<td style="width:200px;"><a id='lblNeed_s'> </a></td>
-						<td style="width:200px;"><a id='lblMemo_s'> </a></td>
+						<td><a id='lblMemo_s'> </a></td>
+						<td style="width:200px;"><a id='lblUno_s'> </a></td>
 						<td style="width:100px;"><a id='lblDate2_s'> </a></td>
+						<!--<td style="width:200px;"><a id='lblStore_s'> </a></td>-->
 						<td style="width:30px;"><a id='lblEnda_s'> </a></td>
 						<td style="width:150px;"><a id='lblOrdeno_s'> </a></td>
 						<td style="width:60px;"><a id='lblNo2_s'> </a></td>
@@ -697,10 +809,15 @@
 						<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>
-						<td><input id="txtUno.*" type="text" class="txt c1"/></td>
 						<td><input id="txtNeed.*" type="text" class="txt c1"/></td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
+						<td><input id="txtUno.*" type="text" class="txt c1"/></td>
 						<td><input id="txtDate2.*" type="text" class="txt c1"/></td>
+						<!--<td>
+							<input id="txtStoreno.*" type="text" class="txt c1" style="width: 30%;"/>
+							<input class="btn" id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;float: left;" />
+							<input id="txtStore.*" type="text" class="txt c1" style="width: 50%;"/>
+						</td>-->
 						<td><input id="chkEnda.*" type="checkbox"/></td>
 						<td><input id="txtOrdeno.*" type="text" class="txt c1"/></td>
 						<td><input id="txtNo2.*" type="text" class="txt c1"/></td>

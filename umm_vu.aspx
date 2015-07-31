@@ -53,9 +53,9 @@
                 if (r_rank < 7)
                     q_readonly[q_readonly.length] = 'txtAccno';
 				
-                bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm]];
+                bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99']];
                 q_mask(bbmMask);
-                bbsMask = [['txtIndate', r_picd], ['txtMon', r_picm]];
+                bbsMask = [['txtIndate', '9999/99/99'], ['txtMon', '9999/99']];
 				q_gt('part', '', 0, 0, 0, "");
 		        q_gt('acomp', '', 0, 0, 0, "");
 		        //q_cmbParse("combAcc1", '1111@現金,1121@應收票據');
@@ -764,7 +764,7 @@
                 if (q_cur > 0 && q_cur < 4)// 1-3
                     return;
 
-                q_box('umm_s.aspx', q_name + '_s', "500px", "600px", q_getMsg("popSeek"));
+                q_box('umm_vu_s.aspx', q_name + '_s', "500px", "600px", q_getMsg("popSeek"));
             }
 
             function bbsAssign() {

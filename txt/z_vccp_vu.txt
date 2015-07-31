@@ -63,9 +63,9 @@ insert into @tmp
 		,(case when a.taxtype='1' then round(a.money*0.05,0) when a.taxtype='3' then a.total-e.money else 0 end)
 		,(case when a.taxtype='1' then a.money when a.taxtype='3' then e.money else a.money end)
 		,(case when a.taxtype='1' then a.money+round(a.money*0.05,0) when a.taxtype='3' then a.total else a.money end)
-		,b.uno,b.productno,
-		REPLACE(b.product,' ','') + case when b.size is null or LEN(b.size) = 0 then '' else size end + '(' + CAST(b.lengthb as nvarchar(20)) + 'M)',
-		b.unit,b.mount,b.weight,b.price,b.total,b.memo
+		,b.uno,b.productno
+		,REPLACE(b.product,' ','') + case when LEN(isnull(b.size,'')) = 0 then '' else size end + (case when isnull(b.lengthb,0)=0 then '' else '*'+CAST(b.lengthb as nvarchar(20)) + 'M' end)
+		,b.unit,b.mount,b.weight,b.price,b.total,b.memo
 	from view_vcc a
 	left join view_vccs b on a.noa = b.noa
 	left join cust c on a.custno = c.noa
@@ -173,9 +173,6 @@ select
 	'依民法及消費者保護法之規定，如有發票或是商品異常問題請於到貨後七日內告知，逾期恕不受理。<BR><BR>白：會計聯　　　綠：客戶簽回會計留底聯　　　藍：客戶簽回銷貨留底聯　　　紅：客戶留底聯　　　黃：倉庫留底聯' else '' end) x_memo
 from @tmp order by a_noa desc,pageno,gno,orderno;
 
-
-
-
 --******************************************************************************
 z_vccp_vu02:--z_vccp_vu02
 
@@ -228,9 +225,7 @@ update @tmp1 set tweight = case when tweight is null then 0 else tweight end,
 				 nweight = case when nweight is null then 0 else nweight end			  					 
 where gno = '0'
 
-update @tmp1 set product = REPLACE(product,' ','') + 
-						   case when size is null or LEN(size) = 0 then '' else size end +
-						   '(' + CAST(long as nvarchar(20)) + 'M)'
+update @tmp1 set product = REPLACE(product,' ','') + case when LEN(isnull(size,'')) = 0 then '' else size end + (case when isnull(long,0)=0 then '' else '*'+CAST(long as nvarchar(20)) + 'M' end)
 where gno = '0'
 
 declare @idno int

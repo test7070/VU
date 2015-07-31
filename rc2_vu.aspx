@@ -348,6 +348,13 @@
 							maxnoq=dec(as[0].uno.slice(-3));
 						}
 						
+						//判斷表身批號是否已被使用
+						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
+							if(replaceAll($('#txtDatea').val(),'/','')+(('000'+maxnoq).slice(-3))==$('#txtUno_'+j).val() && !emp($('#txtUno_'+j).val())){
+								maxnoq=maxnoq+1;
+							}
+						}
+						
 						//寫入批號
 						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 							if(!emp($('#txtStyle_'+j).val()) && emp($('#txtUno_'+j).val())){

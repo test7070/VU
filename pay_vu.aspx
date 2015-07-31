@@ -47,9 +47,9 @@
 		    
 		    function mainPost() {
 		        q_getFormat();
-		        bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm]];
+		        bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99']];
 		        q_mask(bbmMask);
-		        bbsMask = [['txtIndate', r_picd]];
+		        bbsMask = [['txtIndate', '9999/99/99']];
 		        q_gt('part', '', 0, 0, 0, "");
 		        q_gt('acomp', '', 0, 0, 0, "");
 		        
@@ -613,7 +613,7 @@
 		        if (q_cur > 0 && q_cur < 4)// 1-3
 		            return;
 
-		        q_box('pay_s.aspx', q_name + '_s', "550px", "600px", q_getMsg("popSeek"));
+		        q_box('pay_vu_s.aspx', q_name + '_s', "550px", "600px", q_getMsg("popSeek"));
 		    }
 
 		    function combPay_chg() {

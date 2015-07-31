@@ -177,6 +177,13 @@
 							maxnoq=dec(as[0].uno.slice(-3));
 						}
 						
+						//判斷表身批號是否已被使用
+						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
+							if(replaceAll($('#txtDatea').val(),'/','')+(('000'+maxnoq).slice(-3))==$('#txtUno_'+j).val() && !emp($('#txtUno_'+j).val())){
+								maxnoq=maxnoq+1;
+							}
+						}
+						
 						//寫入批號
 						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 							if(emp($('#txtUno_'+j).val()) && (!emp($('#txtProductno_'+j).val()) || !emp($('#txtProduct_'+j).val()))){
@@ -239,6 +246,9 @@
 					return;
                 }
                 
+                check_uccb_uno=false;
+                get_uno=false,get_maxuno=false;
+                
                 //檢查是否批號重複
                 var uno_repeat=false;
                 for (var i = 0; i < q_bbsCount; i++) {
@@ -257,9 +267,6 @@
                 	alert("批號重複!!");
                     return;
                 }
-                
-                check_uccb_uno=false;
-                get_uno=false,get_maxuno=false;
                 
                 var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
                 if (s1.length == 0 || s1 == "AUTO")

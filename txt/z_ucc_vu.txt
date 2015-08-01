@@ -35,7 +35,7 @@ create table #tmp(
 )
 
 insert #tmp
-select '9','ucce',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight
+select '10','ucce',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight
 from view_ucce a left join view_ucces b on a.noa=b.noa 
 where a.datea<=@t_edate and b.productno between @t_bpno and @t_epno and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
 
@@ -59,14 +59,21 @@ where a.datea<=@t_edate and b.productno between @t_bpno and @t_epno and (len(@t_
 and a.datea>=isnull(c.datea,'')
 
 insert #tmp
-select '13','cubs',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
+select '13','cubu',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
+from view_cub a left join view_cubu b on a.noa=b.noa
+outer apply(select datea from #tmp where uno=b.uno and tablea='ucce')c
+where b.datea<=@t_edate and b.productno between @t_bpno and @t_epno and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
+and b.datea>=isnull(c.datea,'')
+
+insert #tmp
+select '14','cubs',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea from #tmp where uno=b.uno and tablea='ucce')c
 where a.datea<=@t_edate and b.productno between @t_bpno and @t_epno and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
 and a.datea>=isnull(c.datea,'')
 
 insert #tmp
-select '14','gets',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
+select '15','gets',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
 from view_get a left join view_gets b on a.noa=b.noa
 outer apply(select datea from #tmp where uno=b.uno and tablea='ucce')c
 where a.datea<=@t_edate and b.productno between @t_bpno and @t_epno and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
@@ -74,8 +81,8 @@ and a.datea>=isnull(c.datea,'')
 
 insert #tmp
 select '0','end',@t_edate,CHAR(255),MAX(b.pno),MAX(b.product),MAX(b.spec),MAX(b.size),MAX(b.lengthb),MAX(b.class),a.uno
-,sum((case when a.tablea in ('ucce','rc2s','inas') then 1 else -1 end)*a.mount)
-,sum((case when a.tablea in ('ucce','rc2s','inas') then 1 else -1 end)*a.weight) 
+,sum((case when a.tablea in ('ucce','rc2s','inas','cubu') then 1 else -1 end)*a.mount)
+,sum((case when a.tablea in ('ucce','rc2s','inas','cubu') then 1 else -1 end)*a.weight) 
 from #tmp a outer apply(select top 1 * from #tmp where uno=a.uno and gno!=0 order by datea,gno) b
 group by a.uno
 

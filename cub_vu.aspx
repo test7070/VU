@@ -742,7 +742,7 @@
 							<span style="float:left; display:block; width:20px;"><a> ～ </a></span>
 							<input id="txtEdate" type="text" style="width:45%;"/>
 						</td>
-						<td> </td>
+						<!--<td> </td>-->
 						<td colspan="2">
 							<input type="button" id="btnOrdes_vu" value="訂單匯入" style="width:120px;"/>
 							<input type="button" id="btnCubu_vu" value="入庫" style="width:120px;"/>

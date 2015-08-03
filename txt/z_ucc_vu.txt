@@ -66,8 +66,8 @@ where b.datea<=@t_edate and b.productno between @t_bpno and @t_epno and (len(@t_
 and b.datea>=isnull(c.datea,'')
 
 insert #tmp
-select '14','cubs',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
-from view_cub a left join view_cubs b on a.noa=b.noa
+select '14','cubt',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
+from view_cub a left join view_cubt b on a.noa=b.noa
 outer apply(select datea from #tmp where uno=b.uno and tablea='ucce')c
 where a.datea<=@t_edate and b.productno between @t_bpno and @t_epno and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
 and a.datea>=isnull(c.datea,'')

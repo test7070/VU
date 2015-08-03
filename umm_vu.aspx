@@ -13,7 +13,7 @@
             q_desc = 1
             q_tables = 's';
             var q_name = "umm";
-            var q_readonly = [ 'txtWorker', 'txtCno', 'txtAcomp', 'txtSale', 'txtTotal', 'txtPaysale', 'txtUnpay', 'txtOpay', 'textOpay','txtAccno','txtWorker2'];
+            var q_readonly = ['txtNoa','txtWorker', 'txtCno', 'txtAcomp', 'txtSale', 'txtTotal', 'txtPaysale', 'txtUnpay', 'txtOpay', 'textOpay','txtAccno','txtWorker2'];
             var q_readonlys = ['txtUnpay', 'txtUnpayorg', 'txtAcc2', 'txtPart2','txtMemo2','txtCno','txtCoin'];
             var bbmNum = new Array(['txtSale', 10, 0, 1], ['txtTotal', 10, 0, 1], ['txtPaysale', 10, 0, 1], ['txtUnpay', 10, 0, 1], ['txtOpay', 10, 0, 1], ['txtUnopay', 10, 0, 1], ['textOpay', 10, 0, 1]);
             var bbsNum = [['txtMoney', 10, 0, 1], ['txtChgs', 10, 0, 1], ['txtPaysale', 10, 0, 1], ['txtUnpay', 10, 0, 1], ['txtUnpayorg', 10, 0, 1]];
@@ -63,21 +63,25 @@
 		        $('#lblPayc').text('合約號碼');
 		        
 		        $('#lblPayc').click(function() {
-		        	if(emp($('#txtPayc').val())){
-		        		q_box('quat_vu.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtPayc').val()), '', "95%", "95%", "出貨合約");
+		        	if(!emp($('#txtPayc').val())){
+		        		q_box('quat_vu.aspx' + "?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + trim($('#txtPayc').val())+"';" + r_accy , '', "95%", "95%", "出貨合約");
 		        	}
+				});
+				
+				$('#txtPayc').change(function() {
+					if(!emp($('#txtPayc').val())){
+						var t_where = "where=^^ noa='" + $('#txtPayc').val() + "' ^^";
+	                	q_gt("view_quat", t_where, 1, 1, 0, 'get_quat', r_accy);
+	                }else{
+	                	getOpay();
+	                }
 				});
 		        
 		         $('#txtDatea').blur(function() {
 		         	if(!emp($('#txtDatea').val())&&(q_cur==1 || q_cur==2)){
-		         		
-		         		if(q_getPara('sys.comp').indexOf('英特瑞')>-1 || q_getPara('sys.comp').indexOf('安美得')>-1 || q_getPara('sys.comp').indexOf('永勝')>-1 || q_getPara('sys.project').toUpperCase()=='XY'){
-		         			$('#txtMon').val($('#txtDatea').val().substr(0,6));
-		         		}else{
-                    		var d = new Date(dec($('#txtDatea').val().substr(0,3))+1911, dec($('#txtDatea').val().substr(4,2))-1, dec($('#txtDatea').val().substr(7,2)));
-							d.setMonth(d.getMonth() - 1);
-							$('#txtMon').val(d.getFullYear()-1911+'/'+('0'+(d.getMonth()+1)).slice(-2));
-						}
+                    	var d = new Date(dec($('#txtDatea').val().substr(0,4)), dec($('#txtDatea').val().substr(5,2))-1, dec($('#txtDatea').val().substr(8,2)));
+						d.setMonth(d.getMonth() - 1);
+						$('#txtMon').val(d.getFullYear()+'/'+('0'+(d.getMonth()+1)).slice(-2));
 					}
                 });
 		        
@@ -147,11 +151,12 @@
                 	var t_custno = $.trim($('#txtCustno').val());
                 	var t_custno2 = $.trim($('#txtCustno2').val()).replace(/\,/g,'@');
                 	var t_mon = $.trim($('#txtMon').val());
+                	var t_payc = $.trim($('#txtPayc').val());
                 	if(t_custno.length==0){
                 		alert('請先輸入'+q_getMsg('lblCust')+'!!');
                 		return;
                 	}
-                	q_gt('umm_import',"where=^^['"+t_noa+"','"+t_custno+"','"+t_custno2+"','"+t_mon+"','"+q_getPara('sys.d4taxtype')+"')^^", 0, 0, 0, "umm_import");
+                	q_gt('umm_import',"where=^^['"+t_noa+"','"+t_custno+"','"+t_custno2+"','"+t_mon+"','VU#"+t_payc+"#"+q_getPara('sys.d4taxtype')+"')^^", 0, 0, 0, "umm_import");
                 	
                 });
                 
@@ -172,16 +177,15 @@
                 });
             }
 			
-			
             function getOpay() {
             	Lock(1,{opacity:0});
                 var t_custno = $('#txtCustno').val();
                 var s2 = (q_cur == 2 ? " and noa!='" + $('#txtNoa').val() + "'" : '');
                 
                 if(q_cur==4 ||q_cur==0 )
-                	var t_where = "where=^^custno='" + t_custno + "'" + s2 + " and datea<='"+$('#txtDatea').val()+"' ^^";
+                	var t_where = "where=^^custno='" + t_custno + "' " + s2 + " and datea<='"+$('#txtDatea').val()+"' and payc='" + $('#txtPayc').val() + "' ^^";
                 else
-                	var t_where = "where=^^custno='" + t_custno + "'" + s2 + "^^";
+                	var t_where = "where=^^custno='" + t_custno + "' " + s2 + " and payc='" + $('#txtPayc').val() + "' ^^";
                 
                 q_gt("umm_opay", t_where, 1, 1, 0, '', r_accy);
             }
@@ -205,7 +209,7 @@
                                 return;
 
                             for (var i = 0; i < b_ret.length; i++) {
-                                if (dec(b_ret[i].total) - dec(b_ret[i].paysale) == 0 &&$('#txtCustno').val().substr(0,1)!='H') {
+                                if (dec(b_ret[i].total) - dec(b_ret[i].paysale) == 0 ) {
                                     b_ret.splice(i, 1);
                                     i--;
                                 } else {
@@ -287,37 +291,25 @@
 			var z_cno=r_cno,z_acomp=r_comp,z_nick=r_comp.substr(0,2);
             function q_gtPost(t_name) {
                 switch (t_name) {
+                	case 'get_quat':
+                		var as = _q_appendData('view_quat', "", true);
+                		if (as[0] != undefined){
+                			$('#txtCustno').val(as[0].custno);
+                			$('#txtComp').val(as[0].nick);
+                			$('#cmbCno').val(as[0].cno);
+                		}else{
+                			alert('無此合約號碼!!');
+                			$('#txtPayc').val('');
+                		}
+                		getOpay();
+                		break;
                 	case 'umm_import':
                 		as = _q_appendData(t_name, "", true);
                 		for (var i = 0; i < as.length; i++) {
-                			if(q_getPara('sys.project').toUpperCase()=='XY'){
-                				as[i].tablea='vcc_xy';
-							}else if(q_getPara('sys.comp').indexOf('英特瑞')>-1 || q_getPara('sys.comp').indexOf('安美得')>-1){
-								as[i].tablea='vcc_it';
-							}else if(q_getPara('sys.comp').indexOf('永勝')>-1){
-								as[i].tablea='vcc_uu';
-								as[i].memo=as[i].memo+as[i].invono;
-							}else if (q_getPara('sys.comp').indexOf('楊家') > -1|| q_getPara('sys.comp').indexOf('德芳') > -1){
-								as[i].tablea='vcc_tn';
-							}else if(q_getPara('sys.comp').indexOf('傑期')>-1){
-								as[i].tablea='vcc_pk';
-							}else{
-								if(q_getPara('sys.steel')=='1'){
-									as[i].tablea='vccst';
-								}else{
-									as[i].tablea='vcc';
-								}
-							}
+                			as[i].tablea='vcc_vu';
 						}
                 		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtCustno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtVccno,txtMemo2', as.length, as, 'cno,custno,mon,coin,unpay,unpay,tablea,tableaccy,vccno,memo', '', '');
-                		
                 		var t_comp = q_getPara('sys.comp').substring(0,2);
-                		for(var i=0;i<q_bbsCount;i++){
-                			if($('#txtTablea_'+i).val()=='vcc' && t_comp == "裕承"){
-                				$('#txtTablea_'+i).val('vccst');
-                			}
-                		}
-                		
                 		sum();
                 		break;
                 	case 'vcc_cust':
@@ -416,34 +408,9 @@
                             }
                         }
                         
-                        
-                        /*var as = _q_appendData("umms", "", true);
-                        for (var i = 0; i < as.length; i++) {
-                            if (as[i].total - as[i].payed == 0) {
-                                as.splice(i, 1);
-                                i--;
-                            } 
-                        }
-                        q_gridAddRow(bbsHtm, 'tbbs', 'txtVccno,txtMemo2,txtUnpay,txtUnpayorg,txtPart2', as.length, as, 'noa,memo,unpay,unpay,part2', 'txtVccno', '');
-                        */
                         var as = _q_appendData("umm_mon", "", true);
                         for (var i = 0; i < as.length; i++) {
-                        	if(q_getPara('sys.project').toUpperCase()=='XY'){
-								as[i].tablea='vcc_xy';
-							}else if(q_getPara('sys.comp').indexOf('英特瑞')>-1 || q_getPara('sys.comp').indexOf('安美得')>-1){
-								as[i].tablea='vcc_it';
-							}else if(q_getPara('sys.comp').indexOf('永勝')>-1){
-								as[i].tablea='vcc_uu';
-								as[i].memo=as[i].memo+as[i].invono;
-							}else if (q_getPara('sys.comp').indexOf('楊家') > -1|| q_getPara('sys.comp').indexOf('德芳') > -1){
-								as[i].tablea='vcc_tn';
-							}else{
-								if(q_getPara('sys.steel')=='1'){
-									as[i].tablea='vccst';
-								}else{
-									as[i].tablea='vcc';
-								}
-							}
+							as[i].tablea='vcc_vu';							
                         }
                         q_gridAddRow(bbsHtm, 'tbbs', 'txtAccy,txtTablea,txtVccno,txtMemo2,txtUnpay,txtUnpayorg,txtPart2', as.length, as, 'accy,tablea,noa,memo,unpay,unpay,part', 'txtVccno', '');
                         sum();
@@ -682,21 +649,7 @@
                 
                 for (var i = 0; i < q_bbsCount; i++) {
                 	if (emp($('#txtTablea_'+i).val())&&!emp($('#txtVccno_'+i).val())){
-                		if(q_getPara('sys.project').toUpperCase()=='XY'){
-                			$('#txtTablea_'+i).val('vcc_xy');
-                		}else if(q_getPara('sys.comp').indexOf('英特瑞')>-1 || q_getPara('sys.comp').indexOf('安美得')>-1){
-							$('#txtTablea_'+i).val('vcc_it');
-                    	}else if(q_getPara('sys.comp').indexOf('永勝')>-1){
-							$('#txtTablea_'+i).val('vcc_uu');
-                    	}else if (q_getPara('sys.comp').indexOf('楊家') > -1|| q_getPara('sys.comp').indexOf('德芳') > -1){
-							$('#txtTablea_'+i).val('vcc_tn');
-						}else{
-							if(q_getPara('sys.steel')=='1'){//鋼鐵業
-								$('#txtTablea_'+i).val('vccst');
-							}else{
-								$('#txtTablea_'+i).val('vcc');
-							}
-                    	}
+                		$('#txtTablea_'+i).val('vcc_vu');
                 	}
                 }
                 
@@ -947,11 +900,6 @@
 		        	$("#btnMon").attr("disabled","disabled");
 		        	$("#btnAuto").attr("disabled","disabled");
 		        }
-		        if(q_cur==1){
-		        	$('#txtNoa').css('color','black').css('background','white').removeAttr('readonly');
-		        }else{
-		        	$('#txtNoa').css('color','green').css('background','RGB(237,237,237)').attr('readonly','readonly');
-		        }
 		        
 		        if(q_cur==2){
 		        	for (var i = 0; i < q_bbsCount; i++) {
@@ -1057,7 +1005,7 @@
 			function tipInit(){
 				
 				tip($('#txtMon'),'<a style="color:red;font-size:16px;font-weight:bold;width:250px;display:block;">匯入資料前需注意【'+q_getMsg('lblMon')+'】有無輸入正確。</a>',-20,-10);
-				tip($('#btnVcc'),'<a style="color:red;font-size:16px;font-weight:bold;width:300px;display:block;">【'+q_getMsg('btnVcc')+'】、【'+q_getMsg('btnMon')+'】只能擇一輸入。</a>',-50,30);
+				//tip($('#btnVcc'),'<a style="color:red;font-size:16px;font-weight:bold;width:300px;display:block;">【'+q_getMsg('btnVcc')+'】、【'+q_getMsg('btnMon')+'】只能擇一輸入。</a>',-50,30);
 				tip($('#txtOpay'),'<a style="color:red;font-size:16px;font-weight:bold;width:150px;display:block;">↑本次預收金額。</a>',-100,30);
 				tip($('#txtUnopay'),'<a style="color:red;font-size:16px;font-weight:bold;width:150px;display:block;">↑若使用預收金額來沖帳，則在此填入金額。</a>',-100,30);
 				tip($('#textOpay'),'<a style="color:red;font-size:16px;font-weight:bold;width:150px;display:block;">↑累計預收金額。</a>',-100,30);
@@ -1279,7 +1227,7 @@
 						</td>
 						<td colspan="2">
 							<input type="button" id="btnVcc" class="txt c1 " style="width: 95px;"/>
-							<input type="button" id="btnMon" class="txt c1 " style="width: 95px;"/>
+							<input type="button" id="btnMon" class="txt c1 " style="width: 95px;display: none;"/>
 						<span> </span><a id='lblCust2' class="lbl btn"> </a></td>
 						<td><input id="txtCustno2" type="text" class="txt c1" title='多客戶使用"逗號"分隔'/></td>
 					</tr>

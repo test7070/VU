@@ -58,16 +58,25 @@
 		        $('#lblPayc').text('合約號碼');
 		        
 		        $('#lblPayc').click(function() {
-		        	if(emp($('#txtPayc').val())){
-		        		q_box('contst_vu.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtPayc').val()), '', "95%", "95%", "進貨合約");
+		        	if(!emp($('#txtPayc').val())){
+		        		q_box('contst_vu.aspx' + "?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + trim($('#txtPayc').val())+"';" + r_accy , '', "95%", "95%", "進貨合約");
 		        	}
+				});
+				
+				$('#txtPayc').change(function() {
+					if(!emp($('#txtPayc').val())){
+						var t_where = "where=^^ noa='" + $('#txtPayc').val() + "' ^^";
+	                	q_gt("cont", t_where, 1, 1, 0, 'get_cont', r_accy);
+	                }else{
+	                	getOpay();
+	                }
 				});
 		        
 		        $('#txtDatea').blur(function() {
 		         	if(!emp($('#txtDatea').val())&&(q_cur==1 || q_cur==2)){
-                    	var d = new Date(dec($('#txtDatea').val().substr(0,3))+1911, dec($('#txtDatea').val().substr(4,2))-1, dec($('#txtDatea').val().substr(7,2)));
+                    	var d = new Date(dec($('#txtDatea').val().substr(0,4)), dec($('#txtDatea').val().substr(5,2))-1, dec($('#txtDatea').val().substr(8,2)));
 						d.setMonth(d.getMonth() - 1);
-						$('#txtMon').val(d.getFullYear()-1911+'/'+('0'+(d.getMonth()+1)).slice(-2));
+						$('#txtMon').val(d.getFullYear()+'/'+('0'+(d.getMonth()+1)).slice(-2));
 					}
                 });
 		        
@@ -113,11 +122,12 @@
                 	var t_tggno = $.trim($('#txtTggno').val());
                 	var t_tggno2 = $.trim($('#txtTggno2').val()).replace(/\,/g,'@');
                 	var t_mon = $.trim($('#txtMon').val());
+                	var t_payc = $.trim($('#txtPayc').val());
                 	if(t_tggno.length==0){
                 		alert('請先輸入'+q_getMsg('lblTgg')+'!!');
                 		return;
                 	}
-                	q_gt('pay_import',"where=^^['"+t_noa+"','"+t_tggno+"','"+t_tggno2+"','"+t_mon+"','"+q_getPara('rc2.d4taxtype')+"')^^", 0, 0, 0, "pay_import");
+                	q_gt('pay_import',"where=^^['"+t_noa+"','"+t_tggno+"','"+t_tggno2+"','"+t_mon+"','VU#"+t_payc+"#"+q_getPara('rc2.d4taxtype')+"')^^", 0, 0, 0, "pay_import");
 		        });
 		        $('#btnMon').click(function (e) {
 		        	var t_noa = $.trim($('#txtNoa').val());
@@ -180,7 +190,10 @@
 		    	Lock(1,{opacity:0});
 		        var t_tggno = $('#txtTggno').val();
 		        var s2 = (q_cur == 2 ? " and noa!='" + $('#txtNoa').val() + "'" : '');
-		        var t_where = "where=^^tggno='" + t_tggno + "'" + s2 + "^^";
+		        if(q_cur==4 ||q_cur==0 )
+                	var t_where = "where=^^tggno='" + t_tggno + "' " + s2 + " and datea<='"+$('#txtDatea').val()+"' and payc='" + $('#txtPayc').val() + "' ^^";
+                else
+		        	var t_where = "where=^^tggno='" + t_tggno + "'" + s2 + " and payc='" + $('#txtPayc').val() + "' ^^";
 		        q_gt("pay_opay", t_where, 1, 1, 0, '', r_accy);
 		    }
 
@@ -226,15 +239,27 @@
 			var z_cno=r_cno,z_acomp=r_comp,z_nick=r_comp.substr(0,2);
 		    function q_gtPost(t_name) {
 		        switch (t_name) {
+		        	case 'get_cont':
+		        		var as = _q_appendData('cont', "", true);
+                		if (as[0] != undefined){
+                			$('#txtTggno').val(as[0].tggno);
+                			$('#txtComp').val(as[0].nick);
+                			$('#cmbCno').val(as[0].cno);                			
+                		}else{
+                			alert('無此合約號碼!!');
+                			$('#txtPayc').val('');
+                		}
+                		getOpay();
+		        		break;
 		        	case 'pay_import':
                 		as = _q_appendData(t_name, "", true);
                 		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtTggno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtRc2no,txtMemo2', as.length, as, 'cno,tggno,mon,coin,unpay,unpay,tablea,tableaccy,rc2no,memo', '', '');
                 		
                 		var t_comp = q_getPara('sys.comp').substring(0,2);
                 		for(var i=0;i<q_bbsCount;i++){
-                			if($('#txtTablea_'+i).val()=='rc2' && t_comp == "裕承"){
-                				$('#txtTablea_'+i).val('rc2st');
-                			}
+                			if($('#txtTablea_'+i).val()=='rc2'){
+                				as[i].tablea='rc2_vu';
+							}
                 		}
                 		
                 		sum();
@@ -260,15 +285,7 @@
                                 $('#txtMemo2_' + i).val('');
                             }
                         }
-                        /*var as = _q_appendData("pays", "", true);
-                        for (var i = 0; i < as.length; i++) {
-                            if (as[i].total - as[i].payed == 0) {
-                                as.splice(i, 1);
-                                i--;
-                            } 
-                        }
                         
-                        q_gridAddRow(bbsHtm, 'tbbs', 'txtRc2no,txtMemo2,txtUnpay,txtUnpayorg,txtPart2', as.length, as, 'noa,memo,unpay,unpay,part2', 'txtRc2no', '');*/
                         var as = _q_appendData("pay_mon", "", true);
                         q_gridAddRow(bbsHtm, 'tbbs', 'txtAccy,txtTablea,txtRc2no,txtMemo2,txtUnpay,txtUnpayorg,txtPart2', as.length, as, 'accy,tablea,noa,memo,unpay,unpay,part', 'txtRc2no', '');
                         sum();
@@ -631,16 +648,13 @@
                     	var t_accy = $('#txtAccy_'+n).val();
                     	var t_tablea = $('#txtTablea_'+n).val();
                     	if(t_tablea.length>0 && $(this).val().indexOf('TAX')==-1 && !($(this).val().indexOf('-')>-1 && $(this).val().indexOf('/')>-1)){//稅額和月結排除
-                    		if (q_getPara('sys.comp').indexOf('楊家') > -1 || q_getPara('sys.comp').indexOf('德芳') > -1)
-                    			t_tablea = t_tablea +'_tn';
-                    		else if (t_tablea=='rc2'){
+                    		if (t_tablea=='rc2'){
                     			if(q_getPara('sys.steel')=='1'){//鋼鐵業
                     				t_tablea = t_tablea+'st';
                     			}else{
                     				t_tablea = t_tablea;
                     			}
                     		}
-                    			
                     		q_box(t_tablea+".aspx?;;;noa='" + $(this).val() + "';" + t_accy, t_tablea, "95%", "95%", q_getMsg("pop"+t_tablea));	
                     	}
                     });
@@ -778,7 +792,6 @@
 		        return true;
 		    }
 
-
 		    function refresh(recno) {
 		        _refresh(recno);
 		        
@@ -884,7 +897,7 @@
 			function tipInit(){
 				
 				tip($('#lblMon'),'<a style="color:red;font-size:16px;font-weight:bold;width:400px;display:block;">匯入資料前需注意【'+q_getMsg('lblMon')+'】有無輸入正確。</a>',-20,-20);
-				tip($('#btnVcc'),'<a style="color:red;font-size:16px;font-weight:bold;width:400px;display:block;">【'+q_getMsg('btnVcc')+'】、【'+q_getMsg('btnMon')+'】只能擇一輸入。</a>',-50,30);
+				//tip($('#btnVcc'),'<a style="color:red;font-size:16px;font-weight:bold;width:400px;display:block;">【'+q_getMsg('btnVcc')+'】、【'+q_getMsg('btnMon')+'】只能擇一輸入。</a>',-50,30);
 				tip($('#txtOpay'),'<a style="color:red;font-size:16px;font-weight:bold;width:150px;display:block;">↑本次預付金額。</a>',-80,30);
 				tip($('#txtUnopay'),'<a style="color:red;font-size:16px;font-weight:bold;width:150px;display:block;">↑若使用預付金額來沖帳，則在此填入金額。</a>',-100,30);
 				tip($('#textOpay'),'<a style="color:red;font-size:16px;font-weight:bold;width:150px;display:block;">↑累計預付金額。</a>',-80,30);
@@ -1118,7 +1131,7 @@
 						</td>
 						<td colspan="2">
 							<input type="button" id="btnVcc" class="txt c1 " style="width: 95px;"/>
-							<input type="button" id="btnMon" class="txt c1 "  style="width: 95px;"/>
+							<input type="button" id="btnMon" class="txt c1 "  style="width: 95px;display: none"/>
 							<span> </span><a id='lblTgg2' class="lbl btn"> </a>
 						</td>
 						<td>

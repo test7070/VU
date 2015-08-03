@@ -41,7 +41,7 @@ select '0',row_number() over(order by a.tggno,a.datea,a.noa),a.datea,a.noa
 ,isnull(c.opay,0),0,a.econtdate,a.memo
 from cont a
 outer apply (select top 1 price from conts where noa=a.noa order by noq )b
-outer apply (select sum(opay) opay from umm where payc=a.noa) c
+outer apply (select sum(opay) opay from pay where payc=a.noa) c
 where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
 and (a.tggno between @t_btggno and @t_etggno ) 
 and (a.datea between @t_bdate and @t_edate)
@@ -133,7 +133,7 @@ select
 dbo.getComma(weight,2)weight,
 dbo.getComma(eweight,2)eweight,
 dbo.getComma(emoney,0)emoney,
-dbo.getComma(opay,0)opay,
+dbo.getComma(opay,0)mopay,
 dbo.getComma(rmoney,0)rmoney,
 * from @tmp
 order by tggno,datea,noa,case when gno='1' then '2' when gno='2' then '1' else gno end,recno

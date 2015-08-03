@@ -15,38 +15,34 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
+            aPop = new Array(['txtXcno', '', 'acomp', 'noa,acomp,nick', 'txtXcno', "acomp_b.aspx"], ['txtXpart', '', 'part', 'part,noa', 'txtXpart', "part_b.aspx"]);
             if (location.href.indexOf('?') < 0) {
                 location.href = location.href + "?;;;;" + ((new Date()).getUTCFullYear() - 1911);
             }
-            t_isinit = false;
             $(document).ready(function() {
                 q_getId();
-                q_gf('', 'z_umm_vu');
-
-                $('#q_report').click(function(e) {
-                });
+                q_gf('', 'z_pay_vu');
             });
-
             function q_gfPost() {
                 $('#q_report').q_report({
-                    fileName : 'z_umm_vu',
+                    fileName : 'z_pay_vu',
                     options : [{
                         type : '0', //[1]
-                        name : 'accy',
+                        name : 'xaccy',
                         value : r_accy
                     },{
-                        type : '0',
-                        name : 'caccy', //[2]
+                        type : '0', //[2]
+                        name : 'accy',
                         value : r_accy + "_" + r_cno
-                    },{
-                        type : '0', //[3] //判斷vcc是內含或應稅 內含不抓vcca
-                        name : 'vcctax',
-                        value : q_getPara('sys.d4taxtype')
+                    }, {
+                        type : '0', //[3]
+                        name : 'rc2taxtype',
+                        value : q_getPara('rc2.d4taxtype')
                     },{
                         type : '0', //[4]
                         name : 'xproject',
                         value : q_getPara('sys.project').toUpperCase()
-                    },{
+                    }, {
                         type : '6', //[5]
                         name : 'xcno'
                     }, {
@@ -54,47 +50,41 @@
                         name : 'xdate'
                     }, {
                         type : '2', //[8][9]
-                        name : 'xcust',
-                        dbf : 'cust',
+                        name : 'xtgg',
+                        dbf : 'tgg',
                         index : 'noa,comp',
-                        src : 'cust_b.aspx'
+                        src : 'tgg_b.aspx'
                     }, {
                         type : '1', //[10][11]
                         name : 'xmon'
-                    }, {
+                    },{
                         type : '2', //[12][13]
+                        name : 'xcardeal',
+                        dbf : 'cardeal',
+                        index : 'noa,comp',
+                        src : 'cardeal_b.aspx'
+                    }, {
+                        type : '2', //[14][15]
                         name : 'xsales',
                         dbf : 'sss',
                         index : 'noa,namea',
                         src : 'sss_b.aspx'
-                    }, {
-                        type : '6', //[14]
-                        name : 'xmemo'
-                    }, {
-						type : '8',//[15]
-						name : 'xoption01',
-						value : 'detail@明細'.split('&')
-					}]
+                    },  {
+                        type : '8',//[16]
+                        name : 'xoption01',
+                        value : 'detail@明細'.split('&')
+                    }]
                 });
                 q_popAssign();
-                q_getFormat();
-				q_langShow();
-				
                 $('#txtXdate1').mask('9999/99/99');
                 $('#txtXdate2').mask('9999/99/99');
                 $('#txtXmon1').mask('9999/99');
                 $('#txtXmon2').mask('9999/99');
                 
-                $('#Xmemo').removeClass('a2').addClass('a1');
-                $('#txtXmemo').css('width', '85%');
-                $('.q_report .report').css('width', '460px');
-                $('.q_report .report div').css('width', '220px');
-
-               
                 var t_date, t_year, t_month, t_day;
                 t_date = new Date();
                 t_date.setDate(1);
-                t_year = t_date.getUTCFullYear() ;
+                t_year = t_date.getUTCFullYear();
                 t_month = t_date.getUTCMonth() + 1;
                 t_month = t_month > 9 ? t_month + '' : '0' + t_month;
                 t_day = t_date.getUTCDate();
@@ -106,7 +96,7 @@
                 t_date = new Date();
                 t_date.setDate(35);
                 t_date.setDate(0);
-                t_year = t_date.getUTCFullYear() ;
+                t_year = t_date.getUTCFullYear();
                 t_month = t_date.getUTCMonth() + 1;
                 t_month = t_month > 9 ? t_month + '' : '0' + t_month;
                 t_day = t_date.getUTCDate();
@@ -118,12 +108,8 @@
             function q_boxClose(s2) {
             }
 
-            function q_gtPost(t_name) {
-                switch (t_name) {
-
-                }
+            function q_gtPost(s2) {
             }
-
 		</script>
 	</head>
 	<body ondragstart="return false" draggable="false"

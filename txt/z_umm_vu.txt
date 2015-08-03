@@ -525,7 +525,7 @@ z_umm_vu03:--z_umm_vu03 ref. z_ummst03
 	,a.mount a1
 	,a.[weight] a2
 	,a.price a3
-	,reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a.[moneys]),1)),4,12)) a4
+	,dbo.getComma(a.[moneys],0) a4
 	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+b.comp +'</a>'comp
 	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+b.nick+'</a>' nick
 	,'<a style="font-family:'+ "'Times New Roman','標楷體', serif"+char(59)+'">'+b.addr_comp+'</a>' addr

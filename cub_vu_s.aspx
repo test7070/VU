@@ -13,7 +13,7 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"> </script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
 		<script type="text/javascript">
-            var q_name = "ina_s";
+            var q_name = "cub_s";
 			aPop = new Array();
             $(document).ready(function() {
                 main();
@@ -28,31 +28,30 @@
                 q_langShow();
                 bbmMask = [['txtBdate', '9999/99/99'], ['txtEdate', '9999/99/99']];
                 q_mask(bbmMask);
-                q_cmbParse("cmbItype", '@全部,'+q_getPara('ina.typea'));
                 $('#txtNoa').focus();
             }
             function q_seekStr() {
-            	t_itype = $.trim($('#cmbItype').val());
                 t_noa = $.trim($('#txtNoa').val());
-		        t_tggno = $.trim($('#txtTggno').val());
-		        t_comp = $.trim($('#txtComp').val());
-		        t_uno = $.trim($('#txtUno').val());
-
-		        t_bdate = $('#txtBdate').val();
+                t_bdate = $('#txtBdate').val();
 		        t_edate = $('#txtEdate').val();
 		        
-		        t_custno = $.trim($('#txtCustno').val());
-		        t_cust = $.trim($('#txtCust').val());
+		        t_ordeno = $.trim($('#txtOrdeno').val());
+		        t_no2 = $.trim($('#txtNo2').val());
+		        t_uno = $.trim($('#txtUno').val());
 
 		        var t_where = " 1=1 " 
-		        + q_sqlPara2("itype", t_itype)
 		        + q_sqlPara2("noa", t_noa) 
-		        + q_sqlPara2("datea", t_bdate, t_edate) 		     
-		        + q_sqlPara2("tggno", t_tggno);
-		        if (t_comp.length>0)
-                    t_where += " and charindex('" + t_comp + "',comp)>0";
-		       	if(t_uno.length>0)
-		       		t_where += " and exists(select noa from view_inas"+r_accy+" where view_inas"+r_accy+".noa=view_ina"+r_accy+".noa and view_inas"+r_accy+".uno='"+t_uno+"')";
+		        + q_sqlPara2("datea", t_bdate, t_edate);
+		        
+				if (t_ordeno.length>0)
+					t_where += " and exists(select noa from view_cubs"+r_accy+" where view_cubs"+r_accy+".noa=view_cub"+r_accy+".noa and view_cubs"+r_accy+".ordeno='"+t_ordeno+"')";
+				if (t_no2.length>0)
+					t_where += " and exists(select noa from view_cubs"+r_accy+" where view_cubs"+r_accy+".noa=view_cub"+r_accy+".noa and view_cubs"+r_accy+".no2='"+t_no2+"')";
+                    
+		       	if(t_uno.length>0){
+		       		t_where += " and (exists(select noa from view_cubs"+r_accy+" where view_cubs"+r_accy+".noa=view_cub"+r_accy+".noa and view_cubs"+r_accy+".uno='"+t_uno+"')";
+		       		t_where += " or exists(select noa from view_cubt"+r_accy+" where view_cubt"+r_accy+".noa=view_cub"+r_accy+".noa and view_cubt"+r_accy+".uno='"+t_uno+"'))";
+		       	}
 		       	
 		        t_where = ' where=^^' + t_where + '^^ ';
 		        return t_where;
@@ -75,10 +74,6 @@
 		<div style='width:400px; text-align:center;padding:15px;' >
 			<table id="seek"  border="1"   cellpadding='3' cellspacing='2' style='width:100%;' >
 				<tr class='seek_tr'>
-					<td class='seek'  style="width:20%;"><a id='lblItype'> </a></td>
-					<td><select id="cmbItype" style="width:215px; font-size:medium;" > </select></td>
-				</tr>
-				<tr class='seek_tr'>
 					<td class='seek'  style="width:20%;"><a id='lblNoa'> </a></td>
 					<td><input class="txt" id="txtNoa" type="text" style="width:215px; font-size:medium;" /></td>
 				</tr>
@@ -91,12 +86,11 @@
 					</td>
 				</tr>
 				<tr class='seek_tr'>
-					<td class='seek'  style="width:20%;"><a id='lblTggno'> </a></td>
-					<td><input class="txt" id="txtTggno" type="text" style="width:215px; font-size:medium;" /></td>
-				</tr>
-				<tr class='seek_tr'>
-					<td class='seek'  style="width:20%;"><a id='lblComp'> </a></td>
-					<td><input class="txt" id="txtComp" type="text" style="width:215px; font-size:medium;" /></td>
+					<td class='seek'  style="width:20%;"><a id='lblOrdeno'> </a></td>
+					<td>
+						<input class="txt" id="txtOrdeno" type="text" style="width:155px; font-size:medium;" />
+						<input class="txt" id="txtNo2" type="text" style="width:45px; font-size:medium;" />
+					</td>
 				</tr>
 				<tr class='seek_tr'>
 					<td class='seek'  style="width:20%;"><a id='lblUno'> </a></td>

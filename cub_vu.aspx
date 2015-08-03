@@ -18,7 +18,7 @@
             q_tables = 't';
             var q_name = "cub";
             var q_readonly = ['txtNoa'];
-            var q_readonlys = ['txtDate2', 'txtOrdeno', 'txtNo2'];
+            var q_readonlys = ['txtOrdeno', 'txtNo2'];
             var q_readonlyt = [];
             var bbmNum = [];
             var bbsNum = [];
@@ -244,6 +244,7 @@
             function _btnSeek() {
                 if (q_cur > 0 && q_cur < 4)
                     return;
+				q_box('cub_vu_s.aspx', q_name + '_s', "500px", "400px", q_getMsg("popSeek"));
             }
 
             function btnIns() {

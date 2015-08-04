@@ -573,7 +573,7 @@
 				}
 				
 				if(get_uno && !get_maxuno){
-					var t_where = "where=^^ uno=isnull((select MAX(uno) view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
+					var t_where = "where=^^ uno=isnull((select MAX(uno) from view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "getuno", r_accy);
 					return;
 				}

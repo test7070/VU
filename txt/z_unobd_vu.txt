@@ -1,0 +1,211 @@
+z_unobd_vu01:--z_unobd_vu01
+declare @t_uno nvarchar(50)
+set @t_uno = case when '#non' = [2] then '#non' else [2] end
+set @t_uno = rtrim(ltrim(@t_uno))
+
+declare @tmpa table(
+	auno nvarchar(30),--批號
+	aproduct nvarchar(90),--品名
+	aunit nvarchar(12),--單位
+	adatea nvarchar(20),--入庫日
+	aspec nvarchar(50),--材質
+	asize nvarchar(90),--號數
+	astoreno nvarchar(30),--存放廠
+	alengthb float, --米數
+	aclass nvarchar(25),--廠牌
+	amount float,--期初量
+	aweight float,--期初重
+	aemount float,--餘料數
+	aeweight float--餘料重
+)
+
+insert into @tmpa
+	select top 1 a.uno ,a.product ,a.unit ,a.datea,a.spec,a.size,a.storeno,a.lengthb,a.class,a.mount,a.weight,b.emount,b.eweight
+	from view_uccb a
+	left join uccy b on a.uno = b.uno
+	where rtrim(ltrim(a.uno)) = @t_uno or left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno 
+	order by a.uno
+	
+declare @tmp table(
+	gno nvarchar(1),
+	auno nvarchar(30),--批號
+	aproduct nvarchar(90),--品名
+	aunit nvarchar(12),--單位
+	adatea nvarchar(20),--入庫日
+	aspec nvarchar(50),--材質
+	asize nvarchar(90),--號數
+	astoreno nvarchar(30),--存放廠
+	alengthb float, --米數
+	aclass nvarchar(25),--廠牌
+	amount float,--期初量
+	aweight float,--期初重
+	aemount float,--餘料數
+	aeweight float,--餘料重
+	
+	btypea nvarchar(15),--作業
+	bnoa nvarchar(30),--單據編號
+	bdatea nvarchar(10), --日期
+	bcomp nvarchar(90),--公司名稱
+	bmount float, --入庫數量
+	bweight float, --入庫重量
+	bgmount float, --領料數量
+	bgweight float, --領料重量
+	buno nvarchar(max), --批號
+	bmemo nvarchar(max), --備註
+	bproduct nvarchar(90), --品名
+	bucolor nvarchar(90), --類別
+	bprice float, --單價
+	qhref nvarchar(max),--連結
+	orderby int,--排序
+	sprice float, --成本單價
+	sprice2 float --進貨單價
+)	
+
+insert into @tmp
+		select '0',c.*,'盤點',a.noa,a.datea,'',a.mount,a.eweight,0,0,a.uno,a.memo,a.product,
+		a.ucolor,a.price,'ucce_vu'+a.accy,13,null,null
+		from view_ucces a
+		left join view_ucce b on a.noa = b.noa
+		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	union all
+		select '0',c.*,'入庫',a.noa,a.datea,isnull(e.nick,d.nick),a.mount,a.weight,0,0,a.uno,a.memo,a.product,
+		a.ucolor,a.price,'ina_vu'+a.accy,2,a.sprice,a.sprice2
+		from view_inas a
+		left join view_ina b on a.noa = b.noa
+		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+		left join cust d on b.tggno = d.noa
+		left join tgg e on b.tggno = e.noa
+		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	union all
+		select '0',c.*,(case b.typea when '1' then '進貨' else '進退' end),a.noa,
+		a.datea,isnull(e.nick,d.nick),a.mount,a.weight,0,0,a.uno,a.memo,a.product,
+		a.ucolor,a.price,'rc2_vu'+a.accy,1,a.sprice,a.sprice2
+		from view_rc2s a
+		left join view_rc2 b on a.noa = b.noa
+		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+		left join cust d on b.tggno = d.noa
+		left join tgg e on b.tggno = e.noa
+		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	union all
+		select '0',c.*,(case b.typea when '1' then '調撥' when '2' then '委出' when '3' then '委入' when '4' then '客戶借出' when '5' then '客戶歸還' when '6' then '委外加工' end),a.noa,
+		b.datea,isnull(d.nick,e.nick),a.mount,a.weight,0,0,a.uno,a.memo,a.product,
+		a.ucolor,a.price,'cng_vu'+a.accy,(case b.typea when '1' then 7 when '2' then 8 when '3' then 6 end),null,null
+		from view_cngs a
+		left join view_cng b on a.noa = b.noa
+		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+		left join cust d on b.tggno = d.noa
+		left join tgg e on b.tggno = e.noa
+		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	union all
+		select '0',c.*,'加工領料',a.noa,f.datea,isnull(d.nick,e.nick),0,0,a.gmount,a.gweight,a.uno,a.memo,a.product,
+		a.ucolor,0,'cub_vu'+a.accy,4,null,null
+		from view_cubt a
+		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+		left join cust d on a.custno = d.noa
+		left join tgg e on a.custno = e.noa
+		left join view_cub f on a.noa = f.noa
+		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	union all
+		select '0',c.*,(case when a.waste > 0 then '廢料' else '加工入庫' end),
+			a.noa,a.datea,isnull(d.nick,e.nick),a.mount,a.weight,0,0,a.uno,a.memo,a.product,
+			a.ucolor,0,'cub_vu'+a.accy,10,a.sprice,a.sprice2
+		from view_cubu a
+		left join view_cub b on a.noa = b.noa
+		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+		left join cust d on a.custno = d.noa
+		left join tgg e on a.custno = e.noa
+		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	union all
+		select '0',d.*,'領料',a.noa,b.datea,isnull(f.nick,e.nick),
+		(case when c.noa is null then 0 else c.mount2 end),
+		(case when c.noa is null then 0 else c.weight2 end),
+		a.gmount,a.gweight,a.uno,a.memo,a.product,
+		a.ucolor,0,'get_vu'+a.accy,11,null,null
+		from view_gets a
+		left join view_get b on a.noa = b.noa
+		left join ucch c on a.noa = c.noa
+		left join @tmpa d on left(rtrim(ltrim(d.auno)),len(@t_uno)) = @t_uno
+		left join cust f on b.custno =f.noa
+		left join tgg e on b.custno = e.noa
+		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	union all
+		select '0',c.*,(case a.typea when '1' then '出貨' else '出退' end),	a.noa,a.datea,isnull(d.nick,e.nick)
+		,(case a.typea when '1' then 0 else a.mount end),(case a.typea when '1' then 0 else a.weight end)
+		,(case a.typea when '1' then a.mount else 0 end),(case a.typea when '1' then a.weight else 0 end),
+		a.uno,a.memo,a.product,
+		a.ucolor,a.price,'vcc_vu'+a.accy,12,
+		case when a.weight=0 then null else (a.total/a.weight) end,
+		case when a.weight=0 then null else (a.total/a.weight)+b.price end
+		from view_vccs a
+		left join view_vcc b on a.noa = b.noa
+		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+		left join cust d on a.custno = d.noa
+		left join tgg e on a.custno = e.noa
+		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	--103/12/05 顯示領料的批號
+	--union all
+	--	select '0',c.*,'用料',a.noa,b.datea,b.station,0,0,a.mount,a.weight,a.uno,a.memo,a.product,
+	--	c.ucolor,0,'workb'+a.accy,13,d.sprice,d.sprice2
+	--	from view_workbt a left join view_workb b on a.noa=b.noa
+	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+	--	left join view_uccc d on left(rtrim(ltrim(d.uno)),len(@t_uno)) = @t_uno
+	--	where (left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno)
+	--union all
+	--	select '0',c.*,'委外用料',a.noa,b.datea,b.tgg,0,0,a.mount,a.weight,a.uno,a.memo,a.product,
+	--	c.ucolor,0,'workd'+a.accy,14,d.sprice,d.sprice2
+	--	from view_workdt a left join view_workd b on a.noa=b.noa
+	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+	--	left join view_uccc d on left(rtrim(ltrim(d.uno)),len(@t_uno)) = @t_uno
+	--	where (left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno)
+	--union all
+	--	select '0',c.*,'訂單扣料', a.noa,d.odate,'訂序='+a.no2,a.ordmount,a.ordweight,0,0,a.uno,b.memo,a.product,
+	--	a.ucolor,isnull(b.price,0),'orde_vu'+a.accy,3,null,null
+	--	from view_ordet a
+	--	left join uccb b on a.uno = b.noa
+	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+	--	left join view_orde d on a.noa = d.noa
+	--	where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
+	--union all
+	--	select '0',c.*,'裁領',a.noa,a.datea,isnull(d.nick,e.nick),0,0,a.gmount,a.gweight,a.uno,a.memo,a.product,
+	--	a.ucolor,0,'cut_vu'+a.accy,9,null,null
+	--	from view_cut a
+	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+	--	left join cust d on a.custno = d.noa
+	--	left join tgg e on a.custno = e.noa
+	--	outer apply(select top 1 * from view_cuts where (noa=a.noa) and (left(rtrim(ltrim(bno)),len(@t_uno)) = @t_uno)) f
+	--	where (left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno) or (isnull(f.bno,'') != '')
+	--union all
+	--	select '0',c.*,
+	--	case isnull(b.typea,'')	when '1' then '分條' when '2' then '剪板' when '3' then '分捲' when '4' then '貼膜' 
+	--	when '5' then '壓延' when '6' then '領料' when '7' then '退火' when '8' then '壓脫' else '裁入' end,
+	--	a.noa,a.datea,isnull(d.nick,e.nick),a.mount,a.weight,0,0,a.bno,a.memo,a.product,
+	--	a.ucolor,0,'cut_vu'+a.accy,5,a.sprice,a.sprice2
+	--	from view_cuts a
+	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
+	--	left join cust d on a.custno = d.noa
+	--	left join tgg e on a.custno = e.noa
+	--	left join view_cut b on a.noa = b.noa
+	--	where left(rtrim(ltrim(a.bno)),len(@t_uno)) = @t_uno
+
+update a
+set aemount=aemount
+-isnull((select sum(mount) from view_workbt wa left join view_workb wb on wa.noa=wb.noa where wa.uno=a.auno and wb.noa>=isnull((select top 1 datea from view_ucce where uno=wa.uno order by datea desc),'000/00/00')),0)
+-isnull((select sum(mount) from view_workdt wa left join view_workd wb on wa.noa=wb.noa where wa.uno=a.auno and wb.noa>=isnull((select top 1 datea from view_ucce where uno=wa.uno order by datea desc),'000/00/00')),0)
+,aeweight=aeweight
+-isnull((select sum(weight) from view_workbt wa left join view_workb wb on wa.noa=wb.noa where wa.uno=a.auno and wb.noa>=isnull((select top 1 datea from view_ucce where uno=wa.uno order by datea desc),'000/00/00')),0)
+-isnull((select sum(weight) from view_workdt wa left join view_workd wb on wa.noa=wb.noa where wa.uno=a.auno and wb.noa>=isnull((select top 1 datea from view_ucce where uno=wa.uno order by datea desc),'000/00/00')),0)
+from @tmp a
+
+update @tmp set qhref = substring(qhref,0,len(qhref)-2)+'?left(noa,'+cast(len(bnoa) as nvarchar)+')=$bnoa?'+substring(qhref,len(qhref)-2,len(qhref))
+--update @tmp set asize = replace(asize,'~#$','''')
+--update @tmp set bsize = replace(bsize,'~#$','''')
+
+select
+	gno,auno,aproduct,aunit,adatea,asize,alengthb,astoreno,aspec,aclass,amount,aweight,
+	aemount,aeweight,btypea,bnoa,bdatea,bcomp,bmount,bweight,bgmount,bgweight,buno,bmemo,
+	bproduct,bucolor,bprice,qhref,orderby,
+	case when sprice is null then null else round(sprice,3) end sp1,
+	case when sprice2 is null then null else round(sprice2,3) end sp2
+from @tmp order by gno desc,bdatea,orderby,bnoa,buno;
+--**************************************************************************************

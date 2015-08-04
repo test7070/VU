@@ -137,8 +137,11 @@
 		end
 		else
 		begin
-			insert into #tmp(gno,tggno,datea,opay)
-			select '1',@tggno,'',@opay
+			if(@opay!=0)
+			begin
+				insert into #tmp(gno,tggno,datea,opay)
+				select '1',@tggno,'',@opay
+			end
 		end
 	
 		fetch next from cursor_table

@@ -555,12 +555,12 @@
 				if (t_para) {
 					$('#btnOrdei').removeAttr('disabled');
 					$('#combAddr').attr('disabled', 'disabled');
-					$('#txtOdate').datepicker( 'destroy' );
+					//$('#txtOdate').datepicker( 'destroy' );
 					$('#btnOrdem').removeAttr('disabled');
 				} else {
 					$('#btnOrdei').attr('disabled', 'disabled');
 					$('#combAddr').removeAttr('disabled');
-					$('#txtOdate').datepicker();
+					//$('#txtOdate').datepicker();
 					$('#btnOrdem').attr('disabled', 'disabled');
 				}	
 				

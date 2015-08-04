@@ -83,14 +83,14 @@
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
 				q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
                 /* 若非本會計年度則無法存檔 */
-                $('#txtDatea').focusout(function() {
+                /*$('#txtDatea').focusout(function() {
                     if ($(this).val().substr(0, 3) != r_accy) {
                         $('#btnOk').attr('disabled', 'disabled');
                         alert(q_getMsg('lblDatea') + '非本會計年度。');
                     } else {
                         $('#btnOk').removeAttr('disabled');
                     }
-                });
+                });*/
                 
                 $('#txtCardealno').change(function(){
 					//取得車號下拉式選單

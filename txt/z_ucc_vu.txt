@@ -88,9 +88,12 @@ group by a.uno
 
 delete #tmp where mount=0 or weight=0 or gno!='0'
 
-insert #tmp (gno,tablea,datea,uno,mount,weight)
-select '1','total',@t_edate,CHAR(255),sum(a.mount),sum(a.weight) 
-from #tmp a where gno='0'
+if((select count(*) from #tmp)>0)
+begin
+	insert #tmp (gno,tablea,datea,uno,mount,weight)
+	select '1','total',@t_edate,CHAR(255),sum(a.mount),sum(a.weight) 
+	from #tmp a where gno='0'
+end
 
 select ROW_NUMBER() over (order by gno,uno) rr
 ,dbo.getComma(mount,[2])mount

@@ -17,7 +17,7 @@
 		<script type="text/javascript">
 			$(document).ready(function() {
 				q_getId();
-				q_gf('', 'z_unobd_vu');
+				q_gf('', 'z_unovu');
 				
 				$('#q_report').click(function(e) {
 					
@@ -25,7 +25,7 @@
 			});
 			function q_gfPost(t_name) {
 				$('#q_report').q_report({
-					fileName : 'z_unobd_vu',
+					fileName : 'z_unovu',
 					options : [{
 						type : '0', //[1]
 						name : 'accy',

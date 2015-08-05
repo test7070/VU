@@ -22,10 +22,11 @@
             }
 
             function q_gfPost() {
-                q_getFormat();
-                q_langShow();
+                q_popAssign();
+				q_getFormat();
+				q_langShow();
 
-                bbmMask = [['txtBdate', '9999/99/99'], ['txtEdate', '9999/99/99'], ['txtMon', '9999/99']];
+                bbmMask = [['txtBdate', r_picd], ['txtEdate', r_picd], ['txtMon', r_picm]];
                 q_mask(bbmMask);
 
                 $('#txtBdate').focus();

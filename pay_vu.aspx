@@ -47,9 +47,9 @@
 		    
 		    function mainPost() {
 		        q_getFormat();
-		        bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99']];
+		        bbmMask = [['txtDatea', r_picd], ['txtMon', '9999/99']];
 		        q_mask(bbmMask);
-		        bbsMask = [['txtIndate', '9999/99/99']];
+		        bbsMask = [['txtIndate', r_picd]];
 		        q_gt('part', '', 0, 0, 0, "");
 		        q_gt('acomp', '', 0, 0, 0, "");
 		        

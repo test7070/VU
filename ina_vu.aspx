@@ -74,7 +74,7 @@
 
             function mainPost() {
                 q_getFormat();
-                bbmMask = [['txtDatea', '9999/99/99']];
+                bbmMask = [['txtDatea', r_picd]];
                 q_mask(bbmMask);
                 bbsNum = [['txtMount', 15, q_getPara('rc2.mountPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1], ['txtPrice', 15, q_getPara('rc2.pricePrecision'), 1]
 								, ['txtTotal', 15, 0, 1], ['txtLengthb', 15, 2, 1]];

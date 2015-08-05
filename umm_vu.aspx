@@ -53,9 +53,9 @@
                 if (r_rank < 7)
                     q_readonly[q_readonly.length] = 'txtAccno';
 				
-                bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99']];
+                bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm]];
                 q_mask(bbmMask);
-                bbsMask = [['txtIndate', '9999/99/99'], ['txtMon', '9999/99']];
+                bbsMask = [['txtIndate', r_picd], ['txtMon', r_picm]];
 				q_gt('part', '', 0, 0, 0, "");
 		        q_gt('acomp', '', 0, 0, 0, "");
 		        //q_cmbParse("combAcc1", '1111@現金,1121@應收票據');

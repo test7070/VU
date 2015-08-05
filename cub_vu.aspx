@@ -69,8 +69,8 @@
             	bbtNum = [['txtGmount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtGweight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];
             	
                 q_getFormat();
-                bbmMask = [['txtDatea', '9999/99/99'], ['txtBdate', '9999/99/99'], ['txtEdate', '9999/99/99']];
-                bbsMask = [['txtDate2', '9999/99/99'], ['txtDatea', '9999/99/99']];
+                bbmMask = [['txtDatea', r_picd], ['txtBdate', r_picd], ['txtEdate', r_picd]];
+                bbsMask = [['txtDate2', r_picd], ['txtDatea', r_picd]];
                 q_mask(bbmMask);
                 //q_cmbParse("cmbTypea", q_getPara('cub.typea'));
                 q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
@@ -81,7 +81,7 @@
                     var t_edate = trim($('#txtEdate').val());
                     var t_where = ' 1=1 and isnull(enda,0)!=1 and isnull(cancel,0)!=1 ';
                     t_bdate = (emp(t_bdate) ? '' : t_bdate);
-                    t_edate = (emp(t_edate) ? '9999/99/99' : t_edate);
+                    t_edate = (emp(t_edate) ? r_picd : t_edate);
                     t_where += " and (datea between '" + t_bdate + "' and '" + t_edate + "') ";
                     t_where += " and not exists (select * from view_cubs where ordeno=view_ordes"+r_accy+".noa and no2=view_ordes"+r_accy+".no2 ) ";
                     //t_where += ' and (cut=1)';

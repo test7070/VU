@@ -3,62 +3,64 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title> </title>
-		<script src="../script/jquery.min.js" type="text/javascript"> </script>
-		<script src='../script/qj2.js' type="text/javascript"> </script>
-		<script src='qset.js' type="text/javascript"> </script>
-		<script src='../script/qj_mess.js' type="text/javascript"> </script>
-		<script src="../script/qbox.js" type="text/javascript"> </script>
-		<script src='../script/mask.js' type="text/javascript"> </script>
+		<script src="../script/jquery.min.js" type="text/javascript"></script>
+		<script src='../script/qj2.js' type="text/javascript"></script>
+		<script src='qset.js' type="text/javascript"></script>
+		<script src='../script/qj_mess.js' type="text/javascript"></script>
+		<script src="../script/qbox.js" type="text/javascript"></script>
+		<script src='../script/mask.js' type="text/javascript"></script>
 		<link href="../qbox.css" rel="stylesheet" type="text/css" />
 		<link href="css/jquery/themes/redmond/jquery.ui.all.css" rel="stylesheet" type="text/css" />
-		<script src="css/jquery/ui/jquery.ui.core.js"> </script>
-		<script src="css/jquery/ui/jquery.ui.widget.js"> </script>
-		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
+		<script src="css/jquery/ui/jquery.ui.core.js"></script>
+		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
+		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
             if (location.href.indexOf('?') < 0) {
-                location.href = location.href + "?;;;;"+((new Date()).getUTCFullYear()-1911);
+                location.href = location.href + "?;;;;" + ((new Date()).getUTCFullYear() - 1911);
             }
             $(document).ready(function() {
-            	q_getId();
+                q_getId();
                 q_gf('', 'z_vccp_vu');
             });
             function q_gfPost() {
-               $('#q_report').q_report({
-                        fileName : 'z_vccp_vu',
-                        options : [{
-	                        type : '0', //[1]
-	                        name : 'accy',
-	                        value : r_accy
-	                    },  {
-	                        type : '1', //[2][3]
-	                        name : 'xnoa'
-	                    },{
-							type : '8',//[4]
-							name : 'xshowprice',
-							value : "1@".split(',')
-	                    },{
-	                        type : '0', //[5] //判斷顯示小數點
-	                        name : 'xacomp',
-	                        value : q_getPara('sys.comp')
-	                    },{
-	                        type : '5', //[6] //選擇抬頭
-	                        name : 'yacomp',
-	                        value : ("1@"+q_getPara('sys.comp').substr(0,3)+",0@永勝生醫").split(',')
-	                    }]
-                    });
+                $('#q_report').q_report({
+                    fileName : 'z_vccp_vu',
+                    options : [{
+                        type : '0', //[1]
+                        name : 'accy',
+                        value : r_accy
+                    }, {
+                        type : '1', //[2][3]
+                        name : 'xnoa'
+                    }, {
+                        type : '8', //[4]
+                        name : 'xshowprice',
+                        value : "1@".split(',')
+                    }, {
+                        type : '0', //[5] //判斷顯示小數點
+                        name : 'xacomp',
+                        value : q_getPara('sys.comp')
+                    }, {
+                        type : '5', //[6] //選擇抬頭
+                        name : 'yacomp',
+                        value : ("1@" + q_getPara('sys.comp').substr(0, 3) + ",0@永勝生醫").split(',')
+                    }]
+                });
                 q_popAssign();
-                	
-	                
-	            var t_noa=typeof(q_getId()[3])=='undefined'?'':q_getId()[3];
-                t_noa  =  t_noa.replace('noa=','');
+                q_getFormat();
+                q_langShow();
+
+                var t_noa = typeof (q_getId()[3]) == 'undefined' ? '' : q_getId()[3];
+                t_noa = t_noa.replace('noa=', '');
                 $('#txtXnoa1').val(t_noa);
                 $('#txtXnoa2').val(t_noa);
-	                
-	            $("input[type='checkbox'][value!='']").attr('checked', true);
+
+                $("input[type='checkbox'][value!='']").attr('checked', true);
             }
 
             function q_boxClose(s2) {
             }
+
             function q_gtPost(s2) {
             }
 		</script>
@@ -78,5 +80,4 @@
 		</div>
 	</body>
 </html>
-           
-          
+

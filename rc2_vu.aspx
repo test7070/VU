@@ -85,7 +85,7 @@
 
 			function mainPost() {
 				q_getFormat();
-				bbmMask = [['txtDatea', '9999/99/99'], ['txtMon', '9999/99']];
+				bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm]];
 				q_mask(bbmMask);
 				bbmNum = [['txtMoney', 15, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 15, 0, 1],['txtTranmoney',15,0,1]
 								,['txtTranadd', 15, q_getPara('rc2.weightPrecision'), 1],['txtBenifit', 15, q_getPara('rc2.weightPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1]
@@ -93,7 +93,7 @@
 				bbsNum = [['txtMount', 15, q_getPara('rc2.mountPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1], ['txtPrice', 15, q_getPara('rc2.pricePrecision'), 1]
 								, ['txtTotal', 15, 0, 1], ['txtLengthb', 15, 2, 1]];
 				
-				q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
+				//q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
 				q_cmbParse("cmbTypea", q_getPara('rc2.typea'));
 				q_cmbParse("cmbStype", q_getPara('rc2.stype'));
 				q_cmbParse("combPaytype", q_getPara('rc2.paytype'));
@@ -489,13 +489,20 @@
 						if (as[0] != undefined) {
 							t_startdate=as[0].startdate;
 						}
-						if(t_startdate.length==0 || ('00'+t_startdate).slice(-2)=='00' || $('#txtDatea').val().substr(7, 2)<('00'+t_startdate).substr(-2)){
-							$('#txtMon').val($('#txtDatea').val().substr(0, 6));
+						if(t_startdate.length==0 || ('00'+t_startdate).slice(-2)=='00' || $('#txtDatea').val().substr(r_lenm+1, 2)<('00'+t_startdate).substr(-2)){
+							$('#txtMon').val($('#txtDatea').val().substr(0, r_lenm));
 						}else{
 							var t_date=$('#txtDatea').val();
-							var nextdate=new Date(dec(t_date.substr(0,3))+1911,dec(t_date.substr(4,2))-1,dec(t_date.substr(7,2)));
+							var nextdate='';
+							if(r_len==4)
+								nextdate=new Date(dec(t_date.substr(0,4))+1911,dec(t_date.substr(5,2))-1,dec(t_date.substr(8,2)));
+							else
+								nextdate=new Date(dec(t_date.substr(0,3))+1911,dec(t_date.substr(4,2))-1,dec(t_date.substr(7,2)));
 				    		nextdate.setMonth(nextdate.getMonth() +1)
-				    		t_date=''+(nextdate.getFullYear()-1911)+'/'+(nextdate.getMonth()<9?'0':'')+(nextdate.getMonth()+1);
+				    		if(r_len==4)
+				    			t_date=''+(nextdate.getFullYear())+'/'+(nextdate.getMonth()<9?'0':'')+(nextdate.getMonth()+1);
+				    		else
+				    			t_date=''+(nextdate.getFullYear()-1911)+'/'+(nextdate.getMonth()<9?'0':'')+(nextdate.getMonth()+1);
 							$('#txtMon').val(t_date);
 						}
 						check_startdate=true;
@@ -1106,7 +1113,7 @@
 							<input id="txtCarno" type="text" class="txt" style="width:75%;"/>
 							<select id="combCarno" style="width: 20%;"> </select>
 						</td>
-						<td><select id="cmbTranstyle" style="width: 100%;"> </select></td>
+						<td><!--<select id="cmbTranstyle" style="width: 100%;"> </select>--></td>
 						<td><span> </span><a id='lblTranmoney' class="lbl"> </a></td>
 						<td><input id="txtTranmoney" type="text" class="txt num c1" /></td>
 					</tr>

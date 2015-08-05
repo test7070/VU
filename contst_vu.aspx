@@ -72,7 +72,7 @@
 
 			function mainPost() {
 				q_getFormat();
-				bbmMask = [['txtDatea', '9999/99/99'],['txtBcontdate', '9999/99/99'],['txtEcontdate', '9999/99/99']];
+				bbmMask = [['txtDatea', r_picd],['txtBcontdate', r_picd],['txtEcontdate', r_picd]];
 				q_mask(bbmMask);
 				bbmNum = [['txtTotal', 15, 0, 1],['txtOrdeweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtEweight', 15, q_getPara('vcc.weightPrecision'), 1]];
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,

@@ -53,8 +53,8 @@
 				q_getFormat();
 				q_langShow();
 
-				$('#txtDate1').mask('9999/99/99');
-                $('#txtDate2').mask('9999/99/99');
+				$('#txtDate1').mask(r_picd);
+                $('#txtDate2').mask(r_picd);
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();

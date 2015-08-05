@@ -59,7 +59,7 @@
 				q_getFormat();
 				q_langShow();
 
-				$('#txtEdate').mask('9999/99/99');
+				$('#txtEdate').mask(r_picd);
 				$('#txtEdate').val(q_date());
 				
 			}

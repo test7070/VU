@@ -76,10 +76,13 @@
                     }]
                 });
                 q_popAssign();
-                $('#txtXdate1').mask('9999/99/99');
-                $('#txtXdate2').mask('9999/99/99');
-                $('#txtXmon1').mask('9999/99');
-                $('#txtXmon2').mask('9999/99');
+				q_getFormat();
+				q_langShow();
+				
+                $('#txtXdate1').mask(r_picd);
+                $('#txtXdate2').mask(r_picd);
+                $('#txtXmon1').mask(r_picm);
+                $('#txtXmon2').mask(r_picm);
                 
                 var t_date, t_year, t_month, t_day;
                 t_date = new Date();

@@ -92,9 +92,9 @@
 
 			function mainPost() {
 				q_getFormat();
-				bbmMask = [['txtOdate', '9999/99/99']];
+				bbmMask = [['txtOdate', r_picd]];
 				q_mask(bbmMask);
-				bbsMask = [['txtDatea', '9999/99/99']];
+				bbsMask = [['txtDatea', r_picd]];
 				bbmNum = [['txtTranadd', 15, q_getPara('vcc.weightPrecision'), 1],['txtBenifit', 15, q_getPara('vcc.weightPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]
 								,['txtTotal', 15, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15,0 , 1]];
 				bbsNum = [['txtPrice', 15, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 15, q_getPara('vcc.mountPrecision'), 1]

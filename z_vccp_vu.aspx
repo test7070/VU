@@ -40,10 +40,6 @@
                         type : '0', //[5] //判斷顯示小數點
                         name : 'xacomp',
                         value : q_getPara('sys.comp')
-                    }, {
-                        type : '5', //[6] //選擇抬頭
-                        name : 'yacomp',
-                        value : ("1@" + q_getPara('sys.comp').substr(0, 3) + ",0@永勝生醫").split(',')
                     }]
                 });
                 q_popAssign();

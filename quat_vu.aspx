@@ -176,6 +176,10 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
 						});
+						$('#txtSize_' + j).change(function() {
+							 if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
+						});
 					}
 				}
 				_bbsAssign();

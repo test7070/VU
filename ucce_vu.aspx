@@ -191,6 +191,11 @@
 							}
 							$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), dec(t_mount)), 0));
 						});
+						
+						$('#txtSize_' + j).change(function() {
+							 if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
+						});
 					}
 				}
 				_bbsAssign();

@@ -394,6 +394,10 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
 						});
+						$('#txtSize_' + i).change(function() {
+							 if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
+						});
                         
                         $('#btnUccc_' + i).click(function() {
                             var n = $(this).attr('id').split('_')[$(this).attr('id').split('_').length - 1];
@@ -477,6 +481,10 @@
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2)
 								$('#txtUcolor__'+b_seq).val($('#combUcolor__'+b_seq).find("option:selected").text());
+						});
+						$('#txtSize_' + i).change(function() {
+							 if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
 						});
                     }
                 }

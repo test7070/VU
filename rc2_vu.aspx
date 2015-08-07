@@ -1093,8 +1093,8 @@
 						<td colspan="2"><input id="txtTgg" type="text" class="txt c1"/></td>
 						<td><span> </span><a id='lblTel' class="lbl"> </a></td>
 						<td><input id="txtTel" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lblOrdc' class="lbl btn"> </a></td>
-						<td><input id="txtOrdcno" type="text" class="txt c1"/></td>
+						<!--<td><span> </span><a id='lblOrdc' class="lbl btn"> </a></td>
+						<td><input id="txtOrdcno" type="text" class="txt c1"/></td>-->
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblAddr' class="lbl btn"> </a></td>

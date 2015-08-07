@@ -182,7 +182,7 @@
 				_bbsAssign();
 				HiddenField();
 				$('#lblNoq_s').text('項次');
-				$('#lblProductno_s').text('品編');
+				$('#lblProductno_s').text('品號');
 				$('#lblProduct_s').text('品名');
 				$('#lblUcolor_s').text('類別');
 				$('#lblSpec_s').text('材質');

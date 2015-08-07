@@ -679,7 +679,7 @@
 				HiddenTreat();
 				$('#div_orde').hide();
 				$('#lblNoq_s').text('項序');
-				$('#lblProductno_s').text('品編');
+				$('#lblProductno_s').text('品號');
 				$('#lblProduct_s').text('品名');
 				$('#lblUcolor_s').text('類別');
 				$('#lblStyle_s').text('型');

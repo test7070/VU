@@ -180,7 +180,7 @@
 				_bbsAssign();
 				$('#lblNoq_s').text('項序');
 				$('#lblUno_s').text('批號');
-				$('#lblProductno_s').text('品編');
+				$('#lblProductno_s').text('品號');
 				$('#lblProduct_s').text('品名');
 				$('#lblUcolor_s').text('類別');
 				$('#lblSpec_s').text('材質');

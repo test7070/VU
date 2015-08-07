@@ -47,6 +47,22 @@
                         type : '8',
                         name : 'xoption01',
                         value : q_getMsg('toption01').split('&')
+                    },{
+						type : '0',//[8]
+						name : 'projectname',
+						value : q_getPara('sys.project').toUpperCase()
+					}, {
+                        type : '0', //[9]
+                        name : 'mountprecision',
+                        value : q_getPara('vcc.mountPrecision')
+                    }, {
+                        type : '0', //[10]
+                        name : 'weightprecision',
+                        value : q_getPara('vcc.weightPrecision')
+                    }, {
+                        type : '0', //[11]
+                        name : 'priceprecision',
+                        value : q_getPara('vcc.pricePrecision')
                     }]
                 });
                 q_popAssign();
@@ -58,6 +74,7 @@
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();
+				t_date.setMonth(-14);
 				t_date.setDate(1);
 				t_year = t_date.getUTCFullYear();
 				t_month = t_date.getUTCMonth() + 1;

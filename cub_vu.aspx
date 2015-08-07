@@ -422,7 +422,7 @@
                 _bbsAssign();
                 
                 $('#lblCust_s').text('客戶');
-                $('#lblProductno_s').text('品編');
+                $('#lblProductno_s').text('品號');
                 $('#lblProduct_s').text('品名');
                 $('#lblUcolor_s').text('類別');
                 $('#lblSpec_s').text('材質');
@@ -483,7 +483,7 @@
                 _bbtAssign();
                 
                 $('#lblUno_t').text('領料批號');
-                $('#lblProductno_t').text('品編');
+                $('#lblProductno_t').text('品號');
                 $('#lblProduct_t').text('品名');
                 $('#lblUcolor_t').text('類別');
                 $('#lblSpec_t').text('材質');

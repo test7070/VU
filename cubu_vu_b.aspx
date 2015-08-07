@@ -70,7 +70,7 @@
 				_bbsAssign();
 				$('#lblDatea_s').text('入庫日期');
 				$('#lblUno_s').text('批號');
-				$('#lblProductno_s').text('品編');
+				$('#lblProductno_s').text('品號');
 				$('#lblProduct_s').text('品名');
 				$('#lblUcolor_s').text('類別');
 				$('#lblStyle_s').text('型');

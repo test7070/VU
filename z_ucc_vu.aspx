@@ -19,7 +19,7 @@
             $(document).ready(function() {
                 _q_boxClose();
                 q_getId();
-                q_gf('', 'z_ucc_vu');
+                q_gt('spec', '1=1 ', 0, 0, 0, "spec");
             });
 
             function q_gfPost() {
@@ -57,8 +57,9 @@
                         type : '6',
                         name : 'xspec' //[9]
                     }, {
-                        type : '6',
-                        name : 'xsize' //[10]
+                        type : '5',
+                        name : 'xsize', //[10]
+                        value:(',#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16').split(',')
                     }, {
                         type : '1',
                         name : 'xlengthb' //[11][12]
@@ -91,6 +92,17 @@
                     if ($(this).val() == 'NaN')
                     	$(this).val(99);
                 });
+                
+                var tmp = document.getElementById("txtXspec");
+                var selectbox = document.createElement("select");
+                selectbox.id="combSpec";
+                selectbox.style.cssText ="width:20px;font-size: medium;";
+                tmp.parentNode.appendChild(selectbox,tmp);
+                q_cmbParse("combSpec", t_spec); 
+                
+                $('#combSpec').change(function() {
+					$('#txtXspec').val($('#combSpec').find("option:selected").text());
+				});
 
             }
 
@@ -103,9 +115,17 @@
             function q_boxClose(s2) {
 
             }
-
+			
+			var t_spec='@';
             function q_gtPost(t_name) {
                 switch (t_name) {
+                	case 'spec':
+                		var as = _q_appendData("spec", "", true);
+						for ( i = 0; i < as.length; i++) {
+							t_spec+=","+as[i].noa;
+						}
+                		q_gf('', 'z_ucc_vu');
+                		break;
                     default:
                         break;
                 }
@@ -115,6 +135,10 @@
             .num {
                 text-align: right;
                 padding-right: 2px;
+            }
+            #q_report select {
+            	font-size: medium;
+    			margin-top: 2px;
             }
 		</style>
 	</head>

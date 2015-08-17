@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
 		<title> </title>
@@ -332,7 +332,7 @@
 							if(!qno2_exists)
 								t_qno=t_qno+(t_qno.length>0?',':'')+$('#textQno2').val();
 							alert(t_qno+'合約號碼不存在!!');
-						}else if(qcust1!=trim($('#txtCustno').val()) || qcust2!=trim($('#txtCustno').val())){
+						}else if(qcust1 && qcust1!=trim($('#txtCustno').val()) || qcust2 && qcust2!=trim($('#txtCustno').val())){
 							alert('合約客戶與出貨客戶不同!!');
 						}else{
 							var t_where = "where=^^ (1=0 "+(!emp($('#textQno1').val())?" or charindex('"+$('#textQno1').val()+"',apvmemo)>0 ":'')+(!emp($('#textQno2').val())?" or charindex('"+$('#textQno2').val()+"',apvmemo)>0 ":'')+ ") and noa!='"+$('#txtNoa').val()+"' ^^";

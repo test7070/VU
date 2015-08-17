@@ -10,7 +10,7 @@
 		<script src="../script/qbox.js" type="text/javascript"> </script>
     	<link href="../qbox.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
-            var q_name = 'quat', t_content = ' field=noa,datea,comp,price,eweight', bbsKey = ['noa'], as;
+            var q_name = 'cont', t_content = ' field=noa,datea,comp,earnest,eweight', bbsKey = ['noa'], as;
             var isBott = false;
             /// 是否已按過 最後一頁
             var txtfield = [], afield, t_data, t_htm, t_bbsTag = 'tbbs';
@@ -36,9 +36,9 @@
             function refresh() {
                 _refresh();
                 $('#lblNoa').text('合約號碼');
-				$('#lblComp').text('合約客戶');
+				$('#lblComp').text('合約廠商');
 				$('#lblDatea').text('訂約日期');
-				$('#lblPrice').text('單價');
+				$('#lblEarnest').text('單價');
 				$('#lblEweight').text('合約餘量');
             }
             
@@ -46,9 +46,9 @@
 			_bbsAssign();
 			
 			$('#lblNoa').text('合約號碼');
-			$('#lblComp').text('合約客戶');
+			$('#lblComp').text('合約廠商');
 			$('#lblDatea').text('訂約日期');
-			$('#lblPrice').text('單價');
+			$('#lblEarnest').text('單價');
 			$('#lblEweight').text('合約餘量');
 		}
 		</script>
@@ -63,7 +63,7 @@
 					<th align="center" style='color:Blue;' ><a id='lblNoa'> </a></th>
 					<!--<th align="center" style='color:Blue;' ><a id='lblComp'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblDatea'> </a></th>-->
-					<th align="center" style='color:Blue;' ><a id='lblPrice'> </a></th>
+					<th align="center" style='color:Blue;' ><a id='lblEarnest'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblEweight'> </a></th>
 				</tr>
 				<tr>
@@ -71,7 +71,7 @@
 					<td style="width:25%;"><input class="txt" id="txtNoa.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<!--<td style="width:45%;"><input class="txt" id="txtComp.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<td style="width:20%;"><input class="txt" id="txtDatea.*" type="text" style="width:98%;"  readonly="readonly" /></td>-->
-					<td style="width:25%;"><input class="txt" id="txtPrice.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
+					<td style="width:25%;"><input class="txt" id="txtEarnest.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
 					<td style="width:25%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
 				</tr>
 			</table>

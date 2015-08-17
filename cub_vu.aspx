@@ -66,7 +66,7 @@
             }
 
             function mainPost() {
-            	bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];
+            	bbsNum = [ ['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];//['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1],
             	bbtNum = [['txtGmount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtGweight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];
             	
                 q_getFormat();
@@ -215,8 +215,8 @@
                                 }
                             }
                             if (b_ret && b_ret[0] != undefined) {
-                                ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtCustno,txtComp,txtProductno,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtPrice,txtOrdeno,txtNo2,txtWeight,txtMount,txtUno,txtMemo'
-                                , b_ret.length, b_ret, 'custno,comp,productno,product,ucolor,spec,size,lengthb,class,unit,price,noa,no2,mount,weight,uno,memo', 'txtProductno');
+                                ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtCustno,txtComp,txtProductno,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtOrdeno,txtNo2,txtWeight,txtMount,txtUno,txtMemo'
+                                , b_ret.length, b_ret, 'custno,comp,productno,product,ucolor,spec,size,lengthb,class,unit,noa,no2,mount,weight,uno,memo', 'txtProductno');
                             }
                             sum();
                             b_ret = '';
@@ -804,7 +804,7 @@
 						<td style="width:55px;"><a id='lblUnit_s'> </a></td>
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
-						<td style="width:100px;"><a id='lblPrice_s'> </a></td>
+						<!--<td style="width:100px;"><a id='lblPrice_s'> </a></td>-->
 						<td style="width:200px;"><a id='lblNeed_s'> </a></td>
 						<td><a id='lblMemo_s'> </a></td>
 						<td style="width:200px;"><a id='lblUno_s'> </a></td>
@@ -845,7 +845,7 @@
 						<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
 						<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
-						<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>
+						<!--<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>-->
 						<td><input id="txtNeed.*" type="text" class="txt c1"/></td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
 						<td><input id="txtUno.*" type="text" class="txt c1"/></td>

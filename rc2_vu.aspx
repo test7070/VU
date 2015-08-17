@@ -37,7 +37,7 @@
 				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp,addr', 'txtCno,txtAcomp,txtAddr2', 'acomp_b.aspx'],
-				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
+				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
 				['txtCarno', 'lblCar', 'cardeal', 'noa,comp', 'txtCarno,txtCar', 'cardeal_b.aspx']
 			);
 
@@ -709,6 +709,9 @@
 				$('#lblSize_s').text('號數');
 				$('#lblLengthb_s').text('米數');
 				$('#lblClass_s').text('廠牌');
+				$('#lblMount_s').text('數量(件)');
+				$('#lblWeight_s').text('重量(KG)');
+				
 			}
 
 			function btnIns() {
@@ -1185,7 +1188,7 @@
 					<td align="center" style="width:1%;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:55px;"><a id='lblNoq_s'> </a></td>
 					<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
+					<!--<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:50px;"><a id='lblStyle_s'> </a></td>
@@ -1206,10 +1209,10 @@
 					<td><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td><input id="txtNoq.*" type="text" class="txt c1"/></td>
 					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
-					<td>
+					<!--<td>
 						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
-					</td>
+					</td>-->
 					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
 					<td>
 						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>

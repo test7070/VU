@@ -249,7 +249,8 @@
 			}
 
 			function btnPrint() {
-					q_box('z_contstp_vu.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", m_print);
+					//q_box('z_contstp_vu.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", m_print);
+					window.open("./z_contstp_vu.aspx"+ "?"+ r_userno + ";" + r_name + ";" + q_id +";noa=" + trim($('#txtNoa').val()) + ";" + r_accy);
 			}
 
 			function wrServer(key_value) {

@@ -49,7 +49,7 @@
                 $('#lblUnit').text('單位');
                 $('#lblMount').text('數量');
                 $('#lblWeight').text('重量');
-                $('#lblPrice').text('單價');
+                $('#lblComp').text('客戶');
                 $('#lblNotv').text('訂單未出');
                 $('#lblNoa').text('訂單號碼');
                 $('#lblMemo').text('備註');
@@ -97,7 +97,7 @@
 					<td align="center"><a id='lblUnit'> </a></td>
 					<td align="center"><a id='lblMount'> </a></td>
 					<td align="center"><a id='lblWeight'> </a></td>
-					<td align="center"><a id='lblPrice'> </a></td>
+					<td align="center"><a id='lblComp'> </a></td>
 					<!--<td align="center"><a id='lblNotv'> </a></td>-->
 					<td align="center"><a id='lblNoa'> </a></td>
 					<td align="center"><a id='lblMemo'> </a></td>
@@ -113,7 +113,7 @@
 					<td style="width:4%;"><input class="txt" id="txtUnit.*" type="text" style="width:94%;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtMount.*" type="text" style="width:94%; text-align:right;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtWeight.*" type="text" style="width:94%; text-align:right;"/></td>
-					<td style="width:8%;"><input class="txt" id="txtPrice.*" type="text" style="width:96%; text-align:right;"/></td>
+					<td style="width:8%;"><input class="txt" id="txtComp.*" type="text" style="width:96%; text-align:right;"/></td>
 					<!--<td style="width:8%;"><input class="txt" id="txtNotv.*" type="text" style="width:96%; text-align:right;"/></td>-->
 					<td style="width:15%;"><input class="txt" id="txtNoa.*" type="text" style="width:70%;"/>
 						<input class="txt" id="txtNo2.*" type="text" style="width:25%;" />

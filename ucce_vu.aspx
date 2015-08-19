@@ -31,7 +31,7 @@
 			aPop = new Array(
 				['txtStoreno', 'lblStoreno', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
 				['txtStoreno2', 'lblStore2', 'store', 'noa,store', 'txtStoreno2,txtStore2', 'store_b.aspx'],
-				['txtProductno_', 'btnProduct_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
+				//['txtProductno_', 'btnProduct_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
 				['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
 			);
 
@@ -43,6 +43,8 @@
 				q_brwCount();
 				q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
 				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
+				q_gt('color', '1=1 ', 0, 0, 0, "bbscolor");
+				q_gt('class', '1=1 ', 0, 0, 0, "bbsclass");
 			});
 
 			function main() {
@@ -61,6 +63,7 @@
 								, ['txtEmount2', 9, q_getPara('rc2.mountPrecision'), 1], ['txtEweight2', 9, q_getPara('rc2.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
 				
 				q_cmbParse("cmbKind", q_getPara('ucce.kind'));
+				q_cmbParse("combProduct", q_getPara('rc2s_vu.product'),'s');
 				$('#cmbKind').change(function() {
 					for (var j = 0; j < q_bbsCount; j++) {
 						btnMinus('btnMinus_' + j);
@@ -78,17 +81,7 @@
 						break;
 				}
 				if(s2[0]!=undefined){
-					if(s2[0]=='ucc' && q_getPara('sys.project').toUpperCase()=='RB'){
-						if (q_cur > 0 && q_cur < 4) {
-							b_ret = getb_ret();
-							if (!b_ret || b_ret.length == 0)
-								return;
-							if (b_ret.length>0)
-								b_ret.splice(0, 1);
-							if (b_ret.length>0)
-								ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProductno,txtProduct,txtSpec,txtUnit', b_ret.length, b_ret, 'noa,product,spec,unit', 'txtProductno,txtProduct,txtSpec');
-						}
-					}
+					
 				}
 				b_pop = '';
 			}
@@ -102,6 +95,22 @@
 							t_spec+=","+as[i].noa;
 						}
 						q_cmbParse("combSpec", t_spec,'s');
+						break;
+					case 'bbscolor':
+						var as = _q_appendData("color", "", true);
+						var t_color='@';
+						for ( i = 0; i < as.length; i++) {
+							t_color+=","+as[i].color;
+						}
+						q_cmbParse("combUcolor", t_color,'s');
+						break;
+					case 'bbsclass':
+						var as = _q_appendData("class", "", true);
+						var t_class='@';
+						for ( i = 0; i < as.length; i++) {
+							t_class+=","+as[i].class;
+						}
+						q_cmbParse("combClass", t_class,'s');
 						break;
 					case q_name:
 						if (q_cur == 4)
@@ -212,6 +221,30 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtSpec_'+b_seq).val($('#combSpec_'+b_seq).find("option:selected").text());
 						});
+						
+						$('#combUcolor_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
+						});
+						
+						$('#combClass_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtClass_'+b_seq).val($('#combClass_'+b_seq).find("option:selected").text());
+						});
+						
+						$('#combProduct_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
+						});
 					}
 				}
 				_bbsAssign();
@@ -223,8 +256,8 @@
 				$('#lblLengthb_s').text('米數');
 				$('#lblClass_s').text('廠牌');
 				$('#lblUnit_s').text('單位');
-				$('#lblMount_s').text('數量');
-				$('#lblWeight_s').text('重量');
+				$('#lblMount_s').text('數量(件)');
+				$('#lblWeight_s').text('重量(KG)');
 			}
 
 			function btnIns() {
@@ -282,10 +315,6 @@
 
 			function readonly(t_para, empty) {
 				_readonly(t_para, empty);
-				//暫定全部只能用原料要開放其他再額外設定
-				if (q_getPara('sys.comp').indexOf('大昌') == -1) {
-					$('#cmbKind').attr('disabled', 'disabled');
-				}
 			}
 
 			function btnMinus(id) {
@@ -343,33 +372,24 @@
 
 			function product_change() {
 				if ($('#cmbKind').val() == '1') {
-					if (q_getPara('sys.project').toUpperCase()=='RB'){
-						aPop = new Array(
-							['txtStoreno', 'lblStoreno', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
-							['txtStoreno2', 'lblStore2', 'store', 'noa,store', 'txtStoreno2,txtStore2', 'store_b.aspx'],
-							['txtProductno_', 'btnProduct_', 'ucc', 'noa,product,unit', 'txtProductno_,txtProduct_,txtUnit_', 'ucc_b2.aspx'],
-							['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
-						);
-					}else{
-						aPop = new Array(
-							['txtStoreno', 'lblStoreno', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
-							['txtStoreno2', 'lblStore2', 'store', 'noa,store', 'txtStoreno2,txtStore2', 'store_b.aspx'],
-							['txtProductno_', 'btnProduct_', 'ucaucc', 'noa,product,unit', 'txtProductno_,txtProduct_,txtUnit_', 'ucaucc_b.aspx'],
-							['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
-						);
-					}
+					aPop = new Array(
+						['txtStoreno', 'lblStoreno', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
+						['txtStoreno2', 'lblStore2', 'store', 'noa,store', 'txtStoreno2,txtStore2', 'store_b.aspx'],
+						//['txtProductno_', 'btnProduct_', 'ucaucc', 'noa,product,unit', 'txtProductno_,txtProduct_,txtUnit_', 'ucaucc_b.aspx'],
+						['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
+					);
 				} else if ($('#cmbKind').val() == '2') {
 					aPop = new Array(
 						['txtStoreno', 'lblStoreno', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
 						['txtStoreno2', 'lblStore2', 'store', 'noa,store', 'txtStoreno2,txtStore2', 'store_b.aspx'],
-						['txtProductno_', 'btnProduct_', 'bcc', 'noa,product,unit', 'txtProductno_,txtProduct_,txtUnit_', 'bcc_b.aspx'],
+						//['txtProductno_', 'btnProduct_', 'bcc', 'noa,product,unit', 'txtProductno_,txtProduct_,txtUnit_', 'bcc_b.aspx'],
 						['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
 					);
 				} else {
 					aPop = new Array(
 						['txtStoreno', 'lblStoreno', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
 						['txtStoreno2', 'lblStore2', 'store', 'noa,store', 'txtStoreno2,txtStore2', 'store_b.aspx'],
-						['txtProductno_', 'btnProduct_', 'fixucc', 'noa,namea,unit', 'txtProductno_,txtProduct_,txtUnit_', 'fixucc_b.aspx'],
+						//['txtProductno_', 'btnProduct_', 'fixucc', 'noa,namea,unit', 'txtProductno_,txtProduct_,txtUnit_', 'fixucc_b.aspx'],
 						['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
 					);
 				}
@@ -498,7 +518,7 @@
 	</head>
 	<body>
 		<!--#include file="../inc/toolbar.inc"-->
-		<div id='dmain' style="width: 1250px;">
+		<div id='dmain' style="width: 100%;">
 			<div class="dview" id="dview" style="float: left; width:32%;" >
 				<table class="tview" id="tview" border="1" cellpadding='2' cellspacing='0' style="background-color: #FFFF66;">
 					<tr>
@@ -533,19 +553,19 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 2150px;">
+		<div class='dbbs' style="width: 100%;"><!--2150px-->
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;">
 						<input class="btn" id="btnPlus" type="button" value='+' style="font-weight: bold;" />
 					</td>
 					<td align="center" style="width:200px;"><a id='lblStoreno_s'> </a></td>
-					<td align="center" style="width:200px;"><a id='lblProductno_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
-					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
 					<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblEmount2_s'> </a></td>
@@ -554,7 +574,7 @@
 					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
 					<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>
-					<td align="center"><a id='lblMemo_s'> </a></td>
+					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td><input class="btn" id="btnMinus.*" type="button" value='-' style=" font-weight: bold;" /></td>
@@ -564,18 +584,25 @@
 						<input id="btnStore.*" type="button" style="display:none;" />
 					</td>
 					<td>
-						<input id="txtProductno.*" type="text" style="width:95%;"/>
-						<input id="txtProduct.*" type="text" style="width:95%;"/>
-						<input id="btnProduct.*" type="button" style="display:none;" />
+						<!--<input id="txtProductno.*" type="text" style="width:95%;"/>
+						<input id="btnProduct.*" type="button" style="display:none;" />-->
+						<input id="txtProduct.*" type="text" class="txt c1" style="width: 80px;"/>
+						<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
 					<td>
-						<input id="txtSpec.*" type="text" class="txt c1" style="width: 120px;"/>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 80px;"/>
+						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
+					</td>
+					<td>
+						<input id="txtSpec.*" type="text" class="txt c1" style="width: 80px;"/>
 						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
-					<td><input id="txtClass.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtClass.*" type="text" class="txt c1" style="width: 80px;"/>
+						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
 					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtEmount2.*" type="text" class="txt num c1"/></td>

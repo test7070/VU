@@ -62,7 +62,7 @@ insert into @tmp
 		,(case when a.taxtype='1' then a.money when a.taxtype='3' then e.money else a.money end)
 		,(case when a.taxtype='1' then a.money+round(a.money*0.05,0) when a.taxtype='3' then a.total else a.money end)
 		,b.uno,b.productno
-		,REPLACE(b.product,' ','') + case when LEN(isnull(b.size,'')) = 0 then '' else size end + (case when isnull(b.lengthb,0)=0 then '' else '*'+CAST(b.lengthb as nvarchar(20)) + 'M' end)
+		,REPLACE(b.product,' ','') + (case when LEN(isnull(b.size,'')) = 0 then '' else b.size end) +(case when LEN(isnull(b.ucolor,'')) = 0 then '' else b.ucolor end)+ (case when isnull(b.lengthb,0)=0 then '' else '*'+CAST(b.lengthb as nvarchar(20)) + 'M' end)
 		,b.unit,b.mount,b.weight,b.price,b.total,b.memo
 	from view_vcc a
 	left join view_vccs b on a.noa = b.noa
@@ -212,7 +212,7 @@ update @tmp1 set tweight = case when tweight is null then 0 else tweight end,
 				 nweight = case when nweight is null then 0 else nweight end			  					 
 where gno = '0'
 
-update @tmp1 set product = REPLACE(product,' ','') + case when LEN(isnull(size,'')) = 0 then '' else size end + (case when isnull(long,0)=0 then '' else '*'+CAST(long as nvarchar(20)) + 'M' end)
+update @tmp1 set product = REPLACE(product,' ','') + (case when LEN(isnull(size,'')) = 0 then '' else size end) + (case when isnull(long,0)=0 then '' else '*'+CAST(long as nvarchar(20)) + 'M' end)
 where gno = '0'
 
 declare @idno int

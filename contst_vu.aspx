@@ -42,6 +42,8 @@
 				q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
 				q_gt('acomp', 'stop=1 ', 0, 0, 0, "cno_acomp");
 				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
+				q_gt('color', '1=1 ', 0, 0, 0, "bbscolor");
+				//q_gt('class', '1=1 ', 0, 0, 0, "bbsclass");
 			});
 
 			function main() {
@@ -79,7 +81,8 @@
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,
 				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
-				q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
+				q_cmbParse("combProduct", q_getPara('rc2s_vu.product'),'s');
+				//q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
 				
 				$('#lblNoa').text('合約號碼');
 				$('#lblDatea').text('訂約日期');
@@ -120,6 +123,22 @@
 						}
 						q_cmbParse("combSpec", t_spec,'s');
 						break;
+					case 'bbscolor':
+						var as = _q_appendData("color", "", true);
+						var t_color='@';
+						for ( i = 0; i < as.length; i++) {
+							t_color+=","+as[i].color;
+						}
+						q_cmbParse("combUcolor", t_color,'s');
+						break;
+					case 'bbsclass':
+						var as = _q_appendData("class", "", true);
+						var t_class='@';
+						for ( i = 0; i < as.length; i++) {
+							t_class+=","+as[i].class;
+						}
+						q_cmbParse("combClass", t_class,'s');
+						break;
 					case 'cno_acomp':
 						var as = _q_appendData("acomp", "", true);
 						if (as[0] != undefined) {
@@ -142,6 +161,11 @@
 					alert(t_err);
 					return;
 				}
+				
+				if($('#txtPrice_0').val())
+					$('#txtEarnest').val($('#txtPrice_0').val());
+				else
+					$('#txtEarnest').val(0);
 				
 				//1030419 當專案沒有勾 BBM的取消和結案被打勾BBS也要寫入
 				if(!$('#chkIsproj').prop('checked')){
@@ -197,6 +221,13 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtSpec_'+b_seq).val($('#combSpec_'+b_seq).find("option:selected").text());
 						});
+						$('#combProduct_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
+						});
 					}
 				}
 				_bbsAssign();
@@ -209,8 +240,8 @@
 				$('#lblSize_s').text('號數');
 				$('#lblLengthb_s').text('米數');
 				$('#lblUnit_s').text('單位');
-				$('#lblMount_s').text('數量');
-				$('#lblWeight_s').text('重量');
+				$('#lblMount_s').text('數量(件)');
+				$('#lblWeight_s').text('重量(KG)');
 				$('#lblPrice_s').text('單價');
 				$('#lblTotal_s').text('小計');
 				$('#lblMemo_s').text('備註');
@@ -249,7 +280,8 @@
 			}
 
 			function btnPrint() {
-					q_box('z_contstp_vu.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", m_print);
+					//q_box('z_contstp_vu.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", m_print);
+					window.open("./z_contstp_vu.aspx"+ "?"+ r_userno + ";" + r_name + ";" + q_id +";noa=" + trim($('#txtNoa').val()) + ";" + r_accy);
 			}
 
 			function wrServer(key_value) {
@@ -497,7 +529,7 @@
 	</head>
 	<body>
 		<!--#include file="../inc/toolbar.inc"-->
-		<div id='dmain' style="overflow:hidden;width: 1270px;">
+		<div id='dmain' style="overflow:hidden;width: 100%;">
 			<div class="dview" id="dview">
 				<table class="tview" id="tview"	>
 					<tr>
@@ -571,7 +603,10 @@
 					</tr>
 					<tr>
 						<td ><span> </span><a id='lblMemo' class="lbl"> </a></td>
-						<td colspan='5'><input id="txtMemo" type="text" style="width: 99%;"/></td>
+						<td colspan='5'>
+							<input id="txtMemo" type="text" style="width: 99%;"/>
+							<input id="txtEarnest" type="hidden"/>
+						</td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblWorker' class="lbl"> </a></td>
@@ -582,12 +617,12 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1700px;">
+		<div class='dbbs' style="width: 100%;"><!--1700px-->
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:40px;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:70px;"><a id='lblNoq_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
+					<!--<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
@@ -598,23 +633,26 @@
 					<td align="center" style="width:100px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
-					<td align="center"><a id='lblMemo_s'> </a></td>
+					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
 					<!--<td align="center" style="width:40px;"><a id='lblEnda_s'> </a></td>-->
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td align="center"><input id="txtNoq.*" type="text" class="txt c1" /></td>
-					<td>
+					<!--<td>
 						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
-					</td>
-					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
+					</td>-->
 					<td>
-						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
+						<input id="txtProduct.*" type="text" class="txt c1" style="width: 100px;"/>
+						<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
+					</td>
+					<td>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 100px;"/>
 						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtSpec.*" type="text" class="txt c1" style="width: 120px;"/>
+						<input id="txtSpec.*" type="text" class="txt c1" style="width: 100px;"/>
 						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>

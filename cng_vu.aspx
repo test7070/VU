@@ -38,9 +38,11 @@
 				//['txtRackinno', 'lblRackinno', 'rack', 'noa,rack,storeno,store', 'txtRackinno', 'rack_b.aspx'],
 				['txtTggno', 'lblTgg', 'tgg', 'noa,nick', 'txtTggno,txtTgg', 'tgg_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
-				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
+				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
 				['txtMemo', '', 'qphr', 'noa,phr', '0,txtMemo', ''],
-				['txtSssno', 'lblSssno', 'sss', 'noa,namea', 'txtSssno,txtNamea', 'sss_b.aspx']
+				['txtSssno', 'lblSssno', 'sss', 'noa,namea', 'txtSssno,txtNamea', 'sss_b.aspx'],
+				['txtUno_', '', 'view_uccc2', 'uno,uno,product,spec,size,lengthb,class,ucolor,unit,emount,eweight'
+				,'0txtUno_,txtUno_,txtProduct_,txtSpec_,txtSize_,txtLengthb_,txtClass_,txtUcolor_,txtUnit_,txtMount_,txtWeight_', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
 			);
 
 			$(document).ready(function() {
@@ -49,6 +51,8 @@
 				q_brwCount();
 				q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
 				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
+				q_gt('color', '1=1 ', 0, 0, 0, "bbscolor");
+				q_gt('class', '1=1 ', 0, 0, 0, "bbsclass");
 			});
 
 			function main() {
@@ -67,7 +71,8 @@
 				q_mask(bbmMask);
 				q_cmbParse("cmbTypea", q_getPara('cng.typea'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
-				q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
+				//q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
+				q_cmbParse("combProduct", q_getPara('rc2s_vu.product'),'s');
 				
 				$('#txtCardealno').change(function(){
 					//取得車號下拉式選單
@@ -109,6 +114,22 @@
 							t_spec+=","+as[i].noa;
 						}
 						q_cmbParse("combSpec", t_spec,'s');
+						break;
+					case 'bbscolor':
+						var as = _q_appendData("color", "", true);
+						var t_color='@';
+						for ( i = 0; i < as.length; i++) {
+							t_color+=","+as[i].color;
+						}
+						q_cmbParse("combUcolor", t_color,'s');
+						break;
+					case 'bbsclass':
+						var as = _q_appendData("class", "", true);
+						var t_class='@';
+						for ( i = 0; i < as.length; i++) {
+							t_class+=","+as[i].class;
+						}
+						q_cmbParse("combClass", t_class,'s');
 						break;
 					case 'getCardealCarno' :
 						var as = _q_appendData("cardeals", "", true);
@@ -194,6 +215,21 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtSpec_'+b_seq).val($('#combSpec_'+b_seq).find("option:selected").text());
 						});
+						$('#combClass_' + i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtClass_'+b_seq).val($('#combClass_'+b_seq).find("option:selected").text());
+						});
+						
+						$('#combProduct_' +i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
+						});
 					}
 				}
 				_bbsAssign();
@@ -207,8 +243,8 @@
 				$('#lblLengthb_s').text('米數');
 				$('#lblClass_s').text('廠牌');
 				$('#lblUnit_s').text('單位');
-				$('#lblMount_s').text('數量');
-				$('#lblWeight_s').text('重量');
+				$('#lblMount_s').text('數量(件)');
+				$('#lblWeight_s').text('重量(KG)');
 				$('#lblMemo_s').text('備註');
 			}
 
@@ -474,7 +510,7 @@
 	</head>
 	<body>
 		<!--#include file="../inc/toolbar.inc"-->
-		<div id='dmain' style="width: 1260px;">
+		<div id='dmain' style="width: 100%;">
 			<div class="dview" id="dview" style="float: left; width:500px;" >
 				<table class="tview" id="tview" border="1" cellpadding='2' cellspacing='0' style="background-color: #FFFF66;">
 					<tr>
@@ -571,19 +607,19 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1650px;">
+		<div class='dbbs' style="width: 100%;"><!--1650px-->
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:55px;"><a id='lblNoq_s'> </a></td>
 					<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
+					<!--<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
-					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
 					<td align="center" style="width:40px;"><a id='lblUnit_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblWeight_s'> </a></td>
@@ -593,22 +629,28 @@
 					<td><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td><input id="txtNoq.*" type="text" class="txt c1"/></td>
 					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
-					<td>
+					<!--<td>
 						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
-					</td>
-					<td><input id="txtProduct.*" type="text" class="txt c1"/></td>
+					</td>-->
 					<td>
-						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
+						<input id="txtProduct.*" type="text" class="txt c1" style="width: 100px;"/>
+						<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
+					</td>
+					<td>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 100px;"/>
 						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtSpec.*" type="text" class="txt c1" style="width: 120px;"/>
+						<input id="txtSpec.*" type="text" class="txt c1" style="width: 100px;"/>
 						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
-					<td><input id="txtClass.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtClass.*" type="text" class="txt c1" style="width: 100px;"/>
+						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
 					<td><input id="txtMount.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtWeight.*" type="text" class="txt num c1" /></td>

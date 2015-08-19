@@ -1,0 +1,119 @@
+﻿zxls_cubvu:--zxls_cubvu 
+
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max)
+
+IF OBJECT_ID('tempdb..#z_cubvu')is not null
+BEGIN
+	drop table #z_cubvu
+END
+
+create table #z_cubvu(
+	isexist int,
+	accy nvarchar(10),
+	noa nvarchar(30),	
+	
+	place nvarchar(200),--工地名稱	暫存memo
+	bdate nvarchar(10),
+	edate nvarchar(10),
+	datea nvarchar(10),
+	
+	noq nvarchar(3), 
+	ordeno nvarchar(40),
+	no2 nvarchar(10),
+	comp nvarchar(100),
+	size nvarchar(90),
+	spec nvarchar(90),
+	lengthb float,
+	mount float,
+	[weight] float,
+	memo nvarchar(200)
+)
+declare @a nvarchar(max)
+declare @b nvarchar(max)
+declare @c nvarchar(max)
+declare @d nvarchar(max)
+declare @e nvarchar(max)
+declare @f nvarchar(max)
+declare @g nvarchar(max)
+declare @h nvarchar(max)
+declare @i nvarchar(max)
+
+declare	@isexist int
+declare	@accy nvarchar(10)
+declare	@noa nvarchar(30)
+declare	@place nvarchar(200)--工地名稱	暫存memo
+declare	@bdate nvarchar(10)
+declare	@edate nvarchar(10)
+declare	@datea nvarchar(10)
+declare @noq nvarchar(3)
+declare	@ordeno nvarchar(40)
+declare	@no2 nvarchar(10)
+declare	@comp nvarchar(100)
+declare	@size nvarchar(90)
+declare	@spec nvarchar(90)
+declare	@lengthb float
+declare	@mount float
+declare	@weight float
+declare	@memo nvarchar(200)
+declare @no int = 0
+
+declare cursor_table cursor for
+select noa,a,b,c,d,e,f,g,h,i from ztmpxls where CAST(noa as int) > 6 order by CAST(noa as int)
+open cursor_table
+fetch next from cursor_table
+into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i
+while(@@FETCH_STATUS <> -1)
+begin
+	set @noa = (select c from ztmpxls where CAST(noa as int) = 2)
+	
+	set @place = (select c from ztmpxls where CAST(noa as int) = 4)
+	set @bdate = (select min(datea) from view_ordes where noa = @noa)
+	set @edate = (select max(datea) from view_ordes where noa = @noa)
+	set @datea = (select c from ztmpxls where CAST(noa as int) = 5)
+	
+	set @no = @no + 1
+	set @noq = REPLICATE('0',3-LEN(CAST(@no as varchar(3))))+CAST(@no as varchar(3))
+	set @ordeno = @a
+	set @no2 = @b
+	set @comp = (select c from ztmpxls where CAST(noa as int) = 3)
+	set @size = @c
+	set @spec = @d
+	set @lengthb = @e
+	set @mount = CAST(@f as int) + CAST(@g as int)
+	set @weight = @h
+	set @memo = @i
+	
+	set @accy = LEFT((select c from ztmpxls where CAST(noa as int) = 5),3)
+	set @isexist = case when (LEN(ISNULL((select noa from view_cub where noa = @noa),''))=0) then 0 else 1 end
+	
+	insert into #z_cubvu
+	select @isexist,@accy,@noa,@place,@bdate,@edate,@datea,@noq,@ordeno,@no2,@comp,@size,@spec,@lengthb,@mount,@weight,@memo
+
+	fetch next from cursor_table
+	into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i
+end
+close cursor_table
+deallocate cursor_table
+
+--將已存在的資料刪除
+if(@isexist = 1)
+begin
+	set @cmd = 'delete cub'+@accy+' where noa='+"'"+@noa+"'"
+	execute sp_executesql @cmd
+	set @cmd = 'delete cubs'+@accy+' where noa='+"'"+@noa+"'"
+	execute sp_executesql @cmd
+end
+
+--將資料存入資料庫
+set @cmd = 'insert into cub'+@accy+'(noa,memo,bdate,edate,datea)
+			select MAX(noa),MAX(place),MAX(bdate),MAX(edate),MAX(datea)
+			from #z_cubvu'
+execute sp_executesql @cmd
+
+set @cmd = 'insert into cubs'+@accy+'(noa,noq,ordeno,no2,comp,size,spec,lengthb,mount,weight,memo)
+			select noa,noq,ordeno,no2,comp,size,spec,lengthb,mount,weight,memo
+			from #z_cubvu'
+execute sp_executesql @cmd
+
+drop table #z_cubvu;

@@ -42,7 +42,7 @@
 				q_bbsLen = 15;
 				q_brwCount();
 				q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
-
+				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
 			});
 
 			function main() {
@@ -95,6 +95,14 @@
 
 			function q_gtPost(t_name) {
 				switch (t_name) {
+					case 'bbsspec':
+						var as = _q_appendData("spec", "", true);
+						var t_spec='@';
+						for ( i = 0; i < as.length; i++) {
+							t_spec+=","+as[i].noa;
+						}
+						q_cmbParse("combSpec", t_spec,'s');
+						break;
 					case q_name:
 						if (q_cur == 4)
 							q_Seek_gtPost();
@@ -190,6 +198,19 @@
 								t_mount = $('#txtMount_' + b_seq).val();
 							}
 							$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), dec(t_mount)), 0));
+						});
+						
+						$('#txtSize_' + j).change(function() {
+							 if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
+						});
+						
+						$('#combSpec_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtSpec_'+b_seq).val($('#combSpec_'+b_seq).find("option:selected").text());
 						});
 					}
 				}
@@ -512,7 +533,7 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 2100px;">
+		<div class='dbbs' style="width: 2150px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;">
@@ -521,7 +542,7 @@
 					<td align="center" style="width:200px;"><a id='lblStoreno_s'> </a></td>
 					<td align="center" style="width:200px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
-					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
@@ -548,7 +569,10 @@
 						<input id="btnProduct.*" type="button" style="display:none;" />
 					</td>
 					<td><input id="txtUcolor.*" type="text" class="txt c1"/></td>
-					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtSpec.*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtClass.*" type="text" class="txt c1"/></td>

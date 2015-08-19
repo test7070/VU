@@ -128,8 +128,13 @@ begin
 	select '3',char(255),char(255),sum(weight),sum(eweight) 
 	from @tmp where gno = '0'
 	
+<<<<<<< HEAD
 	insert @tmp (gno,noa,memo,tggno,datea) 
 	select '4',noa,memo,tggno,datea from @tmp where gno = '0' group by noa,memo,tggno,datea
+=======
+	insert @tmp (gno,noa,memo,custno,datea) 
+	select '4',noa,memo,custno,datea from @tmp where gno = '0' group by noa,memo,custno,datea
+>>>>>>> 20ec960d239a8b61665858cbd97b66fd146480b6
 end
 
 select 

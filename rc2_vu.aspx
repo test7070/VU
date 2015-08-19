@@ -47,6 +47,7 @@
 				q_brwCount();
 				q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
 				q_gt('acomp', 'stop=1 ', 0, 0, 0, "cno_acomp");
+				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
 			});
 
 			function main() {
@@ -260,8 +261,16 @@
 			var q1_weight=0,q2_weight=0;
 			function q_gtPost(t_name) {
 				switch (t_name) {
+					case 'bbsspec':
+						var as = _q_appendData("spec", "", true);
+						var t_spec='@';
+						for ( i = 0; i < as.length; i++) {
+							t_spec+=","+as[i].noa;
+						}
+						q_cmbParse("combSpec", t_spec,'s');
+						break;
 					case 'cont_btnOk':
-					var as = _q_appendData("cont", "", true);
+						var as = _q_appendData("cont", "", true);
 						var qno1_exists=(emp($('#textQno1').val())?true:false);
 						var qno2_exists=(emp($('#textQno2').val())?true:false);
 						var qtgg1='',qtgg2='';
@@ -672,6 +681,19 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
 						});
+						
+						$('#combSpec_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtSpec_'+b_seq).val($('#combSpec_'+b_seq).find("option:selected").text());
+						});
+						
+						$('#txtSize_' + j).change(function() {
+							 if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
+						});
 					}
 				}
 				_bbsAssign();
@@ -679,7 +701,7 @@
 				HiddenTreat();
 				$('#div_orde').hide();
 				$('#lblNoq_s').text('項序');
-				$('#lblProductno_s').text('品編');
+				$('#lblProductno_s').text('品號');
 				$('#lblProduct_s').text('品名');
 				$('#lblUcolor_s').text('類別');
 				$('#lblStyle_s').text('型');
@@ -1071,8 +1093,8 @@
 						<td colspan="2"><input id="txtTgg" type="text" class="txt c1"/></td>
 						<td><span> </span><a id='lblTel' class="lbl"> </a></td>
 						<td><input id="txtTel" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lblOrdc' class="lbl btn"> </a></td>
-						<td><input id="txtOrdcno" type="text" class="txt c1"/></td>
+						<!--<td><span> </span><a id='lblOrdc' class="lbl btn"> </a></td>
+						<td><input id="txtOrdcno" type="text" class="txt c1"/></td>-->
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblAddr' class="lbl btn"> </a></td>
@@ -1157,7 +1179,7 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 2200px;">
+		<div class='dbbs' style="width: 2250px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
@@ -1167,7 +1189,7 @@
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:50px;"><a id='lblStyle_s'> </a></td>
-					<td align="center" style="width:100px;"><a id='lblSpec_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
@@ -1194,7 +1216,10 @@
 						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td><input id="txtStyle.*" type="text" class="txt c1"/></td>
-					<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtSpec.*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtClass.*" type="text" class="txt c1"/></td>

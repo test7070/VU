@@ -46,6 +46,7 @@
                 bbtKey = ['noa', 'noq'];
                 q_brwCount();
                 q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
+                q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
             });
 
             function main() {
@@ -101,6 +102,15 @@
 
             function q_gtPost(t_name) {
                 switch (t_name) {
+                	case 'bbsspec':
+						var as = _q_appendData("spec", "", true);
+						var t_spec='@';
+						for ( i = 0; i < as.length; i++) {
+							t_spec+=","+as[i].noa;
+						}
+						q_cmbParse("combSpec", t_spec,'s');
+						q_cmbParse("combSpec", t_spec,'t');
+						break;
                     case 'deleUccy':
                         var as = _q_appendData("uccy", "", true);
                         var err_str = '';
@@ -394,6 +404,10 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
 						});
+						$('#txtSize_' + i).change(function() {
+							 if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
+						});
                         
                         $('#btnUccc_' + i).click(function() {
                             var n = $(this).attr('id').split('_')[$(this).attr('id').split('_').length - 1];
@@ -416,13 +430,21 @@
 
                             q_box("uccc_chk_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";;;" + encodeURIComponent(JSON.stringify(t_array)), 'uccc', "95%", "95%", q_getMsg('popUccc'));
                         });
+                        
+                        $('#combSpec_' + i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtSpec_'+b_seq).val($('#combSpec_'+b_seq).find("option:selected").text());
+						});
 
                     }
                 }
                 _bbsAssign();
                 
                 $('#lblCust_s').text('客戶');
-                $('#lblProductno_s').text('品編');
+                $('#lblProductno_s').text('品號');
                 $('#lblProduct_s').text('品名');
                 $('#lblUcolor_s').text('類別');
                 $('#lblSpec_s').text('材質');
@@ -478,12 +500,23 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtUcolor__'+b_seq).val($('#combUcolor__'+b_seq).find("option:selected").text());
 						});
+						$('#txtSize__' + i).change(function() {
+							 if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
+						});
+						$('#combSpec__' + i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2)
+								$('#txtSpec__'+b_seq).val($('#combSpec__'+b_seq).find("option:selected").text());
+						});
                     }
                 }
                 _bbtAssign();
                 
                 $('#lblUno_t').text('領料批號');
-                $('#lblProductno_t').text('品編');
+                $('#lblProductno_t').text('品號');
                 $('#lblProduct_t').text('品名');
                 $('#lblUcolor_t').text('類別');
                 $('#lblSpec_t').text('材質');
@@ -645,7 +678,7 @@
                 font-size: medium;
             }
             .dbbs {
-                width: 2600px;
+                width: 2650px;
             }
             .dbbs .tbbs {
                 margin: 0;
@@ -673,7 +706,7 @@
                 font-size: medium;
             }
             #dbbt {
-                width: 1700px;
+                width: 1750px;
             }
             #tbbt {
                 margin: 0;
@@ -764,7 +797,7 @@
 						<td style="width:150px;"><a id='lblProductno_s'> </a></td>
 						<td style="width:150px;"><a id='lblProduct_s'> </a></td>
 						<td style="width:150px;"><a id='lblUcolor_s'> </a></td>
-						<td style="width:100px;"><a id='lblSpec_s'> </a></td>
+						<td style="width:150px;"><a id='lblSpec_s'> </a></td>
 						<td style="width:100px;"><a id='lblSize_s'> </a></td>
 						<td style="width:100px;"><a id='lblLengthb_s'> </a></td>
 						<td style="width:100px;"><a id='lblClass_s'> </a></td>
@@ -802,7 +835,10 @@
 							<input id="txtUcolor.*" type="text" class="txt c1" style="width: 120px;"/>
 							<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 						</td>
-						<td><input id="txtSpec.*" type="text" class="txt c1"/></td>
+						<td>
+							<input id="txtSpec.*" type="text" class="txt c1" style="width: 120px;"/>
+							<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
+						</td>
 						<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 						<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 						<td><input id="txtClass.*" type="text" class="txt c1"/></td>
@@ -838,7 +874,7 @@
 					<td style="width:150px;"><a id='lblProductno_t'> </a></td>
 					<td style="width:150px;"><a id='lblProduct_t'> </a></td>
 					<td style="width:150px;"><a id='lblUcolor_t'> </a></td>
-					<td style="width:100px;"><a id='lblSpec_t'> </a></td>
+					<td style="width:150px;"><a id='lblSpec_t'> </a></td>
 					<td style="width:100px;"><a id='lblSize_t'> </a></td>
 					<td style="width:100px;"><a id='lblLengthb_t'> </a></td>
 					<td style="width:100px;"><a id='lblClass_t'> </a></td>
@@ -863,7 +899,10 @@
 						<input id="txtUcolor..*" type="text" class="txt c1" style="width: 120px;"/>
 						<select id="combUcolor..*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td><input id="txtSpec..*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtSpec..*" type="text" class="txt c1" style="width: 120px;"/>
+						<select id="combSpec..*" class="txt" style="width: 20px;"> </select>
+					</td>
 					<td><input id="txtSize..*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb..*" type="text" class="txt num c1" /></td>
 					<td><input id="txtClass..*" type="text" class="txt c1"/></td>

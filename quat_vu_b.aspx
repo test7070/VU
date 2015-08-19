@@ -10,7 +10,7 @@
 		<script src="../script/qbox.js" type="text/javascript"> </script>
     	<link href="../qbox.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
-            var q_name = 'quat', t_content = ' field=noa,datea,comp,price,eweight', bbsKey = ['noa'], as;
+            var q_name = 'quat', t_content = ' field=noa,datea,comp,price,eweight,memo', bbsKey = ['noa'], as;
             var isBott = false;
             /// 是否已按過 最後一頁
             var txtfield = [], afield, t_data, t_htm, t_bbsTag = 'tbbs';
@@ -65,14 +65,16 @@
 					<th align="center" style='color:Blue;' ><a id='lblDatea'> </a></th>-->
 					<th align="center" style='color:Blue;' ><a id='lblPrice'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblEweight'> </a></th>
+					<th align="center" style='color:Blue;' ><a id='lblMemo'> </a></th>
 				</tr>
 				<tr>
 					<td style="width:2%;"><input name="sel"  id="radSel.*" type="radio" /></td>
 					<td style="width:25%;"><input class="txt" id="txtNoa.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<!--<td style="width:45%;"><input class="txt" id="txtComp.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<td style="width:20%;"><input class="txt" id="txtDatea.*" type="text" style="width:98%;"  readonly="readonly" /></td>-->
-					<td style="width:25%;"><input class="txt" id="txtPrice.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
-					<td style="width:25%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
+					<td style="width:20%;"><input class="txt" id="txtPrice.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
+					<td style="width:25%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
+					<td style="width:30%;"><input class="txt" id="txtMemo.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
 				</tr>
 			</table>
 			<!--#include file="../inc/brow_ctrl.inc"-->

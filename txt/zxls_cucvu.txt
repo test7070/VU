@@ -1,4 +1,4 @@
-﻿zxls_cubvu:--zxls_cubvu 
+﻿zxls_cucvu:--zxls_cucvu 
 
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -21,10 +21,11 @@ create table #z_cubvu(
 	noq nvarchar(3), 
 	ordeno nvarchar(40),
 	no2 nvarchar(10),
-	comp nvarchar(100),
+	cust nvarchar(100),
 	size nvarchar(90),
 	spec nvarchar(90),
 	lengthb float,
+	mount1 float,
 	mount float,
 	[weight] float,
 	memo nvarchar(200)
@@ -49,10 +50,11 @@ declare	@datea nvarchar(10)
 declare @noq nvarchar(3)
 declare	@ordeno nvarchar(40)
 declare	@no2 nvarchar(10)
-declare	@comp nvarchar(100)
+declare	@cust nvarchar(100)
 declare	@size nvarchar(90)
 declare	@spec nvarchar(90)
 declare	@lengthb float
+declare	@mount1 float
 declare	@mount float
 declare	@weight float
 declare	@memo nvarchar(200)
@@ -76,19 +78,20 @@ begin
 	set @noq = REPLICATE('0',3-LEN(CAST(@no as varchar(3))))+CAST(@no as varchar(3))
 	set @ordeno = @a
 	set @no2 = @b
-	set @comp = (select c from ztmpxls where CAST(noa as int) = 3)
+	set @cust = (select c from ztmpxls where CAST(noa as int) = 3)
 	set @size = @c
 	set @spec = @d
 	set @lengthb = @e
-	set @mount = CAST(@f as int) + CAST(@g as int)
-	set @weight = @h
+	set @mount1 = CAST(@f as int) 
+	set @mount = CAST(@g as int)
+	set @weight = CAST(@h as int)
 	set @memo = @i
 	
 	set @accy = LEFT((select c from ztmpxls where CAST(noa as int) = 5),3)
 	set @isexist = case when (LEN(ISNULL((select noa from view_cub where noa = @noa),''))=0) then 0 else 1 end
 	
 	insert into #z_cubvu
-	select @isexist,@accy,@noa,@place,@bdate,@edate,@datea,@noq,@ordeno,@no2,@comp,@size,@spec,@lengthb,@mount,@weight,@memo
+	select @isexist,@accy,@noa,@place,@bdate,@edate,@datea,@noq,@ordeno,@no2,@cust,@size,@spec,@lengthb,@mount1,@mount,@weight,@memo
 
 	fetch next from cursor_table
 	into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i
@@ -99,20 +102,20 @@ deallocate cursor_table
 --將已存在的資料刪除
 if(@isexist = 1)
 begin
-	set @cmd = 'delete cub'+@accy+' where noa='+"'"+@noa+"'"
+	set @cmd = 'delete cuc'+@accy+' where noa='+"'"+@noa+"'"
 	execute sp_executesql @cmd
-	set @cmd = 'delete cubs'+@accy+' where noa='+"'"+@noa+"'"
+	set @cmd = 'delete cucs'+@accy+' where noa='+"'"+@noa+"'"
 	execute sp_executesql @cmd
 end
 
 --將資料存入資料庫
-set @cmd = 'insert into cub'+@accy+'(noa,memo,bdate,edate,datea)
-			select MAX(noa),MAX(place),MAX(bdate),MAX(edate),MAX(datea)
+set @cmd = 'insert into cuc'+@accy+'(noa,cust,memo,datea)
+			select MAX(noa),MAX(cust),MAX(place),MAX(datea)
 			from #z_cubvu'
 execute sp_executesql @cmd
 
-set @cmd = 'insert into cubs'+@accy+'(noa,noq,ordeno,no2,comp,size,spec,lengthb,mount,weight,memo)
-			select noa,noq,ordeno,no2,comp,size,spec,lengthb,mount,weight,memo
+set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,size,spec,lengthb,mount1,mount,weight,memo)
+			select noa,noq,ordeno,no2,size,spec,lengthb,mount1,mount,weight,memo
 			from #z_cubvu'
 execute sp_executesql @cmd
 

@@ -80,7 +80,8 @@
                 //q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'t');
                 q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
                 q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
-
+				
+				$('#btnOrdes_vu').hide();
                 $('#btnOrdes_vu').click(function() {
                     var t_bdate = trim($('#txtBdate').val());
                     var t_edate = trim($('#txtEdate').val());
@@ -100,12 +101,39 @@
                         q_box("cubu_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where + ";" + r_accy, 'cubu', "95%", "95%", q_getMsg('popCubu'));
                     }
                 });
+                
+                $('#btnCuc_vu').click(function() {
+                	if (q_cur==1 || q_cur==2){
+	                    var t_bdate = trim($('#txtBdate').val());
+	                    var t_edate = trim($('#txtEdate').val());
+	                    //訂單未結案 且 排程數量-加工數量>0
+	                    var t_where = ' 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ';
+	                    t_bdate = (emp(t_bdate) ? '' : t_bdate);
+	                    t_edate = (emp(t_edate) ? r_picd : t_edate);
+	                    t_where += " and (a.datea between '" + t_bdate + "' and '" + t_edate + "') ";
+	                    t_where ="where=^^"+t_where+"^^";
+	                    q_gt('cucs_vu', t_where , 0, 0, 0, "cucs_vu");
+                   }
+                });
 
                 document.title = '加工單';
+                $('#lblDatea').text('加工日');
+                $('#lblBdate').text('排程日');
             }
 
             function q_gtPost(t_name) {
                 switch (t_name) {
+                	case 'cucs_vu':
+                		var as = _q_appendData("view_cuc", "", true);
+                		for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
+                			$('#btnMinus_'+j).click();
+                		}
+                		
+                		q_gridAddRow(bbsHtm, 'tbbs'
+                		, 'txtCustno,txtComp,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtMount,txtWeight,txtMemo,txtDate2,txtOrdeno,txtNo2'
+                        , as.length, as, 'acustno,acust,product,ucolor,spec,size,lengthb,class,unit,emount,eweight,memo,odatea,ordeno,no2', '','');
+                	
+                		break;
                 	case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';
@@ -208,9 +236,9 @@
             function q_funcPost(t_func, result) {
 				switch(t_func) {
 					case 'cubu_post.post.a1':					
-						q_func('qtxt.query.cubstocubt', 'cub.txt,cubstocubt,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
+						q_func('qtxt.query.cubstocubu', 'cub.txt,cubstocubu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
 						break;
-					case 'qtxt.query.cubstocubt':
+					case 'qtxt.query.cubstocubu':
 						q_func('cubu_post.post.a2', r_accy + ',' + $('#txtNoa').val() + ',1');
 						break;
 					case 'cubu_post.post.a2':					
@@ -284,7 +312,7 @@
                 $('#txtNoa').val('AUTO');
                 $('#txtDatea').val(q_date());
                 $('#txtDatea').focus();
-                $('#txtBdate').val(q_cdn(q_date(),3));
+                $('#txtBdate').val(q_date());
             }
 
             function btnModi() {
@@ -490,6 +518,7 @@
                 $('#lblLengthb_s').text('米數');
                 $('#lblClass_s').text('廠牌');
                 $('#lblUnit_s').text('單位');
+                $('#lblHmount_s').text('支數');
                 $('#lblMount_s').text('數量');
                 $('#lblWeight_s').text('重量');
                 $('#lblPrice_s').text('單價');
@@ -832,6 +861,7 @@
 						</td>
 						<!--<td> </td>-->
 						<td colspan="2">
+							<input type="button" id="btnCuc_vu" value="排程匯入" style="width:120px;"/>
 							<input type="button" id="btnOrdes_vu" value="訂單匯入" style="width:120px;"/>
 							<input type="button" id="btnCubu_vu" value="入庫" style="width:120px;"/>
 						</td>
@@ -856,6 +886,7 @@
 						<td style="width:100px;"><a id='lblLengthb_s'> </a></td>
 						<td style="width:100px;"><a id='lblClass_s'> </a></td>
 						<td style="width:55px;"><a id='lblUnit_s'> </a></td>
+						<td style="width:85px;"><a id='lblHmount_s'> </a></td>
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
 						<!--<td style="width:100px;"><a id='lblPrice_s'> </a></td>-->
@@ -874,6 +905,8 @@
 						<td align="center">
 							<input id="btnMinus.*" type="button" style="font-size: medium; font-weight: bold;" value="－"/>
 							<input id="txtNoq.*" type="text" style="display: none;"/>
+							<input id="txtProductno2.*" type="hidden"/>
+							<input id="txtProduct2.*" type="hidden"/>
 						</td>
 						<td><a id="lblNo.*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
 						<td>
@@ -903,6 +936,7 @@
 							<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
+						<td><input id="txtHmount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 						<!--<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>-->

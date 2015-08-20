@@ -187,17 +187,17 @@
                     }
                 }
                 _bbsAssign();
-                $('#lblOrdeno_s').text('訂單編號');
+                $('#lblOrdeno_s').text('訂單編號/訂序');
                 $('#lblProduct_s').text('品名');
                 $('#lblUcolor_s').text('類別');
                 $('#lblSpec_s').text('材質');
                 $('#lblSize_s').text('號數');
-                $('#lblLengthb_s').text('米數');
+                $('#lblLengthb_s').text('長度(米)');
                 $('#lblClass_s').text('廠牌');
                 $('#lblUnit_s').text('單位');
                 $('#lblMount1_s').text('支數');
                 $('#lblMount_s').text('件數');
-                $('#lblWeight_s').text('重量');
+                $('#lblWeight_s').text('重量(KG)');
                 $('#lblMemo_s').text('備註');
             }
 

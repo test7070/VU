@@ -130,8 +130,8 @@
                 		}
                 		
                 		q_gridAddRow(bbsHtm, 'tbbs'
-                		, 'txtCustno,txtComp,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtMount,txtWeight,txtMemo,txtDate2,txtOrdeno,txtNo2'
-                        , as.length, as, 'acustno,acust,product,ucolor,spec,size,lengthb,class,unit,emount,eweight,memo,odatea,ordeno,no2', '','');
+                		, 'txtCustno,txtComp,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtHmount,txtMount,txtWeight,txtMemo,txtDate2,txtOrdeno,txtNo2'
+                        , as.length, as, 'acustno,acust,product,ucolor,spec,size,lengthb,class,unit,mount1,emount,eweight,memo,odatea,ordeno,no2', '','');
                 	
                 		break;
                 	case 'bbsspec':

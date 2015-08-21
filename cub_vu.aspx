@@ -872,20 +872,20 @@
 					</tr>
 				</table>
 			</div>
-			<div class='dbbs'>
+			<div class='dbbs' style="min-width: 2000px;">
 				<table id="tbbs" class='tbbs'>
 					<tr style='color:white; background:#003366;' >
 						<td style="width:20px;"><input id="btnPlus" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 						<td style="width:20px;"> </td>
 						<td style="width:100px;"><a id='lblCust_s'> </a></td>
 						<!--<td style="width:150px;"><a id='lblProductno_s'> </a></td>-->
-						<td style="width:100px;"><a id='lblProduct_s'> </a></td>
-						<td style="width:100px;"><a id='lblUcolor_s'> </a></td>
-						<td style="width:100px;"><a id='lblSpec_s'> </a></td>
+						<td style="width:150px;"><a id='lblProduct_s'> </a></td>
+						<td style="width:150px;"><a id='lblUcolor_s'> </a></td>
+						<td style="width:150px;"><a id='lblSpec_s'> </a></td>
 						<td style="width:100px;"><a id='lblSize_s'> </a></td>
 						<td style="width:100px;"><a id='lblLengthb_s'> </a></td>
-						<td style="width:100px;"><a id='lblClass_s'> </a></td>
-						<td style="width:55px;"><a id='lblUnit_s'> </a></td>
+						<td style="width:150px;"><a id='lblClass_s'> </a></td>
+						<!--<td style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 						<td style="width:85px;"><a id='lblHmount_s'> </a></td>
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
@@ -918,24 +918,24 @@
 							<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 						</td>-->
 						<td>
-							<input id="txtProduct.*" type="text" class="txt c1" style="width: 80px;"/>
+							<input id="txtProduct.*" type="text" class="txt c1" style="width: 70%;"/>
 							<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td>
-							<input id="txtUcolor.*" type="text" class="txt c1" style="width: 80px;"/>
+							<input id="txtUcolor.*" type="text" class="txt c1" style="width: 110px;"/>
 							<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td>
-							<input id="txtSpec.*" type="text" class="txt c1" style="width: 80px;"/>
+							<input id="txtSpec.*" type="text" class="txt c1" style="width: 70%;"/>
 							<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 						<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 						<td>
-							<input id="txtClass.*" type="text" class="txt c1" style="width: 80px;"/>
+							<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
 							<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 						</td>
-						<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
+						<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
 						<td><input id="txtHmount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
@@ -964,15 +964,15 @@
 				<tr class="head" style="color:white; background:#003366;">
 					<td style="width:20px;"><input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 					<td style="width:20px;"> </td>
-					<td style="width:120px;"><a id='lblUno_t'> </a></td>
+					<td style="width:150px;"><a id='lblUno_t'> </a></td>
 					<!--<td style="width:150px;"><a id='lblProductno_t'> </a></td>-->
-					<td style="width:120px;"><a id='lblProduct_t'> </a></td>
-					<td style="width:120px;"><a id='lblUcolor_t'> </a></td>
-					<td style="width:120px;"><a id='lblSpec_t'> </a></td>
-					<td style="width:120px;"><a id='lblSize_t'> </a></td>
+					<td style="width:150px;"><a id='lblProduct_t'> </a></td>
+					<td style="width:150px;"><a id='lblUcolor_t'> </a></td>
+					<td style="width:150px;"><a id='lblSpec_t'> </a></td>
+					<td style="width:150px;"><a id='lblSize_t'> </a></td>
 					<td style="width:100px;"><a id='lblLengthb_t'> </a></td>
-					<td style="width:120px;"><a id='lblClass_t'> </a></td>
-					<td style="width:55px;"><a id='lblUnit_t'> </a></td>
+					<td style="width:150px;"><a id='lblClass_t'> </a></td>
+					<!--<td style="width:55px;"><a id='lblUnit_t'> </a></td>-->
 					<td style="width:120px;"><a id='lblGmount_t'> </a></td>
 					<td style="width:120px;"><a id='lblGweight_t'> </a></td>
 					<td style="width:150px; text-align: center;"><a id='lblMemo2_t'> </a></td>
@@ -989,24 +989,24 @@
 						<input class="btn" id="btnProductno..*" type="button" value='.' style="font-weight: bold;" />
 					</td>-->
 					<td>
-						<input id="txtProduct..*" type="text" class="txt c1" style="width: 100px;"/>
+						<input id="txtProduct..*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combProduct..*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtUcolor..*" type="text" class="txt c1" style="width: 100px;"/>
+						<input id="txtUcolor..*" type="text" class="txt c1" style="width: 110px;"/>
 						<select id="combUcolor..*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtSpec..*" type="text" class="txt c1" style="width: 100px;"/>
+						<input id="txtSpec..*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combSpec..*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td><input id="txtSize..*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb..*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass..*" type="text" class="txt c1" style="width: 100px;"/>
+						<input id="txtClass..*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combClass..*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td><input id="txtUnit..*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUnit..*" type="text" class="txt c1"/></td>-->
 					<td><input id="txtGmount..*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtGweight..*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtMemo2..*" type="text" class="txt c1"/></td>

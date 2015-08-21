@@ -195,23 +195,48 @@
                         break;
 					case 'btnOk_getuno':
 						var as = _q_appendData("view_uccb", "", true);
-						var maxnoq=0; 
-						if(as[0] != undefined){
-							maxnoq=dec(as[0].uno.slice(-3));
+						var maxordeuno=[];
+												
+						for (var i=0;i<as.length;i++){
+							maxordeuno.push({
+								ordeno:as[i].uno.substr(0,15),
+								noq:dec(as[i].uno.slice(-3))
+							})
 						}
 						
 						//判斷表身批號是否已被使用
 						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
-							if(replaceAll($('#txtDatea').val(),'/','')+(('000'+maxnoq).slice(-3))==$('#txtUno_'+j).val() && !emp($('#txtUno_'+j).val())){
-								maxnoq=maxnoq+1;
+							if(!emp($('#txtProduct_'+j).val()) && !emp($('#txtUno_'+j).val()) && $('#txtUno_'+j).val().length==18  && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
+								for (var i=0;i<maxordeuno.length;i++){
+									if(maxordeuno[i].ordeno==$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()){
+										maxordeuno[i].noq=$('#txtUno_'+j).val().slice(-3);
+									}
+								}	
 							}
 						}
 						
+						
 						//寫入批號
 						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
-							if(emp($('#txtUno_'+j).val()) && (!emp($('#txtProductno_'+j).val()) || !emp($('#txtProduct_'+j).val()))){
-								maxnoq=maxnoq+1;
-								$('#txtUno_'+j).val(replaceAll($('#txtDatea').val(),'/','')+(('000'+maxnoq).slice(-3)));
+							var maxnoq='',findorde=false; 
+							if(!emp($('#txtProduct_'+j).val()) && emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
+								for (var i=0;i<maxordeuno.length;i++){
+									if(maxordeuno[i].ordeno==$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()){
+										findorde=true;
+										maxnoq=('000'+(dec(maxordeuno[i].noq)+1)).slice(-3);
+										$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+maxnoq);
+										maxordeuno[i].noq=maxnoq;
+									}
+									if (findorde)
+										break;
+								}
+								if(!findorde){
+									$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'001');
+									maxordeuno.push({
+										ordeno:$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val(),
+										noq:'001'
+									})
+								}
 							}
 						}
 						
@@ -348,18 +373,20 @@
                 
                 //產生批號當天最大批號數
 				//判斷是否要產生批號
+				var ordenos_where=' 1=0 ';
 				if(!get_uno){
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
-						if((!emp($('#txtProductno_'+j).val()) || !emp($('#txtProduct_'+j).val()))&& emp($('#txtUno_'+j).val())){
+						if(!emp($('#txtProduct_'+j).val()) && emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
+							if(ordenos_where.indexOf(($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()))==-1)
+								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+"%' and len(uno)=18),'') )";
 							get_uno=true;
-							break;
 						}
 					}
 				}
 				
-				//預設產生批號
+				//預設產生批號 (訂單號碼(12)+訂序(3)+流水號(3))
                 if(get_uno && !get_maxuno){
-	                var t_where = "where=^^ uno=isnull((select MAX(uno) from view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
+	                var t_where = "where=^^ uno!='' and ("+ordenos_where+") ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_getuno", r_accy);
 					return;
                 }

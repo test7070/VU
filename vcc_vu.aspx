@@ -262,6 +262,9 @@
 					case 'qtxt.query.changequatgweight':
 						break;
 					case 'qtxt.query.packing':
+						//要刷新畫面才會顯示bbs
+						var s2=new Array('vcc_vu_s',"where=^^noa<='"+$('#txtNoa').val()+"' ^^ ");
+						q_boxClose2(s2);
 						break;
 				}
 			}

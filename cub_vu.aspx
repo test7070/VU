@@ -104,15 +104,17 @@
                 
                 $('#btnCuc_vu').click(function() {
                 	if (q_cur==1 || q_cur==2){
-	                    var t_bdate = trim($('#txtBdate').val());
-	                    var t_edate = trim($('#txtEdate').val());
+	                    //var t_bdate = trim($('#txtBdate').val());
+	                    //var t_edate = trim($('#txtEdate').val());
 	                    //訂單未結案 且 排程數量-加工數量>0
 	                    var t_where = ' 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ';
-	                    t_bdate = (emp(t_bdate) ? '' : t_bdate);
-	                    t_edate = (emp(t_edate) ? r_picd : t_edate);
-	                    t_where += " and (a.datea between '" + t_bdate + "' and '" + t_edate + "') ";
-	                    t_where ="where=^^"+t_where+"^^";
-	                    q_gt('cucs_vu', t_where , 0, 0, 0, "cucs_vu");
+	                    //t_bdate = (emp(t_bdate) ? '' : t_bdate);
+	                    //t_edate = (emp(t_edate) ? r_picd : t_edate);
+	                    //t_where += " and (a.datea between '" + t_bdate + "' and '" + t_edate + "') ";
+	                    //t_where ="where=^^"+t_where+"^^";
+	                    q_box("cucs_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where + ";" + r_accy, 'cucs_vu', "95%", "95%", q_getMsg('popCuc'));
+	                    
+	                    //q_gt('cucs_vu', t_where , 0, 0, 0, "cucs_vu");
                    }
                 });
 
@@ -130,8 +132,8 @@
                 		}
                 		
                 		q_gridAddRow(bbsHtm, 'tbbs'
-                		, 'txtCustno,txtComp,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtHmount,txtMount,txtWeight,txtMemo,txtDate2,txtOrdeno,txtNo2'
-                        , as.length, as, 'acustno,acust,product,ucolor,spec,size,lengthb,class,unit,mount1,emount,eweight,memo,odatea,ordeno,no2', '','');
+                		, 'txtCustno,txtComp,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtHmount,txtMount,txtWeight,txtMemo,txtDatea,txtOrdeno,txtNo2,txtProductno2,txtProduct2'
+                        , as.length, as, 'acustno,acust,product,ucolor,spec,size,lengthb,class,unit,mount1,emount,eweight,memo,odatea,ordeno,no2,noa,noq', '','');
                 	
                 		break;
                 	case 'bbsspec':
@@ -274,6 +276,22 @@
             function q_boxClose(s2) {
                 var ret;
                 switch (b_pop) {
+                	case 'cucs_vu':
+                		if (q_cur > 0 && q_cur < 4) {
+                            if (!b_ret || b_ret.length == 0) {
+                                b_pop = '';
+                                return;
+                            }
+                		
+	                		for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
+	                			$('#btnMinus_'+j).click();
+	                		}
+	                		
+	                		q_gridAddRow(bbsHtm, 'tbbs'
+	                		, 'txtCustno,txtComp,txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtUnit,txtHmount,txtMount,txtWeight,txtMemo,txtDatea,txtOrdeno,txtNo2,txtProductno2,txtProduct2'
+	                        , b_ret.length, b_ret, 'acustno,acust,product,ucolor,spec,size,lengthb,class,unit,mount1,emount,eweight,memo,odatea,ordeno,no2,noa,noq', '','');
+                		}
+                		break;
                     case 'ordes':
                         if (q_cur > 0 && q_cur < 4) {
                             if (!b_ret || b_ret.length == 0) {
@@ -432,7 +450,7 @@
             }
 
             function bbsSave(as) {
-                if (!as['productno'] && !as['product'] && !as['uno'] && parseFloat(as['mount'].length == 0 ? "0" : as['mount']) == 0 && parseFloat(as['weight'].length == 0 ? "0" : as['weight']) == 0) {
+                if (!as['product'] && !as['uno'] && parseFloat(as['mount'].length == 0 ? "0" : as['mount']) == 0 && parseFloat(as['weight'].length == 0 ? "0" : as['weight']) == 0) {
                     as[bbsKey[1]] = '';
                     return;
                 }
@@ -876,23 +894,22 @@
 						<td><input id="txtDatea" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblNoa" class="lbl"> </a></td>
 						<td><input id="txtNoa" type="text" class="txt c1"/></td>
+						<td colspan="2">
+							<input type="button" id="btnCuc_vu" value="排程匯入" style="width:120px;"/>
+							<input type="button" id="btnOrdes_vu" value="訂單匯入" style="width:120px;"/>
+							<input type="button" id="btnCubu_vu" value="入庫" style="width:120px;"/>
+						</td>
 						<!--<td><span> </span><a id="lblTypea" class="lbl"> </a></td>
 						<td><select id="cmbTypea" class="txt c1"> </select></td>-->
 					</tr>
-					<tr>
+					<!--<tr>
 						<td><span> </span><a id="lblBdate" class="lbl" > </a></td>
 						<td colspan="2">
 							<input id="txtBdate" type="text" style="width:45%;"/>
 							<span style="float:left; display:block; width:20px;"><a> ～ </a></span>
 							<input id="txtEdate" type="text" style="width:45%;"/>
 						</td>
-						<!--<td> </td>-->
-						<td colspan="2">
-							<input type="button" id="btnCuc_vu" value="排程匯入" style="width:120px;"/>
-							<input type="button" id="btnOrdes_vu" value="訂單匯入" style="width:120px;"/>
-							<input type="button" id="btnCubu_vu" value="入庫" style="width:120px;"/>
-						</td>
-					</tr>
+					</tr>-->
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl" > </a></td>
 						<td colspan="4"><input id="txtMemo" type="text" class="txt c1"/></td>

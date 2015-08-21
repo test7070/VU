@@ -312,7 +312,7 @@
                 $('#txtNoa').val('AUTO');
                 $('#txtDatea').val(q_date());
                 $('#txtDatea').focus();
-                $('#txtBdate').val(q_date());
+                //$('#txtBdate').val(q_date());
             }
 
             function btnModi() {

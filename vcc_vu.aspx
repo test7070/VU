@@ -262,6 +262,9 @@
 					case 'qtxt.query.changequatgweight':
 						break;
 					case 'qtxt.query.packing':
+						//要刷新畫面才會顯示bbs
+						var s2=new Array('vcc_vu_s',"where=^^noa<='"+$('#txtNoa').val()+"' ^^ ");
+						q_boxClose2(s2);
 						break;
 				}
 			}
@@ -1271,19 +1274,19 @@
 					<td align="center" style="width:55px;"><a id='lblNoq_s'> </a></td>
 					<!--<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>-->
 					<!--<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>-->
-					<td align="center" style="width:120px;"><a id='lblProduct_s'> </a></td>
-					<td align="center" style="width:120px;"><a id='lblUcolor_s'> </a></td>
-					<td align="center" style="width:120px;"><a id='lblSpec_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
+					<td align="center" style="width:160px;"><a id='lblUcolor_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
-					<td align="center" style="width:120px;"><a id='lblClass_s'> </a></td>
-					<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
+					<!--<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
-					<td align="center" style="width:120px;"><a id='lblStore_s'> </a></td>
-					<td align="center" style="width:230px;"><a id='lblMemo_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblStore_s'> </a></td>
+					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn"  id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
@@ -1294,24 +1297,24 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>-->
 					<td>
-						<input id="txtProduct.*" type="text" class="txt c1" style="width: 80px;"/>
+						<input id="txtProduct.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 80px;"/>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 110px;"/>
 						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtSpec.*" type="text" class="txt c1" style="width: 80px;"/>
+						<input id="txtSpec.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass.*" type="text" class="txt c1" style="width: 80px;"/>
+						<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
 					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>
@@ -1323,7 +1326,7 @@
 					</td>
 					<td>
 						<input id="txtMemo.*" type="text" class="txt c1"/>
-						<input id="txtOrdeno.*" type="text"  class="txt" style="width:70%;"/>
+						<input id="txtOrdeno.*" type="text"  class="txt" style="width:65%;"/>
 						<input id="txtNo2.*" type="text" class="txt" style="width:20%;"/>
 					</td>
 				</tr>

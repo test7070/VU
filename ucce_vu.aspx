@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
-		<title></title>
+		<title> </title>
 		<script src="../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -553,7 +553,7 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 100%;"><!--2150px-->
+		<div class='dbbs' style="min-width: 1900px;"><!--2150px-->
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;">
@@ -566,7 +566,7 @@
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
-					<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>
+					<!--<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblEmount2_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
@@ -586,24 +586,24 @@
 					<td>
 						<!--<input id="txtProductno.*" type="text" style="width:95%;"/>
 						<input id="btnProduct.*" type="button" style="display:none;" />-->
-						<input id="txtProduct.*" type="text" class="txt c1" style="width: 80px;"/>
+						<input id="txtProduct.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 80px;"/>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 110px;"/>
 						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtSpec.*" type="text" class="txt c1" style="width: 80px;"/>
+						<input id="txtSpec.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass.*" type="text" class="txt c1" style="width: 80px;"/>
+						<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
 					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtEmount2.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>

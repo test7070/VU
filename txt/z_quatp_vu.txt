@@ -38,9 +38,9 @@ declare @tmp table(
 
 insert @tmp
 select '0',row_number() over(order by a.custno,a.datea,a.noa),a.datea,a.noa
-,a.cno,a.acomp,a.custno,left(a.comp,6),'','','',isnull(b.price,0),a.weight,a.eweight,isnull(b.price,0)*a.eweight
+,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end,'','','',isnull(b.price,0),a.weight,a.eweight,isnull(b.price,0)*a.eweight
 ,isnull(c.opay,0),0,a.conn,a.memo
-from view_quat a
+from view_quat a left join cust d on a.custno=d.noa
 outer apply (select top 1 price from view_quats where noa=a.noa order by no3 )b
 outer apply (select sum(opay) opay from umm where payc=a.noa) c
 where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
@@ -125,8 +125,8 @@ begin
 	select '1',custno,char(255),char(255),sum(weight),sum(eweight) 
 	from @tmp where gno = '0' group by custno
 		
-	insert into @tmp(gno,custno,datea,weight,eweight)
-	select '3',char(255),char(255),sum(weight),sum(eweight) 
+	insert into @tmp(gno,custno,datea,weight,eweight,price)
+	select '3',char(255),char(255),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
 	from @tmp where gno = '0'
 	
 	insert @tmp (gno,noa,memo,custno,datea) 

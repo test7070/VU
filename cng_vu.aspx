@@ -620,7 +620,7 @@
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
-					<td align="center" style="width:40px;"><a id='lblUnit_s'> </a></td>
+					<!--<td align="center" style="width:40px;"><a id='lblUnit_s'> </a></td>-->
 					<td align="center" style="width:90px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
@@ -634,24 +634,24 @@
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
 					</td>-->
 					<td>
-						<input id="txtProduct.*" type="text" class="txt c1" style="width: 100px;"/>
+						<input id="txtProduct.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 100px;"/>
+						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 110px;"/>
 						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td>
-						<input id="txtSpec.*" type="text" class="txt c1" style="width: 100px;"/>
+						<input id="txtSpec.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass.*" type="text" class="txt c1" style="width: 100px;"/>
+						<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
 					<td><input id="txtMount.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtWeight.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>

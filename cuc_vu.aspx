@@ -225,7 +225,7 @@
             }
 
             function bbsSave(as) {
-                if (!as['ordeno']) {
+                if (!as['ordeno'] && !as['product']) {
                     as[bbsKey[1]] = '';
                     return;
                 }
@@ -474,13 +474,13 @@
 					<tr style='color:White; background:#003366;'>
 						<td align="center" style="width: 1%;"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  /></td>
 						<td align="center" style="width: 130px;"><a id='lblOrdeno_s'> </a></td>
-						<td style="width:130px;"><a id='lblProduct_s'> </a></td>
-						<td style="width:130px;"><a id='lblUcolor_s'> </a></td>
-						<td style="width:130px;"><a id='lblSpec_s'> </a></td>
-						<td style="width:130px;"><a id='lblSize_s'> </a></td>
+						<td style="width:150px;"><a id='lblProduct_s'> </a></td>
+						<td style="width:150px;"><a id='lblUcolor_s'> </a></td>
+						<td style="width:150px;"><a id='lblSpec_s'> </a></td>
+						<td style="width:100px;"><a id='lblSize_s'> </a></td>
 						<td style="width:100px;"><a id='lblLengthb_s'> </a></td>
-						<td style="width:130px;"><a id='lblClass_s'> </a></td>
-						<td style="width:55px;"><a id='lblUnit_s'> </a></td>
+						<td style="width:150px;"><a id='lblClass_s'> </a></td>
+						<!--<td style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 						<td style="width:85px;"><a id='lblMount1_s'> </a></td>
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
@@ -494,24 +494,24 @@
 							<input id="txtNoq.*" type="hidden"/>
 						</td>
 						<td>
-							<input id="txtProduct.*" type="text" class="txt c1" style="width: 90px;"/>
+							<input id="txtProduct.*" type="text" class="txt c1" style="width: 70%;"/>
 							<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td>
-							<input id="txtUcolor.*" type="text" class="txt c1" style="width: 90px;"/>
+							<input id="txtUcolor.*" type="text" class="txt c1" style="width: 110px;"/>
 							<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td>
-							<input id="txtSpec.*" type="text" class="txt c1" style="width: 90px;"/>
+							<input id="txtSpec.*" type="text" class="txt c1" style="width: 70%;"/>
 							<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 						<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 						<td>
-							<input id="txtClass.*" type="text" class="txt c1" style="width: 90px;"/>
+							<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
 							<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 						</td>
-						<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
+						<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
 						<td><input id="txtMount1.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>

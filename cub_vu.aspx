@@ -226,14 +226,14 @@
 									if(maxordeuno[i].ordeno==$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()){
 										findorde=true;
 										maxnoq=('000'+(dec(maxordeuno[i].noq)+1)).slice(-3);
-										$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'_'+$('#txtMechno').val()+maxnoq);
+										$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'-'+$('#txtMechno').val()+maxnoq);
 										maxordeuno[i].noq=maxnoq;
 									}
 									if (findorde)
 										break;
 								}
 								if(!findorde){
-									$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'_'+$('#txtMechno').val()+'001');
+									$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'-'+$('#txtMechno').val()+'001');
 									maxordeuno.push({
 										ordeno:$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val(),
 										noq:'001'
@@ -255,9 +255,10 @@
             function q_stPost() {
                 if (!(q_cur == 1 || q_cur == 2))
                     return false;
-				if(!emp($('#txtNoa').val())){
+				//0824 拿掉直接出貨
+				/*if(!emp($('#txtNoa').val())){
 					q_func('cubu_post.post.a1', r_accy + ',' + $('#txtNoa').val() + ',0');
-				}
+				}*/
             }
             
             function q_funcPost(t_func, result) {
@@ -402,7 +403,7 @@
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 						if(!emp($('#txtProduct_'+j).val()) && emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
 							if(ordenos_where.indexOf(($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()))==-1)
-								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'_'+$('#txtMechno').val()+"%' ),'') )";
+								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'-'+$('#txtMechno').val()+"%' ),'') )";
 							get_uno=true;
 						}
 					}
@@ -440,7 +441,13 @@
                 
                 sum();
                 $('#txtWorker').val(r_name);
-
+                
+                //入庫日沒打預設今天
+				for (var i = 0; i < q_bbsCount; i++) {
+					if ($.trim($('#txtDate2_' + i).val()).length == 0)
+						$('#txtDate2_' + i).val(q_date());
+				}
+                    
                 var t_noa = trim($('#txtNoa').val());
                 var t_date = trim($('#txtDatea').val());
                 if (t_noa.length == 0 || t_noa == "AUTO")
@@ -577,7 +584,7 @@
                 $('#lblNeed_s').text('需求');
                 $('#lblMemo_s').text('備註');
                 $('#lblStore_s').text('入庫倉庫');
-                $('#lblDate2_s').text('交期');
+                $('#lblDate2_s').text('入庫日');
                 $('#lblEnda_s').text('手結');
                 $('#lblOrdeno_s').text('訂單編號');
                 $('#lblNo2_s').text('訂序');

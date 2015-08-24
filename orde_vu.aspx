@@ -95,7 +95,7 @@
 
 			function mainPost() {
 				q_getFormat();
-				bbmMask = [['txtOdate', r_picd]];
+				bbmMask = [['txtOdate', r_picd],['txtDatea', r_picd]];
 				q_mask(bbmMask);
 				bbsMask = [['txtDatea', r_picd]];
 				bbmNum = [['txtTranadd', 15, q_getPara('vcc.weightPrecision'), 1],['txtBenifit', 15, q_getPara('vcc.weightPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]
@@ -114,6 +114,7 @@
 				$('#lblTranadd').text('車空重');
 				$('#lblBenifit').text('車總重');
 				$('#lblWeight').text('淨重');
+				$('#lblDatea').text('預交日');
 				
 				$('#txtTranadd').change(function() {
 					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
@@ -347,7 +348,7 @@
 						var as = _q_appendData("class", "", true);
 						var t_class='@';
 						for ( i = 0; i < as.length; i++) {
-							t_class+=","+as[i].class;
+							t_class+=","+as[i].noa;
 						}
 						q_cmbParse("combClass", t_class,'s');
 						break;
@@ -403,9 +404,11 @@
 					return;
 				}
 				
-				for(var k=0;k<q_bbsCount;k++){
-					if(emp($('#txtDatea_'+k).val()))
-						$('#txtDatea_'+k).val(q_cdn($.trim($('#txtOdate').val()),15))
+				if(emp($('#txtDatea').val()))
+					$('#txtDatea').val(q_cdn($.trim($('#txtOdate').val()),15))
+				for(var k=0;k<q_bbsCount;k++){					
+					if(!emp($('#txtDatea').val()))
+						$('#txtDatea_'+k).val($.trim($('#txtDatea').val()));
 				}
 				
 				//1030419 當專案沒有勾 BBM的取消和結案被打勾BBS也要寫入
@@ -939,6 +942,8 @@
 							<input id="txtSalesno" type="text" class="txt c2"/>
 							<input id="txtSales" type="text" class="txt c3"/>
 						</td>
+						<td><span> </span><a id='lblDatea' class="lbl"> </a></td>
+						<td><input id="txtDatea" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblTranadd' class="lbl"> </a></td>
@@ -1003,7 +1008,7 @@
 					<td align="center" style="width:85px;"><a id='lblGemounts'> </a></td>
 					<td align="center" style="width:180px;"><a id='lblMemo_s'> </a></td>
 					<!--<td align="center" style="width: 180px;"><a id='lblUno_s'> </a></td>-->
-					<td align="center" style="width:90px;"><a id='lblDateas'> </a></td>
+					<td align="center" style="width:90px;display: none;"><a id='lblDateas'> </a></td>
 					<td align="center" style="width:30px;"><a id='lblEndas'> </a></td>
 					<td align="center" style="width:30px;"><a id='lblCancels'> </a></td>
 				</tr>
@@ -1047,7 +1052,7 @@
 						<input class="txt" id="txtNo3.*" type="text" style="width: 20%;"/>-->
 					</td>
 					<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->
-					<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
+					<td style="display: none;"><input id="txtDatea.*" type="text" class="txt c1"/></td>
 					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
 					<td align="center"><input id="chkCancel.*" type="checkbox"/></td>
 				</tr>

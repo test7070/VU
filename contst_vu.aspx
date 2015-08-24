@@ -35,6 +35,7 @@
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
 				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
 			);
+			
 			$(document).ready(function() {
 				bbmKey = ['noa'];
 				bbsKey = ['noa', 'noq'];
@@ -115,6 +116,14 @@
 			var z_cno = r_cno, z_acomp = r_comp, z_nick = r_comp.substr(0, 2);
 			function q_gtPost(t_name) {
 				switch (t_name) {
+					case 'checkContno_btnOk':
+						var as = _q_appendData("cont", "", true);
+                        if (as[0] != undefined) {
+                            alert('合約號碼已存在!!!');
+                        } else {
+                            wrServer($('#txtNoa').val());
+                        }
+						break;
 					case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';
@@ -135,7 +144,7 @@
 						var as = _q_appendData("class", "", true);
 						var t_class='@';
 						for ( i = 0; i < as.length; i++) {
-							t_class+=","+as[i].class;
+							t_class+=","+as[i].noa;
 						}
 						q_cmbParse("combClass", t_class,'s');
 						break;
@@ -183,10 +192,16 @@
 				sum();
 
 				var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
-				if (s1.length == 0 || s1 == "AUTO")
+				if (s1.length == 0 || s1 == "AUTO"){
 					q_gtnoa(q_name, replaceAll(q_getPara('sys.key_cont') + (!emp($('#txtDatea').val())?$('#txtDatea').val():q_date()), '/', ''));
-				else
-					wrServer(s1);
+				}else{
+					if (q_cur == 1){
+						t_where = "where=^^ noa='" + $('#txtNoa').val() + "'^^";
+                    	q_gt('cont', t_where, 0, 0, 0, "checkContno_btnOk", r_accy);
+					}else{
+						wrServer(s1);
+					}
+				}
 			}
 
 			function _btnSeek() {
@@ -231,6 +246,7 @@
 					}
 				}
 				_bbsAssign();
+				refreshBbm();
 				HiddenField();
 				$('#lblNoq_s').text('項次');
 				$('#lblProductno_s').text('品號');
@@ -261,6 +277,9 @@
 				$('#chkIsproj').attr('checked', true);
 				
 				$('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val('AUTO');
+				//104/08/24開放可以修改
+				refreshBbm();
+				
 				$('#txtOdate').val(q_date());
 				$('#txtDatea').val(q_cdn(q_date(), 3));
 				
@@ -308,6 +327,7 @@
 			function refresh(recno) {
 				_refresh(recno);
 				HiddenField();
+				refreshBbm();
 			}
 
 			function readonly(t_para, empty) {
@@ -386,6 +406,14 @@
 					
 				}
 			}
+			
+			function refreshBbm() {
+                if (q_cur == 1) {
+                    $('#txtNoa').css('color', 'black').css('background', 'white').removeAttr('readonly');
+                } else {
+                    $('#txtNoa').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+                }
+            }
 		</script>
 		<style type="text/css">
 			#dmain {

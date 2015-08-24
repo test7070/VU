@@ -49,8 +49,8 @@
                     }
                 });
 
-                $('#vewClass').text("廠牌");
-                $('#lblClass').text("廠牌");
+                $('#lblNoa').text("廠牌");
+                $('#lblClass').text("工廠名稱");
                 document.title = '廠牌主檔';
             }
             
@@ -69,19 +69,16 @@
                    case 'checkClass_change':
                         var as = _q_appendData("class", "", true);
                         if (as[0] != undefined) {
-                            alert('已存在 ' + as[0].class);
+                            alert('已存在 ' + as[0].noa);
                         }
                         break;
                     case 'checkClassno_btnOk':
                         var as = _q_appendData("class", "", true);
                         if (as[0] != undefined) {
-                            alert('已存在 ' + as[0].class);
+                            alert('已存在 ' + as[0].noa);
                             return;
                         } else {
-                            //wrServer($('#txtNoa').val());
-                            var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
-                            if (s1.length == 0 || s1 == "AUTO")
-                                q_gtnoa(q_name, replaceAll(q_date(), '/', ''));
+                            wrServer($('#txtNoa').val());
                         }
                         break;
                     case q_name:
@@ -119,17 +116,17 @@
 
             function btnOk() {
                 var t_err = '';
-                t_err = q_chkEmpField([['txtClass', q_getMsg('lblClass')]]);
+                t_err = q_chkEmpField([['txtNoa', '廠牌']]);
 
                 if (t_err.length > 0) {
                     alert(t_err);
                     return;
                 }
-                var t_class = trim($('#txtClass').val());
+                
 				var t_noa = trim($('#txtNoa').val());
 				
                 if (q_cur == 1) {
-                    t_where = "where=^^ class='" + t_class + "'^^";
+                    t_where = "where=^^ noa='" + t_noa + "'^^";
                     q_gt('class', t_where, 0, 0, 0, "checkClassno_btnOk", r_accy);
                 } else {
                     wrServer(t_noa);
@@ -150,7 +147,8 @@
             function refresh(recno) {
                 _refresh(recno);
                 refreshBbm();
-                $('#vewClass').text("廠牌");
+                $('#vewNoa').text("廠牌");
+                $('#vewClass').text("工廠名稱");
                 $('#vewChk').text("選");
             }
 
@@ -341,19 +339,19 @@
 				<table class="tview" id="tview"   border="1" cellpadding='2'  cellspacing='0' style="background-color: #FFFF66;">
 					<tr>
 						<td align="center" style="width:5%"><a id='vewChk'> </a></td>
-						<td align="center" style="width:45%;display: none;"><a id='vewNoa'> </a></td>
+						<td align="center" style="width:45%;"><a id='vewNoa'> </a></td>
 						<td align="center" style="width:50%"><a id='vewClass'> </a></td>
 					</tr>
 					<tr>
 						<td ><input id="chkBrow.*" type="checkbox" style=''/></td>
-						<td align="center" id='noa' style="display: none;">~noa</td>
+						<td align="center" id='noa'>~noa</td>
 						<td align="center" id='class'>~class</td>
 					</tr>
 				</table>
 			</div>
 			<div class='dbbm' style="width: 60%;float: left;">
 				<table class="tbbm"  id="tbbm"   border="0" cellpadding='2'  cellspacing='5'>
-					<tr class="tr1" style="display: none;">
+					<tr class="tr1">
 						<td class="td1"><span> </span><a id="lblNoa" class="lbl"> </a></td>
 						<td class="td2"><input id="txtNoa" type="text" class="txt c1"/></td>
 						<td class="td3"> </td>

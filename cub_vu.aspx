@@ -226,14 +226,14 @@
 									if(maxordeuno[i].ordeno==$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()){
 										findorde=true;
 										maxnoq=('000'+(dec(maxordeuno[i].noq)+1)).slice(-3);
-										$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+$('#txtMechno').val()+maxnoq);
+										$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'_'+$('#txtMechno').val()+maxnoq);
 										maxordeuno[i].noq=maxnoq;
 									}
 									if (findorde)
 										break;
 								}
 								if(!findorde){
-									$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+$('#txtMechno').val()+'001');
+									$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'_'+$('#txtMechno').val()+'001');
 									maxordeuno.push({
 										ordeno:$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val(),
 										noq:'001'
@@ -402,7 +402,7 @@
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 						if(!emp($('#txtProduct_'+j).val()) && emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
 							if(ordenos_where.indexOf(($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()))==-1)
-								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+$('#txtMechno').val()+"%' ),'') )";
+								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'_'+$('#txtMechno').val()+"%' ),'') )";
 							get_uno=true;
 						}
 					}
@@ -927,7 +927,7 @@
 					</tr>
 				</table>
 			</div>
-			<div class='dbbs' style="min-width: 2000px;">
+			<div class='dbbs' style="min-width: 2200px;">
 				<table id="tbbs" class='tbbs'>
 					<tr style='color:white; background:#003366;' >
 						<td style="width:20px;"><input id="btnPlus" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
@@ -946,15 +946,15 @@
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
 						<!--<td style="width:100px;"><a id='lblPrice_s'> </a></td>-->
 						<td style="width:150px;"><a id='lblNeed_s'> </a></td>
-						<td style="width:150px;"><a id='lblMemo_s'> </a></td>
-						<td style="width:150px;"><a id='lblUno_s'> </a></td>
+						<td style="width:150px;"><a id='lblMemo_s'> </a></td>						
 						<td style="width:100px;"><a id='lblDate2_s'> </a></td>
 						<!--<td style="width:200px;"><a id='lblStore_s'> </a></td>-->
-						<td style="width:30px;"><a id='lblEnda_s'> </a></td>
+						<!--<td style="width:30px;"><a id='lblEnda_s'> </a></td>-->
 						<td style="width:150px;"><a id='lblOrdeno_s'> </a></td>
 						<td style="width:60px;"><a id='lblNo2_s'> </a></td>
 						<td style="width:100px;"><a id='lblDatea_s'> </a></td>
-						<td style="width:45px;"><a id='lblHend_s'> </a></td>
+						<td style="width:200px;"><a id='lblUno_s'> </a></td>
+						<!--<td style="width:45px;"><a id='lblHend_s'> </a></td>-->
 					</tr>
 					<tr style='background:#cad3ff;'>
 						<td align="center">
@@ -997,18 +997,18 @@
 						<!--<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>-->
 						<td><input id="txtNeed.*" type="text" class="txt c1"/></td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
-						<td><input id="txtUno.*" type="text" class="txt c1"/></td>
 						<td><input id="txtDate2.*" type="text" class="txt c1"/></td>
 						<!--<td>
 							<input id="txtStoreno.*" type="text" class="txt c1" style="width: 30%;"/>
 							<input class="btn" id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;float: left;" />
 							<input id="txtStore.*" type="text" class="txt c1" style="width: 50%;"/>
 						</td>-->
-						<td><input id="chkEnda.*" type="checkbox"/></td>
+						<!--<td><input id="chkEnda.*" type="checkbox"/></td>-->
 						<td><input id="txtOrdeno.*" type="text" class="txt c1"/></td>
 						<td><input id="txtNo2.*" type="text" class="txt c1"/></td>
 						<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
-						<td><input id="chkHend.*" type="checkbox"/></td>
+						<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+						<!--<td><input id="chkHend.*" type="checkbox"/></td>-->
 					</tr>
 				</table>
 			</div>

@@ -45,7 +45,9 @@ declare @tmp table(
 	a_total float,
 	b_uno nvarchar(100),
 	b_productno nvarchar(30),
-	b_products nvarchar(30),
+	b_products nvarchar(MAX),
+	b_spec nvarchar(MAX),
+	b_size nvarchar(MAX),
 	b_unit nvarchar(15),
 	b_mount float,
 	b_weight float,
@@ -62,7 +64,9 @@ insert into @tmp
 		,(case when a.taxtype='1' then a.money when a.taxtype='3' then e.money else a.money end)
 		,(case when a.taxtype='1' then a.money+round(a.money*0.05,0) when a.taxtype='3' then a.total else a.money end)
 		,b.uno,b.productno
-		,REPLACE(b.product,' ','') + (case when LEN(isnull(b.size,'')) = 0 then '' else b.size end) +(case when LEN(isnull(b.ucolor,'')) = 0 then '' else b.ucolor end)+ (case when isnull(b.lengthb,0)=0 then '' else '*'+CAST(b.lengthb as nvarchar(20)) + 'M' end)
+		,REPLACE(b.product,' ','')
+		,REPLACE(b.spec,' ','')
+		,(case when LEN(isnull(b.size,'')) = 0 then '' else b.size end) + (case when isnull(b.lengthb,0)=0 then '' else '*'+CAST(b.lengthb as nvarchar(20)) + 'M' end)+(case when LEN(isnull(b.ucolor,'')) = 0 then '' else b.ucolor end)
 		,b.unit,b.mount,b.weight,b.price,b.total,b.memo
 	from view_vcc a
 	left join view_vccs b on a.noa = b.noa
@@ -151,7 +155,7 @@ select
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a_tax),1)),4,12)) a_tax,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a_money),1)),4,12)) a_money,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a_total),1)),4,12)) a_total,
-	b_productno,dbo.charbr(b_products,38) b_products,b_unit,
+	b_productno,dbo.charbr(b_products,38) b_products,b_unit,b_spec,b_size,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_mount),1)),4,12)) b_mount,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_weight),1)),4,12)) b_weight,b_price,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_total),1)),4,12)) b_total

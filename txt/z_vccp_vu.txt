@@ -45,7 +45,9 @@ declare @tmp table(
 	a_total float,
 	b_uno nvarchar(100),
 	b_productno nvarchar(30),
-	b_products nvarchar(30),
+	b_products nvarchar(MAX),
+	b_spec nvarchar(MAX),
+	b_size nvarchar(MAX),
 	b_unit nvarchar(15),
 	b_mount float,
 	b_weight float,
@@ -62,7 +64,9 @@ insert into @tmp
 		,(case when a.taxtype='1' then a.money when a.taxtype='3' then e.money else a.money end)
 		,(case when a.taxtype='1' then a.money+round(a.money*0.05,0) when a.taxtype='3' then a.total else a.money end)
 		,b.uno,b.productno
-		,REPLACE(b.product,' ','') + (case when LEN(isnull(b.size,'')) = 0 then '' else b.size end) +(case when LEN(isnull(b.ucolor,'')) = 0 then '' else b.ucolor end)+ (case when isnull(b.lengthb,0)=0 then '' else '*'+CAST(b.lengthb as nvarchar(20)) + 'M' end)
+		,REPLACE(b.product,' ','')
+		,REPLACE(b.spec,' ','')
+		,(case when LEN(isnull(b.size,'')) = 0 then '' else b.size end) + (case when isnull(b.lengthb,0)=0 then '' else '*'+CAST(b.lengthb as nvarchar(20)) + 'M' end)+(case when LEN(isnull(b.ucolor,'')) = 0 then '' else b.ucolor end)
 		,b.unit,b.mount,b.weight,b.price,b.total,b.memo
 	from view_vcc a
 	left join view_vccs b on a.noa = b.noa
@@ -151,7 +155,7 @@ select
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a_tax),1)),4,12)) a_tax,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a_money),1)),4,12)) a_money,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,a_total),1)),4,12)) a_total,
-	b_productno,dbo.charbr(b_products,38) b_products,b_unit,
+	b_productno,dbo.charbr(b_products,38) b_products,b_unit,b_spec,b_size,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_mount),1)),4,12)) b_mount,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_weight),1)),4,12)) b_weight,b_price,
 	reverse(substring(reverse(convert(nvarchar(15),CONVERT(money,b_total),1)),4,12)) b_total
@@ -416,33 +420,35 @@ set @t_slengthb=case when '#non' = [12] then '' else [12] end
 set @t_elengthb=case when '#non' = [13] then char(255)  else [13] end
 set @t_class=case when '#non' = [14] then '' else [14] end
 -------------------------------------------------------------------------
-declare @result table(gno nvarchar(1),rank int,productno nvarchar(35),product nvarchar(100)
-,ucolor nvarchar(30),spec nvarchar(30),size nvarchar(30),lengthb float,class nvarchar(15)
-,uno nvarchar(30),mount float,weight float)
-insert @result
-select '0',ROW_NUMBER() over(order by productno)
-,productno,product,ucolor,spec,size,lengthb,class,uno,mount,
-case when (select count(*) from view_vcct b where b.uno=a.uno)!=0 then 
-		  a.weight-(select weight from view_vcct c where c.uno=a.uno) else weight
-		  end
-from view_cubs a
+declare @result table(gno nvarchar(1),rank int,productno nvarchar(35),product nvarchar(100) 
+,ucolor nvarchar(30),spec nvarchar(30),size nvarchar(30),lengthb float,class nvarchar(15) 
+,uno nvarchar(30),mount float,weight float) 
+insert @result 
+select '0',ROW_NUMBER() over(order by productno) 
+,productno,product,ucolor,spec,size,lengthb,class,uno,
+a.mount-isnull((select weight from view_vcct b where b.uno=a.uno),0)  , 
+a.weight-isnull((select weight from view_vcct b where b.uno=a.uno),0)  
 
-where  product between @t_spno and @t_epno
- and (len(@t_uno)=0 or uno=@t_uno) and uno!='' and datea <= @t_edate
+from view_cubs a 
+
+where product between @t_spno and @t_epno 
+and (len(@t_uno)=0 or uno=@t_uno) and uno!='' and datea <= @t_edate 
 and (len(@t_uno)=0 or uno=@t_uno) and uno!='' and datea <= @t_edate 
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) 
 and (len(@t_size)=0 or isnull(size,'')=@t_size) 
-and ((@t_slengthb='' and  @t_elengthb=char(255)) or isnull(lengthb,0) between cast(@t_slengthb as float) and cast(@t_elengthb as float))
-and (len(@t_class)=0 or isnull(class,'')=@t_class)
+and ((@t_slengthb='' and @t_elengthb=char(255)) or isnull(lengthb,0) between cast(@t_slengthb as float) and cast(@t_elengthb as float)) 
+and (len(@t_class)=0 or isnull(class,'')=@t_class) 
 
-if ((select count(*) from @result) != 0)
-	begin
-	insert @result(gno,mount,weight) 
-	select '1',SUM(mount),SUM(weight) 
+if ((select count(*) from @result) != 0) 
+begin 
+	insert @result(gno,mount,weight,productno) 
+	select '1',SUM(mount),SUM(weight),'ZZZZZZZ'
 	from @result 
-	end
+end 
 
-select *
-from @result
+select * 
+from @result 
+where mount !=0 and weight != 0
+order by productno,uno
 
 ;

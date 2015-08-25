@@ -37,9 +37,9 @@
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
 				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
-				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp,addr', 'txtCno,txtAcomp,txtAddr2', 'acomp_b.aspx'],
+				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp,addr', 'txtCno,txtAcomp,txtAddr2', 'acomp_b.aspx']
 				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
-				['txtCarno', 'lblCar', 'cardeal', 'noa,comp', 'txtCarno,txtCar', 'cardeal_b.aspx']
+				//['txtCarno', 'lblCar', 'cardeal', 'noa', '0txtCarno', 'cardeal_b.aspx']
 			);
 
 			$(document).ready(function() {
@@ -316,7 +316,7 @@
 						var as = _q_appendData("class", "", true);
 						var t_class='@';
 						for ( i = 0; i < as.length; i++) {
-							t_class+=","+as[i].class;
+							t_class+=","+as[i].noa;
 						}
 						q_cmbParse("combClass", t_class,'s');
 						break;

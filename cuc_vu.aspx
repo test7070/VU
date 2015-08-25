@@ -106,7 +106,7 @@
 						var as = _q_appendData("class", "", true);
 						var t_class='@';
 						for ( i = 0; i < as.length; i++) {
-							t_class+=","+as[i].class;
+							t_class+=","+as[i].noa;
 						}
 						q_cmbParse("combClass", t_class,'s');
 						break;

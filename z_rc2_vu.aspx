@@ -15,13 +15,14 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
-			if (location.href.indexOf('?') < 0) {
-				location.href = location.href + "?;;;;" + ((new Date()).getUTCFullYear() - 1911);
-			}
+		
 			$(document).ready(function() {
 				q_getId();
 				q_gf('', 'z_rc2_vu');
 			});
+			
+			
+			
 			function q_gfPost() {
 				$('#q_report').q_report({
 					fileName : 'z_rc2_vu',
@@ -67,35 +68,49 @@
                     }
                     ]
 				});
-				q_popAssign();
-				$('#txtDate1').mask('999/99/99');
-				$('#txtDate1').datepicker();
-				$('#txtDate2').mask('999/99/99');
-				$('#txtDate2').datepicker();
-				$('#txtMon1').mask('999/99');
-				$('#txtMon2').mask('999/99');
+				 
+                
+                
+                var r_1911=1911;
+				if(r_len==4){//西元年
+					r_1911=0;
+				}else{
+					$('#txtDate1').datepicker();
+					$('#txtDate2').datepicker();
+				}
+				
+				$('#txtMon1').mask(r_picm);
+                $('#txtMon2').mask(r_picm);
+                $('#txtDate1').mask(r_picd);
+                $('#txtDate2').mask(r_picd);
+				
 				var t_date, t_year, t_month, t_day;
-				t_date = new Date();
-				t_date.setDate(1);
-				t_year = t_date.getUTCFullYear() - 1911;
-				t_year = t_year > 99 ? t_year + '' : '0' + t_year;
-				t_month = t_date.getUTCMonth() + 1;
-				t_month = t_month > 9 ? t_month + '' : '0' + t_month;
-				t_day = t_date.getUTCDate();
-				t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-				$('#txtDate1').val(t_year + '/' + t_month + '/' + t_day);
+                t_date = new Date();
+                t_date.setDate(1);
+                t_year = t_date.getUTCFullYear() - r_1911;
+                t_year = t_year > 99 ? t_year + '' : '0' + t_year;
+                t_month = t_date.getUTCMonth() + 1;
+                t_month = t_month > 9 ? t_month + '' : '0' + t_month;
+                t_day = t_date.getUTCDate();
+                t_day = t_day > 9 ? t_day + '' : '0' + t_day;
+                $('#txtDate1').val(t_year + '/' + t_month + '/' + t_day);
+                $('#txtMon1').val(t_year + '/' + t_month);
 
-				t_date = new Date();
-				t_date.setDate(35);
-				t_date.setDate(0);
-				t_year = t_date.getUTCFullYear() - 1911;
-				t_year = t_year > 99 ? t_year + '' : '0' + t_year;
-				t_month = t_date.getUTCMonth() + 1;
-				t_month = t_month > 9 ? t_month + '' : '0' + t_month;
-				t_day = t_date.getUTCDate();
-				t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-				$('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
-				q_getFormat();
+                t_date = new Date();
+                t_date.setDate(35);
+                t_date.setDate(0);
+                t_year = t_date.getUTCFullYear() - r_1911;
+                t_year = t_year > 99 ? t_year + '' : '0' + t_year;
+                t_month = t_date.getUTCMonth() + 1;
+                t_month = t_month > 9 ? t_month + '' : '0' + t_month;
+                t_day = t_date.getUTCDate();
+                t_day = t_day > 9 ? t_day + '' : '0' + t_day;
+                $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
+                $('#txtMon2').val(t_year + '/' + t_month);
+               q_popAssign();
+                q_getFormat();
+                q_langShow();
+               // $('#txtXDate1').val(r_picm);
 			}
 
 			function q_boxClose(s2) {

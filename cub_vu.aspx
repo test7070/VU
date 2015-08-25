@@ -34,6 +34,7 @@
             q_desc = 1;
             brwCount2 = 5;
             aPop = new Array(
+            	['txtMechno', 'lblMechno', 'mech', 'noa,mech', 'txtMechno,txtMech', 'mech_b.aspx'],
             	['txtProductno_', 'btnProduct_', 'ucaucc', 'noa,product', 'txtProductno_,txtProduct_', 'ucaucc_b.aspx'],
             	['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,ucolor,spec,size,lengthb,class,unit,emount,eweight'
             	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtUcolor__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtGmount__,txtGweight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%'],
@@ -158,7 +159,7 @@
 						var as = _q_appendData("class", "", true);
 						var t_class='@';
 						for ( i = 0; i < as.length; i++) {
-							t_class+=","+as[i].class;
+							t_class+=","+as[i].noa;
 						}
 						q_cmbParse("combClass", t_class,'s');
 						q_cmbParse("combClass", t_class,'t');
@@ -208,7 +209,7 @@
 						
 						//判斷表身批號是否已被使用
 						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
-							if(!emp($('#txtProduct_'+j).val()) && !emp($('#txtUno_'+j).val()) && $('#txtUno_'+j).val().length==18  && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
+							if(!emp($('#txtProduct_'+j).val()) && !emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
 								for (var i=0;i<maxordeuno.length;i++){
 									if(maxordeuno[i].ordeno==$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()){
 										maxordeuno[i].noq=$('#txtUno_'+j).val().slice(-3);
@@ -216,7 +217,6 @@
 								}	
 							}
 						}
-						
 						
 						//寫入批號
 						for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
@@ -226,14 +226,14 @@
 									if(maxordeuno[i].ordeno==$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()){
 										findorde=true;
 										maxnoq=('000'+(dec(maxordeuno[i].noq)+1)).slice(-3);
-										$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+maxnoq);
+										$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'-'+$('#txtMechno').val()+maxnoq);
 										maxordeuno[i].noq=maxnoq;
 									}
 									if (findorde)
 										break;
 								}
 								if(!findorde){
-									$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'001');
+									$('#txtUno_'+j).val($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'-'+$('#txtMechno').val()+'001');
 									maxordeuno.push({
 										ordeno:$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val(),
 										noq:'001'
@@ -255,9 +255,10 @@
             function q_stPost() {
                 if (!(q_cur == 1 || q_cur == 2))
                     return false;
-				if(!emp($('#txtNoa').val())){
+				//0824 拿掉直接出貨
+				/*if(!emp($('#txtNoa').val())){
 					q_func('cubu_post.post.a1', r_accy + ',' + $('#txtNoa').val() + ',0');
-				}
+				}*/
             }
             
             function q_funcPost(t_func, result) {
@@ -372,6 +373,12 @@
 			var check_uccb_uno=false;
 			var get_uno=false,get_maxuno=false;
             function btnOk() {
+            	t_err = q_chkEmpField([['txtDatea', '加工日'],['txtMechno', q_getMsg('lblMechno')]]);
+                if (t_err.length > 0) {
+                    alert(t_err);
+                    return;
+                }
+                
                 if ($('#txtDatea').val().length == 0 || !q_cd($('#txtDatea').val())) {
                     alert(q_getMsg('lblDatea') + '錯誤。');
                     return;
@@ -396,13 +403,13 @@
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 						if(!emp($('#txtProduct_'+j).val()) && emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
 							if(ordenos_where.indexOf(($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()))==-1)
-								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+"%' and len(uno)=18),'') )";
+								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'-'+$('#txtMechno').val()+"%' ),'') )";
 							get_uno=true;
 						}
 					}
 				}
 				
-				//預設產生批號 (訂單號碼(12)+訂序(3)+流水號(3))
+				//預設產生批號 (訂單號碼(12)+訂序(3)+機台(?)+流水號(3))
                 if(get_uno && !get_maxuno){
 	                var t_where = "where=^^ uno!='' and ("+ordenos_where+") ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_getuno", r_accy);
@@ -434,7 +441,13 @@
                 
                 sum();
                 $('#txtWorker').val(r_name);
-
+                
+                //入庫日沒打預設今天
+				for (var i = 0; i < q_bbsCount; i++) {
+					if ($.trim($('#txtDate2_' + i).val()).length == 0)
+						$('#txtDate2_' + i).val(q_date());
+				}
+                    
                 var t_noa = trim($('#txtNoa').val());
                 var t_date = trim($('#txtDatea').val());
                 if (t_noa.length == 0 || t_noa == "AUTO")
@@ -571,7 +584,7 @@
                 $('#lblNeed_s').text('需求');
                 $('#lblMemo_s').text('備註');
                 $('#lblStore_s').text('入庫倉庫');
-                $('#lblDate2_s').text('交期');
+                $('#lblDate2_s').text('入庫日');
                 $('#lblEnda_s').text('手結');
                 $('#lblOrdeno_s').text('訂單編號');
                 $('#lblNo2_s').text('訂序');
@@ -894,13 +907,16 @@
 						<td><input id="txtDatea" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblNoa" class="lbl"> </a></td>
 						<td><input id="txtNoa" type="text" class="txt c1"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblMechno" class="lbl"> </a></td>
+						<td><input id="txtMechno" type="text" class="txt c1"/></td>
+						<td><input id="txtMech" type="text" class="txt c1"/></td>
 						<td colspan="2">
 							<input type="button" id="btnCuc_vu" value="排程匯入" style="width:120px;"/>
-							<input type="button" id="btnOrdes_vu" value="訂單匯入" style="width:120px;"/>
-							<input type="button" id="btnCubu_vu" value="入庫" style="width:120px;"/>
+							<!--<input type="button" id="btnOrdes_vu" value="訂單匯入" style="width:120px;"/>
+							<input type="button" id="btnCubu_vu" value="入庫" style="width:120px;"/>-->
 						</td>
-						<!--<td><span> </span><a id="lblTypea" class="lbl"> </a></td>
-						<td><select id="cmbTypea" class="txt c1"> </select></td>-->
 					</tr>
 					<!--<tr>
 						<td><span> </span><a id="lblBdate" class="lbl" > </a></td>
@@ -910,13 +926,15 @@
 							<input id="txtEdate" type="text" style="width:45%;"/>
 						</td>
 					</tr>-->
+					<!--<td><span> </span><a id="lblTypea" class="lbl"> </a></td>
+					<td><select id="cmbTypea" class="txt c1"> </select></td>-->
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl" > </a></td>
 						<td colspan="4"><input id="txtMemo" type="text" class="txt c1"/></td>
 					</tr>
 				</table>
 			</div>
-			<div class='dbbs' style="min-width: 2000px;">
+			<div class='dbbs' style="min-width: 2200px;">
 				<table id="tbbs" class='tbbs'>
 					<tr style='color:white; background:#003366;' >
 						<td style="width:20px;"><input id="btnPlus" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
@@ -935,15 +953,15 @@
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
 						<!--<td style="width:100px;"><a id='lblPrice_s'> </a></td>-->
 						<td style="width:150px;"><a id='lblNeed_s'> </a></td>
-						<td style="width:150px;"><a id='lblMemo_s'> </a></td>
-						<td style="width:150px;"><a id='lblUno_s'> </a></td>
+						<td style="width:150px;"><a id='lblMemo_s'> </a></td>						
 						<td style="width:100px;"><a id='lblDate2_s'> </a></td>
 						<!--<td style="width:200px;"><a id='lblStore_s'> </a></td>-->
-						<td style="width:30px;"><a id='lblEnda_s'> </a></td>
+						<!--<td style="width:30px;"><a id='lblEnda_s'> </a></td>-->
 						<td style="width:150px;"><a id='lblOrdeno_s'> </a></td>
 						<td style="width:60px;"><a id='lblNo2_s'> </a></td>
 						<td style="width:100px;"><a id='lblDatea_s'> </a></td>
-						<td style="width:45px;"><a id='lblHend_s'> </a></td>
+						<td style="width:200px;"><a id='lblUno_s'> </a></td>
+						<!--<td style="width:45px;"><a id='lblHend_s'> </a></td>-->
 					</tr>
 					<tr style='background:#cad3ff;'>
 						<td align="center">
@@ -986,18 +1004,18 @@
 						<!--<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>-->
 						<td><input id="txtNeed.*" type="text" class="txt c1"/></td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
-						<td><input id="txtUno.*" type="text" class="txt c1"/></td>
 						<td><input id="txtDate2.*" type="text" class="txt c1"/></td>
 						<!--<td>
 							<input id="txtStoreno.*" type="text" class="txt c1" style="width: 30%;"/>
 							<input class="btn" id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;float: left;" />
 							<input id="txtStore.*" type="text" class="txt c1" style="width: 50%;"/>
 						</td>-->
-						<td><input id="chkEnda.*" type="checkbox"/></td>
+						<!--<td><input id="chkEnda.*" type="checkbox"/></td>-->
 						<td><input id="txtOrdeno.*" type="text" class="txt c1"/></td>
 						<td><input id="txtNo2.*" type="text" class="txt c1"/></td>
 						<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
-						<td><input id="chkHend.*" type="checkbox"/></td>
+						<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+						<!--<td><input id="chkHend.*" type="checkbox"/></td>-->
 					</tr>
 				</table>
 			</div>

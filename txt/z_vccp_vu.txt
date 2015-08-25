@@ -420,20 +420,28 @@ set @t_slengthb=case when '#non' = [12] then '' else [12] end
 set @t_elengthb=case when '#non' = [13] then char(255)  else [13] end
 set @t_class=case when '#non' = [14] then '' else [14] end
 -------------------------------------------------------------------------
-declare @result table(gno nvarchar(1),rank int,productno nvarchar(35),product nvarchar(100) 
-,ucolor nvarchar(30),spec nvarchar(30),size nvarchar(30),lengthb float,class nvarchar(15) 
-,uno nvarchar(30),mount float,weight float) 
+declare @result table(
+	gno nvarchar(1),
+	rank int,
+	productno nvarchar(35),
+	product nvarchar(100),
+	ucolor nvarchar(30),
+	spec nvarchar(30),
+	size nvarchar(30),
+	lengthb float,
+	class nvarchar(15),
+	uno nvarchar(30),
+	mount float,
+	weight float
+
+) 
 insert @result 
 select '0',ROW_NUMBER() over(order by productno) 
 ,productno,product,ucolor,spec,size,lengthb,class,uno,
 a.mount-isnull((select weight from view_vcct b where b.uno=a.uno),0)  , 
 a.weight-isnull((select weight from view_vcct b where b.uno=a.uno),0)  
-
 from view_cubs a 
-
-where product between @t_spno and @t_epno 
-and (len(@t_uno)=0 or uno=@t_uno) and uno!='' and datea <= @t_edate 
-and (len(@t_uno)=0 or uno=@t_uno) and uno!='' and datea <= @t_edate 
+where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and datea <= @t_edate 
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) 
 and (len(@t_size)=0 or isnull(size,'')=@t_size) 
 and ((@t_slengthb='' and @t_elengthb=char(255)) or isnull(lengthb,0) between cast(@t_slengthb as float) and cast(@t_elengthb as float)) 
@@ -446,9 +454,13 @@ begin
 	from @result 
 end 
 
-select * 
+select 
+dbo.getComma(mount,0)mount
+,dbo.getComma(weight,0)weight
+,dbo.getComma(lengthb,0)lengthb
+,* 
 from @result 
 where mount !=0 and weight != 0
-order by productno,uno
+order by gno,productno,uno
 
 ;

@@ -30,23 +30,25 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @qhref_acomp='_it' 
+	set @qhref_acomp='_it' 
 if(charindex('永勝',@t_acomp)>0) 
-set @qhref_acomp='_uu' 
+	set @qhref_acomp='_uu' 
 if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-set @qhref_acomp='_tn' 
+	set @qhref_acomp='_tn' 
 if(charindex('有達',@t_acomp)>0 ) 
-set @qhref_acomp='_xy' 
+	set @qhref_acomp='_xy' 
 if(charindex('義橋',@t_acomp)>0 ) 
-set @qhref_acomp='_yc' 
+	set @qhref_acomp='_yc' 
+if(charindex('智勝',@t_acomp)>0 ) 
+	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -69,33 +71,33 @@ set @vcctypea = case when '#non' = [22] then '' else [22] end
 set @t_partno = case when '#non' = [23] then '' else [23] end 
 --*********************************************************************************** 
 declare @result table( 
-gno nvarchar(10), 
-noa nvarchar(30), 
-noq nvarchar(10), 
-typea nvarchar(12), 
-datea nvarchar(10), 
-mon nvarchar(7), 
-custno nvarchar(30), 
-comp nvarchar(90), 
-productno nvarchar(30), 
-xproduct nvarchar(MAX), 
-unit nvarchar(12), 
-mount float, 
-weight float, 
-price float, 
-total float, 
-qhref nvarchar(max), 
-invono nvarchar(MAX), 
-idate nvarchar(30), 
-imoney float, 
-itax float, 
-itotal float ,
-ucolor nvarchar(30),
-spec nvarchar(30),
-size nvarchar(30),
-lengh nvarchar(30),
-conn nvarchar(30),
-memo nvarchar(30)
+	gno nvarchar(10), 
+	noa nvarchar(30), 
+	noq nvarchar(10), 
+	typea nvarchar(12), 
+	datea nvarchar(10), 
+	mon nvarchar(7), 
+	custno nvarchar(30), 
+	comp nvarchar(90), 
+	productno nvarchar(30), 
+	xproduct nvarchar(MAX), 
+	unit nvarchar(12), 
+	mount float, 
+	weight float, 
+	price float, 
+	total float, 
+	qhref nvarchar(max), 
+	invono nvarchar(MAX), 
+	idate nvarchar(30), 
+	imoney float, 
+	itax float, 
+	itotal float ,
+	ucolor nvarchar(30),
+	spec nvarchar(30),
+	size nvarchar(30),
+	lengh nvarchar(30),
+	conn nvarchar(30),
+	memo nvarchar(30)
 ) 
 insert into @result 
 select '91' gno, a.noa noa, b.noq noq, a.typea typea, a.datea datea, (case when a.mon='' then left(a.datea,6) else a.mon end), a.custno, a.comp 
@@ -124,9 +126,9 @@ order by a.datea,gno,noa,noq
 
 if(@t_showinvono='1') 
 begin 
-insert into @result(gno,datea,noa,noq,invono,idate,imoney,itax,itotal) 
-select '92',datea,noa,'ZZZ',invono,idate,imoney,itax,itotal 
-from @result group by datea,noa,invono,idate,imoney,itax,itotal 
+	insert into @result(gno,datea,noa,noq,invono,idate,imoney,itax,itotal) 
+	select '92',datea,noa,'ZZZ',invono,idate,imoney,itax,itotal 
+	from @result group by datea,noa,invono,idate,imoney,itax,itotal 
 end 
 
 insert into @result(gno,datea,noa,mount,price,total) 
@@ -146,7 +148,6 @@ update @result set gno='1' where gno='92'
 update @result set gno='2' where gno='93' 
 update @result set gno='3' where gno='94' 
 
-
 update @result 
 set mount=mount*-1,total=total*-1 
 where typea='退' 
@@ -164,7 +165,7 @@ select gno, noa, noq, typea, datea, LEFT(datea,6) xdatea, mon, custno, left(comp
 ,ucolor,spec,size,lengh,conn cust,memo
 from @result order by datea,noa,noq ;
 
-
+--**********************************************************************************************
 z_vcc_vu2:--z_vcc_vu2
 declare @t_bdate nvarchar(10) 
 declare @t_edate nvarchar(10) 
@@ -189,7 +190,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -211,7 +211,6 @@ set @vcctypea = case when '#non' = [22] then '' else [22] end
 set @t_partno = case when '#non' = [23] then '' else [23] end 
 --***********************************************************************************
 
-------------------------------------------------------------------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 0 
 declare @weight_decimal int = 0 
@@ -229,15 +228,16 @@ set @mount_decimal =4
 -------------------------------------------------- 
 
 declare @tmp table( 
-gno nvarchar(1), 
-productno nvarchar(30), 
-products nvarchar(MAX), 
-cno nvarchar(30), 
-custnick nvarchar(90), 
-mount float, 
-total float ,
-tax float
+	gno nvarchar(1), 
+	productno nvarchar(30), 
+	products nvarchar(MAX), 
+	cno nvarchar(30), 
+	custnick nvarchar(90), 
+	mount float, 
+	total float ,
+	tax float
 ) 
+
 insert into @tmp 
 select '9',b.productno,b.product+(case when @isspec='1' then '
  '+isnull(b.spec,'') else '' end) 
@@ -276,7 +276,7 @@ select gno,productno,products,cno,custnick
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax+total),1)),@total_decimal,30)) totax
 from @tmp order by cno,custnick,gno,productno 
 ;
-
+--**********************************************************************************************
 z_vcc_vu3:--z_vcc_vu3 
 declare @t_bdate nvarchar(10) 
 declare @t_edate nvarchar(10) 
@@ -309,24 +309,25 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
 set @mount_decimal =4 
 -------------------------------------------------- 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @qhref_acomp='_it' 
+	set @qhref_acomp='_it' 
 if(charindex('永勝',@t_acomp)>0) 
-set @qhref_acomp='_uu' 
+	set @qhref_acomp='_uu' 
 if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-set @qhref_acomp='_tn' 
+	set @qhref_acomp='_tn' 
 if(charindex('有達',@t_acomp)>0 ) 
-set @qhref_acomp='_xy' 
+	set @qhref_acomp='_xy' 
 if(charindex('義橋',@t_acomp)>0 ) 
-set @qhref_acomp='_yc' 
-
+	set @qhref_acomp='_yc' 
+if(charindex('智勝',@t_acomp)>0 ) 
+	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -748,21 +749,23 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @qhref_acomp='_it' 
+	set @qhref_acomp='_it' 
 if(charindex('永勝',@t_acomp)>0) 
-set @qhref_acomp='_uu' 
+	set @qhref_acomp='_uu' 
 if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-set @qhref_acomp='_tn' 
+	set @qhref_acomp='_tn' 
 if(charindex('有達',@t_acomp)>0 ) 
-set @qhref_acomp='_xy' 
+	set @qhref_acomp='_xy' 
+if(charindex('智勝',@t_acomp)>0 ) 
+	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 
 declare @result table( 
@@ -891,21 +894,21 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 declare @tmp table( 
-gno nvarchar(1), 
-custno nvarchar(30), 
-custs nvarchar(90), 
-mon nvarchar(15), 
-mount float, 
-total float, 
-tax float 
+	gno nvarchar(1), 
+	custno nvarchar(30), 
+	custs nvarchar(90), 
+	mon nvarchar(15), 
+	mount float, 
+	total float, 
+	tax float 
 ) 
 insert into @tmp 
 select 
@@ -995,51 +998,53 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @qhref_acomp='_it' 
+	set @qhref_acomp='_it' 
 if(charindex('永勝',@t_acomp)>0) 
-set @qhref_acomp='_uu' 
+	set @qhref_acomp='_uu' 
 if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-set @qhref_acomp='_tn' 
+	set @qhref_acomp='_tn' 
 if(charindex('有達',@t_acomp)>0 ) 
-set @qhref_acomp='_xy' 
+	set @qhref_acomp='_xy' 
+if(charindex('智勝',@t_acomp)>0 ) 
+	set @qhref_acomp='_vu' 	
 ------------------------------------------------- 
 
 declare @result table( 
-gno nvarchar(1), 
-typea nvarchar(4), 
-noa nvarchar(15), 
-noq nvarchar(3), 
-datea nvarchar(10), 
-mon nvarchar(7), 
-custno nvarchar(20), 
-comp nvarchar(90), 
-addr_invo nvarchar(90), 
-tel nvarchar(90), 
-productno nvarchar(30), 
-xproduct nvarchar(MAX), 
-unit nvarchar(8), 
-mount float, 
-weight float, 
-price float, 
-total float, 
-money float, 
-back float, 
-tax float, 
-total1 float, 
-pay float, 
-unpay float, 
-total2 float, 
-pcount int, 
-qhref nvarchar(MAX) 
-primary key (productno,gno,datea,noa,noq) 
+	gno nvarchar(1), 
+	typea nvarchar(4), 
+	noa nvarchar(15), 
+	noq nvarchar(3), 
+	datea nvarchar(10), 
+	mon nvarchar(7), 
+	custno nvarchar(20), 
+	comp nvarchar(90), 
+	addr_invo nvarchar(90), 
+	tel nvarchar(90), 
+	productno nvarchar(30), 
+	xproduct nvarchar(MAX), 
+	unit nvarchar(8), 
+	mount float, 
+	weight float, 
+	price float, 
+	total float, 
+	money float, 
+	back float, 
+	tax float, 
+	total1 float, 
+	pay float, 
+	unpay float, 
+	total2 float, 
+	pcount int, 
+	qhref nvarchar(MAX) 
+	primary key (productno,gno,datea,noa,noq) 
 ) 
 
 insert into @result 
@@ -1217,22 +1222,22 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 
 declare @tmp table( 
-gno nvarchar(1), 
-productno nvarchar(30), 
-products nvarchar(MAX), 
-mon nvarchar(15), 
-mount float, 
-total float,
-tax float 
+	gno nvarchar(1), 
+	productno nvarchar(30), 
+	products nvarchar(MAX), 
+	mon nvarchar(15), 
+	mount float, 
+	total float,
+	tax float 
 ) 
 insert into @tmp 
 select 
@@ -1328,39 +1333,41 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @qhref_acomp='_it' 
+	set @qhref_acomp='_it' 
 if(charindex('永勝',@t_acomp)>0) 
-set @qhref_acomp='_uu' 
+	set @qhref_acomp='_uu' 
 if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-set @qhref_acomp='_tn' 
+	set @qhref_acomp='_tn' 
 if(charindex('有達',@t_acomp)>0 ) 
-set @qhref_acomp='_xy' 
+	set @qhref_acomp='_xy' 
+if(charindex('智勝',@t_acomp)>0 ) 
+	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 
 declare @tmp table( 
-gno nvarchar(1), 
-salesno nvarchar(30), 
-salesname nvarchar(50), 
-comp nvarchar(100), 
-datea nvarchar(10), 
-noa nvarchar(35), 
-typea nvarchar(15), 
-productno nvarchar(30), 
-products nvarchar(max), 
-unit nvarchar(15), 
-mount float, 
-price float, 
-total float, 
-qhref nvarchar(max) ,
-tax float
+	gno nvarchar(1), 
+	salesno nvarchar(30), 
+	salesname nvarchar(50), 
+	comp nvarchar(100), 
+	datea nvarchar(10), 
+	noa nvarchar(35), 
+	typea nvarchar(15), 
+	productno nvarchar(30), 
+	products nvarchar(max), 
+	unit nvarchar(15), 
+	mount float, 
+	price float, 
+	total float, 
+	qhref nvarchar(max) ,
+	tax float
 ) 
 insert into @tmp 
 select '0',a.salesno,s.namea,a.comp,a.datea,a.noa,a.typea,b.productno 
@@ -1460,12 +1467,12 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 
 declare @tmp table( 
@@ -1574,39 +1581,41 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
 set @mount_decimal =4 
 -------------------------------------------------- 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @qhref_acomp='_it' 
+	set @qhref_acomp='_it' 
 if(charindex('永勝',@t_acomp)>0) 
-set @qhref_acomp='_uu' 
+	set @qhref_acomp='_uu' 
 if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-set @qhref_acomp='_tn' 
+	set @qhref_acomp='_tn' 
 if(charindex('有達',@t_acomp)>0 ) 
-set @qhref_acomp='_xy' 
+	set @qhref_acomp='_xy' 
+if(charindex('智勝',@t_acomp)>0 ) 
+	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 
 declare @tmp table( 
-gno nvarchar(1), 
-salesno nvarchar(30), 
-salesname nvarchar(50), 
-comp nvarchar(100), 
-productno nvarchar(30), 
-products nvarchar(max), 
-datea nvarchar(10), 
-noa nvarchar(35), 
-typea nvarchar(15), 
-unit nvarchar(15), 
-mount float, 
-price float, 
-total float, 
-qhref nvarchar(MAX),
-tax float 
+	gno nvarchar(1), 
+	salesno nvarchar(30), 
+	salesname nvarchar(50), 
+	comp nvarchar(100), 
+	productno nvarchar(30), 
+	products nvarchar(max), 
+	datea nvarchar(10), 
+	noa nvarchar(35), 
+	typea nvarchar(15), 
+	unit nvarchar(15), 
+	mount float, 
+	price float, 
+	total float, 
+	qhref nvarchar(MAX),
+	tax float 
 ) 
 insert into @tmp 
 select '0',a.salesno,s.namea,a.comp,b.productno 
@@ -1708,22 +1717,22 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 declare @tmp table( 
-gno nvarchar(1), 
-salesno nvarchar(30), 
-salesname nvarchar(50), 
-productno nvarchar(30), 
-products nvarchar(max), 
-mount float, 
-total float,
-tax float 
+	gno nvarchar(1), 
+	salesno nvarchar(30), 
+	salesname nvarchar(50), 
+	productno nvarchar(30), 
+	products nvarchar(max), 
+	mount float, 
+	total float,
+	tax float 
 ) 
 
 insert into @tmp 
@@ -1822,40 +1831,42 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @qhref_acomp='_it' 
+	set @qhref_acomp='_it' 
 if(charindex('永勝',@t_acomp)>0) 
-set @qhref_acomp='_uu' 
+	set @qhref_acomp='_uu' 
 if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-set @qhref_acomp='_tn' 
+	set @qhref_acomp='_tn' 
 if(charindex('有達',@t_acomp)>0 ) 
-set @qhref_acomp='_xy' 
+	set @qhref_acomp='_xy' 
+if(charindex('智勝',@t_acomp)>0 ) 
+	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 
 declare @tmp table( 
-gno nvarchar(1), 
-custno nvarchar(30), 
-custnick nvarchar(90), 
-salesno nvarchar(30), 
-salesname nvarchar(50), 
-productno nvarchar(30), 
-products nvarchar(max), 
-datea nvarchar(10), 
-noa nvarchar(35), 
-typea nvarchar(15), 
-unit nvarchar(15), 
-mount float, 
-price float, 
-total float, 
-qhref nvarchar(MAX) ,
-tax float
+	gno nvarchar(1), 
+	custno nvarchar(30), 
+	custnick nvarchar(90), 
+	salesno nvarchar(30), 
+	salesname nvarchar(50), 
+	productno nvarchar(30), 
+	products nvarchar(max), 
+	datea nvarchar(10), 
+	noa nvarchar(35), 
+	typea nvarchar(15), 
+	unit nvarchar(15), 
+	mount float, 
+	price float, 
+	total float, 
+	qhref nvarchar(MAX) ,
+	tax float
 ) 
 
 insert into @tmp 
@@ -1960,26 +1971,27 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 
 declare @tmp table( 
-gno nvarchar(1), 
-custno nvarchar(30), 
-custnick nvarchar(90), 
-salesno nvarchar(30), 
-salesname nvarchar(50), 
-productno nvarchar(30), 
-products nvarchar(max), 
-mount float, 
-total float,
-tax float
+	gno nvarchar(1), 
+	custno nvarchar(30), 
+	custnick nvarchar(90), 
+	salesno nvarchar(30), 
+	salesname nvarchar(50), 
+	productno nvarchar(30), 
+	products nvarchar(max), 
+	mount float, 
+	total float,
+	tax float
 ) 
+
 insert into @tmp 
 select '0',a.custno,(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
 a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then '
@@ -2076,38 +2088,40 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @qhref_acomp='_it' 
+	set @qhref_acomp='_it' 
 if(charindex('永勝',@t_acomp)>0) 
-set @qhref_acomp='_uu' 
+	set @qhref_acomp='_uu' 
 if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-set @qhref_acomp='_tn' 
+	set @qhref_acomp='_tn' 
 if(charindex('有達',@t_acomp)>0 ) 
-set @qhref_acomp='_xy' 
+	set @qhref_acomp='_xy' 
+if(charindex('智勝',@t_acomp)>0 ) 
+	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 declare @tmp table( 
-gno nvarchar(1), 
-productno nvarchar(30), 
-products nvarchar(MAX), 
-sno nvarchar(30), 
-salesname nvarchar(90), 
-cno nvarchar(30), 
-custnick nvarchar(90), 
-datea nvarchar(10), 
-noa nvarchar(30), 
-typea nvarchar(15), 
-mount float, 
-price float, 
-total float, 
-qhref nvarchar(MAX) ,
-tax float
+	gno nvarchar(1), 
+	productno nvarchar(30), 
+	products nvarchar(MAX), 
+	sno nvarchar(30), 
+	salesname nvarchar(90), 
+	cno nvarchar(30), 
+	custnick nvarchar(90), 
+	datea nvarchar(10), 
+	noa nvarchar(30), 
+	typea nvarchar(15), 
+	mount float, 
+	price float, 
+	total float, 
+	qhref nvarchar(MAX) ,
+	tax float
 ) 
 insert into @tmp 
 select 
@@ -2207,25 +2221,25 @@ declare @total_decimal int = 4
 
 if(charindex('永勝',@t_acomp)>0) 
 begin 
-set @mount_decimal =4 
-set @weight_decimal =4 
-set @price_decimal =4 
+	set @mount_decimal =4 
+	set @weight_decimal =4 
+	set @price_decimal =4 
 end 
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =4 
+	set @mount_decimal =4 
 -------------------------------------------------- 
 
 declare @tmp table( 
-gno nvarchar(1), 
-productno nvarchar(30), 
-products nvarchar(MAX), 
-sno nvarchar(30), 
-salesname nvarchar(90), 
-cno nvarchar(30), 
-custnick nvarchar(90), 
-mount float, 
-total float, 
-tax  float
+	gno nvarchar(1), 
+	productno nvarchar(30), 
+	products nvarchar(MAX), 
+	sno nvarchar(30), 
+	salesname nvarchar(90), 
+	cno nvarchar(30), 
+	custnick nvarchar(90), 
+	mount float, 
+	total float, 
+	tax  float
 ) 
 insert into @tmp 
 select 

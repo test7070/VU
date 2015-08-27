@@ -798,36 +798,33 @@ a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.
  '+isnull(b.spec,'') else '' end) 
 , b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 ,a.tax
-from view_vccs b 
-left join view_vcc a on a.noa = b.noa 
-left join cust c on a.custno = c.noa 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+from view_vccs b left join view_vcc a on a.noa = b.noa 
+				 left join cust c on a.custno = c.noa 
+				 left join view_ucaucc d on b.productno = d.noa 
+				 left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+      (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+      (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+      (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+      (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+      (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  and (len(@t_partno)=0 or s.partno=@t_partno) 
 order by custno,gno,mon,datea,noa,noq 
 
 insert into @result(gno,custno,pcount,mount,total) 
-select '1',custno, 
-count(*), 
-sum((case typea when '1' then mount else (-1)*mount end)), 
-sum((case typea when '1' then total else (-1)*total end)) 
+select '1',custno, count(*), 
+	sum((case typea when '1' then mount else (-1)*mount end)), 
+	sum((case typea when '1' then total else (-1)*total end)) 
 from @result a group by custno 
 
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
-update @result 
-set mount=mount*-1,total=total*-1 
+update @result set mount=mount*-1,total=total*-1 
 where typea='退' 
 
 select 
@@ -865,7 +862,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -915,17 +911,16 @@ select
 '0',a.custno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end), 
 case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end,sum((case when a.typea='1' then 1 else -1 end)*b.mount),sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 ,sum((case when a.typea='1' then 1 else -1 end)*a.tax) 
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join cust c on a.custno = c.noa 
-left join view_ucaucc d on b.productno = d.noa 
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join cust c on a.custno = c.noa 
+				left join view_ucaucc d on b.productno = d.noa 
 where (a.datea between @t_bdate and @t_edate) and --(isnull(a.salesno,'') != '') and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+	  (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+	  (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+	  (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) and (len(@vcctypea)=0 or a.typea = @vcctypea) 
 group by a.custno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 
 insert into @tmp(gno,custno,custs,mon,mount,total,tax) 
@@ -968,7 +963,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -989,7 +983,6 @@ set @t_showinvono = case when '#non' = [24] then 0 else [24] end
 set @vcctypea = case when '#non' = [22] then '' else [22] end 
 set @t_partno = case when '#non' = [23] then '' else [23] end 
 --***********************************************************************************
--------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 0 
 declare @weight_decimal int = 0 
@@ -1054,24 +1047,23 @@ a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.
  '+isnull(b.spec,'') else '' end) 
 , b.unit,(case when a.typea='1' then 1 else -1 end) *b.mount, b.weight, b.price, b.total, 0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
 ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-from view_vccs b 
-left join view_vcc a on a.noa = b.noa 
-left join cust c on a.custno = c.noa 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+from view_vccs b left join view_vcc a on a.noa = b.noa 
+				 left join cust c on a.custno = c.noa 
+				 left join view_ucaucc d on b.productno = d.noa 
+				 left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+	  (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+	  (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+	  (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+	  (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  and (len(@t_partno)=0 or s.partno=@t_partno) 
 order by productno,gno,datea,noa,noq 
 
 --*********************************************************************** 
@@ -1100,30 +1092,30 @@ open cursor_table
 fetch next from cursor_table 
 into @gno,@typea,@productno,@datea,@total 
 while(@@FETCH_STATUS <> -1) 
-begin 
-if @t_productno != @productno 
-begin 
-if @t_productno != '#zzzz#zzzz' 
-begin 
-set @t_total1 = @t_money - @t_back + @t_tax 
-insert into @result 
-select '1' gno, '' typea, '' noa, '' noq, '' datea, '' mon, '' custno, '' comp, '' addr_invo, '' tel, 
-@t_productno, '' product, '' unit, 0 mount, 0 weight, 0 price, 0 total, 
-@t_money, @t_back, @t_tax, @t_total1, 0 pay, 0 unpay, 0 total2, @t_pcount,'' 
-end 
-set @t_productno = @productno 
-set @t_money = case when @typea = '1' then @total else 0 end 
-set @t_back = case when @typea = '2' then @total else 0 end 
-set @t_tax = case when @typea = '稅' then @total else 0 end 
-set @t_pcount = 1 
-end 
-else 
-begin 
-set @t_money = @t_money + case when @typea = '1' then @total else 0 end 
-set @t_back = @t_back + case when @typea = '2' then @total else 0 end 
-set @t_tax = @t_tax + case when @typea = '稅' then @total else 0 end 
-set @t_pcount = @t_pcount + 1 
-end 
+	begin 
+		if @t_productno != @productno 
+		begin 
+			if @t_productno != '#zzzz#zzzz' 
+			begin 
+				set @t_total1 = @t_money - @t_back + @t_tax 
+				insert into @result 
+				select '1' gno, '' typea, '' noa, '' noq, '' datea, '' mon, '' custno, '' comp, '' addr_invo, '' tel, 
+				@t_productno, '' product, '' unit, 0 mount, 0 weight, 0 price, 0 total, 
+				@t_money, @t_back, @t_tax, @t_total1, 0 pay, 0 unpay, 0 total2, @t_pcount,'' 
+			end 
+			set @t_productno = @productno 
+			set @t_money = case when @typea = '1' then @total else 0 end 
+			set @t_back = case when @typea = '2' then @total else 0 end 
+			set @t_tax = case when @typea = '稅' then @total else 0 end 
+			set @t_pcount = 1 
+		end 
+	else 
+	begin 
+		set @t_money = @t_money + case when @typea = '1' then @total else 0 end 
+		set @t_back = @t_back + case when @typea = '2' then @total else 0 end 
+		set @t_tax = @t_tax + case when @typea = '稅' then @total else 0 end 
+		set @t_pcount = @t_pcount + 1 
+	end 
 fetch next from cursor_table 
 into @gno,@typea,@productno,@datea,@total 
 end 
@@ -1131,23 +1123,20 @@ close cursor_table
 deallocate cursor_table 
 
 if @t_productno != '#zzzz#zzzz' 
-begin 
-set @t_total1 = @t_money - @t_back + @t_tax 
-insert into @result 
-select '1' gno, '' typea, '' noa, '' noq, '' datea, '' mon, '' custno, '' comp, '' addr_invo, '' tel, 
-@t_productno, '' product, '' unit, 0 mount, 0 weight, 0 price, 0 total, 
-@t_money, @t_back, @t_tax, @t_total1, 0 pay, 0 unpay, 0 total2, @t_pcount,'' 
-end 
+	begin 
+		set @t_total1 = @t_money - @t_back + @t_tax 
+		insert into @result 
+		select '1' gno, '' typea, '' noa, '' noq, '' datea, '' mon, '' custno, '' comp, '' addr_invo, '' tel, 
+		@t_productno, '' product, '' unit, 0 mount, 0 weight, 0 price, 0 total, 
+		@t_money, @t_back, @t_tax, @t_total1, 0 pay, 0 unpay, 0 total2, @t_pcount,'' 
+	end 
 --*********************************************************************** 
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
-update a 
-set mount=(select sum(mount) from @result where gno='0' and productno=a.productno) 
+update a set mount=(select sum(mount) from @result where gno='0' and productno=a.productno) 
 from @result a	where gno='1' 
 
-update @result 
-set total=total*-1 
-where typea='退' 
+update @result set total=total*-1 where typea='退' 
 
 select gno, typea, noa, noq, datea, mon, custno, left(comp,10) comp 
 ,addr_invo,tel,productno,xproduct,unit, qhref 
@@ -1165,8 +1154,6 @@ select gno, typea, noa, noq, datea, mon, custno, left(comp,10) comp
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total+tax),1)),@total_decimal,30)) totax
 ,pcount 
 from @result order by productno,gno,datea,noa,noq ;
-
-
 
 z_vcc_vu8:--z_vcc_vu8
 declare @t_bdate nvarchar(10) 
@@ -1192,7 +1179,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -1241,28 +1227,26 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-'0',b.productno,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
-,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
-,sum((case when a.typea='1' then 1 else -1 end)*b.mount),sum((case when a.typea='1' then 1 else -1 end)*b.total) 
-,a.tax
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join view_ucaucc d on b.productno = d.noa 
+	'0',b.productno,b.product+(case when @isspec='1' then '
+ 	'+isnull(b.spec,'') else '' end) 
+	,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
+	,sum((case when a.typea='1' then 1 else -1 end)*b.mount),sum((case when a.typea='1' then 1 else -1 end)*b.total) 
+	,a.tax
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join view_ucaucc d on b.productno = d.noa 
 where (a.datea between @t_bdate and @t_edate) and --(isnull(a.salesno,'') != '') and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-group by b.productno,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
-,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
-,a.tax
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+	  (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+      (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+	  (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+group by b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+		 ,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
+		 ,a.tax
 insert into @tmp(gno,productno,products,mon,mount,total,tax) 
 select '1',productno,products,'999/99',sum(mount),sum(total),SUM(tax) 
 from @tmp group by productno,products 
@@ -1303,7 +1287,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -1351,7 +1334,6 @@ if(charindex('有達',@t_acomp)>0 )
 if(charindex('智勝',@t_acomp)>0 ) 
 	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
-
 declare @tmp table( 
 	gno nvarchar(1), 
 	salesno nvarchar(30), 
@@ -1371,39 +1353,32 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select '0',a.salesno,s.namea,a.comp,a.datea,a.noa,a.typea,b.productno 
-,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end),b.unit,b.mount,b.price,b.total 
-,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-,a.tax
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+		,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end)
+		,b.unit,b.mount,b.price,b.total ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,a.tax
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join view_ucaucc d on b.productno = d.noa 
+				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and --(isnull(a.salesno,'') != '') and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+	  (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and --(isnull(a.salesno,'') != '') and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+	  (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+	  (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+	  (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  and (len(@t_partno)=0 or s.partno=@t_partno) 
 order by a.salesno,a.datea 
 
 insert into @tmp(gno,salesno,salesname,mount,total,tax) 
-select '1' gno,salesno,salesname, 
-sum((case when typea='1' then mount else mount*(-1) end)), 
-sum((case when typea='1' then total else total*(-1) end)),
-SUM(tax) 
+select '1' gno,salesno,salesname,sum((case when typea='1' then mount else mount*(-1) end)), 
+	   sum((case when typea='1' then total else total*(-1) end)),SUM(tax) 
 from @tmp group by salesno,salesname 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
-
-update @tmp 
-set mount=mount*-1,total=total*-1 
+update @tmp set mount=mount*-1,total=total*-1 
 where typea='退' 
 
 select gno,salesno,salesname,left(comp,10)comp,datea,noa,typea,productno,products,unit,qhref 
@@ -1486,27 +1461,26 @@ tax float
 ) 
 insert into @tmp 
 select 
-'0',a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
-,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
-,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
-,sum((case when a.typea='1' then 1 else -1 end)*a.tax) 
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+	'0',a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
+	,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
+	,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
+	,sum((case when a.typea='1' then 1 else -1 end)*a.tax) 
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join view_ucaucc d on b.productno = d.noa 
+				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and --(isnull(a.salesno,'') != '') and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (a.custno between @t_bcustno and @t_ecustno) 
-and (isnull(b.productno,'') between @t_bproductno and @t_eproductno) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
+	  (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+	  (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+	  (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+	  (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (a.custno between @t_bcustno and @t_ecustno) 
+	  and (isnull(b.productno,'') between @t_bproductno and @t_eproductno) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  and (len(@t_partno)=0 or s.partno=@t_partno) 
 group by a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 
 insert into @tmp(gno,salesno,salesname,mon,mount,total) 
@@ -1525,9 +1499,9 @@ select gno,salesno sno,salesname,mon
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30))tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax+total),1)),@total_decimal,30))totax
 from @tmp order by salesno,mon,gno 
-  ;
+;
   
- z_vcc_vu11:--z_vcc_vu11
+z_vcc_vu11:--z_vcc_vu11
 declare @t_bdate nvarchar(10) 
 declare @t_edate nvarchar(10) 
 declare @t_bcustno nvarchar(20) 
@@ -1551,7 +1525,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -1599,7 +1572,6 @@ if(charindex('有達',@t_acomp)>0 )
 if(charindex('智勝',@t_acomp)>0 ) 
 	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
-
 declare @tmp table( 
 	gno nvarchar(1), 
 	salesno nvarchar(30), 
@@ -1618,49 +1590,42 @@ declare @tmp table(
 	tax float 
 ) 
 insert into @tmp 
-select '0',a.salesno,s.namea,a.comp,b.productno 
-,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
-,a.datea,a.noa,a.typea,b.unit,b.mount,b.price,b.total 
-,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-,a.tax
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+select '0',a.salesno,s.namea,a.comp,b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+		  ,a.datea,a.noa,a.typea,b.unit,b.mount,b.price,b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,a.tax
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join view_ucaucc d on b.productno = d.noa 
+				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and --(isnull(a.salesno,'') != '') and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+      (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+      (b.productno between @t_bproductno and @t_eproductno) and --(isnull(a.salesno,'') != '') and 
+      (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+      (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+      (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+      (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+      and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  and (len(@t_partno)=0 or s.partno=@t_partno) 
 order by a.salesno,b.productno 
 insert into @tmp(gno,salesno,salesname,mount,total) 
 select '1' gno,salesno,salesname, 
-sum((case when typea='1' then mount else mount*(-1) end)), 
-sum((case when typea='1' then total else total*(-1) end)) 
+		sum((case when typea='1' then mount else mount*(-1) end)), 
+		sum((case when typea='1' then total else total*(-1) end)) 
 from @tmp group by salesno,salesname 
 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
-update @tmp 
-set mount=mount*-1,total=total*-1 
-where typea='退' 
+update @tmp set mount=mount*-1,total=total*-1 where typea='退' 
 
 select 
-gno,salesno,salesname,left(comp,10) comp,productno,products,datea,noa,typea,unit, qhref 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total+tax),1)),@total_decimal,30)) totax
+	gno,salesno,salesname,left(comp,10) comp,productno,products,datea,noa,typea,unit, qhref 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total+tax),1)),@total_decimal,30)) totax
 from @tmp order by salesno,salesname,gno,productno,datea ;
 
 z_vcc_vu12:--z_vcc_vu12
@@ -1687,7 +1652,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -1742,25 +1706,24 @@ select '0',a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then '
 ,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 ,sum((case when a.typea='1' then 1 else -1 end)*a.tax) 
 from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+	left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+	left join view_ucaucc d on b.productno = d.noa 
+	left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
+	  (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
 --(isnull(a.salesno,'') != '') and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
-group by a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+	  (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+	  (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+	  (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  and (len(@t_partno)=0 or s.partno=@t_partno) 
+group by a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
 order by a.salesno,b.productno 
 
 insert into @tmp(gno,mount,total) 
@@ -1801,7 +1764,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -1849,7 +1811,6 @@ if(charindex('有達',@t_acomp)>0 )
 if(charindex('智勝',@t_acomp)>0 ) 
 	set @qhref_acomp='_vu' 
 ------------------------------------------------- 
-
 declare @tmp table( 
 	gno nvarchar(1), 
 	custno nvarchar(30), 
@@ -1875,37 +1836,33 @@ a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then '
  '+isnull(b.spec,'') else '' end) 
 ,a.datea,a.noa,a.typea,b.unit,b.mount,b.price,b.total 
 ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy ,a.tax
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join cust c on a.custno = c.noa 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join cust c on a.custno = c.noa 
+				left join view_ucaucc d on b.productno = d.noa 
+				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and --(isnull(a.salesno,'') != '') and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) 
-and (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+	  (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and --(isnull(a.salesno,'') != '') and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) 
+	  and (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+      and (len(@t_partno)=0 or s.partno=@t_partno) 
 order by a.salesno,a.custno,b.productno 
 
 insert into @tmp(gno,salesno,salesname,mount,total,tax) 
 select '1' gno,salesno,salesname, 
-sum((case when typea='1' then mount else mount*(-1) end)), 
-sum((case when typea='1' then total else total*(-1) end)),
-SUM(tax) 
+		sum((case when typea='1' then mount else mount*(-1) end)), 
+		sum((case when typea='1' then total else total*(-1) end)),sum(tax) 
 from @tmp group by salesno,salesname 
 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
-
-update @tmp 
-set mount=mount*-1,total=total*-1 
+update @tmp set mount=mount*-1,total=total*-1 
 where typea='退' 
 
 select gno,custno,custnick,salesno,salesname,productno,products,datea,noa,typea,unit,qhref 
@@ -1999,26 +1956,25 @@ a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then '
 ,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 ,a.tax
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join cust c on a.custno = c.noa 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join cust c on a.custno = c.noa 
+				left join view_ucaucc d on b.productno = d.noa 
+				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(isnull(a.salesno,'')between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and --(isnull(a.salesno,'') != '') and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+	  (isnull(a.salesno,'')between @t_bsalesno and @t_esalesno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and --(isnull(a.salesno,'') != '') and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+	  (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+	  (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+	  (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  and (len(@t_partno)=0 or s.partno=@t_partno) 
 group by a.salesno,s.namea,a.custno,c.nick,c.comp,b.productno,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) ,tax
+ 	     '+isnull(b.spec,'') else '' end) ,tax
 order by a.salesno,a.custno,b.productno 
 
 insert into @tmp(gno,mount,total) 
@@ -2032,10 +1988,10 @@ select gno,custno,left(custnick,7) custnick,salesno sno ,salesname,productno,pro
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax+total),1)),@total_decimal,30)) totax
 from @tmp order by gno,salesno,custno,productno 
-  ;
+ ;
   
   
-  z_vcc_vu15:--z_vcc_vu15
+z_vcc_vu15:--z_vcc_vu15
 declare @t_bdate nvarchar(10) 
 declare @t_edate nvarchar(10) 
 declare @t_bcustno nvarchar(20) 
@@ -2059,7 +2015,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -2125,28 +2080,25 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-'0',b.productno,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
-,a.salesno,s.namea,a.custno, 
-(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
-a.datea,a.noa,a.typea,b.mount,b.price,b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-,a.tax
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join cust c on a.custno = c.noa 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+		'0',b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+		,a.salesno,s.namea,a.custno,(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
+		a.datea,a.noa,a.typea,b.mount,b.price,b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
+		,a.tax
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join cust c on a.custno = c.noa 
+				left join view_ucaucc d on b.productno = d.noa 
+				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and 
-(len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
-(len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
-(len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+	  (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and 
+	  (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) and 
+	  (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) and 
+	  (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) and (len(@vcctypea)=0 or a.typea = @vcctypea) 
 and (len(@t_partno)=0 or s.partno=@t_partno) 
 order by b.productno,b.product,a.salesno,s.namea,a.custno,c.nick,c.comp,a.datea,a.noa,a.typea 
 insert into @tmp(gno,productno,products,mount,total) 
@@ -2192,7 +2144,6 @@ declare @vcctypea nvarchar(10) =''
 declare @t_partno nvarchar(30) 
 declare @isspec nvarchar(10)='0' 
 -------------------------------------------------- 
-
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -2228,7 +2179,6 @@ end
 if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
 	set @mount_decimal =4 
 -------------------------------------------------- 
-
 declare @tmp table( 
 	gno nvarchar(1), 
 	productno nvarchar(30), 
@@ -2243,33 +2193,28 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-'0',b.productno,b.product+(case when @isspec='1' then ' 
-'+isnull(b.spec,'') else '' end) 
-,a.salesno,s.namea,a.custno, 
-(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
-,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
-,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
-,a.tax 
-from view_vcc a 
-left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-left join cust c on a.custno = c.noa 
-left join view_ucaucc d on b.productno = d.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
+	'0',b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+	,a.salesno,s.namea,a.custno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
+	,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
+	,sum((case when a.typea='1' then 1 else -1 end)*b.total),a.tax 
+from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
+				left join cust c on a.custno = c.noa 
+				left join view_ucaucc d on b.productno = d.noa 
+				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-(a.custno between @t_bcustno and @t_ecustno) and 
-(isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_groupano)=0 or d.groupano = @t_groupano) and (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
-and (len(@t_stype)=0 or a.stype = @t_stype) 
-and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
-and (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) 
-and (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) 
-and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
-and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-and (len(@t_partno)=0 or s.partno=@t_partno) 
-group by b.productno,b.product+(case when @isspec='1' then ' 
-'+isnull(b.spec,'') else '' end) 
-,a.salesno,s.namea,a.custno,c.nick,c.comp ,a.tax
+	  (a.custno between @t_bcustno and @t_ecustno) and 
+	  (isnull(a.salesno,'') between @t_bsalesno and @t_esalesno) and 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_groupano)=0 or d.groupano = @t_groupano) and (len(@t_typea)=0 or isnull(d.typea,'null') = @t_typea) 
+	  and (len(@t_stype)=0 or a.stype = @t_stype) 
+	  and (len(@t_salesgroup)=0 or s.salesgroup=@t_salesgroup) 
+	  and (len(@t_groupbno)=0 or d.groupbno = @t_groupbno) 
+	  and (len(@t_groupcno)=0 or d.groupcno = @t_groupcno) 
+	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
+	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
+	  and (len(@t_partno)=0 or s.partno=@t_partno) 
+group by b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+		 ,a.salesno,s.namea,a.custno,c.nick,c.comp ,a.tax
 --order by b.productno,b.product,a.salesno,s.namea,a.custno,c.nick,c.comp 
 
 insert into @tmp(gno,productno,products,mount,total) 

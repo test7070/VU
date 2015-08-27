@@ -56,7 +56,8 @@ ucolor nvarchar(30),
 spec nvarchar(30), 
 size nvarchar(30), 
 lengh decimal ,
-btotal float
+btotal float,
+carno nvarchar(30)
 
 ) 
 insert into @result 
@@ -67,6 +68,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 		,b.price 
 		,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,a.addr2,b.ucolor,b.spec,b.size,b.lengthb 
 		,(case when a.typea='2' then b.total else 0 end)
+		,a.carno
 from view_rc2s b left join view_rc2 a on a.noa = b.noa 
 				 left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
@@ -89,7 +91,7 @@ isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),4
 row_number()over(partition by productno,xproduct order by productno,xproduct,gno,datea,noa) idno , 
 isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),0,30)),0) tax, 
 isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax+total),1)),0,30)),0) money,memo,conn,ucolor,spec,size, 
-reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,lengh),1)),0,30))lengh ,btotal
+reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,lengh),1)),0,30))lengh ,btotal,carno
 from @result order by gno,productno,xproduct,datea,noa ;
 
 z_rc2_vu02:--z_rc2_vu02

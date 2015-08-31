@@ -622,7 +622,7 @@
 				}
 				
 				//判斷批號是否已使用
-				if(!check_uccb_uno){
+				/*if(!check_uccb_uno){
                 	var t_uno = "1=0";
                     for (var i = 0; i < q_bbsCount; i++) {
                         if ($.trim($('#txtUno_' + i).val()).length > 0)
@@ -631,11 +631,11 @@
 					var t_where = "where=^^ ("+t_uno+") and noa!='"+$('#txtNoa').val()+"' ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_uccb", r_accy);
 					return;
-                }
+                }*/
 				
 				//產生批號當天最大批號數
 				//判斷是否要產生批號
-				if(!get_uno){
+				/*if(!get_uno){
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 						if(!emp($('#txtStyle_'+j).val()) && emp($('#txtUno_'+j).val())){
 							get_uno=true;
@@ -648,7 +648,7 @@
 					var t_where = "where=^^ uno=isnull((select MAX(uno) from view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "getuno", r_accy);
 					return;
-				}
+				}*/
 				
 				check_uccb_uno=false;
 				check_startdate=false;
@@ -1259,7 +1259,7 @@
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:55px;"><a id='lblNoq_s'> </a></td>
-					<td align="center" style="width:180px;"><a id='lblUno_s'> </a></td>
+					<!--<td align="center" style="width:180px;"><a id='lblUno_s'> </a></td>-->
 					<!--<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:160px;"><a id='lblUcolor_s'> </a></td>
@@ -1280,7 +1280,7 @@
 				<tr style='background:#cad3ff;'>
 					<td><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td><input id="txtNoq.*" type="text" class="txt c1"/></td>
-					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->
 					<!--<td>
 						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />

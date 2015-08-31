@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title></title>
+		<title> </title>
 		<script src="../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -152,7 +152,7 @@
 				<tr style='color:white; background:#003366;' >
 					<td align="center" style="width:32px;"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  /></td>
 					<td align="center" style="width:40px;"><a id='lblNo_s'> </a></td>
-					<td align="center" style="width:160px;"><a id='lblUno_s'> </a></td>
+					<!--<td align="center" style="width:160px;"><a id='lblUno_s'> </a></td>-->
 					<td align="center" style="width:120px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:120px;"><a id='lblWeight_s'> </a></td>
 					<td align="center"><a id='lblMemo_s'> </a></td>
@@ -164,7 +164,7 @@
                     	<input id="txtNoq.*" type="hidden" />
 					</td>
 					<td align="center"><a id='lblNo.*'> </a></td>
-					<td><input class="txt" id="txtUno.*" type="text" /></td>
+					<!--<td><input class="txt" id="txtUno.*" type="text" /></td>-->
 					<td><input class="txt num" id="txtMount.*" type="text" /></td>
 					<td><input class="txt num" id="txtWeight.*" type="text" /></td>
 					<td><input class="txt" id="txtMemo.*" type="text" /></td>

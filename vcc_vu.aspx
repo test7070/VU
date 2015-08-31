@@ -1461,7 +1461,7 @@
 				<tr class="head" style="color:white; background:#003366;">
 					<td style="width:20px;"><input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 					<td style="width:20px;"> </td>
-					<td style="width:200px;"><a id='lblUno_t'> </a></td>
+					<!--<td style="width:200px;"><a id='lblUno_t'> </a></td>-->
 					<!--<td style="width:150px;"><a id='lblProductno_t'> </a></td>-->
 					<td style="width:150px;"><a id='lblProduct_t'> </a></td>
 					<td style="width:150px;"><a id='lblUcolor_t'> </a></td>
@@ -1480,7 +1480,7 @@
 						<input class="txt" id="txtNoq..*" type="text" style="display: none;"/>
 					</td>
 					<td><a id="lblNo..*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
-					<td><input id="txtUno..*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUno..*" type="text" class="txt c1"/></td>-->
 					<!--<td>
 						<input id="txtProductno..*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno..*" type="button" value='.' style="font-weight: bold;" />

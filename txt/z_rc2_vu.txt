@@ -42,7 +42,7 @@ datea nvarchar(10),
 tggno nvarchar(20), 
 comp nvarchar(40), 
 productno nvarchar(30), 
-xproduct nvarchar(40), 
+xproduct nvarchar(max), 
 unit nvarchar(8), 
 mount float, 
 weight float, 
@@ -56,33 +56,32 @@ ucolor nvarchar(30),
 spec nvarchar(30), 
 size nvarchar(30), 
 lengh decimal ,
-btotal float
+btotal float,
+carno nvarchar(30)
 
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea, 
-a.tggno, isnull(c.nick,''), b.productno, b.product, b.unit 
-,(case when a.typea='2' then -1 else 1 end)*b.mount 
-,(case when a.typea='2' then -1 else 1 end)*b.weight 
-,b.price 
-,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,c.conn,b.ucolor,b.spec,b.size,b.lengthb 
-,(case when a.typea='2' then b.total else 0 end)
-from view_rc2s b 
-left join view_rc2 a on a.noa = b.noa 
-left join tgg c on a.tggno = c.noa 
+		a.tggno, isnull(c.nick,''), b.productno, b.product, b.unit 
+		,(case when a.typea='2' then -1 else 1 end)*b.mount 
+		,(case when a.typea='2' then -1 else 1 end)*b.weight 
+		,b.price 
+		,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,a.addr2,b.ucolor,b.spec,b.size,b.lengthb 
+		,(case when a.typea='2' then b.total else 0 end)
+		,a.carno
+from view_rc2s b left join view_rc2 a on a.noa = b.noa 
+				 left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
-(a.tggno between @t_btggno and @t_etggno) and 
+	  ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+	  (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_stype)=0 or a.stype=@t_stype) 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_stype)=0 or a.stype=@t_stype) 
 order by b.productno,gno,a.datea,a.noa 
 
 insert into @result(gno,productno,xproduct,mount,total,tax,btotal) 
 select top 1 '1',productno,xproduct,sum(mount),sum(total),isnull(sum(tax),0),SUM(btotal) from @result group by productno,xproduct 
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
-
-
 
 select gno, type, noa, datea, tggno, left(comp,5) comp,productno, xproduct,unit,invono, 
 isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),0,30)),0) mount, 
@@ -92,7 +91,7 @@ isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),4
 row_number()over(partition by productno,xproduct order by productno,xproduct,gno,datea,noa) idno , 
 isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),0,30)),0) tax, 
 isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax+total),1)),0,30)),0) money,memo,conn,ucolor,spec,size, 
-reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,lengh),1)),0,30))lengh ,btotal
+reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,lengh),1)),0,30))lengh ,btotal,carno
 from @result order by gno,productno,xproduct,datea,noa ;
 
 z_rc2_vu02:--z_rc2_vu02
@@ -141,7 +140,7 @@ comp nvarchar(40),
 addr_invo nvarchar(90), 
 tel nvarchar(90), 
 productno nvarchar(30), 
-xproduct nvarchar(40), 
+xproduct nvarchar(max), 
 unit nvarchar(8), 
 mount float, 
 weight float, 
@@ -157,31 +156,30 @@ lengh decimal
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono, a.datea, 
-a.tggno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno, b.product, b.unit 
-,(case when a.typea='2' then -1 else 1 end)*b.mount 
-,(case when a.typea='2' then -1 else 1 end)*b.weight 
-,b.price 
-,(case when a.typea='2' then -1 else 1 end)*b.total 
-,case when (select count(*) from ucca)>0 then --有發票系統 
-(case when a.invono!='' then isnull((select tax from rc2a where noa=a.invono),0) --有發票號碼 
-else (case when a.taxtype='1' then round(a.money*0.05,0) when a.taxtype='3' then round(a.money/1.05*0.05,0) else 0 end)end) --沒有發票號碼 
-else a.tax end --沒有發票系統 
-, 0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb
-from view_rc2s b 
-left join view_rc2 a on a.noa = b.noa 
-left join tgg c on a.tggno = c.noa 
+	  a.tggno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno, b.product, b.unit 
+	  ,(case when a.typea='2' then -1 else 1 end)*b.mount 
+	  ,(case when a.typea='2' then -1 else 1 end)*b.weight 
+	  ,b.price 
+	  ,(case when a.typea='2' then -1 else 1 end)*b.total 
+	  ,case when (select count(*) from ucca)>0 then --有發票系統 
+	  (case when a.invono!='' then isnull((select tax from rc2a where noa=a.invono),0) --有發票號碼 
+	  else (case when a.taxtype='1' then round(a.money*0.05,0) when a.taxtype='3' then round(a.money/1.05*0.05,0) else 0 end)end) --沒有發票號碼 
+	  else a.tax end --沒有發票系統 
+	  ,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb
+from view_rc2s b left join view_rc2 a on a.noa = b.noa 
+				 left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
-(a.tggno between @t_btggno and @t_etggno) and 
+	  ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+	  (a.tggno between @t_btggno and @t_etggno) and 
 -- (a.salesno between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_stype)=0 or a.stype=@t_stype)  and a.transtart like '%'+@t_qno+'%' 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_stype)=0 or a.stype=@t_stype)  and a.transtart like '%'+@t_qno+'%' 
 order by a.tggno,a.datea,a.noa 
 
 insert into @result(gno,tggno,comp,pcount,mount,total,tax,weight) 
 select '1',tggno,comp,count(pcount),sum(mount),sum(total) 
-,(select SUM(tax)tax from (select tggno,noa,tax from @result group by noa,tggno,tax)tmp where tggno=a.tggno )
- ,SUM(weight)
+	   ,(select SUM(tax)tax from (select tggno,noa,tax from @result group by noa,tggno,tax)tmp where tggno=a.tggno )
+ 	   ,SUM(weight)
 from @result a group by tggno,comp 
 
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
@@ -241,7 +239,7 @@ datea nvarchar(10),
 tggno nvarchar(20), 
 comp nvarchar(40), 
 productno nvarchar(30), 
-xproduct nvarchar(40), 
+xproduct nvarchar(max), 
 unit nvarchar(8), 
 mount float, 
 weight float, 
@@ -259,20 +257,19 @@ lengh decimal
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea, 
-a.tggno, isnull(c.nick,''), b.productno, b.product, b.unit 
-,(case when a.typea='2' then -1 else 1 end)*b.mount 
-,(case when a.typea='2' then -1 else 1 end)*b.weight 
-,b.price 
-,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,c.conn,b.ucolor,b.spec,b.size,b.lengthb
-from view_rc2s b 
-left join view_rc2 a on a.noa = b.noa 
-left join tgg c on a.tggno = c.noa 
+		a.tggno, isnull(c.nick,''), b.productno, b.product, b.unit 
+		,(case when a.typea='2' then -1 else 1 end)*b.mount 
+		,(case when a.typea='2' then -1 else 1 end)*b.weight 
+		,b.price 
+		,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,c.conn,b.ucolor,b.spec,b.size,b.lengthb
+from view_rc2s b left join view_rc2 a on a.noa = b.noa 
+				 left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
-(a.tggno between @t_btggno and @t_etggno) and 
+	  ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+	  (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_stype)=0 or a.stype=@t_stype) 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_stype)=0 or a.stype=@t_stype) 
 order by b.productno,gno,a.datea,a.noa 
 
 insert into @result(gno,productno,xproduct,mount,total,tax) 
@@ -343,7 +340,7 @@ datea nvarchar(10),
 tggno nvarchar(20), 
 comp nvarchar(40), 
 productno nvarchar(30), 
-xproduct nvarchar(40), 
+xproduct nvarchar(max), 
 unit nvarchar(8), 
 mount float, 
 weight float, 
@@ -363,21 +360,20 @@ product nvarchar(30)
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea, 
-a.tggno, isnull(c.nick,''), b.productno, b.product, b.unit 
-,(case when a.typea='2' then -1 else 1 end)*b.mount 
-,(case when a.typea='2' then -1 else 1 end)*b.weight 
-,b.price 
-,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,c.conn,b.ucolor,b.spec,b.size,b.lengthb 
-,(case when a.typea='2' then b.total else 0 end),b.product
-from view_rc2s b 
-left join view_rc2 a on a.noa = b.noa 
-left join tgg c on a.tggno = c.noa 
+		   a.tggno, isnull(c.nick,''), b.productno, b.product, b.unit 
+	 	   ,(case when a.typea='2' then -1 else 1 end)*b.mount 
+		   ,(case when a.typea='2' then -1 else 1 end)*b.weight 
+		   ,b.price 
+		   ,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,c.conn,b.ucolor,b.spec,b.size,b.lengthb 
+		   ,(case when a.typea='2' then b.total else 0 end),b.product
+from view_rc2s b left join view_rc2 a on a.noa = b.noa 
+				 left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
-(a.tggno between @t_btggno and @t_etggno) and 
+	  ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+	  (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_stype)=0 or a.stype=@t_stype) and a.transtart like '%'+@t_qno+'%' 
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_stype)=0 or a.stype=@t_stype) and a.transtart like '%'+@t_qno+'%' 
 order by b.productno,gno,a.datea,a.noa 
 insert into @result(gno,tggno,comp,productno,xproduct,mount,total,weight) 
 select '1',tggno,comp,productno,xproduct,sum(mount),sum(total),SUM(weight) from @result group by tggno,comp,productno,xproduct 

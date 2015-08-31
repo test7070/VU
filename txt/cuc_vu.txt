@@ -1,0 +1,71 @@
+﻿lock:--lock
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	
+	set @accy=isnull((select accy from view_cuc where noa=@noa and noq=@noq),@accy)
+		
+	EXEC("
+		update cuc"+@accy+" set cubno='"+@userno+"'+'##'+'"+@namea+"'
+		where noa='"+@noa+"' and noq='"+@noq+"'
+	")
+;
+-------------------------------------------------------------------------------------------------------------------------------
+unlock:--unlock
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	
+	set @accy=isnull((select accy from view_cuc where noa=@noa and noq=@noq),@accy)
+		
+	EXEC("
+		update cuc"+@accy+" set cubno='' where noa='"+@noa+"' and noq='"+@noq+"' and left(cubno,len('"+@userno+"'))='"+@userno+"'
+	")
+;
+-------------------------------------------------------------------------------------------------------------------------------
+unlockall:--unlockall 使用者unlock全部的cucs
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = ''
+	declare @userno nvarchar(max) = [1]
+	declare @namea nvarchar(max) = [2]
+	
+	declare cursor_table cursor for 
+	select accy from view_cucs where left(cubno,len(@userno)=@userno group by accy
+	open cursor_table 
+	fetch next from cursor_table 
+	into @accy
+	while(@@FETCH_STATUS <> -1) 
+	begin 
+		
+		EXEC(" update cuc"+@accy+" set cubno='' where left(cubno,len('"+@userno+"'))='"+@userno+"' ")	
+	
+		fetch next from cursor_table 
+		into @accy
+	end 
+	close cursor_table 
+	deallocate cursor_table 
+;
+-------------------------------------------------------------------------------------------------------------------------------
+cucstocub:--cucstocub
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	
+	
+	
+	
+	
+;

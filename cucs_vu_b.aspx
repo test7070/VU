@@ -47,8 +47,10 @@
 				$('#lblLengthb').text('米數');
 				$('#lblClass').text('廠牌');
                 $('#lblUnit').text('單位');
-                $('#lblMount').text('數量');
-                $('#lblWeight').text('重量');
+                $('#lblMount').text('件數');
+                $('#lblEmount').text('未完工數');
+                $('#lblWeight').text('訂單重');
+                $('#lblEweight').text('未完工重');
                 $('#lblComp').text('客戶');
                 $('#lblNotv').text('訂單未出');
                 $('#lblNoa').text('訂單號碼');
@@ -96,7 +98,9 @@
 					<td align="center"><a id='lblClass'> </a></td>
 					<!--<td align="center"><a id='lblUnit'> </a></td>-->
 					<td align="center"><a id='lblMount'> </a></td>
+					<td align="center"><a id='lblEmount'> </a></td>
 					<td align="center"><a id='lblWeight'> </a></td>
+					<td align="center"><a id='lblEweight'> </a></td>
 					<td align="center"><a id='lblComp'> </a></td>
 					<td align="center">預交日</td>
 					<!--<td align="center"><a id='lblNotv'> </a></td>-->
@@ -112,7 +116,10 @@
 					<td style="width:6%;"><input class="txt" id="txtLengthb.*" type="text" style="width:98%;text-align:right;" /></td>
 					<td style="width:8%;"><input class="txt" id="txtClass.*" type="text" style="width:98%;" /></td>
 					<!--<td style="width:4%;"><input class="txt" id="txtUnit.*" type="text" style="width:94%;"/></td>-->
+					
+					<td style="width:8%;"><input class="txt" id="txtMount.*" type="text" style="width:94%; text-align:right;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtEmount.*" type="text" style="width:94%; text-align:right;"/></td>
+					<td style="width:8%;"><input class="txt" id="txtWeight.*" type="text" style="width:94%; text-align:right;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtEweight.*" type="text" style="width:94%; text-align:right;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtAcust.*" type="text" style="width:96%; text-align:right;"/></td>
 					<td style="width:8%;"><input class="txt" id="txtOdatea.*" type="text" style="width:96%; text-align:right;"/></td>

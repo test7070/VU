@@ -14,14 +14,14 @@
 			aPop = new Array(
 				['textMechno', '', 'mech', 'noa,mech', 'textMechno,textMech', 'mech_b.aspx']
 			);
-			
+			var intervalupdate;
 			var chk_cucs=''; //儲存要加工的cuc資料
 			
 			function cucs() {
             }
             cucs.prototype = {
                 data : null,
-                tbCount : 10,
+                tbCount : 8,
                 curPage : -1,
                 totPage : 0,
                 curIndex : '',
@@ -30,6 +30,7 @@
                     var string = "<table id='cucs_table' style='width:1000px;'>";
                     string+='<tr id="cucs_header">';
                     string+='<td id="cucs_chk" align="center" style="width:20px; color:black;">鎖</td>';
+                    string+='<td id="cucs_cubno" align="center" style="width:20px; color:black;display:none;">鎖定人</td>'
                     string+='<td id="cucs_noa" align="center" style="width:20px; color:black;display:none;">案號</td>'
                     string+='<td id="cucs_noq" align="center" style="width:20px; color:black;display:none;">案序</td>'
                     string+='<td id="cucs_sel" align="center" style="width:20px; color:black;"></td>';
@@ -56,6 +57,7 @@
                     for(var i=0;i<this.tbCount;i++){
                         string+='<tr id="cucs_tr'+i+'">';
                         string+='<td style="text-align: center;"><input id="cucs_chk'+i+'" class="cucs_chk" type="checkbox"/></td>';
+                        string+='<td id="cucs_cubno'+i+'" style="display:none;text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
                         string+='<td id="cucs_noa'+i+'" style="display:none;text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
                         string+='<td id="cucs_noq'+i+'" style="display:none;text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
                         string+='<td style="text-align: center; font-weight: bolder; color:black;">'+(i+1)+'</td>';
@@ -69,9 +71,9 @@
                         string+='<td id="cucs_weight'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
                         string+='<td id="cucs_emount'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
                         string+='<td id="cucs_eweight'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
-                        string+='<td id="cucs_xmount'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textXmount_'+i+'"  type="text" class="xmount txt c1" /></td>';
-                        string+='<td id="cucs_xcount'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textXcount_'+i+'"  type="text" class="xcount txt c1"/></td>';
-                        string+='<td id="cucs_xweight'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textXweight_'+i+'"  type="text" class="xweight txt c1" /></td>';
+                        string+='<td id="cucs_xmount'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textXmount_'+i+'"  type="text" class="xmount txt c1 num" /></td>';
+                        string+='<td id="cucs_xcount'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textXcount_'+i+'"  type="text" class="xcount txt c1 num"/></td>';
+                        string+='<td id="cucs_xweight'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textXweight_'+i+'"  type="text" class="xweight txt c1 num" /></td>';
                         string+='<td id="cucs_custno'+i+'" style="display:none;text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
                         string+='<td id="cucs_cust'+i+'" style="display:none;text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
                         string+='<td id="cucs_memo'+i+'" style="text-align: center;color:'+t_color[i%t_color.length]+'"></td>';
@@ -102,29 +104,14 @@
 					
                     $('.cucs_chk').click(function(e) {
                     	var n=$(this).attr('id').replace('cucs_chk','')
-                        if($(this).prop('checked')){
-                        	$(this).parent().parent().find('td').css('background', '#FF8800');
-                        	//暫存資料
-                        	chk_cucs.push({
-								noa : $('#cucs_noa'+n).text(),
-								noq : $('#cucs_noq'+n).text(),
-								xmount : $('#textXmount_'+n).val(),
-								xcount : $('#textXcount_'+n).val(),
-								xweight : $('#textXweight_'+n).val()
-							});
-                        	//鎖定資料
-                        	
-                        }else{
-                        	$(this).parent().parent().find('td').css('background', 'pink');	
-                        	//刪除暫存資料
-                        	 for(var i =0 ;i<chk_cucs.length;i++){
-                        	 	if(chk_cucs[i].noa==$('#cucs_noa'+n).text() && chk_cucs[i].noq==$('#cucs_noq'+n).text()){
-                        	 		chk_cucs.splice(i, 1);
-                        	 		break;
-                        	 	}
-                        	 }
-                        	//取消鎖定資料
-                        }
+                    	Lock();
+                    	var t_where="where=^^  1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and a.noa='"+$('#cucs_noa'+n).text()+"' and b.noq='"+$('#cucs_noq'+n).text()+"' ^^";
+                    	//判斷是否能被鎖定或解除
+                    	if($(this).prop('checked')){
+							q_gt('cucs_vu', t_where, 0, 0, 0,'getcanlock_'+n, r_accy);
+                    	}else{
+                    		q_gt('cucs_vu', t_where, 0, 0, 0,'getcanunlock_'+n, r_accy);
+                    	}
                     });
                     
                     $('.xmount').blur(function(e) {
@@ -160,6 +147,15 @@
 						}
                     });
                     
+                    $('.num').each(function() {
+						$(this).keyup(function(e) {
+							if(e.which>=37 && e.which<=40){return;}
+							var tmp=$(this).val();
+							tmp=tmp.match(/\d{1,}\.{0,1}\d{0,}/);
+							$(this).val(tmp);
+						});
+					});
+                    
                     this.data = new Array();
                     if (obj[0] != undefined) {
                         for (var i in obj)
@@ -167,10 +163,29 @@
                                 this.data.push(obj[i]);
                             }
                     }
+                                        
+                    for(var i =0 ;i<this.data.length;i++){
+                    	var cubno=this.data[i]['cubno'];
+						if(cubno.length>0){
+							if(cubno.split('##')[0]==r_userno){
+								chk_cucs.push({
+										noa : this.data[i]['noa'],
+										noq : this.data[i]['noq'],
+										xmount : 0,
+										xcount : 0,
+										xweight : 0
+								});
+							}
+						}
+                    }
+                    
                     this.totPage = Math.ceil(this.data.length / this.tbCount);
                     $('#textTotPage').val(this.totPage);
-                    this.sort('noa', false);
+                    this.sort('odatea', false);
+                    
                     Unlock();
+                    
+                    intervalupdate=setInterval("cucsupdata()",1000*60);
                 },
                 sort : function(index, isFloat) {
                     //排序
@@ -194,15 +209,15 @@
                             var m = a[cucs.curIndex] == undefined ? "" : a[cucs.curIndex];
                             var n = b[cucs.curIndex] == undefined ? "" : b[cucs.curIndex];
                             if (m == n) {
-                                if (a[index] < b[index])
-                                    return 1;
                                 if (a[index] > b[index])
+                                    return 1;
+                                if (a[index] < b[index])
                                     return -1;
                                 return 0;
                             } else {
-                                if (m < n)
-                                    return 1;
                                 if (m > n)
+                                    return 1;
+                                if (m < n)
                                     return -1;
                                 return 0;
                             }
@@ -244,9 +259,22 @@
                     var n = (this.curPage - 1) * this.tbCount;
                     for (var i = 0; i < this.tbCount; i++) {
                         if ((n + i) < this.data.length) {
-                            $('#cucs_chk' + i).removeAttr('disabled');
+                        	var cubno=this.data[n+i]['cubno'];
+                            if(cubno.length>0){
+                            	if(cubno.split('##')[0]==r_userno){
+                            		$('#cucs_chk' + i).removeAttr('disabled');
+                            		$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', '#FF8800');
+                            	}else{ //其他人已經鎖定
+                            		$('#cucs_chk' + i).attr('disabled', 'disabled');
+                            		$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'pink');	
+                            	}
+                            }else{
+                            	$('#cucs_chk' + i).removeAttr('disabled');
+                            	$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'pink');	
+                            }
                             $('#cucs_noa' + i).html(this.data[n+i]['noa']);
                             $('#cucs_noq' + i).html(this.data[n+i]['noq']);
+                            $('#cucs_cubno' + i).html(this.data[n+i]['cubno']);
                             $('#cucs_odatea' + i).html(this.data[n+i]['odatea']);
                             $('#cucs_ucolor' + i).html(this.data[n+i]['ucolor']);
                             $('#cucs_product' + i).html(this.data[n+i]['product']);
@@ -257,9 +285,9 @@
                             $('#cucs_weight' + i).html(this.data[n+i]['weight']);  
                             $('#cucs_emount' + i).html(this.data[n+i]['emount']);
                             $('#cucs_eweight' + i).html(this.data[n+i]['eweight']);
-                            $('#textXmount_'+i).val('');
-                            $('#textXcount_'+i).val('');
-                            $('#textXweight_'+i).val('');
+                            $('#textXmount_'+i).val('').attr('disabled', 'disabled');
+                            $('#textXcount_'+i).val('').attr('disabled', 'disabled');
+                            $('#textXweight_'+i).val('').attr('disabled', 'disabled');
                             $('#cucs_custno' + i).html(this.data[n+i]['acustno']);
                             $('#cucs_cust' + i).html(this.data[n+i]['acust']);
                             $('#cucs_memo' + i).html(this.data[n+i]['memo']);
@@ -268,21 +296,26 @@
                             //text寫入
                             for(var j =0 ;j<chk_cucs.length;j++){
                             	if(chk_cucs[j].noa==$('#cucs_noa'+i).text() && chk_cucs[j].noq==$('#cucs_noq'+i).text()){
-									$('#textXmount_'+i).val(chk_cucs[i].xmount);
-									$('#textXcount_'+i).val(chk_cucs[i].xcount);
-									$('#textXweight_'+i).val(chk_cucs[i].xweight);
+                            		$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', '#FF8800');
+									$('#textXmount_'+i).val(chk_cucs[j].xmount).removeAttr('disabled');
+									$('#textXcount_'+i).val(chk_cucs[j].xcount).removeAttr('disabled');
+									$('#textXweight_'+i).val(chk_cucs[j].xweight).removeAttr('disabled');
 									break;
-								}	
+								}else{
+									$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'pink');	
+								}
                             }
                         } else {
-                            $('#cucs_chk' + i).attr('disabled', 'disabled');
+                            $('#cucs_chk' + i).attr('disabled', 'disabled').prop('checked',false).parent().parent().find('td').css('background', 'pink');
                             $('#cucs_noa' + i).html('');
                             $('#cucs_noq' + i).html('');
+                            $('#cucs_cubno' + i).html('');
                             $('#cucs_odatea' + i).html('');
                             $('#cucs_ucolor' + i).html('');
                             $('#cucs_product' + i).html('');
                             $('#cucs_spec' + i).html('');
                             $('#cucs_size' + i).html('');
+                            $('#cucs_lengthb' + i).html('');
                             $('#cucs_mount' + i).html('');
                             $('#cucs_weight' + i).html('');
                             $('#cucs_emount' + i).html('');
@@ -290,10 +323,10 @@
                             $('#cucs_cust' + i).html('');
                             $('#cucs_memo' + i).html('');
                             $('#cucs_orde' + i).html('');
-                            $('#textXmount_'+i).val('');
-                            $('#textXcount_'+i).val('');
-                            $('#textXweight_'+i).val('');
-                        }
+                            $('#textXmount_'+i).val('').attr('disabled', 'disabled');
+                            $('#textXcount_'+i).val('').attr('disabled', 'disabled');
+                            $('#textXweight_'+i).val('').attr('disabled', 'disabled');
+                        }                      
                     }
                 }
             };
@@ -305,6 +338,12 @@
                 q_gf('', q_name);
 			});
 			
+			var new_where='';
+			function cucsupdata() {
+				q_gt('cucs_vu', new_where, 0, 0, 0,'bbb', r_accy);
+				Lock();
+			}
+			
 			function q_gfPost() {
 				q_getFormat();
                 q_langShow();
@@ -314,7 +353,8 @@
                 q_cur=2;
                 cucs.load();
                 
-                 var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
+                var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
+                new_where = t_where;
 				q_gt('cucs_vu', t_where, 0, 0, 0,'aaa', r_accy);
                 
                 $('#btncucs_refresh').click(function(e) {
@@ -330,19 +370,29 @@
                     + q_sqlPara2("a.noa", t_noa)+ q_sqlPara2("isnull(d.odatea,'')", t_bdate,t_edate);
                     
                     t_where="where=^^"+t_where+"^^";
+                    new_where = t_where;
                     Lock();
 					q_gt('cucs_vu', t_where, 0, 0, 0,'aaa', r_accy);
                 });
                 
                 $('#btnCancels').click(function(e) {
-                   chk_cucs=new Array();
-                   cucs.refresh();
+					q_func('qtxt.query.unlockall', 'cuc_vu.txt,unlockall,'+r_userno+';'+r_name);
+					chk_cucs=new Array();
+					cucs.refresh();
                 });
                 
                 $('#btnCub').click(function(e) {
-					if(chk_vcce.length>0){
-						if(confirm("確定要轉至加工單?")){
-						}
+                	t_err = q_chkEmpField([['textDatea', '加工日'],['textMechno', '機　台']]);
+	                if (t_err.length > 0) {
+	                    alert(t_err);
+	                    return;
+	                }
+                	
+					if(chk_cucs.length>0){
+						//先取得最新的資料再判斷是否要轉加工單
+						var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
+						q_gt('cucs_vu', t_where, 0, 0, 0,'ccc', r_accy);
+						Lock();
 					}else
 						alert('無核取資料。');
                 });
@@ -359,16 +409,223 @@
                             alert('無資料。');
                         }
                         break;
+                    case 'ccc':
+                    	var as = _q_appendData("view_cuc", "", true);
+                    	if (as[0] != undefined){
+                    		var t_noa='';
+                    		var t_noq='';
+                    		var t_xmount='';
+                    		var t_xcount='';
+                    		var t_xweight='';
+                    		var t_err='';
+                    		for (var i=0;i<chk_cucs.length;i++){
+                    			var t_exists=false;
+                    			for (var j=0;j<as.length;j++){
+                    				if(chk_cucs[i]['noa']==as[j]['noa'] && chk_cucs[i]['noq']==as[j]['noq']){//表示加工排程單存在
+                    					if(as[j]['cubno'].split('##')[0]!=r_userno){
+                    						t_err+=chk_cucs[i]['noa']+'-'+chk_cucs[i]['noq']+"鎖定人員非自己本人!!";
+                    					}
+                    					if(dec(as[j].emount)<dec(chk_cucs[i]['xmount'])){
+                    						t_err+=chk_cucs[i]['noa']+'-'+chk_cucs[i]['noq']+"加工數量大於未完工數!!";
+                    					}
+                    					if(dec(as[j].eweight)<dec(chk_cucs[i]['xweight'])){
+                    						t_err+=chk_cucs[i]['noa']+'-'+chk_cucs[i]['noq']+"加工重量大於未完工重!!";
+                    					}
+                    					t_exists=true;
+                    					break;
+                    				}
+                    			}
+                    			if(t_err.length>0){
+                    				break;
+                    			}else if(!t_exists){
+                    				t_err=chk_cucs[i]['noa']+'-'+chk_cucs[i]['noq']+"加工排程單不存在!!";
+                    				break;
+                    			}else{//表示資料正常
+                    				if(dec(chk_cucs[i]['xmount'])>0 || dec(chk_cucs[i]['xweight'])>0){
+	                    				t_noa=t_noa+chk_cucs[i]['noa']+'^';
+			                    		t_noq=t_noq+chk_cucs[i]['noq']+'^';
+			                    		t_xmount=t_xmount+dec(chk_cucs[i]['xmount'])+'^';
+			                    		t_xcount=t_xcount+dec(chk_cucs[i]['xcount'])+'^';
+			                    		t_xweight=t_xweight+dec(chk_cucs[i]['xweight'])+'^';
+		                    		}
+                    			}
+                    		}
+                    		if(t_err.length>0){
+                    			alert(t_err);
+                    		}else if(t_noa.length==0 || t_noq.length==0){
+                    			alert('排程加工資料無設定數量或重量。');
+                    		}else{
+                    			var t_mechno=emp($('#textMechno').val())?'#non':$('#textMechno').val();
+                    			var t_memo=emp($('#textMemo').val())?'#non':$('#textMemo').val();
+                    			
+                    			if(confirm("確定要轉至加工單?("+t_noa.split('^').length+"筆)")){
+                    				q_func('qtxt.query.cucstocub', 'cuc_vu.txt,cucstocub,'
+                    				+r_accy+';'+$('#textDatea').val()+';'+t_mechno+';'+t_memo+';'
+                    				+r_userno+';'+r_name+';'+t_noa+';'+t_noq+';'+t_xmount+';'+t_xcount+';'+t_xweight);
+								}
+							}
+                    	}else{
+                            alert('無排程單!!');
+                    	}
+                    	Unlock();
+                    	break;
+					case 'bbb':
+						var as = _q_appendData("view_cuc", "", true);
+                        if (as[0] != undefined)
+                            cucs.data=as;
+                        else{                           
+                            alert('無資料。');
+                        }
+                        var t_curPage=cucs.curPage
+                        cucs.sort(cucs.curIndex,false);
+                        cucs.curPage=t_curPage;
+                        cucs.totPage = Math.ceil(cucs.data.length / cucs.tbCount);
+                        if(cucs.totPage<cucs.curPage)
+                        	cucs.curPage=1;
+                    	$('#textTotPage').val(cucs.totPage);
+                    	$('#textCurPage').val(cucs.curPage);
+                    	
+                    	//判斷lock是否有變動
+                    	for(var i =0 ;i<as.length;i++){
+                    		var cubno=as[i]['cubno'];
+							if(cubno.length>0){
+								if(cubno.split('##')[0]==r_userno){ //自己的鎖定資料
+									var t_exists=false;
+		                    		for(var j=0;j<chk_cucs.length;j++){
+		                    			if(as[i]['noa']==chk_cucs[j]['noa'] && as[i]['noq']==chk_cucs[j]['noq']){
+		                    				t_exists=true;
+		                    			}
+		                    		}
+		                    		if(!t_exists){//當不存在時新增
+		                    			chk_cucs.push({
+												noa : as[i]['noa'],
+												noq : as[i]['noq'],
+												xmount : 0,
+												xcount : 0,
+												xweight : 0
+										});
+		                    		}
+		                    	}else{//他人鎖定資料
+		                    		for(var j=0;j<chk_cucs.length;j++){
+		                    			if(as[i]['noa']==chk_cucs[j]['noa'] && as[i]['noq']==chk_cucs[j]['noq']){
+		                    				chk_cucs.splice(j, 1);
+		                    				j--;
+                        	 				break;
+		                    			}
+		                    		}
+		                    	}
+		                    }else{//無鎖定資料
+		                    	for(var j=0;j<chk_cucs.length;j++){
+		                    		if(as[i]['noa']==chk_cucs[j]['noa'] && as[i]['noq']==chk_cucs[j]['noq']){
+		                    			chk_cucs.splice(j, 1);
+		                    			j--;
+                        	 			break;
+		                    		}
+		                    	}
+		                    }
+	                    }
+	                                        	
+                        cucs.refresh();
+						//clearInterval(intervalupdate);
+                        Unlock();
+                        break;
 					case q_name:
 						if (q_cur == 4)
 							q_Seek_gtPost();
 						break;
 				}
+				if(t_name.indexOf("getcanlock_")>-1){
+					var n=t_name.split('_')[1];
+					var as = _q_appendData("view_cuc", "", true);
+					if (as[0] != undefined){//是否有資料
+						if(as[0].cubno!='' && as[0].cubno.split('##')[0] != r_userno){//其他人被鎖定
+							alert("該筆排程已被"+as[0].cubno.split('##')[1]+"鎖定!!");
+							$('#cucs_cubno'+n).text(as[0].cubno);
+							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'pink');	
+                        	//檢查是否有暫存 並刪除暫存資料
+                        	 for(var i =0 ;i<chk_cucs.length;i++){
+                        	 	if(chk_cucs[i].noa==$('#cucs_noa'+n).text() && chk_cucs[i].noq==$('#cucs_noq'+n).text()){
+                        	 		chk_cucs.splice(i, 1);
+                        	 		break;
+                        	 	}
+                        	 }
+                        	//關閉欄位修改
+                        	$('#textXmount_'+n).val('').attr('disabled', 'disabled');
+                            $('#textXcount_'+n).val('').attr('disabled', 'disabled');
+                            $('#textXweight_'+n).val('').attr('disabled', 'disabled');
+						}else{//未鎖定資料
+							$('#cucs_chk'+n).parent().parent().find('td').css('background', '#FF8800');
+							//鎖定資料
+                        	q_func('qtxt.query.lock', 'cuc_vu.txt,lock,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
+                        	$('#cucs_cubno'+n).text(r_userno+"##"+r_name);
+                        	//暫存資料
+                        	chk_cucs.push({
+								noa : $('#cucs_noa'+n).text(),
+								noq : $('#cucs_noq'+n).text(),
+								xmount : $('#textXmount_'+n).val(),
+								xcount : $('#textXcount_'+n).val(),
+								xweight : $('#textXweight_'+n).val()
+							});
+                        	//開放欄位修改
+                        	$('#textXmount_'+n).removeAttr('disabled');
+							$('#textXcount_'+n).removeAttr('disabled');
+							$('#textXweight_'+n).removeAttr('disabled');
+						}
+					}else{
+						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'pink');	
+						alert('該筆排程已完工!!');
+					}
+					Unlock();
+				}
+				if(t_name.indexOf("getcanunlock_")>-1){
+					var n=t_name.split('_')[1];
+					var as = _q_appendData("view_cuc", "", true);
+					if (as[0] != undefined){//是否有資料
+						if(as[0].cubno==''){
+							$('#cucs_cubno'+n).text('');
+							$('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', 'pink');
+							alert('該筆排程已被解除鎖定!!');
+						}else if(as[0].cubno!='' && as[0].cubno.split('##')[0] != r_userno){//其他人被鎖定
+							$('#cucs_cubno'+n).text(as[0].cubno);
+							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'pink');
+							alert('該筆排程已被鎖定!!');
+						}else{//自己鎖定的資料
+                        	//取消鎖定資料
+                            q_func('qtxt.query.unlock', 'cuc_vu.txt,unlock,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
+                            $('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', 'pink');
+						}
+					}else{
+						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'pink');	
+						alert('該筆排程已完工!!');
+					}
+					//刪除暫存資料
+					for(var i =0 ;i<chk_cucs.length;i++){
+                    	if(chk_cucs[i].noa==$('#cucs_noa'+n).text() && chk_cucs[i].noq==$('#cucs_noq'+n).text()){
+                        	chk_cucs.splice(i, 1);
+                        	break;
+                        }
+					}
+					//關閉欄位修改
+					$('#textXmount_'+n).val('').attr('disabled', 'disabled');
+					$('#textXcount_'+n).val('').attr('disabled', 'disabled');
+					$('#textXweight_'+n).val('').attr('disabled', 'disabled');
+					Unlock();	
+				}
 			}
 			
 			function q_funcPost(t_func, result) {
                 switch(t_func) {
-                	
+                	case 'qtxt.query.cucstocub':
+                		var as = _q_appendData("tmp0", "", true, true);
+                        if (as[0] != undefined) {
+                        	var cubno=as[0].cubno;
+                        	//產生cubu
+                        	q_func('qtxt.query.cubstocubu', 'cub.txt,cubstocubu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
+                		}
+                		break;
+					case 'qtxt.query.cubstocubu':
+						q_func('cubu_post.post', r_accy + ',' + $('#txtNoa').val() + ',1');
+						break;
                 }
 			}
 			

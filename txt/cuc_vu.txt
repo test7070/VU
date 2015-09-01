@@ -59,13 +59,76 @@ cucstocub:--cucstocub
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max) = ''
 	declare @accy nvarchar(max) = [1]
-	declare @noa nvarchar(max) = [2]
-	declare @noq nvarchar(max) = [3]
-	declare @userno nvarchar(max) = [4]
-	declare @namea nvarchar(max) = [5]
+	declare @datea nvarchar(max) = [2]
+	declare @mechno nvarchar(max) = [3]
+	declare @memo nvarchar(max) = [4]
+	declare @userno nvarchar(max) = [5]
+	declare @namea nvarchar(max) = [6]
+	--表身資料
+	declare @noa nvarchar(max) = [7]
+	declare @noq nvarchar(max) = [8]
+	declare @xmount nvarchar(max) = [9]
+	declare @xcount nvarchar(max) = [10]
+	declare @xweight nvarchar(max) = [11]
 	
+	declare @cubno nvarchar(100) --新加工單號
+	set @cubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
+	set @cubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@cubno,3) as int) +1 as nvarchar(50)),3)
+
+	--*********************************************************************************************
 	
+	IF OBJECT_ID('tempdb..#tmp')is not null
+	BEGIN
+		set @cmd = 'drop table #tmp'
+		EXECUTE sp_executesql @cmd
+	END
+		
+	create table #tmp( 
+		noa nvarchar(50),
+		noq nvarchar(50),  
+		xmount float,
+		xcount float,
+		xweight float  
+	) 
 	
+		
+	while (CHARINDEX('#',@noa)>0 && CHARINDEX('#',@noq)>0)
+	begin
+		insert #tmp
+		select left(@noa,CHARINDEX('^',@noa)-1)
+		,SUBSTRING(left(@t_handle,CHARINDEX('#',@t_handle)-1),CHARINDEX('^',@t_handle)+1,len(@t_handle))
+		
+		set @t_handle=SUBSTRING(@t_handle,CHARINDEX('#',@t_handle)+1,LEN(@t_handle))
+	end
+	
+	--*********************************************************************************************
+	if(len(@t_ordenos)>0)
+	begin
+		exec("insert vcce"+@accy+" (noa,datea,timea,carno,driverno,driver,worker)
+		select '"+@vcceno+"','"+@nowdate+"','"+@nowtime+"','"+@t_carno+"','"+@t_driverno+"','"+@driver+"','"+@woker+"' ")
+	
+		exec("insert vcces"+@accy+" (noa,noq,ordeno,custno,comp,datea,timea,odate,salesno,sales,worker,handle,handle2)
+		select '"+@vcceno+"',right('000'+cast(ROW_NUMBER() over(order by noa) as nvarchar(50)),3)
+		,noa,custno,comp,datea,timea,odate,salesno,sales,worker
+		,(select handle from #handle where noa=a.noa)
+		,(select handle from #handle2 where noa=a.noa)
+		from view_orde a where CHARINDEX(noa,'"+@t_ordenos+"')>0 ")
+	
+		insert dno (tablea,noa,usera)
+		select 'vcce',@vcceno,@userno
+		
+	end
+	
+	IF OBJECT_ID('tempdb..#handle')is not null
+	BEGIN
+		set @cmd = 'drop table #handle'
+		EXECUTE sp_executesql @cmd
+	END
+	IF OBJECT_ID('tempdb..#handle2')is not null
+	BEGIN
+		set @cmd = 'drop table #handle2'
+		EXECUTE sp_executesql @cmd
+	END
 	
 	
 ;

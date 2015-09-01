@@ -588,9 +588,9 @@
 							var t_date=$('#txtDatea').val();
 							var nextdate='';
 							if(r_len==4)
-								nextdate=new Date(dec(t_date.substr(0,4))+1911,dec(t_date.substr(5,2))-1,dec(t_date.substr(8,2)));
+								nextdate=new Date(dec(t_date.substr(0,4)),dec(t_date.substr(5,2))-1,1);
 							else
-								nextdate=new Date(dec(t_date.substr(0,3))+1911,dec(t_date.substr(4,2))-1,dec(t_date.substr(7,2)));
+								nextdate=new Date(dec(t_date.substr(0,3))+1911,dec(t_date.substr(4,2))-1,1);
 				    		nextdate.setMonth(nextdate.getMonth() +1)
 				    		if(r_len==4)
 				    			t_date=''+(nextdate.getFullYear())+'/'+(nextdate.getMonth()<9?'0':'')+(nextdate.getMonth()+1);

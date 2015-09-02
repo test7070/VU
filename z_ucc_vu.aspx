@@ -42,30 +42,30 @@
                         name : 'priceprecision',
                         value : q_getPara('vcc.pricePrecision')
                     }, {
-                        type : '2',
-                        name : 'product', //[5][6]
-                        dbf : 'ucaucc',
-                        index : 'noa,product',
-                        src : 'ucaucc_b.aspx'
+                        type : '6',
+                        name : 'xproduct' //[5]
                     }, {
                         type : '6',
-                        name : 'xuno' //[7]
+                        name : 'xucolor' //[6]
                     }, {
                         type : '6',
-                        name : 'edate' //[8]
-                    }, {
-                        type : '6',
-                        name : 'xspec' //[9]
+                        name : 'xspec' //[7]
                     }, {
                         type : '5',
-                        name : 'xsize', //[10]
+                        name : 'xsize', //[8]
                         value:(',#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16').split(',')
                     }, {
                         type : '1',
-                        name : 'xlengthb' //[11][12]
+                        name : 'xlengthb' //[9][10]
                     }, {
                         type : '6',
-                        name : 'xclass' //[13]
+                        name : 'xclass' //[11]
+                    }, {
+                        type : '6',
+                        name : 'xuno' //[12]
+                    }, {
+                        type : '6',
+                        name : 'edate' //[13]
                     }]
                 });
                 q_popAssign();
@@ -93,6 +93,17 @@
                     	$(this).val(99);
                 });
                 
+                var tmp = document.getElementById("txtXproduct");
+                var selectbox = document.createElement("select");
+                selectbox.id="combProduct";
+                selectbox.style.cssText ="width:20px;font-size: medium;";
+                tmp.parentNode.appendChild(selectbox,tmp);
+                q_cmbParse("combProduct", q_getPara('vccs_vu.product')); 
+                
+                $('#combProduct').change(function() {
+					$('#txtXproduct').val($('#combProduct').find("option:selected").text());
+				});
+                
                 var tmp = document.getElementById("txtXspec");
                 var selectbox = document.createElement("select");
                 selectbox.id="combSpec";
@@ -103,7 +114,29 @@
                 $('#combSpec').change(function() {
 					$('#txtXspec').val($('#combSpec').find("option:selected").text());
 				});
-
+				
+				var tmp = document.getElementById("txtXclass");
+                var selectbox = document.createElement("select");
+                selectbox.id="combClass";
+                selectbox.style.cssText ="width:20px;font-size: medium;";
+                tmp.parentNode.appendChild(selectbox,tmp);
+                q_cmbParse("combClass", t_class); 
+                
+                $('#combClass').change(function() {
+					$('#txtXclass').val($('#combClass').find("option:selected").text());
+				});
+				
+				//類別暫時不放入
+				/*var tmp = document.getElementById("txtXucolor");
+                var selectbox = document.createElement("select");
+                selectbox.id="combUcolor";
+                selectbox.style.cssText ="width:20px;font-size: medium;";
+                tmp.parentNode.appendChild(selectbox,tmp);
+                q_cmbParse("combUcolor", t_class); 
+                
+                $('#combUcolor').change(function() {
+					$('#txtXucolor').val($('#combUcolor').find("option:selected").text());
+				});*/
             }
 
             function q_popPost(s1) {
@@ -116,13 +149,27 @@
 
             }
 			
-			var t_spec='@';
+			var t_spec='@',t_color='@',t_class='@';
             function q_gtPost(t_name) {
                 switch (t_name) {
                 	case 'spec':
                 		var as = _q_appendData("spec", "", true);
 						for ( i = 0; i < as.length; i++) {
 							t_spec+=","+as[i].noa;
+						}
+						q_gt('color', '1=1 ', 0, 0, 0, "color");
+                		break;
+                	case 'color':
+                		var as = _q_appendData("color", "", true);
+						for ( i = 0; i < as.length; i++) {
+							t_color+=","+as[i].color;
+						}
+						q_gt('class', '1=1 ', 0, 0, 0, "class");
+                		break;
+                	case 'class':
+                		var as = _q_appendData("class", "", true);
+						for ( i = 0; i < as.length; i++) {
+							t_class+=","+as[i].noa;
 						}
                 		q_gf('', 'z_ucc_vu');
                 		break;
@@ -139,6 +186,9 @@
             #q_report select {
             	font-size: medium;
     			margin-top: 2px;
+            }
+            select {
+            	font-size: medium;
             }
 		</style>
 	</head>

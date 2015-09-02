@@ -42,9 +42,9 @@
 				//['txtPost', 'lblAddr', 'addr', 'post,addr', 'txtPost,txtAddr', 'addr_b.aspx'],
 				//['txtPost2', 'lblAddr2', 'addr', 'post,addr', 'txtPost2,txtAddr2', 'addr_b.aspx'],
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
-				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx']
-				//['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,spec,size,lengthb,class,unit,emount,eweight'
-            	//, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtMount__,txtWeight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%'],
+				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
+				['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,spec,size,lengthb,class,unit,emount,eweight'
+            	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtMount__,txtWeight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
 				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
 			);
 
@@ -249,6 +249,7 @@
 						t_where=t_where+" and noa!='"+$('#textQno1').val()+"'";
 					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat2_b', "600px", "700px", '出貨合約');
 				});
+				
 			}
 			
 			function refreshBbm() {
@@ -617,6 +618,30 @@
 							alert('無此批號!!');
 						}
 						break;
+					case 'getordes':
+						var as = _q_appendData('view_ordes', '', true);
+						if (as[0] != undefined) {
+							var t_nocust=true;
+							if(!emp($('#txtCustno').val())){
+								for (var i = 0; i < as.length; i++) {
+									if(as[i].custno!=$('#txtCustno').val())
+										t_nocust=false;
+								}
+							}
+							if(!t_nocust){
+								alert('領料批號含其他客戶的訂單批號!!');
+							}else{
+								for (var i = 0; i < q_bbsCount; i++) {
+			                		$('#btnMinus_'+i).click();
+			                	}
+								q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtPrice,txtMount,txtWeight,txtOrdeno,txtNo2'
+								, as.length, as, 'product,ucolor,spec,size,lengthb,class,price,mount,weight,noa,no2', 'txtProduct,txtSpec');
+							}
+							sum();
+						}else{
+							alert('無訂單資料!!');
+						}
+						break;
 				}
 			}
 			
@@ -851,6 +876,20 @@
 						});
                     }
                 }
+                $('#btnVccttoOrde').click(function() {
+                	if(q_cur==1 || q_cur==2){
+	                	var t_ordeno="";
+	                	for (var i = 0; i < q_bbtCount; i++) {
+	                		if(!emp($('#txtUno__'+i).val())){
+	                			var t_index=$('#txtUno__'+i).val().indexOf('-');
+	                			t_ordeno=t_ordeno+$('#txtUno__'+i).val().substr(0,t_index);
+	                		}
+	                	}
+	                	if(t_ordeno.length>0){
+	                		q_gt('view_ordes', "where=^^charindex(isnull(noa,'')+isnull(no2,''),'"+t_ordeno+"')>0 ^^ ", 0, 0, 0, "getordes");
+	                	}
+                	}
+                });
                 _bbtAssign();
                 
                 $('#lblUno_t').text('領料批號');
@@ -865,6 +904,7 @@
                 $('#lblMount_t').text('領料數');
                 $('#lblWeight_t').text('領料重');
                 $('#lblMemo_t').text('備註');
+                
             }
 
 			function btnIns() {
@@ -945,8 +985,8 @@
 					if((!emp($('#textQno1').val()) || !emp($('#textQno2').val())))
 						q_func('qtxt.query.changequatgweight', 'vcc.txt,changequat_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
 					
-					if(!emp($('#txtNoa').val()))
-						q_func('qtxt.query.vcct', 'vcc.txt,changevcct_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
+					//if(!emp($('#txtNoa').val()))
+					//	q_func('qtxt.query.vcct', 'vcc.txt,changevcct_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
 				}
 			}
 
@@ -1408,7 +1448,7 @@
 					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblStore_s'> </a></td>
+					<!--<td align="center" style="width:150px;"><a id='lblStore_s'> </a></td>-->
 					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
@@ -1442,11 +1482,11 @@
 					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtTotal.*" type="text" class="txt num c1"/></td>
-					<td>
+					<!--<td>
 						<input id="txtStoreno.*" type="text" class="txt c1" style="width: 65%"/>
 						<input class="btn"  id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;" />
 						<input id="txtStore.*" type="text" class="txt c1"/>
-					</td>
+					</td>-->
 					<td>
 						<input id="txtMemo.*" type="text" class="txt c1"/>
 						<input id="txtOrdeno.*" type="text"  class="txt" style="width:65%;"/>
@@ -1461,7 +1501,10 @@
 				<tr class="head" style="color:white; background:#003366;">
 					<td style="width:20px;"><input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 					<td style="width:20px;"> </td>
-					<!--<td style="width:200px;"><a id='lblUno_t'> </a></td>-->
+					<td style="width:200px;">
+						<a id='lblUno_t'> </a>
+						<input id="btnVccttoOrde" type="button" style="font-size: medium; font-weight: bold;" value="出貨匯入"/>
+					</td>
 					<!--<td style="width:150px;"><a id='lblProductno_t'> </a></td>-->
 					<td style="width:150px;"><a id='lblProduct_t'> </a></td>
 					<td style="width:150px;"><a id='lblUcolor_t'> </a></td>
@@ -1480,7 +1523,7 @@
 						<input class="txt" id="txtNoq..*" type="text" style="display: none;"/>
 					</td>
 					<td><a id="lblNo..*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
-					<!--<td><input id="txtUno..*" type="text" class="txt c1"/></td>-->
+					<td><input id="txtUno..*" type="text" class="txt c1"/></td>
 					<!--<td>
 						<input id="txtProductno..*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno..*" type="button" value='.' style="font-weight: bold;" />

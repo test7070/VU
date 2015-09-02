@@ -293,8 +293,8 @@ isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),4
 row_number()over(partition by productno,xproduct order by productno,xproduct,gno,datea,noa) idno ,
 isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),0,30)),0) tax,
 isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax+total),1)),0,30)),0) money,memo,conn,ucolor,spec,size,
-reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,lengh),1)),0,30))lengh
-from @result order by productno,xproduct,gno,datea,noa,tax  ;
+reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,lengh),1)),0,30))lengh,ucolor,spec,size
+from @result order by productno,xproduct,gno,datea,noa,tax;
 
 z_rc2_vu04:--z_rc2_vu04
 SET QUOTED_IDENTIFIER OFF
@@ -355,7 +355,7 @@ spec nvarchar(30),
 size nvarchar(30), 
 lengh decimal ,
 btotal float,
-product nvarchar(30) 
+product nvarchar(max) 
 
 ) 
 insert into @result 

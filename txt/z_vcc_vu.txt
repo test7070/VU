@@ -97,14 +97,15 @@ declare @result table(
 	size nvarchar(30),
 	lengh nvarchar(30),
 	conn nvarchar(30),
-	memo nvarchar(30)
+	memo nvarchar(30),
+	carno nvarchar(30)
 ) 
 insert into @result 
 select '91' gno, a.noa noa, b.noq noq, a.typea typea, a.datea datea, (case when a.mon='' then left(a.datea,6) else a.mon end), a.custno, a.comp 
-		, b.productno, b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end), b.unit, 
+		, b.productno, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor, b.unit, 
 		b.mount, b.weight, b.price, b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 		,a.invono,v.datea,v.money,v.tax,v.total 
-		,b.ucolor,b.spec,b.size,b.lengthb,s.conn,b.memo
+		,b.ucolor,b.spec,b.size,b.lengthb,a.addr,b.memo,a.carno
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join view_ucaucc c on b.productno = c.noa 
 				 left join sss s on isnull(a.salesno,'')=s.noa 
@@ -160,7 +161,7 @@ select gno, noa, noq, typea, datea, LEFT(datea,6) xdatea, mon, custno, left(comp
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,itax),1)),@total_decimal,30)) itax 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,itotal),1)),@total_decimal,30)) itotal 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,itax+itotal),1)),@total_decimal,30)) mtax
-,ucolor,spec,size,lengh,conn cust,memo
+,ucolor,spec,size,lengh,conn cust,memo,carno
 from @result order by datea,noa,noq ;
 
 --**********************************************************************************************
@@ -233,7 +234,11 @@ declare @tmp table(
 	custnick nvarchar(90), 
 	mount float, 
 	total float ,
-	tax float
+	tax float ,
+	ucolor nvarchar(30),
+	size nvarchar(30),
+	spec nvarchar(30),
+	length nvarchar(30)
 ) 
 
 insert into @tmp 
@@ -241,7 +246,7 @@ select '9',b.productno,b.product+(case when @isspec='1' then '
  	   '+isnull(b.spec,'') else '' end) 
 	   ,a.custno,	(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
 	   ,(case when a.typea='1' then 1 else -1 end)*b.mount,(case when a.typea='1' then 1 else -1 end)*b.total 
-	   ,a.tax
+	   ,a.tax,b.ucolor,b.size,b.spec,b.lengthb
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 			    left join cust c on a.custno = c.noa 
 				left join view_ucaucc d on b.productno = d.noa 
@@ -256,8 +261,8 @@ where (a.datea between @t_bdate and @t_edate) and (a.custno between @t_bcustno a
 order by b.productno,b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
-select '0',productno,products,cno,custnick,SUM(mount),SUM(total),tax from @tmp 
-group by productno,products,cno,custnick ,tax
+select '0',productno,products,cno,custnick,SUM(mount),SUM(total),tax,ucolor,size,spec,length from @tmp 
+group by productno,products,cno,custnick ,tax,ucolor,size,spec,length
 
 delete @tmp where gno='9' 
 
@@ -271,6 +276,7 @@ select gno,productno,products,cno,custnick
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax+total),1)),@total_decimal,30)) totax
+,ucolor,size,spec,length
 from @tmp order by cno,custnick,gno,productno 
 ;
 --**********************************************************************************************
@@ -373,7 +379,12 @@ pay float,
 unpay float, 
 total2 float, 
 pcount int, 
-qhref nvarchar(MAX) 
+qhref nvarchar(MAX) ,
+ucolor nvarchar(30),
+spec nvarchar(30),
+size nvarchar(30),
+length nvarchar(30),
+memo nvarchar(max)
 primary key (custno,productno,gno,datea,noa,noq) 
 ) 
 
@@ -382,7 +393,7 @@ select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon,
 	   a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
 	   , b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
 	   , b.unit,b.mount, b.weight, b.price, b.total, 0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
-	   ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
+	   ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,b.ucolor,b.spec,b.size,b.lengthb,b.memo 
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
 			     left join view_ucaucc d on b.productno = d.noa 
@@ -452,7 +463,7 @@ while(@@FETCH_STATUS <> -1)
 						insert into @result 
 						select '1' gno, '' typea, '' noa, '' noq, '' datea, '' mon, @t_custno1, @t_comp1 comp, '' addr_invo, '' tel, 
 								@t_productno, @xproduct xproduct, '' unit, @t_mount1 mount, @t_weight1 weight, 0 price, @t_total1 total, 
-								0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' 
+								0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' ,'' ucolor,'' spec,'' size,'' length,'' memo
 						end 
 						set @t_custno1 = @custno 
 						set @t_comp1 = @comp 
@@ -497,7 +508,7 @@ while(@@FETCH_STATUS <> -1)
 							insert into @result 
 							select '2' gno, '' typea, '' noa, '' noq, '' datea, '' mon, @t_custno2, @t_comp2 comp, '' addr_invo, '' tel, 
 							CHAR(255) productno, '' xproduct, '' unit, @t_mount2 mount, @t_weight2 weight, 0 price, @t_total2 total, 
-							0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' 
+							0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' ,'' ucolor,'' spec,'' size,'' length,'' memo
 						end 
 					set @t_custno2 = @custno 
 					set @t_comp2 = @comp 
@@ -544,14 +555,14 @@ while(@@FETCH_STATUS <> -1)
 		insert into @result 
 		select '1' gno, '' typea, '' noa, '' noq, '' datea, '' mon, @t_custno1, @t_comp1 comp, '' addr_invo, '' tel, 
 		@t_productno, @xproduct xproduct, '' unit, @t_mount1 mount, @t_weight1 weight, 0 price, @t_total1 total, 
-		0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' 
+		0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' ,'' ucolor,'' spec,'' size,'' length,'' memo
 	end 
 	if @t_custno2 != '#zzzz#zzzz' 
 	begin 
 		insert into @result 
 		select '2' gno, '' typea, '' noa, '' noq, '' datea, '' mon, @t_custno2, @t_comp2 comp, '' addr_invo, '' tel, 
 		CHAR(255) productno, '' xproduct, '' unit, @t_mount2 mount, @t_weight2 weight, 0 price, @t_total2 total, 
-		0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' 
+		0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' ,'' ucolor,'' spec,'' size,'' length,'' memo
 	end 
 --*********************************************************************** 
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
@@ -575,6 +586,7 @@ select gno, typea, noa, noq, datea, mon, custno, comp
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total2),1)),@total_decimal,30)) total2 
 ,pcount ,qhref 
 ,isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total+tax),1)),@total_decimal,30)),0) totax 
+,ucolor,spec,size,length,memo
 from @result order by custno,productno,gno,datea,noa,noq 
   ;
   
@@ -779,16 +791,19 @@ price float,
 total float, 
 pcount int, 
 qhref nvarchar(MAX) ,
-tax float
+tax float,
+ucolor nvarchar(30),
+spec nvarchar(30),
+size nvarchar(30),
+length nvarchar(30)
 ) 
 
 insert into @result 
 select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon, 
 a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
-, b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
+, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 , b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-,a.tax
+,a.tax,b.ucolor,b.spec,b.size,b.lengthb
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
 				 left join view_ucaucc d on b.productno = d.noa 
@@ -825,7 +840,7 @@ select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,productno,xproduct
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total+tax),1)),@total_decimal,30)) totax  
-,pcount 
+,pcount ,ucolor,spec ,size,length
 from @result order by custno,gno,mon,datea,noa,noq ;
 
 z_vcc_vu6:--z_vcc_vu6
@@ -1032,8 +1047,7 @@ declare @result table(
 insert into @result 
 select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end mon, 
 a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
-, b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
+, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 , b.unit,(case when a.typea='1' then 1 else -1 end) *b.mount, b.weight, b.price, b.total, 0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
 ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 from view_vccs b left join view_vcc a on a.noa = b.noa 
@@ -1216,8 +1230,7 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-	'0',b.productno,b.product+(case when @isspec='1' then '
- 	'+isnull(b.spec,'') else '' end) 
+	'0',b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 	,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.mount),sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 	,a.tax
@@ -1233,7 +1246,7 @@ where (a.datea between @t_bdate and @t_edate) and --(isnull(a.salesno,'') != '')
 	  and (len(@t_stype)=0 or a.stype = @t_stype) 
 	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
 	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
-group by b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+group by b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor  
 		 ,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 		 ,a.tax
 insert into @tmp(gno,productno,products,mon,mount,total,tax) 
@@ -1342,7 +1355,7 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select '0',a.salesno,s.namea,a.comp,a.datea,a.noa,a.typea,b.productno 
-		,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end)
+		,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 		,b.unit,b.mount,b.price,b.total ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,a.tax
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join view_ucaucc d on b.productno = d.noa 
@@ -1579,7 +1592,7 @@ declare @tmp table(
 	tax float 
 ) 
 insert into @tmp 
-select '0',a.salesno,s.namea,a.comp,b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+select '0',a.salesno,s.namea,a.comp,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor  
 		  ,a.datea,a.noa,a.typea,b.unit,b.mount,b.price,b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,a.tax
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join view_ucaucc d on b.productno = d.noa 
@@ -1689,8 +1702,7 @@ declare @tmp table(
 ) 
 
 insert into @tmp 
-select '0',a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
+select '0',a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 ,sum((case when a.typea='1' then 1 else -1 end)*a.tax) 
@@ -1712,7 +1724,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
 	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
 	  and (len(@t_partno)=0 or s.partno=@t_partno) 
-group by a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+group by a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 order by a.salesno,b.productno 
 
 insert into @tmp(gno,mount,total) 
@@ -1821,8 +1833,7 @@ declare @tmp table(
 
 insert into @tmp 
 select '0',a.custno,(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
-a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
+a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 ,a.datea,a.noa,a.typea,b.unit,b.mount,b.price,b.total 
 ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy ,a.tax
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
@@ -1940,8 +1951,7 @@ declare @tmp table(
 
 insert into @tmp 
 select '0',a.custno,(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
-a.salesno,s.namea,b.productno,b.product+(case when @isspec='1' then '
- '+isnull(b.spec,'') else '' end) 
+a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 ,a.tax
@@ -1962,8 +1972,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
 	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
 	  and (len(@t_partno)=0 or s.partno=@t_partno) 
-group by a.salesno,s.namea,a.custno,c.nick,c.comp,b.productno,b.product+(case when @isspec='1' then '
- 	     '+isnull(b.spec,'') else '' end) ,tax
+group by a.salesno,s.namea,a.custno,c.nick,c.comp,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor  ,tax
 order by a.salesno,a.custno,b.productno 
 
 insert into @tmp(gno,mount,total) 
@@ -2069,7 +2078,7 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-		'0',b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+		'0',b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor  
 		,a.salesno,s.namea,a.custno,(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
 		a.datea,a.noa,a.typea,b.mount,b.price,b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 		,a.tax
@@ -2182,7 +2191,7 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-	'0',b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+	'0',b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 	,a.salesno,s.namea,a.custno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.total),a.tax 
@@ -2202,7 +2211,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) 
 	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
 	  and (len(@t_partno)=0 or s.partno=@t_partno) 
-group by b.productno,b.product+(case when @isspec='1' then ''+isnull(b.spec,'') else '' end) 
+group by b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 		 ,a.salesno,s.namea,a.custno,c.nick,c.comp ,a.tax
 --order by b.productno,b.product,a.salesno,s.namea,a.custno,c.nick,c.comp 
 

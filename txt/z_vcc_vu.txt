@@ -1485,12 +1485,12 @@ where (a.datea between @t_bdate and @t_edate) and --(isnull(a.salesno,'') != '')
 	  and (len(@t_partno)=0 or s.partno=@t_partno) 
 group by a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 
-insert into @tmp(gno,salesno,salesname,mon,mount,total) 
-select '1',salesno,salesname,'999/99',sum(mount),sum(total) 
+insert into @tmp(gno,salesno,salesname,mon,mount,total,tax) 
+select '1',salesno,salesname,'999/99',sum(mount),sum(total),sum(total)+sum(tax)
 from @tmp group by salesno,salesname 
 
 insert into @tmp(gno,salesno,mount,total,tax) 
-select '2','ZZZZZZ',sum(mount),sum(total),SUM(tax) 
+select '2','ZZZZZZ',sum(mount),sum(total),sum(total)+SUM(tax) 
 from @tmp where gno='1' 
 
 
@@ -1611,10 +1611,11 @@ where (a.datea between @t_bdate and @t_edate) and
 	  and (len(@vcctypea)=0 or a.typea = @vcctypea) 
 	  and (len(@t_partno)=0 or s.partno=@t_partno) 
 order by a.salesno,b.productno 
-insert into @tmp(gno,salesno,salesname,mount,total) 
+insert into @tmp(gno,salesno,salesname,mount,total,tax) 
 select '1' gno,salesno,salesname, 
 		sum((case when typea='1' then mount else mount*(-1) end)), 
-		sum((case when typea='1' then total else total*(-1) end)) 
+		sum((case when typea='1' then total else total*(-1) end)),
+		sum(total)+sum(tax)
 from @tmp group by salesno,salesname 
 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
@@ -1727,8 +1728,8 @@ where (a.datea between @t_bdate and @t_edate) and
 group by a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
 order by a.salesno,b.productno 
 
-insert into @tmp(gno,mount,total) 
-select '1',sum(mount),sum(total) 
+insert into @tmp(gno,mount,total,tax) 
+select '1',sum(mount),sum(total),sum(total)+sum(tax) 
 from @tmp 
 
 
@@ -1975,8 +1976,8 @@ where (a.datea between @t_bdate and @t_edate) and
 group by a.salesno,s.namea,a.custno,c.nick,c.comp,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor  ,tax
 order by a.salesno,a.custno,b.productno 
 
-insert into @tmp(gno,mount,total) 
-select '1',	sum(mount),	sum(total) 
+insert into @tmp(gno,mount,total,tax) 
+select '1',	sum(mount),	sum(total),sum(total)+sum(tax) 
 from @tmp 
 
 select gno,custno,left(custnick,7) custnick,salesno sno ,salesname,productno,products 
@@ -2099,10 +2100,11 @@ where (a.datea between @t_bdate and @t_edate) and
 	  and (isnull(d.tggno,'') between @t_btggno and @t_etggno) and (len(@vcctypea)=0 or a.typea = @vcctypea) 
 and (len(@t_partno)=0 or s.partno=@t_partno) 
 order by b.productno,b.product,a.salesno,s.namea,a.custno,c.nick,c.comp,a.datea,a.noa,a.typea 
-insert into @tmp(gno,productno,products,mount,total) 
+insert into @tmp(gno,productno,products,mount,total,tax) 
 select '1',productno,products, 
 		sum((case when typea='1' then mount else mount*(-1) end)), 
-		sum((case when typea='1' then total else total*(-1) end)) 
+		sum((case when typea='1' then total else total*(-1) end)),
+		sum(tax)+sum(total) 
 from @tmp group by productno,products 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
@@ -2215,8 +2217,8 @@ group by b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.leng
 		 ,a.salesno,s.namea,a.custno,c.nick,c.comp ,a.tax
 --order by b.productno,b.product,a.salesno,s.namea,a.custno,c.nick,c.comp 
 
-insert into @tmp(gno,productno,products,mount,total) 
-select '1',productno,products,sum(mount),sum(total) 
+insert into @tmp(gno,productno,products,mount,total,tax) 
+select '1',productno,products,sum(mount),sum(total),sum(total)+sum(tax) 
 from @tmp group by productno,products 
 
 select gno,productno,products,sno,salesname,cno,left(custnick,10) custnick 

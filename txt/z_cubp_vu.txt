@@ -1,0 +1,45 @@
+z_cubp_vu01:--z_cubp_vu01
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bmechno nvarchar(30)
+declare @t_emechno nvarchar(30)
+
+set @t_bdate = case when '#non'=[1] then '' else [1] end 
+set @t_edate = case when '#non'=[2] then char(255) else [2] end 
+set @t_bmechno = case when '#non'=[3] then '' else [3] end 
+set @t_emechno = case when '#non'=[4] then char(255) else [4] end 
+
+ 
+declare @result table(
+	gno nvarchar(1),
+	datea nvarchar(20),
+	mechno nvarchar(10),
+	comp  nvarchar(20),
+	products nvarchar(max),
+	class float,
+	hmount float,
+	weight float,
+	mount float,
+	need nvarchar(max),
+	memo nvarchar(max),
+	dateb nvarchar(20),
+	ordeno nvarchar(30),
+	no2 nvarchar(10),
+	datec nvarchar(20),
+	dno int
+	
+)
+insert @result 
+select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
+		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(order by a.datea) dno
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
+
+insert @result(gno,hmount,mount,weight,dno)
+select '1' gno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
+from @result
+
+select gno,datea,mechno,comp,products,class,hmount,weight,mount,need,memo,dateb,ordeno,no2,datec
+,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,dno
+from @result
+;

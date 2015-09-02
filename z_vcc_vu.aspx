@@ -159,39 +159,51 @@
                 q_popAssign();
                 q_getFormat();
                 q_langShow();
-
-                $('#txtDate1').mask('999/99/99');
-                $('#txtDate1').datepicker();
-                $('#txtDate2').mask('999/99/99');
-                $('#txtDate2').datepicker();
+                
+                 var r_1911=1911;
+				if(r_len==4){//西元年
+					r_1911=0;
+				}else{
+					$('#txtDate1').datepicker();
+					$('#txtDate2').datepicker();
+				}
+				
+				$('#txtMon1').mask(r_picm);
+                $('#txtMon2').mask(r_picm);
+          
+                $('#txtDate1').mask(r_picd);
+				$('#txtDate2').mask(r_picd);
 
                 var t_date, t_year, t_month, t_day;
                 t_date = new Date();
                 t_date.setDate(1);
-                t_year = t_date.getUTCFullYear() - 1911;
+                t_year = t_date.getUTCFullYear() - r_1911;
                 t_year = t_year > 99 ? t_year + '' : '0' + t_year;
                 t_month = t_date.getUTCMonth() + 1;
                 t_month = t_month > 9 ? t_month + '' : '0' + t_month;
                 t_day = t_date.getUTCDate();
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
                 $('#txtDate1').val(t_year + '/' + t_month + '/' + t_day);
+                $('#txtMon1').val(t_year + '/' + t_month);
 
                 t_date = new Date();
                 t_date.setDate(35);
                 t_date.setDate(0);
-                t_year = t_date.getUTCFullYear() - 1911;
+                t_year = t_date.getUTCFullYear() - r_1911;
                 t_year = t_year > 99 ? t_year + '' : '0' + t_year;
                 t_month = t_date.getUTCMonth() + 1;
                 t_month = t_month > 9 ? t_month + '' : '0' + t_month;
                 t_day = t_date.getUTCDate();
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
                 $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
-                $('#txtMon1').val(r_accy + '/01').mask('999/99');
-                $('#txtMon2').val(r_accy + '/12').mask('999/99');
-                $('#txtXbmon1').val(r_accy + '/01').mask('999/99');
-                $('#txtXbmon2').val(r_accy + '/12').mask('999/99');
-                $('#txtXemon1').val(r_accy + '/01').mask('999/99');
-                $('#txtXemon2').val(r_accy + '/12').mask('999/99');
+                $('#txtMon2').val(t_year + '/' + t_month);
+                $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
+                $('#txtMon1').val(r_accy + '/01').mask(r_picm);
+                $('#txtMon2').val(r_accy + '/12').mask(r_picm);
+                $('#txtXbmon1').val(r_accy + '/01').mask(r_picm);
+                $('#txtXbmon2').val(r_accy + '/12').mask(r_picm);
+                $('#txtXemon1').val(r_accy + '/01').mask(r_picm);
+                $('#txtXemon2').val(r_accy + '/12').mask(r_picm);
                 $('#Xmemo').removeClass('a2').addClass('a1');
                 $('#txtXmemo').css('width', '85%');
                 $('#Xgroupano select').css('width', '150px');

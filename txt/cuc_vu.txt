@@ -60,7 +60,7 @@ cucstocub:--cucstocub
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max) = ''
 	declare @accy nvarchar(max) = [1]
-	declare @datea nvarchar(max) = [2]
+	declare @datea nvarchar(max) = case when '#non'=[2] then '' else [2] end
 	declare @mechno nvarchar(max) = case when '#non'=[3] then '' else [3] end
 	declare @memo nvarchar(max) = case when '#non'=[4] then '' else [4] end
 	declare @userno nvarchar(max) = [5]
@@ -94,7 +94,7 @@ cucstocub:--cucstocub
 	) 
 	
 	--拆解字串
-	while (CHARINDEX('#',@noa)>0 && CHARINDEX('#',@noq)>0)
+	while (CHARINDEX('^',@noa)>0 and CHARINDEX('^',@noq)>0)
 	begin
 		insert #tmp
 		select left(@noa,CHARINDEX('^',@noa)-1),left(@noq,CHARINDEX('^',@noq)-1)
@@ -116,7 +116,7 @@ cucstocub:--cucstocub
 	begin
 		exec("
 			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker)
-			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@woker+"' 
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"' 
 		")
 	
 		exec("
@@ -137,14 +137,14 @@ cucstocub:--cucstocub
 	
 	--解除該使用者鎖定
 	declare cursor_table cursor for 
-	select accy from view_cucs where left(cubno,len(@userno)=@userno group by accy
+	select accy from view_cucs where left(cubno,len(@userno))=@userno group by accy
 	open cursor_table 
 	fetch next from cursor_table 
 	into @accy
 	while(@@FETCH_STATUS <> -1) 
 	begin 
 		
-		EXEC(" update cuc"+@accy+" set cubno='' where left(cubno,len('"+@userno+"'))='"+@userno+"' ")	
+		EXEC(" update cucs"+@accy+" set cubno='' where left(cubno,len('"+@userno+"'))='"+@userno+"' ")	
 	
 		fetch next from cursor_table 
 		into @accy

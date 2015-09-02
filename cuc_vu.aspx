@@ -21,7 +21,7 @@
             }
             cucs.prototype = {
                 data : null,
-                tbCount : 8,
+                tbCount : 15,
                 curPage : -1,
                 totPage : 0,
                 curIndex : '',
@@ -97,11 +97,7 @@
                     
                     $('#textBdate').mask(r_picd);
                     $('#textEdate').mask(r_picd);
-                },
-                init : function(obj) {
-					
-					chk_cucs=new Array();
-					
+                    
                     $('.cucs_chk').click(function(e) {
                     	var n=$(this).attr('id').replace('cucs_chk','')
                     	Lock();
@@ -130,7 +126,7 @@
                         //修改暫存資料
                         for(var i =0 ;i<chk_cucs.length;i++){
 							if(chk_cucs[i].noa==$('#cucs_noa'+n).text() && chk_cucs[i].noq==$('#cucs_noq'+n).text()){
-								chk_cucs[i].xweight=$('#textXcount_'+n).val();
+								chk_cucs[i].xcount=$('#textXcount_'+n).val();
                         	 	break;
 							}
 						}
@@ -141,7 +137,7 @@
                         //修改暫存資料
                         for(var i =0 ;i<chk_cucs.length;i++){
 							if(chk_cucs[i].noa==$('#cucs_noa'+n).text() && chk_cucs[i].noq==$('#cucs_noq'+n).text()){
-								chk_cucs[i].xcount=$('#textXweight_'+n).val();
+								chk_cucs[i].xweight=$('#textXweight_'+n).val();
                         	 	break;
 							}
 						}
@@ -155,7 +151,11 @@
 							$(this).val(tmp);
 						});
 					});
-                    
+                },
+                init : function(obj) {
+					
+					chk_cucs=new Array();
+					
                     this.data = new Array();
                     if (obj[0] != undefined) {
                         for (var i in obj)
@@ -173,7 +173,9 @@
 										noq : this.data[i]['noq'],
 										xmount : 0,
 										xcount : 0,
-										xweight : 0
+										xweight : 0,
+										ordeno:this.data[i]['ordeno'],
+										no2:this.data[i]['no2']
 								});
 							}
 						}
@@ -377,12 +379,10 @@
                 
                 $('#btnCancels').click(function(e) {
 					q_func('qtxt.query.unlockall', 'cuc_vu.txt,unlockall,'+r_userno+';'+r_name);
-					chk_cucs=new Array();
-					cucs.refresh();
                 });
                 
                 $('#btnCub').click(function(e) {
-                	t_err = q_chkEmpField([['textDatea', '加工日'],['textMechno', '機　台']]);
+                	t_err = q_chkEmpField([['textDatea', '加工日'],['textMechno', '機台']]);
 	                if (t_err.length > 0) {
 	                    alert(t_err);
 	                    return;
@@ -390,9 +390,11 @@
                 	
 					if(chk_cucs.length>0){
 						//先取得最新的資料再判斷是否要轉加工單
-						var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
-						q_gt('cucs_vu', t_where, 0, 0, 0,'ccc', r_accy);
-						Lock();
+						if(confirm("確定轉至加工單?")){
+							var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
+							q_gt('cucs_vu', t_where, 0, 0, 0,'ccc', r_accy);
+							Lock();
+						}
 					}else
 						alert('無核取資料。');
                 });
@@ -423,13 +425,13 @@
                     			for (var j=0;j<as.length;j++){
                     				if(chk_cucs[i]['noa']==as[j]['noa'] && chk_cucs[i]['noq']==as[j]['noq']){//表示加工排程單存在
                     					if(as[j]['cubno'].split('##')[0]!=r_userno){
-                    						t_err+=chk_cucs[i]['noa']+'-'+chk_cucs[i]['noq']+"鎖定人員非自己本人!!";
+                    						t_err+=chk_cucs[i]['ordeno']+'-'+chk_cucs[i]['no2']+"鎖定人員非自己本人!!";
                     					}
                     					if(dec(as[j].emount)<dec(chk_cucs[i]['xmount'])){
-                    						t_err+=chk_cucs[i]['noa']+'-'+chk_cucs[i]['noq']+"加工數量大於未完工數!!";
+                    						t_err+=chk_cucs[i]['ordeno']+'-'+chk_cucs[i]['no2']+"加工數量大於未完工數!!";
                     					}
                     					if(dec(as[j].eweight)<dec(chk_cucs[i]['xweight'])){
-                    						t_err+=chk_cucs[i]['noa']+'-'+chk_cucs[i]['noq']+"加工重量大於未完工重!!";
+                    						t_err+=chk_cucs[i]['ordeno']+'-'+chk_cucs[i]['no2']+"加工重量大於未完工重!!";
                     					}
                     					t_exists=true;
                     					break;
@@ -438,7 +440,7 @@
                     			if(t_err.length>0){
                     				break;
                     			}else if(!t_exists){
-                    				t_err=chk_cucs[i]['noa']+'-'+chk_cucs[i]['noq']+"加工排程單不存在!!";
+                    				t_err=chk_cucs[i]['ordeno']+'-'+chk_cucs[i]['no2']+"加工排程單不存在!!";
                     				break;
                     			}else{//表示資料正常
                     				if(dec(chk_cucs[i]['xmount'])>0 || dec(chk_cucs[i]['xweight'])>0){
@@ -455,14 +457,14 @@
                     		}else if(t_noa.length==0 || t_noq.length==0){
                     			alert('排程加工資料無設定數量或重量。');
                     		}else{
+                    			var t_datea=emp($('#textDatea').val())?'#non':$('#textDatea').val();
                     			var t_mechno=emp($('#textMechno').val())?'#non':$('#textMechno').val();
                     			var t_memo=emp($('#textMemo').val())?'#non':$('#textMemo').val();
                     			
-                    			if(confirm("確定要轉至加工單?("+t_noa.split('^').length+"筆)")){
-                    				q_func('qtxt.query.cucstocub', 'cuc_vu.txt,cucstocub,'
-                    				+r_accy+';'+$('#textDatea').val()+';'+t_mechno+';'+t_memo+';'
-                    				+r_userno+';'+r_name+';'+t_noa+';'+t_noq+';'+t_xmount+';'+t_xcount+';'+t_xweight);
-								}
+                    			q_func('qtxt.query.cucstocub', 'cuc_vu.txt,cucstocub,'
+                    			+r_accy+';'+t_datea+';'+t_mechno+';'+t_memo+';'
+                    			+r_userno+';'+r_name+';'+t_noa+';'+t_noq+';'+t_xmount+';'+t_xcount+';'+t_xweight);
+                    			clearInterval(intervalupdate);
 							}
                     	}else{
                             alert('無排程單!!');
@@ -502,7 +504,9 @@
 												noq : as[i]['noq'],
 												xmount : 0,
 												xcount : 0,
-												xweight : 0
+												xweight : 0,
+												ordeno:as[i]['ordeno'],
+												no2:as[i]['no2']
 										});
 		                    		}
 		                    	}else{//他人鎖定資料
@@ -526,7 +530,6 @@
 	                    }
 	                                        	
                         cucs.refresh();
-						//clearInterval(intervalupdate);
                         Unlock();
                         break;
 					case q_name:
@@ -564,7 +567,9 @@
 								noq : $('#cucs_noq'+n).text(),
 								xmount : $('#textXmount_'+n).val(),
 								xcount : $('#textXcount_'+n).val(),
-								xweight : $('#textXweight_'+n).val()
+								xweight : $('#textXweight_'+n).val(),
+								ordeno:$('#cucs_orde'+n).html().split('<br>')[0],
+								no2:$('#cucs_orde'+n).html().split('<br>')[1]
 							});
                         	//開放欄位修改
                         	$('#textXmount_'+n).removeAttr('disabled');
@@ -615,6 +620,12 @@
 			
 			function q_funcPost(t_func, result) {
                 switch(t_func) {
+                	case 'qtxt.query.unlockall':
+                			//畫面直接重刷
+                			chk_cucs=new Array();
+							q_gt('cucs_vu', new_where, 0, 0, 0,'bbb', r_accy);
+							Lock();
+                		break;
                 	case 'qtxt.query.cucstocub':
                 		var as = _q_appendData("tmp0", "", true, true);
                         if (as[0] != undefined) {
@@ -625,6 +636,18 @@
                 		break;
 					case 'qtxt.query.cubstocubu':
 						q_func('cubu_post.post', r_accy + ',' + $('#txtNoa').val() + ',1');
+						break;
+					case 'cubu_post.post':
+						alert('加工單產生完畢!!');
+						//重新抓取新資料
+						$('#textDatea').val(q_date());
+						$('#textMechno').val('');
+						$('#textMech').val('');
+						$('#textMemo').val('');
+						
+						var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
+		                new_where = t_where;
+						q_gt('cucs_vu', t_where, 0, 0, 0,'aaa', r_accy);
 						break;
                 }
 			}

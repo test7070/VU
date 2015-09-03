@@ -403,13 +403,13 @@
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 						if(!emp($('#txtProduct_'+j).val()) && emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
 							if(ordenos_where.indexOf(($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()))==-1)
-								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'-'+$('#txtMechno').val()+"%' ),'') )";
+								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+"-%' ),'') )";
 							get_uno=true;
 						}
 					}
 				}
 				
-				//預設產生批號 (訂單號碼(12)+訂序(3)+機台(?)+流水號(3))
+				//預設產生批號 (訂單號碼(12)+訂序(3)+'-'+機台(?)+流水號(3))
                 if(get_uno && !get_maxuno){
 	                var t_where = "where=^^ uno!='' and ("+ordenos_where+") ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_getuno", r_accy);

@@ -138,9 +138,10 @@ cucstocub:--cucstocub
 	) 
 	
 	--拆解字串
+	set @bbtcount=0
 	while (CHARINDEX('^#^',@xcuct)>0)
 	begin
-		set @bbtcount=1
+		set @bbtcount=@bbtcount+1
 		
 		insert #tmpa
 		select  right('000'+cast(@bbtcount as nvarchar(10)),3)
@@ -160,21 +161,25 @@ cucstocub:--cucstocub
 	--產生cub
 	if((select count(*) from #tmp)>0)
 	begin
+		--bbm
 		exec("
 			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker)
 			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"' 
 		")
-	
+		--bbs
 		exec("
 			insert cubs"+@accy+" (noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
-			,hmount,mount,weight,need,memo,date2,ordeno,no2,datea,productno2,product2)
+			,hmount,mount,weight,need,memo,date2,ordeno,no2,datea,productno2,product2,uno)
 			select '"+@cubno+"',right('000'+cast(ROW_NUMBER() over(order by a.noa,a.noq) as nvarchar(50)),3)
 			,b.custno,b.cust,c.product,c.ucolor,c.spec,c.size,c.lengthb,c.class,a.xcount,a.xmount,a.xweight,'','','"+@datea+"',c.ordeno,c.no2,d.datea,a.noa,a.noq
-			from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq 	left join view_orde d on d.noa=c.ordeno
+			,isnull(c.ordeno,'')+isnull(c.no2,'')+'-'+'"+@mechno+"'+
+			(right('000'+cast(ROW_NUMBER() over (partition by isnull(c.ordeno,''),isnull(c.no2,'') order by isnull(c.ordeno,''),isnull(c.no2,''))+
+			cast(right(isnull((select MAX(uno) from view_uccb where uno like isnull(c.ordeno,'')+isnull(c.no2,'')+'-%'),'000'),3) as int) as nvarchar(10)),3))
+			from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq left join view_orde d on d.noa=c.ordeno
 		")
-		
+		--bbt
 		exec("
-			insert cubt"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,gmount,gweight,memo)
+			insert cubt"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,gmount,gweight,memo2)
 			select '"+@cubno+"',* from #tmpa 
 		")
 	
@@ -226,6 +231,8 @@ declare @t_lengthb nvarchar(50)=case when '#non'=[4] then '' else [4] end--米�
 declare @t_class nvarchar(50)=case when '#non'=[5] then '' else [5] end --廠牌
 declare @t_edate nvarchar(20)=case when '#non'=[6] then char(255) else [6] end --終止日期
 
+declare @t_forcibly nvarchar(20)=case when '#non'=[7] then '0' else [7] end --判斷條件強制符合
+
 --declare @t_ucolor nvarchar(50) --類別 --不判讀
 
 SET QUOTED_IDENTIFIER OFF
@@ -250,66 +257,132 @@ create table #tmp(
 	weight decimal(20,2)
 )
 
-insert #tmp
-select 'ucce',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
-from view_ucce a left join view_ucces b on a.noa=b.noa 
-where a.datea<=@t_edate 
-and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
-and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
-and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-
-delete a
-from #tmp a outer apply (select MAX(datea) datea from #tmp 
-where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
-where a.datea!=b.datea
-
---進貨
-insert #tmp
-select 'rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
-from view_rc2 a left join view_rc2s b on a.noa=b.noa
-outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
-and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
-and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
-and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-
-insert #tmp
-select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
-from view_ina a left join view_inas b on a.noa=b.noa
-outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
-and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
-and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
-and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-
---領料
-insert #tmp
-select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.gmount,b.gweight 
-from view_cub a left join view_cubt b on a.noa=b.noa
-outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
-and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
-and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
-and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+if(@t_forcibly='0') --判斷不強制
+begin
+	insert #tmp
+	select 'ucce',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
+	from view_ucce a left join view_ucces b on a.noa=b.noa 
+	where a.datea<=@t_edate 
+	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
+	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 	
-insert #tmp
-select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
-from view_get a left join view_gets b on a.noa=b.noa
-outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
-and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
-and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
-and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	delete a
+	from #tmp a outer apply (select MAX(datea) datea from #tmp 
+	where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
+	where a.datea!=b.datea
+	
+	--進貨
+	insert #tmp
+	select 'rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	from view_rc2 a left join view_rc2s b on a.noa=b.noa
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
+	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	
+	insert #tmp
+	select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	from view_ina a left join view_inas b on a.noa=b.noa
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
+	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	
+	--領料
+	insert #tmp
+	select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.gmount,b.gweight 
+	from view_cub a left join view_cubt b on a.noa=b.noa
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
+	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+		
+	insert #tmp
+	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	from view_get a left join view_gets b on a.noa=b.noa
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
+	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+end
+else --強制
+begin
+	insert #tmp
+	select 'ucce',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
+	from view_ucce a left join view_ucces b on a.noa=b.noa 
+	where a.datea<=@t_edate 
+	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.spec,'')=@t_spec) 
+	and (isnull(b.size,'')=@t_size)
+	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (isnull(b.class,'')=@t_class)
+	
+	delete a
+	from #tmp a outer apply (select MAX(datea) datea from #tmp 
+	where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
+	where a.datea!=b.datea
+	
+	--進貨
+	insert #tmp
+	select 'rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	from view_rc2 a left join view_rc2s b on a.noa=b.noa
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.spec,'')=@t_spec) 
+	and (isnull(b.size,'')=@t_size)
+	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (isnull(b.class,'')=@t_class)
+	
+	insert #tmp
+	select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	from view_ina a left join view_inas b on a.noa=b.noa
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.spec,'')=@t_spec) 
+	and (isnull(b.size,'')=@t_size)
+	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (isnull(b.class,'')=@t_class)
+	
+	--領料
+	insert #tmp
+	select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.gmount,b.gweight 
+	from view_cub a left join view_cubt b on a.noa=b.noa
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.spec,'')=@t_spec) 
+	and (isnull(b.size,'')=@t_size)
+	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (isnull(b.class,'')=@t_class)
+		
+	insert #tmp
+	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	from view_get a left join view_gets b on a.noa=b.noa
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.spec,'')=@t_spec) 
+	and (isnull(b.size,'')=@t_size)
+	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
+	and (isnull(b.class,'')=@t_class)
+end
 
 select isnull(product,'')product,isnull(spec,'')spec,
 isnull(size,'')size,isnull(lengthb,0)lengthb,isnull(class,'')class,sum(mount)mount,sum(weight)weight
@@ -321,4 +394,5 @@ IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	set @cmd = 'drop table #tmp'
 	EXECUTE sp_executesql @cmd
-END;
+END
+;

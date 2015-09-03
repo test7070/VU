@@ -16,7 +16,6 @@
 			);
 			var intervalupdate;
 			var chk_cucs=''; //儲存要加工的cucs資料
-			var chk_cuct=''; //儲存cucs要領料的內容
 			
 			function cucs() {
             }
@@ -156,7 +155,6 @@
                 },
                 init : function(obj) {
 					chk_cucs=new Array();
-					chk_cuct=new Array();
 					
                     this.data = new Array();
                     if (obj[0] != undefined) {
@@ -468,7 +466,7 @@
 									x_lengthb=emp($('#textLengthb_'+n).val())?'#non':$('#textLengthb_'+n).val();
 									x_class=emp($('#textClass_'+n).val())?'#non':$('#textClass_'+n).val();
 									x_edate=emp($('#textDatea').val())?q_date():$('#textDatea').val();
-									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate);
+									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
 								}
 							}
 						});
@@ -548,7 +546,20 @@
 						alert('無選取加工。');
 					}else{
 						//先取得最新的資料再判斷是否要轉加工單
-						if(chk_cuct.length==0){
+						var hasbbt=false; //是否有表身資料
+                    	for(var j=0;j<cucs.tbsCount;j++){
+                    		var ts_product=$('#textProduct_'+j).val(),ts_ucolor=$('#textUcolor_'+j).val(),ts_spec=$('#textSpec_'+j).val();
+							var ts_size=$('#textSize_'+j).val(),ts_lengthb=$('#textLengthb_'+j).val(),ts_class=$('#textClass_'+j).val();
+							var ts_gmount=$('#textGmount_'+j).val(),ts_gweight=$('#textGweight_'+j).val(),ts_memo=$('#textMemo_'+j).val();
+									
+							if(!emp(ts_product) || !emp(ts_ucolor) || !emp(ts_spec) || !emp(ts_size) || 
+								!emp(ts_lengthb) || !emp(ts_class) || !emp(ts_gmount) || !emp(ts_gweight) || !emp(ts_memo)){
+								hasbbt=true;
+								break;
+                    		}
+                    	}
+						
+						if(!hasbbt){
 							if(confirm("無領料資料是否要轉至加工單?")){
 								var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
 								q_gt('cucs_vu', t_where, 0, 0, 0,'ccc', r_accy);
@@ -841,6 +852,7 @@
 				}
 			}
 			
+			var func_cubno='';
 			function q_funcPost(t_func, result) {
                 switch(t_func) {
                 	case 'qtxt.query.unlockall':
@@ -852,13 +864,17 @@
                 	case 'qtxt.query.cucstocub':
                 		var as = _q_appendData("tmp0", "", true, true);
                         if (as[0] != undefined) {
-                        	var cubno=as[0].cubno;
+                        	func_cubno=as[0].cubno;
                         	//產生cubu
-                        	q_func('qtxt.query.cubstocubu', 'cub.txt,cubstocubu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
+                        	q_func('qtxt.query.cubstocubu', 'cub.txt,cubstocubu,' + encodeURI(r_accy) + ';' + encodeURI(func_cubno));
                 		}
                 		break;
 					case 'qtxt.query.cubstocubu':
-						q_func('cubu_post.post', r_accy + ',' + $('#txtNoa').val() + ',1');
+						if(func_cubno.length>0){
+							q_func('cub_post.post', r_accy + ',' + encodeURI(func_cubno) + ',1');
+							q_func('cubu_post.post', r_accy + ',' + encodeURI(func_cubno) + ',1');
+							func_cubno='';
+						}
 						break;
 					case 'cubu_post.post':
 						alert('加工單產生完畢!!');
@@ -878,7 +894,13 @@
                 	$('#textAvgweight_'+n).focusin();
                 	var as = _q_appendData("tmp0", "", true, true);
 					if (as[0] != undefined) {
-						$('#textAvgweight_'+n).val(round(q_div(dec(as[0].weight),dec(as[0].mount)),3));
+						var t_weight=0,t_mount=0;
+						for (var i=0;i<as.length;i++){
+							t_weight=q_add(t_weight,dec(as[0].weight));
+							t_mount=q_add(t_mount,dec(as[0].mount));
+						}
+						
+						$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
 					}else{
 						$('#textAvgweight_'+n).val(0);
 					}

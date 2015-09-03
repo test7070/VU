@@ -219,6 +219,7 @@ begin
 	select ROW_NUMBER() over (order by gno,uno) rr
 	,dbo.getComma(mount,[2])mount
 	,dbo.getComma(weight,[3])weight
+	,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
 	,* 
 	from #tmp order by gno,uno
 end
@@ -227,6 +228,7 @@ begin
 	select ROW_NUMBER() over (order by gno,product,spec,size,lengthb,class) rr
 	,dbo.getComma(mount,[2])mount
 	,dbo.getComma(weight,[3])weight
+	,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
 	,* 
 	from #tmp order by gno,product,spec,size,lengthb,class
 end

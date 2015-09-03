@@ -385,7 +385,7 @@
                 }
                 
                 //判斷批號是否已使用
-				/*if(!check_uccb_uno){
+				if(!check_uccb_uno){
                 	var t_uno = "1=0";
                     for (var i = 0; i < q_bbsCount; i++) {
                         if ($.trim($('#txtUno_' + i).val()).length > 0)
@@ -394,23 +394,23 @@
 					var t_where = "where=^^ ("+t_uno+") and noa!='"+$('#txtNoa').val()+"' ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_uccb", r_accy);
 					return;
-                }*/
+                }
                 
                 //產生批號當天最大批號數
 				//判斷是否要產生批號
-				/*var ordenos_where=' 1=0 ';
+				var ordenos_where=' 1=0 ';
 				if(!get_uno){
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 						if(!emp($('#txtProduct_'+j).val()) && emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
 							if(ordenos_where.indexOf(($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()))==-1)
-								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+'-'+$('#txtMechno').val()+"%' ),'') )";
+								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_uccb where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+"-%' ),'') )";
 							get_uno=true;
 						}
 					}
-				}*/
+				}
 				
-				//預設產生批號 (訂單號碼(12)+訂序(3)+機台(?)+流水號(3))
-                /*if(get_uno && !get_maxuno){
+				//預設產生批號 (訂單號碼(12)+訂序(3)+'-'+機台(?)+流水號(3))
+                if(get_uno && !get_maxuno){
 	                var t_where = "where=^^ uno!='' and ("+ordenos_where+") ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_getuno", r_accy);
 					return;
@@ -418,10 +418,10 @@
 				
 				check_uccb_uno=false;
 				get_uno=false;
-				get_maxuno=false;*/
+				get_maxuno=false;
                 
                 //檢查是否批號重複
-                /*var uno_repeat=false;
+                var uno_repeat=false;
                 for (var i = 0; i < q_bbsCount; i++) {
                 	if(!emp($('#txtUno_'+i).val())){
 	                	for (var j = i+1; j < q_bbsCount; j++) {
@@ -437,7 +437,7 @@
                 if(uno_repeat){
                 	alert("批號重複!!");
                     return;
-                }*/
+                }
                 
                 sum();
                 $('#txtWorker').val(r_name);
@@ -960,7 +960,7 @@
 						<td style="width:150px;"><a id='lblOrdeno_s'> </a></td>
 						<td style="width:60px;"><a id='lblNo2_s'> </a></td>
 						<td style="width:100px;"><a id='lblDatea_s'> </a></td>
-						<!--<td style="width:200px;"><a id='lblUno_s'> </a></td>-->
+						<td style="width:200px;"><a id='lblUno_s'> </a></td>
 						<!--<td style="width:45px;"><a id='lblHend_s'> </a></td>-->
 					</tr>
 					<tr style='background:#cad3ff;'>
@@ -1014,7 +1014,7 @@
 						<td><input id="txtOrdeno.*" type="text" class="txt c1"/></td>
 						<td><input id="txtNo2.*" type="text" class="txt c1"/></td>
 						<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
-						<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->
+						<td><input id="txtUno.*" type="text" class="txt c1"/></td>
 						<!--<td><input id="chkHend.*" type="checkbox"/></td>-->
 					</tr>
 				</table>

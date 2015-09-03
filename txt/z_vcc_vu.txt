@@ -354,38 +354,38 @@ set @t_partno = case when '#non' = [23] then '' else [23] end
 --*********************************************************************************** 
 
 declare @result table( 
-gno nvarchar(1), 
-typea nvarchar(4), 
-noa nvarchar(15), 
-noq nvarchar(3), 
-datea nvarchar(10), 
-mon nvarchar(7), 
-custno nvarchar(20), 
-comp nvarchar(90), 
-addr_invo nvarchar(90), 
-tel nvarchar(90), 
-productno nvarchar(30), 
-xproduct nvarchar(MAX), 
-unit nvarchar(8), 
-mount float, 
-weight float, 
-price float, 
-total float, 
-money float, 
-back float, 
-tax float, 
-total1 float, 
-pay float, 
-unpay float, 
-total2 float, 
-pcount int, 
-qhref nvarchar(MAX) ,
-ucolor nvarchar(30),
-spec nvarchar(30),
-size nvarchar(30),
-length nvarchar(30),
-memo nvarchar(max)
-primary key (custno,productno,gno,datea,noa,noq) 
+	gno nvarchar(1), 
+	typea nvarchar(4), 
+	noa nvarchar(15), 
+	noq nvarchar(3), 
+	datea nvarchar(10), 
+	mon nvarchar(7), 
+	custno nvarchar(20), 
+	comp nvarchar(90), 
+	addr_invo nvarchar(90), 
+	tel nvarchar(90), 
+	productno nvarchar(30), 
+	xproduct nvarchar(MAX), 
+	unit nvarchar(8), 
+	mount float, 
+	weight float, 
+	price float, 
+	total float, 
+	money float, 
+	back float, 
+	tax float, 
+	total1 float, 
+	pay float, 
+	unpay float, 
+	total2 float, 
+	pcount int, 
+	qhref nvarchar(MAX) ,
+	ucolor nvarchar(30),
+	spec nvarchar(30),
+	size nvarchar(30),
+	length nvarchar(30),
+	memo nvarchar(max)
+	primary key (custno,productno,gno,datea,noa,noq) 
 ) 
 
 insert into @result 
@@ -772,38 +772,38 @@ if(charindex('智勝',@t_acomp)>0 )
 ------------------------------------------------- 
 
 declare @result table( 
-gno nvarchar(1), 
-typea nvarchar(4), 
-noa nvarchar(30), 
-noq nvarchar(3), 
-datea nvarchar(10), 
-mon nvarchar(7), 
-custno nvarchar(20), 
-comp nvarchar(90), 
-addr_invo nvarchar(90), 
-tel nvarchar(90), 
-productno nvarchar(30), 
-xproduct nvarchar(MAX), 
-unit nvarchar(8), 
-mount float, 
-weight float, 
-price float, 
-total float, 
-pcount int, 
-qhref nvarchar(MAX) ,
-tax float,
-ucolor nvarchar(30),
-spec nvarchar(30),
-size nvarchar(30),
-length nvarchar(30)
+	gno nvarchar(1), 
+	typea nvarchar(4), 
+	noa nvarchar(30), 
+	noq nvarchar(3), 
+	datea nvarchar(10), 
+	mon nvarchar(7), 
+	custno nvarchar(20), 
+	comp nvarchar(90), 
+	addr_invo nvarchar(90), 
+	tel nvarchar(90), 
+	productno nvarchar(30), 
+	xproduct nvarchar(MAX), 
+	unit nvarchar(8), 
+	mount float, 
+	weight float, 
+	price float, 
+	total float, 
+	pcount int, 
+	qhref nvarchar(MAX) ,
+	tax float,
+	ucolor nvarchar(30),
+	spec nvarchar(30),
+	size nvarchar(30),
+	length nvarchar(30)
 ) 
 
 insert into @result 
 select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon, 
-a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
-, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
-, b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-,a.tax,b.ucolor,b.spec,b.size,b.lengthb
+		a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
+		, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
+		, b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
+		,a.tax,b.ucolor,b.spec,b.size,b.lengthb
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
 				 left join view_ucaucc d on b.productno = d.noa 
@@ -1046,10 +1046,10 @@ declare @result table(
 
 insert into @result 
 select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end mon, 
-a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
-, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
-, b.unit,(case when a.typea='1' then 1 else -1 end) *b.mount, b.weight, b.price, b.total, 0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
-,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
+		a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
+		, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+' '+b.ucolor 
+		, b.unit,(case when a.typea='1' then 1 else -1 end) *b.mount, b.weight, b.price, b.total, 0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
+		,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
 				 left join view_ucaucc d on b.productno = d.noa 

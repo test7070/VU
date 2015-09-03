@@ -21,7 +21,7 @@
             }
             cucs.prototype = {
                 data : null,
-                tbCount : 10,
+                tbCount : 8,
                 tbsCount : 5,
                 curPage : -1,
                 totPage : 0,
@@ -206,9 +206,9 @@
                         string+='<tr id="cuct_tr'+i+'">';
                         string+='<td style="text-align: center;"><input id="btnMinut_'+i+'" class="minut" type="button" style="font-size: medium; font-weight: bold;" value="－"/></td>';
                         string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textProduct_'+i+'"  type="text" class="txt c3" /><select id="combProduct_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
-                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor_'+i+'"  type="text" class="txt c3" style="width:110px;"" /><select id="combUcolor_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
+                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor_'+i+'"  type="text" class="txt c3" style="width:110px;" /><select id="combUcolor_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
                         string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSpec_'+i+'"  type="text" class="txt c3" /><select id="combSpec_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
-                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSize_'+i+'"  type="text" class="txt c1 sizea" /></td>';
+                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSize_'+i+'"  type="text" class="txt c3 sizea" style="width:40px;" /><select id="combSize_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
                         string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textLengthb_'+i+'"  type="text" class="txt num c1" /></td>';
                         string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textClass_'+i+'"  type="text" class="txt c3" /><select id="combClass_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
                         string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textGmount_'+i+'"  type="text" class="txt num c1" /></td>';
@@ -231,9 +231,9 @@
 	                        string+='<tr id="cuct_tr'+i+'">';
 	                        string+='<td style="text-align: center;"><input id="btnMinut_'+i+'" class="minut" type="button" style="font-size: medium; font-weight: bold;" value="－"/></td>';
 	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textProduct_'+i+'"  type="text" class="txt c3" /><select id="combProduct_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
-	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor_'+i+'"  type="text" class="txt c3" style="width:110px;"" /><select id="combUcolor_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
+	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor_'+i+'"  type="text" class="txt c3" style="width:110px;" /><select id="combUcolor_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSpec_'+i+'"  type="text" class="txt c3" /><select id="combSpec_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
-	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSize_'+i+'"  type="text" class="txt c1 sizea" /></td>';
+	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSize_'+i+'"  type="text" class="txt c3 sizea" style="width:40px;" /><select id="combSize_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textLengthb_'+i+'"  type="text" class="txt num c1" /></td>';
 	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textClass_'+i+'"  type="text" class="txt c3" /><select id="combClass_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	                        string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textGmount_'+i+'"  type="text" class="txt num c1" /></td>';
@@ -394,6 +394,7 @@
                         }                      
                     }
                     
+                    //下拉事件
                     $('.comb').each(function(index) {
 						$(this).text(''); //清空資料
 						//帶入選項值
@@ -411,48 +412,19 @@
 						if(objname=='combClass'){
 							q_cmbParse("combClass_"+n, t_class);
 						}
-						if($(this).data('events')!=undefined)
-							$(this).data('events')['change']=[];
-						$(this).change(function() {
-							var ns=$(this).attr('id').split('_')[1];
-							var objnames=$(this).attr('id').split('_')[0];
-							var textnames=replaceAll(objnames,'comb','text')
-							$('#'+textnames+'_'+ns).val($('#'+objname+'_'+ns).find("option:selected").text());
-						});
-                    });
-                    
-                    $('.minut').each(function(index) {
-						if($(this).data('events')!=undefined)
-							$(this).data('events')['click']=[];
-						$(this).click(function() {
-							var ns=$(this).attr('id').split('_')[1];
-							$('#cuct_tr'+ns+' input[type="text"]').val('');
-						});
-                    });
-                    
-                    $('#cuct_table .num').each(function() {
-                    	if($(this).data('events')!=undefined){
-							$(this).data('events')['keyup']=[];
-							$(this).data('events')['change']=[];
-							$(this).data('events')['focusin']=[];
+						if(objname=='combSize'){
+							q_cmbParse("combSize_"+n, ',#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16');
 						}
-						$(this).keyup(function(e) {
-							if(e.which>=37 && e.which<=40){return;}
-							var tmp=$(this).val();
-							tmp=tmp.match(/\d{1,}\.{0,1}\d{0,}/);
-							$(this).val(tmp);
-						});
+						
+						if($(this).data('events')!=undefined)
+							$(this).data('events')['change']=[];
 						$(this).change(function() {
-							var objname=$(this).attr('id').split('_')[0];
-							var n=$(this).attr('id').split('_')[1];
-							if(objname=='textGmount' ){
-								$('#textGweight_'+n).val(round(q_mul(dec($('#textGmount_'+n).val()),dec($('#textAvgweight_'+n).val())),0))
-							}
-						});
-						$(this).focusin(function() {
-							var objname=$(this).attr('id').split('_')[0];
-							var n=$(this).attr('id').split('_')[1];
-							if(objname=='textGmount' || objname=='textGweight'){
+							var textnames=replaceAll(objname,'comb','text')
+							$('#'+textnames+'_'+n).val($('#'+objname+'_'+n).find("option:selected").text());
+							$('#'+objname+'_'+n).val('');
+							
+							//變動均價
+							if(dec($('#textGmount_'+n).val())!=0 || dec($('#textGweight_'+n).val())!=0){
 								var x_product=$('#textProduct_'+n).val();
 								var x_spec=$('#textSpec_'+n).val();
 								var x_size=$('#textSize_'+n).val();
@@ -470,15 +442,84 @@
 								}
 							}
 						});
-					});
-					
-                    $('#cuct_table .sizea').each(function() {
-                    	if($(this).data('events')!=undefined)
-							$(this).data('events')['change']=[];
-						$(this).change(function() {
-							 if ($(this).val().substr(0, 1) != '#')
-                        		$(this).val('#' + $(this).val());
+                    });
+                    
+                    //清空事件
+                    $('.minut').each(function(index) {
+						if($(this).data('events')!=undefined)
+							$(this).data('events')['click']=[];
+						$(this).click(function() {
+							var ns=$(this).attr('id').split('_')[1];
+							$('#cuct_tr'+ns+' input[type="text"]').val('');
 						});
+                    });
+                    				
+					//所有欄位text
+					$('#cuct_table input[type="text"] ').each(function() {
+						if($(this).data('events')!=undefined){
+							$(this).data('events')['change']=[];
+							$(this).data('events')['keyup']=[];
+							$(this).data('events')['focusin']=[];
+						}
+						var objname=$(this).attr('id').split('_')[0];
+						var n=$(this).attr('id').split('_')[1];
+						
+						//只能輸入數值
+						if(objname=='textLengthb' || objname=='textGmount' || objname=='textGweight'){
+							$(this).keyup(function(e) {
+								if(e.which>=37 && e.which<=40){return;}
+								var tmp=$(this).val();
+								tmp=tmp.match(/\d{1,}\.{0,1}\d{0,}/);
+								$(this).val(tmp);
+							});
+						}
+						//立刻讀均重
+						if(objname=='textGmount' || objname=='textGweight'){
+							$(this).focusin(function() {
+								var x_product=$('#textProduct_'+n).val();
+								var x_spec=$('#textSpec_'+n).val();
+								var x_size=$('#textSize_'+n).val();
+								var x_lengthb=$('#textLengthb_'+n).val();
+								var x_class=$('#textClass_'+n).val();
+								var x_edate=$('#textDatea').val();
+								if((x_product.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
+									x_product=emp($('#textProduct_'+n).val())?'#non':$('#textProduct_'+n).val();
+									x_spec=emp($('#textSpec_'+n).val())?'#non':$('#textSpec_'+n).val();
+									x_size=emp($('#textSize_'+n).val())?'#non':$('#textSize_'+n).val();
+									x_lengthb=emp($('#textLengthb_'+n).val())?'#non':$('#textLengthb_'+n).val();
+									x_class=emp($('#textClass_'+n).val())?'#non':$('#textClass_'+n).val();
+									x_edate=emp($('#textDatea').val())?q_date():$('#textDatea').val();
+									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
+								}
+							});
+						}
+						//變動事件
+						$(this).change(function() {
+							//變動均價
+							if(dec($('#textGmount_'+n).val())!=0 || dec($('#textGweight_'+n).val())!=0){
+								var x_product=$('#textProduct_'+n).val();
+								var x_spec=$('#textSpec_'+n).val();
+								var x_size=$('#textSize_'+n).val();
+								var x_lengthb=$('#textLengthb_'+n).val();
+								var x_class=$('#textClass_'+n).val();
+								var x_edate=$('#textDatea').val();
+								if((x_product.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
+									x_product=emp($('#textProduct_'+n).val())?'#non':$('#textProduct_'+n).val();
+									x_spec=emp($('#textSpec_'+n).val())?'#non':$('#textSpec_'+n).val();
+									x_size=emp($('#textSize_'+n).val())?'#non':$('#textSize_'+n).val();
+									x_lengthb=emp($('#textLengthb_'+n).val())?'#non':$('#textLengthb_'+n).val();
+									x_class=emp($('#textClass_'+n).val())?'#non':$('#textClass_'+n).val();
+									x_edate=emp($('#textDatea').val())?q_date():$('#textDatea').val();
+									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
+								}
+							}
+							//號數
+							if(objname=='textSize'){
+								if ($(this).val().substr(0, 1) != '#')
+                        		$(this).val('#' + $(this).val());
+							}
+						});
+						
 					});
                 }
             };
@@ -491,6 +532,7 @@
                 q_gt('spec', '1=1 ', 0, 0, 0, "");
                 q_gt('color', '1=1 ', 0, 0, 0, "");
 				q_gt('class', '1=1 ', 0, 0, 0, "");
+				q_gt('mech', '1=1 ', 0, 0, 0, "");
 			});
 			
 			var new_where='';
@@ -499,7 +541,7 @@
 				Lock();
 			}
 			
-			var t_spec='@',t_ucolor='@',t_class='@';
+			var t_spec='@',t_ucolor='@',t_class='@',t_mech='@';
 			function q_gfPost() {
 				q_getFormat();
                 q_langShow();
@@ -536,7 +578,7 @@
                 });
                 
                 $('#btnCub').click(function(e) {
-                	t_err = q_chkEmpField([['textDatea', '加工日'],['textMechno', '機台']]);
+                	t_err = q_chkEmpField([['textDatea', '加工日'],['combMechno', '機台']]);
 	                if (t_err.length > 0) {
 	                    alert(t_err);
 	                    return;
@@ -634,7 +676,7 @@
                     			alert('排程加工資料無設定數量或重量。');
                     		}else{
                     			var t_datea=emp($('#textDatea').val())?'#non':$('#textDatea').val();
-                    			var t_mechno=emp($('#textMechno').val())?'#non':$('#textMechno').val();
+                    			var t_mechno=emp($('#combMechno').val())?'#non':$('#combMechno').val();
                     			var t_memo=emp($('#textMemo').val())?'#non':$('#textMemo').val();
                     			
                     			//表身資料
@@ -766,6 +808,14 @@
 						if(cucs.data!=null)
 							cucs.refresh();
 						break;
+					case 'mech':
+						var as = _q_appendData("mech", "", true);
+						t_mech='@';
+						for ( i = 0; i < as.length; i++) {
+							t_mech+=","+as[i].noa+"@"+as[i].mech;
+						}
+						$('#combMechno').text();
+						q_cmbParse("combMechno", t_mech);
 					case q_name:
 						if (q_cur == 4)
 							q_Seek_gtPost();
@@ -880,7 +930,7 @@
 						alert('加工單產生完畢!!');
 						//重新抓取新資料
 						$('#textDatea').val(q_date());
-						$('#textMechno').val('');
+						$('#combMechno').val('');
 						$('#textMech').val('');
 						$('#textMemo').val('');
 						
@@ -901,8 +951,10 @@
 						}
 						
 						$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
+						$('#textGweight_'+n).val(q_mul(dec($('#textGweight_'+n).val()),round(q_div(t_weight,t_mount),3)));
 					}else{
 						$('#textAvgweight_'+n).val(0);
+						$('#textGweight_'+n).val(0);
 					}
                 }
 			}
@@ -1084,8 +1136,9 @@
 		<BR>
 		<a class="lbl">加工日</a>&nbsp;<input id="textDatea"  type="text" class="txt" style="width: 100px;"/>&nbsp;
 		<a class="lbl">機　台</a>&nbsp;
-			<input id="textMechno"  type="text" class="txt " style="width: 100px;"/>
-			<input id="textMech"  type="text" class="txt" style="width: 100px;" disabled="disabled"/>
+			<select id="combMechno" class="txt" style="font-size: medium;"> </select>
+			<!--<input id="textMechno"  type="text" class="txt " style="width: 100px;"/>
+			<input id="textMech"  type="text" class="txt" style="width: 100px;" disabled="disabled"/>-->
 		<BR>
 		<a class="lbl">備　註</a>&nbsp;<input id="textMemo"  type="text" class="txt" style="width: 500px;"/>
 		<input type='button' id='btnCub' style='font-size:16px;' value="入庫"/>

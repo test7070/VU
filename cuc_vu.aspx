@@ -35,23 +35,23 @@
                     string+='<td id="cucs_noa" align="center" style="width:20px; color:black;display:none;">案號</td>'
                     string+='<td id="cucs_noq" align="center" style="width:20px; color:black;display:none;">案序</td>'
                     string+='<td id="cucs_sel" align="center" style="width:20px; color:black;"></td>';
-                    string+='<td id="cucs_odatea" onclick="cucs.sort(\'odatea\',false)" title="預交日" align="center" style="width:65px; color:black;">預交日</td>';
-                    string+='<td id="cucs_ucolor" onclick="cucs.sort(\'ucolor\',false)" title="類別" align="center" style="width:100px; color:black;">類別</td>';
-                    string+='<td id="cucs_product" onclick="cucs.sort(\'product\',false)" title="品名" align="center" style="width:100px; color:black;">品名</td>';
-                    string+='<td id="cucs_spec" onclick="cucs.sort(\'spec\',false)" title="材質" align="center" style="width:100px; color:black;">材質</td>';
-                    string+='<td id="cucs_size" onclick="cucs.sort(\'size\',false)" title="號數" align="center" style="width:100px; color:black;">號數</td>';
-                    string+='<td id="cucs_lengthb" onclick="cucs.sort(\'lengthb\',false)" title="米數" align="center" style="width:100px; color:black;">米數</td>';
-                    string+='<td id="cucs_mount" onclick="cucs.sort(\'mount\',false)" title="訂單數" align="center" style="width:100px; color:black;">訂單數</td>';
-                    string+='<td id="cucs_weight" onclick="cucs.sort(\'weight\',false)" title="訂單重" align="center" style="width:130px; color:black;">訂單重</td>';
-                    string+='<td id="cucs_emount" onclick="cucs.sort(\'emount\',false)" title="未完工數" align="center" style="width:100px; color:black;">未完工數</td>';
-                    string+='<td id="cucs_eweight" onclick="cucs.sort(\'eweight\',false)" title="未完工重" align="center" style="width:130px; color:black;">未完工重</td>';
-                    string+='<td id="cucs_xmount" title="件數" align="center" style="width:100px; color:black;">件數</td>';
-                    string+='<td id="cucs_xcount" title="支數" align="center" style="width:100px; color:black;">支數</td>';
-                    string+='<td id="cucs_xweight" title="重量" align="center" style="width:130px; color:black;">重量</td>';
+                    string+='<td id="cucs_odatea" onclick="cucs.sort(\'odatea\',false)" title="預交日" align="center" style="width:70px; color:black;">預交日</td>';
+                    string+='<td id="cucs_ucolor" onclick="cucs.sort(\'ucolor\',false)" title="類別" align="center" style="width:110px; color:black;">類別</td>';
+                    string+='<td id="cucs_product" onclick="cucs.sort(\'product\',false)" title="品名" align="center" style="width:70px; color:black;">品名</td>';
+                    string+='<td id="cucs_spec" onclick="cucs.sort(\'spec\',false)" title="材質" align="center" style="width:70px; color:black;">材質</td>';
+                    string+='<td id="cucs_size" onclick="cucs.sort(\'size\',false)" title="號數" align="center" style="width:50px; color:black;">號數</td>';
+                    string+='<td id="cucs_lengthb" onclick="cucs.sort(\'lengthb\',false)" title="米數" align="center" style="width:50px; color:black;">米數</td>';
+                    string+='<td id="cucs_mount" onclick="cucs.sort(\'mount\',false)" title="訂單數" align="center" style="width:60px; color:black;">訂單數</td>';
+                    string+='<td id="cucs_weight" onclick="cucs.sort(\'weight\',false)" title="訂單重" align="center" style="width:80px; color:black;">訂單重</td>';
+                    string+='<td id="cucs_emount" onclick="cucs.sort(\'emount\',false)" title="未完工數" align="center" style="width:60px; color:black;">未完工數</td>';
+                    string+='<td id="cucs_eweight" onclick="cucs.sort(\'eweight\',false)" title="未完工重" align="center" style="width:80px; color:black;">未完工重</td>';
+                    string+='<td id="cucs_xmount" title="件數" align="center" style="width:60px; color:black;">件數</td>';
+                    string+='<td id="cucs_xcount" title="支數" align="center" style="width:60px; color:black;">支數</td>';
+                    string+='<td id="cucs_xweight" title="重量" align="center" style="width:80px; color:black;">重量</td>';
                     string+='<td id="cucs_custno" onclick="cucs.sort(\'custno\',false)" title="客戶編號" align="center" style="width:120px; color:black;display:none;">客戶編號</td>';
                     string+='<td id="cucs_cust" onclick="cucs.sort(\'cust\',false)" title="客戶名稱" align="center" style="width:120px; color:black;display:none;">客戶名稱</td>';
                     string+='<td id="cucs_memo" onclick="cucs.sort(\'memo\',false)" title="備註" align="center" style="width:120px; color:black;">備註</td>';
-                    string+='<td id="cucs_orde" onclick="cucs.sort(\'orde\',false)" title="訂單號碼" align="center" style="width:100px; color:black;">訂單號碼</td>';
+                    string+='<td id="cucs_orde" onclick="cucs.sort(\'orde\',false)" title="訂單號碼" align="center" style="width:90px; color:black;">訂單號碼</td>';
                     string+='</tr>';
                     
                     var t_color = ['DarkBlue','DarkRed'];
@@ -328,14 +328,14 @@
                             if(cubno.length>0){
                             	if(cubno.split('##')[0]==r_userno){
                             		$('#cucs_chk' + i).removeAttr('disabled');
-                            		$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', '#FF8800');
+                            		$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
                             	}else{ //其他人已經鎖定
                             		$('#cucs_chk' + i).attr('disabled', 'disabled');
-                            		$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'pink');	
+                            		$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', '#cad3ff');	
                             	}
                             }else{
                             	$('#cucs_chk' + i).removeAttr('disabled');
-                            	$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'pink');	
+                            	$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', '#cad3ff');	
                             }
                             $('#cucs_noa' + i).html(this.data[n+i]['noa']);
                             $('#cucs_noq' + i).html(this.data[n+i]['noq']);
@@ -348,8 +348,8 @@
                             $('#cucs_lengthb' + i).html(this.data[n+i]['lengthb']);
                             $('#cucs_mount' + i).html(this.data[n+i]['mount']);  
                             $('#cucs_weight' + i).html(this.data[n+i]['weight']);  
-                            $('#cucs_emount' + i).html(this.data[n+i]['emount']);
-                            $('#cucs_eweight' + i).html(this.data[n+i]['eweight']);
+                            $('#cucs_emount' + i).html(round(dec(this.data[n+i]['emount']),3));
+                            $('#cucs_eweight' + i).html(round(dec(this.data[n+i]['eweight']),3));
                             $('#textXmount_'+i).val('').attr('disabled', 'disabled');
                             $('#textXcount_'+i).val('').attr('disabled', 'disabled');
                             $('#textXweight_'+i).val('').attr('disabled', 'disabled');
@@ -361,17 +361,17 @@
                             //text寫入
                             for(var j =0 ;j<chk_cucs.length;j++){
                             	if(chk_cucs[j].noa==$('#cucs_noa'+i).text() && chk_cucs[j].noq==$('#cucs_noq'+i).text()){
-                            		$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', '#FF8800');
+                            		$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
 									$('#textXmount_'+i).val(chk_cucs[j].xmount).removeAttr('disabled');
 									$('#textXcount_'+i).val(chk_cucs[j].xcount).removeAttr('disabled');
 									$('#textXweight_'+i).val(chk_cucs[j].xweight).removeAttr('disabled');
 									break;
 								}else{
-									$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'pink');	
+									$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', '#cad3ff');	
 								}
                             }
                         } else {
-                            $('#cucs_chk' + i).attr('disabled', 'disabled').prop('checked',false).parent().parent().find('td').css('background', 'pink');
+                            $('#cucs_chk' + i).attr('disabled', 'disabled').prop('checked',false).parent().parent().find('td').css('background', '#cad3ff');
                             $('#cucs_noa' + i).html('');
                             $('#cucs_noq' + i).html('');
                             $('#cucs_cubno' + i).html('');
@@ -828,7 +828,7 @@
 						if(as[0].cubno!='' && as[0].cubno.split('##')[0] != r_userno){//其他人被鎖定
 							alert("該筆排程已被"+as[0].cubno.split('##')[1]+"鎖定!!");
 							$('#cucs_cubno'+n).text(as[0].cubno);
-							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'pink');	
+							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', '#cad3ff');	
                         	//檢查是否有暫存 並刪除暫存資料
                         	 for(var i =0 ;i<chk_cucs.length;i++){
                         	 	if(chk_cucs[i].noa==$('#cucs_noa'+n).text() && chk_cucs[i].noq==$('#cucs_noq'+n).text()){
@@ -841,7 +841,7 @@
                             $('#textXcount_'+n).val('').attr('disabled', 'disabled');
                             $('#textXweight_'+n).val('').attr('disabled', 'disabled');
 						}else{//未鎖定資料
-							$('#cucs_chk'+n).parent().parent().find('td').css('background', '#FF8800');
+							$('#cucs_chk'+n).parent().parent().find('td').css('background', 'darkturquoise');
 							//鎖定資料
                         	q_func('qtxt.query.lock', 'cuc_vu.txt,lock,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
                         	$('#cucs_cubno'+n).text(r_userno+"##"+r_name);
@@ -861,7 +861,7 @@
 							$('#textXweight_'+n).removeAttr('disabled');
 						}
 					}else{
-						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'pink');	
+						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', '#cad3ff');	
 						alert('該筆排程已完工!!');
 					}
 					Unlock();
@@ -872,19 +872,19 @@
 					if (as[0] != undefined){//是否有資料
 						if(as[0].cubno==''){
 							$('#cucs_cubno'+n).text('');
-							$('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', 'pink');
+							$('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', '#cad3ff');
 							alert('該筆排程已被解除鎖定!!');
 						}else if(as[0].cubno!='' && as[0].cubno.split('##')[0] != r_userno){//其他人被鎖定
 							$('#cucs_cubno'+n).text(as[0].cubno);
-							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'pink');
+							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', '#cad3ff');
 							alert('該筆排程已被鎖定!!');
 						}else{//自己鎖定的資料
                         	//取消鎖定資料
                             q_func('qtxt.query.unlock', 'cuc_vu.txt,unlock,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
-                            $('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', 'pink');
+                            $('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', '#cad3ff');
 						}
 					}else{
-						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'pink');	
+						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', '#cad3ff');	
 						alert('該筆排程已完工!!');
 					}
 					//刪除暫存資料
@@ -1102,7 +1102,7 @@
                 padding: 2px;
                 text-align: center;
                 border-width: 0px;
-                background-color: pink;
+                background-color: #cad3ff;
                 color: blue;
             }
             #cucs_header td:hover{
@@ -1122,7 +1122,7 @@
                 padding: 2px;
                 text-align: center;
                 border-width: 0px;
-                background-color: bisque;
+                background-color: lightblue;
                 color: blue;
             }
             

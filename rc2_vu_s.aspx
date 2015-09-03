@@ -43,7 +43,7 @@
                 t_tggno = $('#txtTggno').val();
                 t_invono = $('#txtInvono').val();
                 t_accno = $('#txtAccno').val();
-                t_uno = $('#txtUno').val();
+               // t_uno = $('#txtUno').val();
 
                 t_bdate = t_bdate.length > 0 && t_bdate.indexOf("_") > -1 ? t_bdate.substr(0, t_bdate.indexOf("_")) : t_bdate;
                 /// 100.  .
@@ -52,9 +52,9 @@
 
                 var t_where = " 1=1 " + q_sqlPara2("noa", t_noa) + q_sqlPara2("cno", t_cno) + q_sqlPara2("datea", t_bdate, t_edate) + q_sqlPara2("mon", t_mon) + q_sqlPara2("tggno", t_tggno) + q_sqlPara2("invono", t_invono) + q_sqlPara2("accno", t_accno);
 				
-				if(t_uno.length>0){
+				/*if(t_uno.length>0){
 					t_where += " and exists(select noa from view_rc2s"+r_accy+" where view_rc2s"+r_accy+".noa=view_rc2"+r_accy+".noa and view_rc2s"+r_accy+".uno='"+t_uno+"')";
-				}
+				}*/
 				
                 t_where = ' where=^^' + t_where + '^^ ';
                 return t_where;
@@ -114,10 +114,10 @@
 					<td><a id='lblInvono'> </a></td>
 					<td><input id="txtInvono" type="text" style="width:215px; font-size:medium;"/></td>
 				</tr>
-				<tr class='seek_tr'>
+				<!--<tr class='seek_tr'>
 					<td><a id='lblUno'> </a></td>
 					<td><input id="txtUno" type="text" style="width:215px; font-size:medium;"/></td>
-				</tr>
+				</tr>-->
 				<tr class='seek_tr'>
 					<td><a id='lblAccno'> </a></td>
 					<td><input id="txtAccno" type="text" style="width:215px; font-size:medium;"/></td>

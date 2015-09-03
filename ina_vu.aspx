@@ -688,13 +688,13 @@
 						<td><span> </span><a id="lblTrantype" class="lbl"> </a></td>
 						<td><select id="cmbTrantype" class="txt c1"> </select></td>
 					</tr>
-					<tr>
+					<!--<tr>
 						<td><span> </span><a id="lblStore" class="lbl btn" > </a></td>
 						<td colspan="3">
 							<input id="txtStoreno" type="text" class="txt c2"/>
 							<input id="txtStore" type="text" class="txt c3"/>
 						</td>
-					</tr>
+					</tr>-->
 					<tr>
 						<td><span> </span><a id="lblCardeal" class="lbl btn"> </a></td>
 						<td colspan="3">

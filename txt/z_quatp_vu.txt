@@ -111,11 +111,11 @@ deallocate cursor_table
 if(CHARINDEX('sel1',@t_option01)>0)
 begin
 		insert into @tmp (gno,recno,custno,datea,noa,pno,product,spec,price,eweight)
-		select '2',row_number() over(partition by a.noa order by a.noa,a.no3),a.custno,a.datea,a.noa,a.productno,a.product+' '+a.size,a.spec,a.price,a.eweight
+		select '2',row_number() over(partition by a.noa order by a.noa,a.no3),b.custno,b.datea,a.noa,a.productno,isnull(a.product,'')+' '+isnull(a.size,''),a.spec,a.price,a.eweight
 		from view_quats a left join view_quat b on a.noa=b.noa
 		where (isnull(b.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
-		and (a.custno between @t_bcustno and @t_ecustno ) 
-		and (a.datea between @t_bdate and @t_edate)
+		and (b.custno between @t_bcustno and @t_ecustno ) 
+		and (b.datea between @t_bdate and @t_edate)
 		and exists (select * from @tmp where noa=a.noa)
 end
 

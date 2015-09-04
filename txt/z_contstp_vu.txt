@@ -111,7 +111,7 @@ deallocate cursor_table
 if(CHARINDEX('sel1',@t_option01)>0)
 begin
 		insert into @tmp (gno,recno,tggno,datea,noa,pno,product,spec,price,eweight)
-		select '2',row_number() over(partition by a.noa order by a.noa,a.noq),b.tggno,b.datea,a.noa,a.productno,a.product+' '+a.size,a.spec,a.price,a.eweight
+		select '2',row_number() over(partition by a.noa order by a.noa,a.noq),b.tggno,b.datea,a.noa,a.productno,isnull(a.product,'')+' '+isnull(a.size,''),a.spec,a.price,a.eweight
 		from conts a left join cont b on a.noa=b.noa
 		where (isnull(b.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
 		and (b.tggno between @t_btggno and @t_etggno ) 

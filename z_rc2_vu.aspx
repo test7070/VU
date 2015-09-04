@@ -57,7 +57,7 @@
 					}, {
 						type : '5', //[12]
 						name : 'xstype',
-						value : [q_getPara('report.all')].concat(q_getPara('rc2.stype').split(','))
+						value : [].concat(trim(q_getPara('vccs_vu.product')).split(','))
 					}, {
                         type : '0', //[13] //判斷顯示小數點與其他判斷
                         name : 'acomp',

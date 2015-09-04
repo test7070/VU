@@ -52,8 +52,8 @@
 		        + q_sqlPara2("tggno", t_tggno);
 		        if (t_comp.length>0)
                     t_where += " and charindex('" + t_comp + "',comp)>0";
-		       	if(t_uno.length>0)
-		       		t_where += " and exists(select noa from view_inas"+r_accy+" where view_inas"+r_accy+".noa=view_ina"+r_accy+".noa and view_inas"+r_accy+".uno='"+t_uno+"')";
+		       	//if(t_uno.length>0)
+		       	//	t_where += " and exists(select noa from view_inas"+r_accy+" where view_inas"+r_accy+".noa=view_ina"+r_accy+".noa and view_inas"+r_accy+".uno='"+t_uno+"')";
 		       	
 		        t_where = ' where=^^' + t_where + '^^ ';
 		        return t_where;
@@ -99,10 +99,10 @@
 					<td class='seek'  style="width:20%;"><a id='lblComp'> </a></td>
 					<td><input class="txt" id="txtComp" type="text" style="width:215px; font-size:medium;" /></td>
 				</tr>
-				<tr class='seek_tr'>
+				<!--<tr class='seek_tr'>
 					<td class='seek'  style="width:20%;"><a id='lblUno'> </a></td>
 					<td><input class="txt" id="txtUno" type="text" style="width:215px; font-size:medium;" /></td>
-				</tr>
+				</tr>-->
 			</table>
 			<!--#include file="../inc/seek_ctrl.inc"-->
 		</div>

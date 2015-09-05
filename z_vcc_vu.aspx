@@ -23,6 +23,12 @@
             var job = '';
             var sgroup = '';
             var isinvosystem = '';
+            var xproductItem ='';
+            var xucolorItem ='';
+            var xspecItem ='';
+            	
+            var xlengthbItem ='';
+            var xclassItem =''
 
             if (location.href.indexOf('?') < 0) {
                 location.href = location.href + "?;;;;100";
@@ -58,6 +64,9 @@
 						$('#Xgroupcno').hide();
 	                }
 				});
+				_q_boxClose();
+                q_getId();
+                q_gt('spec', '1=1 ', 0, 0, 0, "spec");
             });
             
             function q_gfPost() {
@@ -70,7 +79,7 @@
 	            /*if(q_getPara('sys.comp').indexOf('永勝') > -1){
 	            	vccstype=q_getPara('vcc.stype_uu');
 	            }*/
-            	
+            
                 $('#q_report').q_report({
                     fileName : 'z_vcc_vu',
                     options : [{
@@ -98,62 +107,29 @@
                         index : 'noa,comp',
                         src : 'cust_b.aspx'
                     }, {
-                        type : '2', //[10][11]//8
-                        name : 'sales',
-                        dbf : 'sss',
-                        index : 'noa,namea',
-                        src : 'sss_b.aspx'
-                    }, {
-                        type : '2', //[12][13]//10
-                        name : 'product',
-                        dbf : 'ucaucc',
-                        index : 'noa,product',
-                        src : 'ucaucc_b.aspx'
-                    },{
-                        type : '2', //[14][15]//原廠//20
-                        name : 'tggno',
-                        dbf : 'tgg',
-                        index : 'noa,comp',
-                        src : 'tgg_b.aspx'
-                    },{
                         type : '5',
-                        name : 'xtype', //[16]//40
-                        value : [q_getPara('report.all')].concat(ucctype.split(','))
-                    },{
-                        type : '5', //[17]//80
-                        name : 'xgroupano',
-                        value : uccgaItem.split(',')
-                    },{
-                        type : '5', //[18]//100
-                        name : 'xgroupbno',
-                        value : uccgbItem.split(',')
-                    },{
-                        type : '5', //[19]//200
-                        name : 'xgroupcno',
-                        value : uccgcItem.split(',')
-                    }, {
-                        type : '5',
-                        name : 'xstype', //[20]//400
-                        value : [q_getPara('report.all')].concat(vccstype.split(','))
-                    }, {
-                        type : '6', //[21]//800
-                        name : 'salesgroup'
-                    }, {
-                        type : '5',
-                        name : 'vcctypea', //[22]//1000
+                        name : 'vcctypea', //[10]//1000
                         value : [q_getPara('report.all')].concat(q_getPara('vcc.typea').split(','))
-                    },{
-                        type : '5', //[23]//2000
-                        name : 'xpartno',
-                        value : partItem.split(',')
-                    },{
-                        type : '8', //[24]//顯示發票號碼//4000
-                        name : 'xshowinvono',
-                        value : "1@顯示發票資料".split(',')
                     }, {
-                        type : '0', //[25] //判斷是否顯示規格
-                        name : 'isspec',
-                        value : q_getPara('sys.isspec')
+                        type : '5',
+                        name : 'xproduct', //[11]
+                        value :q_getPara('vccs_vu.product').split(',')
+                    }, {
+                        type : '5',
+                        name : 'xspec' ,//[12]
+                        value :xspecItem.split(',')
+                    }, {
+                        type : '5',
+                        name : 'xsize', //[13]
+                        value:(',#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16').split(',')
+                    }, {
+                        type : '5',
+                        name : 'xclass',//[14]
+                        value : xclassItem.split(',')
+                    },{
+                        type : '1',
+                        name : 'xlengthb', //[15][16]
+                        value : xlengthbItem.split(',')
                     }]
                 });
                 q_popAssign();
@@ -197,86 +173,18 @@
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
                 $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
                 $('#txtMon2').val(t_year + '/' + t_month);
-                $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
-                $('#txtMon1').val(r_accy + '/01').mask(r_picm);
-                $('#txtMon2').val(r_accy + '/12').mask(r_picm);
-                $('#txtXbmon1').val(r_accy + '/01').mask(r_picm);
-                $('#txtXbmon2').val(r_accy + '/12').mask(r_picm);
-                $('#txtXemon1').val(r_accy + '/01').mask(r_picm);
-                $('#txtXemon2').val(r_accy + '/12').mask(r_picm);
-                $('#Xmemo').removeClass('a2').addClass('a1');
-                $('#txtXmemo').css('width', '85%');
-                $('#Xgroupano select').css('width', '150px');
-                $('.q_report .report').css('width', '420px');
-                $('.q_report .report div').css('width', '200px');
+                
 
-                if (q_getPara('sys.comp').indexOf('英特瑞') > -1 || q_getPara('sys.comp').indexOf('安美得') > -1) {
-                    if (issale == 'true' && job.indexOf('經理') < 0 && r_rank <= '5') {//一般業務只能看到自己的業績
-                        $('#txtSales1a').val(r_userno);
-                        $('#txtSales1b').val(r_name);
-                        $('#txtSales2a').val(r_userno);
-                        $('#txtSales2b').val(r_name);
-                        $('#btnSales1').hide();
-                        $('#btnSales2').hide();
-                        $('#txtSales1a').attr('disabled', 'disabled');
-                        $('#txtSales2a').attr('disabled', 'disabled');
-                        $('#txtSalesgroup').val(sgroup)
-                        $('#txtSalesgroup').attr('disabled', 'disabled');
-                    } else if (issale == 'true' && job.indexOf('經理') > -1 && r_rank <= '5') {
-                        $('#txtSales1a').val(r_userno);
-                        $('#txtSales1b').val(r_name);
-                        $('#txtSales2a').val(r_userno);
-                        $('#txtSales2b').val(r_name);
-                        $('#txtSalesgroup').val(sgroup)
-                        $('#txtSalesgroup').attr('disabled', 'disabled');
-                    }
-                }
-                
-                $('#Xshowinvono').css('width', '300px').css('height', '30px');
-                $('#Xshowinvono .label').css('width','0px');
-                $('#chkXshowinvono').css('width', '220px').css('margin-top', '5px');
-                $('#chkXshowinvono span').css('width','180px')
-                
-                if(isinvosystem=='2'){//沒有發票系統
-	                $('#Xshowinvono').hide();
-				}
-				
-				if(!(q_getPara('sys.comp').indexOf('英特瑞') > -1 || q_getPara('sys.comp').indexOf('安美得') > -1)){
-					$('#Xgroupbno').hide();
-					$('#Xgroupcno').hide();
-				}
-				
-				if(q_getPara('sys.comp').indexOf('楊家') > -1 || q_getPara('sys.comp').indexOf('德芳') > -1){
-					//打客戶編號和產品後面要自動帶一樣的值
-	                $('#txtCardeal1a').blur(function() {
-	                   	if(emp($('#txtCust1a').val())){
-	                   		$('#txtCust1b').val('');
-	                   	}
-	                   	$('#txtCust2a').val($('#txtCust1a').val());
-	                   	$('#txtCust2b').val($('#txtCust1b').val());
-	                });
-	                	
-	                $('#txtCust2a').blur(function() {
-	                   	if(emp($('#txtCust2a').val())){
-	                   		$('#txtCust2b').val('');
-	                   	}
-	                });
-	                
-	                $('#txtProduct1a').blur(function() {
-	                   	if(emp($('#txtProduct1a').val())){
-	                   		$('#txtProduct1b').val('');
-	                   	}
-	                   	$('#txtProduct2a').val($('#txtProduct1a').val());
-	                   	$('#txtProduct2b').val($('#txtProduct1b').val());
-	                });
-	                	
-	                $('#txtProduct2a').blur(function() {
-	                   	if(emp($('#txtProduct2a').val())){
-	                   		$('#txtProduct2b').val('');
-	                   	}
-	                });
-	                	
-				}
+                 $('#txtXlengthb1').addClass('num').val(0).change(function() {
+                    $(this).val(dec($(this).val()));
+                    if ($(this).val() == 'NaN')
+                    	$(this).val(0);
+                });
+                $('#txtXlengthb2').addClass('num').val(99).change(function() {
+                    $(this).val(dec($(this).val()));
+                    if ($(this).val() == 'NaN')
+                    	$(this).val(99);
+                });
 				
             }
 
@@ -295,8 +203,8 @@
 			};
 			
             function q_gtPost(t_name) {
-                switch (t_name) {
-                    case 'sss':
+                switch (t_name) {               	              	
+                   case 'sss':
                         var as = _q_appendData("sss", "", true);
                         if (as[0] != undefined) {
                             issale = as[0].issales;
@@ -340,15 +248,69 @@
                         for ( i = 0; i < as.length; i++) {
                             partItem = partItem + (partItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa + ' . ' + as[i].part;
                         }
-                        break;   s
+                        break;   
+                        
+                    case 'spec':
+                		var as = _q_appendData("spec", "", true);
+						for ( i = 0; i < as.length; i++) {
+							xspecItem+=","+as[i].noa;
+						}
+						q_gt('color', '1=1 ', 0, 0, 0, "color");
+                		break;
+                	case 'color':
+                		var as = _q_appendData("color", "", true);
+						for ( i = 0; i < as.length; i++) {
+							xucolorItem+=","+as[i].color;
+						}
+						q_gt('class', '1=1 ', 0, 0, 0, "class");
+                		break;
+                	case 'class':
+                		var as = _q_appendData("class", "", true);
+						for ( i = 0; i < as.length; i++) {
+							xclassItem+=","+as[i].noa;
+						}          
+                		break;
+                	               			
                 }
                 if (isinvosystem.length > 0 && uccgaItem.length > 0 &&uccgbItem.length > 0 &&uccgcItem.length > 0 && partItem.length > 0 && sss_state && !gfrun) {
                     gfrun = true;
                     q_gf('', 'z_vcc_vu');
                 }
+                 
             }
+            
+          
+          
+          	/*<style type="text/css">
+            .num {
+                text-align: right;
+                padding-right: 2px;
+            }
+            #q_report select {
+            	font-size: medium;
+    			margin-top: 2px;
+            }
+            select {
+            	font-size: medium;
+            }
+		</style>  */
 		</script>
+		<style type="text/css">
+            .num {
+                text-align: right;
+                padding-right: 2px;
+            }
+            #q_report select {
+            	font-size: medium;
+    			margin-top: 2px;
+            }
+            select {
+            	font-size: medium;
+            }
+		</style> 
 	</head>
+	
+	
 	<body ondragstart="return false" draggable="false"
 	ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"
 	ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"

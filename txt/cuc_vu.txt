@@ -6,11 +6,18 @@
 	declare @noq nvarchar(max) = [3]
 	declare @userno nvarchar(max) = [4]
 	declare @namea nvarchar(max) = [5]
+	declare @mech nvarchar(max) = [6]
+	
+	--鎖定時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=CONVERT (VARCHAR(20), GETDATE(),20 )
+	select @now_datetime
 	
 	set @accy=isnull((select accy from view_cucs where noa=@noa and noq=@noq),@accy)
 		
 	EXEC("
 		update cucs"+@accy+" set cubno='"+@userno+"'+'##'+'"+@namea+"'
+		+'##'+'"+@mech+"'+'##'+'"+@now_datetime+"'
 		where noa='"+@noa+"' and noq='"+@noq+"'
 	")
 ;

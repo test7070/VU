@@ -433,9 +433,9 @@
 						var bbsrow=document.getElementById("cucs_table").rows.length-1;
 						var as = _q_appendData("view_cuc", "", true);
 						var imp_cucno=''; //匯入的cucno
-						if(as[0]!=undefined && !isupdate){ //第一次匯入
+						/*if(as[0]!=undefined && !isupdate){ //匯入資料就先鎖單
 							imp_cucno=as[0].noa;
-						}
+						}*/
 						//變動核取資料
 						for(var i =0 ;i<as.length;i++){
                     		var cubno=as[i]['cubno'];
@@ -631,7 +631,7 @@
 				                }
 							}
 							var n=$(this).attr('id').replace('cucs_chk','')
-							Lock();
+							//Lock();
 							var t_where="where=^^  1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and a.noa='"+$('#cucs_noa'+n).text()+"' and b.noq='"+$('#cucs_noq'+n).text()+"' ^^";
 							//判斷是否能被鎖定或解除
 							if($(this).prop('checked')){
@@ -671,7 +671,7 @@
 						
 						//第一次匯入就先核取
 						bbsrow=document.getElementById("cucs_table").rows.length-1;//重新取得最新的bbsrow
-						if(imp_cucno.length){
+						if(imp_cucno.length>0){
 							for(var i=0;i<bbsrow;i++){
 								if($('#cucs_noa'+i).text()==imp_cucno && !$('#cucs_chk'+i).prop('checked')
 								&& !$('#cucs_chk'+i).prop('disabled')){ //沒有被核取過的資料 且目前沒被鎖定過
@@ -887,7 +887,7 @@
 						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');	
 						alert('該筆排程已完工!!');
 					}
-					Unlock();
+					//Unlock();
 				}
 				if(t_name.indexOf("getcanunlock_")>-1){
 					var n=t_name.split('_')[1];
@@ -922,7 +922,7 @@
 					$('#textXmount_'+n).val('').attr('disabled', 'disabled');
 					$('#textXcount_'+n).val('').attr('disabled', 'disabled');
 					$('#textXweight_'+n).val('').attr('disabled', 'disabled');
-					Unlock();	
+					//Unlock();	
 				}
 			}
 			

@@ -43,6 +43,7 @@
 			
 			var t_spec='@',t_ucolor='@',t_class='@',t_mech='@';
 			var bbtaddcount=5;//bbt每次新增五筆
+			var isclear=false;
 			function q_gfPost() {
 				chk_cucs=new Array();
 				
@@ -65,13 +66,21 @@
 				//匯入
                 $('#btnImport').click(function(e) {
                 	var t_cucno = $('#combCucno').val();
-                    var t_where = " 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ";
-                    t_where += q_sqlPara2("a.noa", t_cucno);
-                    
-                    t_where="where=^^"+t_where+" order by b.noa,b.noq ^^";
-                    Lock();
-                    isupdate=false;
-					q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);
+                	if(t_cucno.length>0){
+                		var t_err = q_chkEmpField([['combMechno', '機台']]);
+						if (t_err.length > 0) {
+				        	alert(t_err);
+							return;
+						}
+                		
+	                    var t_where = " 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ";
+	                    t_where += q_sqlPara2("a.noa", t_cucno);
+	                    
+	                    t_where="where=^^"+t_where+" order by b.noa,b.noq ^^";
+	                    Lock();
+	                    isupdate=false;
+						q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);
+					}
                 });
                 
                 //解除鎖定
@@ -83,6 +92,7 @@
                 //完工 清除所有資料
                 $('#btnClear').click(function(e) {
                 	clearInterval(intervalupdate);
+                	isclear=true;
                 	//目前鎖定資料清空
                 	chk_cucs=new Array();
                 	$('#cuct_table .minut').each(function() {
@@ -91,8 +101,6 @@
                 	//初始化cucs
                 	var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
-					//清空該使用者的全部鎖定
-					q_func('qtxt.query.unlockall', 'cuc_vu.txt,unlockall,'+r_userno+';'+r_name);
                 });
                 
                 //加工
@@ -128,7 +136,7 @@
 								q_gt('cucs_vu', t_where, 0, 0, 0,'tocub', r_accy);
 								Lock();
 							}*/
-							alert('無領料資料。');
+							alert('無領料資料或領料重量小於等於零。');
 						}else{
 							if(confirm("確定轉至加工單?")){
 								var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
@@ -404,13 +412,19 @@
 						});
 					
 						var as = _q_appendData("view_cuc", "", true);
-                        var comb_noa='@全部';
+                        var comb_noa='@';
                         
                         for(var i=0;i<as.length;i++){
                         	if(comb_noa.indexOf(as[i].noa)==-1)
                         		comb_noa=comb_noa+","+as[i].noa+"@"+as[i].noa
                         }
+                        $('#combCucno').text('');
                         q_cmbParse("combCucno", comb_noa);
+                        
+                        if(isclear){
+                        	//清空該使用者的全部鎖定
+							q_func('qtxt.query.unlockall', 'cuc_vu.txt,unlockall,'+r_userno+';'+r_name);
+                        }
                         
                         intervalupdate=setInterval("cucsupdata()",1000*60);
                         break;
@@ -418,7 +432,10 @@
 						//現在表身資料
 						var bbsrow=document.getElementById("cucs_table").rows.length-1;
 						var as = _q_appendData("view_cuc", "", true);
-						
+						var imp_cucno=''; //匯入的cucno
+						if(as[0]!=undefined && !isupdate){ //第一次匯入
+							imp_cucno=as[0].noa;
+						}
 						//變動核取資料
 						for(var i =0 ;i<as.length;i++){
                     		var cubno=as[i]['cubno'];
@@ -606,7 +623,7 @@
 						$('#cucs .cucs_chk').unbind('click');
 						$('#cucs .cucs_chk').click(function(e) {
 							if($(this).prop('checked')){
-								t_err = q_chkEmpField([['combMechno', '機台']]);
+								var t_err = q_chkEmpField([['combMechno', '機台']]);
 				                if (t_err.length > 0) {
 				                    alert(t_err);
 				                    $(this).prop("checked",false).parent().parent().find('td').css('background', 'lavender');
@@ -652,6 +669,22 @@
 							});
 						});
 						
+						//第一次匯入就先核取
+						bbsrow=document.getElementById("cucs_table").rows.length-1;//重新取得最新的bbsrow
+						if(imp_cucno.length){
+							for(var i=0;i<bbsrow;i++){
+								if($('#cucs_noa'+i).text()==imp_cucno && !$('#cucs_chk'+i).prop('checked')
+								&& !$('#cucs_chk'+i).prop('disabled')){ //沒有被核取過的資料 且目前沒被鎖定過
+									$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
+									var t_where="where=^^  1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and a.noa='"+$('#cucs_noa'+i).text()+"' and b.noq='"+$('#cucs_noq'+i).text()+"' ^^";
+									q_gt('cucs_vu', t_where, 0, 0, 0,'getcanlock_'+i, r_accy);
+									//$('#cucs_chk'+i).click();
+									//$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
+								}
+							}
+							cucs_refresh();
+						}
+						imp_cucno='';
                         Unlock();
                     	break;
                     case 'tocub':
@@ -787,8 +820,21 @@
 					var n=t_name.split('_')[1];
 					var as = _q_appendData("view_cuc", "", true);
 					if (as[0] != undefined){//是否有資料
-						if(as[0].cubno!='' && as[0].cubno.split('##')[0] != r_userno){//其他人被鎖定
-							var mechno=as[0].cubno.split('##')[2]!=undefined?as[0].cubno.split('##')[2]:'';
+						var cubno=as[0].cubno;
+						var islock=false;
+						if(cubno!=''){
+							var lock_time=cubno.split('##')[3]!=undefined?cubno.split('##')[3]:'';
+							if(lock_time.length>0){
+								islock=true;
+								var now_time = new Date();
+								lock_time = new Date(lock_time);
+								var diff = now_time - lock_time;
+								if(diff>1000 * 60 * 30) //超過30分表示已解除鎖定
+									islock=false;
+							}
+						}
+						if(islock && cubno!='' && cubno.split('##')[0] != r_userno){//其他人被鎖定
+							var mechno=cubno.split('##')[2]!=undefined?cubno.split('##')[2]:'';
 							var tt_mech=t_mech.split(',');
 							for(var k=0;k<tt_mech.length;k++){
 								if(tt_mech[k].split('@')[0]==mechno){
@@ -798,7 +844,7 @@
 							}
 							alert("該筆排程已被"+mechno+"鎖定!!");
 							$('#cucs_lbla'+n).text(mechno);
-							$('#cucs_cubno'+n).text(as[0].cubno);
+							$('#cucs_cubno'+n).text(cubno);
 							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');	
                         	//檢查是否有暫存 並刪除暫存資料
                         	 for(var i =0 ;i<chk_cucs.length;i++){
@@ -812,10 +858,16 @@
                             $('#textXcount_'+n).val('').attr('disabled', 'disabled');
                             $('#textXweight_'+n).val('').attr('disabled', 'disabled');
 						}else{//未鎖定資料
-							$('#cucs_chk'+n).parent().parent().find('td').css('background', 'darkturquoise');
+							$('#cucs_chk'+n).prop("checked",true).parent().parent().find('td').css('background', 'darkturquoise');
 							//鎖定資料
                         	q_func('qtxt.query.lock', 'cuc_vu.txt,lock,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name+';'+$('#combMechno').val());
-                        	$('#cucs_cubno'+n).text(r_userno+"##"+r_name);
+                        	var t_datea=new Date();
+                        	t_datea=t_datea.getFullYear()+'-'+(t_datea.getMonth()+1>9?t_datea.getMonth():'0'+(t_datea.getMonth()+1))
+                        	+'-'+(t_datea.getDate()+1>9?t_datea.getDate():'0'+t_datea.getDate())
+                        	+' '+(t_datea.getHours()+1>9?t_datea.getHours():'0'+t_datea.getHours())
+                        	+':'+(t_datea.getMinutes()+1>9?t_datea.getMinutes():'0'+t_datea.getMinutes())
+                        	+':'+(t_datea.getSeconds()+1>9?t_datea.getSeconds():'0'+t_datea.getSeconds())
+                        	$('#cucs_cubno'+n).text(r_userno+"##"+r_name+"##"+$('#combMechno').val()+"##"+t_datea);
                         	//暫存資料
                         	chk_cucs.push({
 								noa : $('#cucs_noa'+n).text(),
@@ -853,6 +905,7 @@
                         	//取消鎖定資料
                             q_func('qtxt.query.unlock', 'cuc_vu.txt,unlock,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
                             $('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', 'lavender');
+                            $('#cucs_cubno'+n).text('');
 						}
 					}else{
 						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');	
@@ -1198,6 +1251,8 @@
 		<a class="lbl">案　號</a>&nbsp;
 		<select id="combCucno" class="txt" style="font-size: medium;"> </select>
 		<input type='button' id='btnImport' style='font-size:16px;' value="匯入"/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<a style="color: red;">※鎖定時間超過半小時將自動解除鎖定</a>
 		<div id="cucs" style="float:left;width:100%;height:400px;overflow:auto;position: relative;"> </div> 
 		<!--<div id="cucs_control" style="width:100%;"> </div>--> 
 		<div id="cuct" style="float:left;width:100%;height:250px;overflow:auto;position: relative;"> </div>

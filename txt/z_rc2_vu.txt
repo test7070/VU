@@ -63,7 +63,7 @@ declare @result table(
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea, 
-		a.tggno, isnull(c.nick,''), b.productno, b.product+' '+b.size+' '+b.spec+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor, b.unit 
+		a.tggno, isnull(c.nick,''), b.productno, b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
 		,(case when a.typea='2' then -1 else 1 end)*b.mount 
 		,(case when a.typea='2' then -1 else 1 end)*b.weight 
 		,b.price 
@@ -159,7 +159,7 @@ declare @result table(
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea, 
-		a.tggno, isnull(c.nick,''), b.productno,  b.product+' '+b.size+' '+b.spec+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor, b.unit 
+		a.tggno, isnull(c.nick,''), b.productno,  b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
 		,(case when a.typea='2' then -1 else 1 end)*b.mount 
 		,(case when a.typea='2' then -1 else 1 end)*b.weight 
 		,b.price 
@@ -264,7 +264,7 @@ declare @result table(
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono, a.datea, 
 	  a.tggno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno, 
-	  b.product+' '+b.size+' '+b.spec+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor, b.unit 
+	  b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
 	  ,(case when a.typea='2' then -1 else 1 end)*b.mount 
 	  ,(case when a.typea='2' then -1 else 1 end)*b.weight 
 	  ,b.price 
@@ -374,7 +374,7 @@ declare @result table(
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea, 
 		   a.tggno, isnull(c.nick,'')
-		   , b.productno, b.product+' '+b.size+' '+b.spec+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor, b.unit 
+		   , b.productno, b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
 	 	   ,(case when a.typea='2' then -1 else 1 end)*b.mount 
 		   ,(case when a.typea='2' then -1 else 1 end)*b.weight 
 		   ,b.price 

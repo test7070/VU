@@ -12,7 +12,7 @@ declare @t_elengthb float
 declare @t_acomp nvarchar(MAX)='[3]' 
 declare @qhref_acomp nvarchar(10) ='' 
 declare @vcctypea nvarchar(10) ='' 
-declare @isspec nvarchar(10)='0' 
+declare @isspec nvarchar(10)='0'
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -64,7 +64,6 @@ declare @result table(
 	mon nvarchar(7), 
 	custno nvarchar(30), 
 	comp nvarchar(90), 
-	productno nvarchar(30), 
 	xproduct nvarchar(MAX), 
 	unit nvarchar(12), 
 	mount float, 
@@ -88,34 +87,40 @@ declare @result table(
 ) 
 insert into @result 
 select '91' gno, a.noa noa, b.noq noq, a.typea typea, a.datea datea, (case when a.mon='' then left(a.datea,6) else a.mon end), a.custno, a.comp 
-		, b.productno, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor, b.unit, 
-		b.mount, b.weight, b.price, b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
+		, b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,''), 
+		 b.unit, b.mount, b.weight, b.price, b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 		,a.invono,v.datea,v.money,a.tax,b.total 
 		,b.ucolor,b.spec,b.size,b.lengthb,a.addr,b.memo,a.carno,a.tax+b.total
 from view_vccs b left join view_vcc a on a.noa = b.noa 
-				 left join view_ucaucc c on b.productno = c.noa 
+			--	 left join view_ucaucc c on b.productno = c.noa 
 				 left join sss s on isnull(a.salesno,'')=s.noa 
 				 left join vcca v on a.invono=v.noa 
+				 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
-	  (len(@t_product)=0 or @t_product like b.product)and
-	  (len(@t_spec)=0 or @t_spec like b.spec) and
-	  (len(@t_size)=0 or @t_size like b.size) and
-	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb)
+	  (len(@t_product)=0 or @t_product like isnull(b.product,''))and
+	  (len(@t_spec)=0 or @t_spec like isnull(b.spec,'')) and
+	  (len(@t_size)=0 or @t_size like isnull(b.size,'')) and
+	  (len(@t_class)=0 or @t_class like isnull(b.class,'')) and
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 order by a.datea,gno,noa,noq 
 
 
-insert into @result(gno,datea,noa,mount,price,total,money) 
+insert into @result(gno,datea,noa,mount,price,total,money,weight) 
 select '93',datea,'ZZZZZZZZZZZZ', 
 	   sum((case typea when '1' then mount else (-1)*mount end)), 
 	   sum((case typea when '1' then price else (-1)*price end)), 
 	   sum((case typea when '1' then total else (-1)*total end)),
-	   sum((case typea when '1' then money else (-1)*money end)) 
+	   sum((case typea when '1' then money else (-1)*money end)),
+	   sum((case typea when '1' then weight else (-1)*weight end)) 
 from @result group by datea 
 
-insert into @result(gno,datea,noa,mount,price,total,money) 
-select '94',left(datea,6)+'z','ZZZZZZZZZZZZ',sum(mount),sum(price),sum(total),sum(money) 
+insert into @result(gno,datea,noa,mount,price,total,money,weight) 
+select '94',left(datea,6)+'z','ZZZZZZZZZZZZ',sum(mount),sum(price),sum(total),sum(money),sum(weight) 
 from @result a where gno='93' group by left(datea,6) 
 --*************************************************************************	
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
@@ -125,10 +130,10 @@ update @result set gno='2' where gno='93'
 update @result set gno='3' where gno='94' 
 
 update @result 
-set mount=mount*-1,total=total*-1 
+set mount=mount*-1,total=total*-1 ,weight=weight*-1
 where typea='退' 
 
-select gno, noa, noq, typea, datea, LEFT(datea,6) xdatea, mon, custno, left(comp,10) comp, productno, xproduct  xpros,unit,qhref 
+select gno, noa, noq, typea, datea, LEFT(datea,6) xdatea, mon, custno, left(comp,10) comp,  xproduct  xpros,unit,qhref 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
@@ -189,41 +194,43 @@ if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0)
 
 declare @tmp table( 
 	gno nvarchar(1), 
-	productno nvarchar(30), 
 	products nvarchar(MAX), 
 	cno nvarchar(30), 
 	custnick nvarchar(90), 
 	mount float, 
 	total float ,
-	tax float ,
-	ucolor nvarchar(30),
-	size nvarchar(30),
-	spec nvarchar(30),
-	length nvarchar(30),
+	tax float,
 	weight float,
 	money float
 ) 
 
 insert into @tmp 
-select '9',b.productno,b.product+' '+b.size+' '+b.spec+ ' '+convert(nvarchar,b.lengthb)+'M'+' '+b.ucolor
+select '9',
+		b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
 	   ,a.custno,	(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
 	   ,(case when a.typea='1' then 1 else -1 end)*b.mount,(case when a.typea='1' then 1 else -1 end)*b.total 
-	   ,a.tax,b.ucolor,b.size,b.spec,b.lengthb,b.weight,a.tax+b.total
+	   ,(case when a.typea='1' then 1 else -1 end)*a.tax
+	   ,(case when a.typea='1' then 1 else -1 end)*b.weight
+	   ,(case when a.typea='1' then 1 else -1 end)*(a.tax+b.total)
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 			    left join cust c on a.custno = c.noa 
-				left join view_ucaucc d on b.productno = d.noa 
+				
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb)
-order by b.productno,b.product,a.custno,c.nick,c.comp 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
-select '0',productno,products,cno,custnick,SUM(mount),SUM(total),tax,ucolor,size,spec,length,sum(weight),sum(money) from @tmp 
-group by productno,products,cno,custnick ,tax,ucolor,size,spec,length
+select '0',products,cno,custnick,SUM(mount),SUM(total),sum(tax),sum(weight),sum(money) from @tmp 
+group by products,cno,custnick
 
 delete @tmp where gno='9' 
 
@@ -231,13 +238,13 @@ insert into @tmp(gno,cno,custnick,mount,total,weight,money)
 select '1',cno,custnick,sum(mount),sum(total),sum(weight),sum(money) 
 from @tmp where gno='0' group by cno,custnick 
 
-select gno,productno,products,cno,custnick 
+select gno,products,cno,custnick 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money
-,ucolor,size,spec,length,dbo.getComma(weight,0) weight
-from @tmp order by cno,custnick,gno,productno  
+,dbo.getComma(weight,0) weight
+from @tmp order by cno,custnick,gno  
 ;
 --**********************************************************************************************
 z_vcc_vu3:--z_vcc_vu3 
@@ -309,7 +316,7 @@ declare @result table(
 	addr_invo nvarchar(90), 
 	tel nvarchar(90), 
 	productno nvarchar(30), 
-	xproduct nvarchar(MAX), 
+	xproduct nvarchar(100), 
 	unit nvarchar(8), 
 	mount float, 
 	weight float, 
@@ -330,14 +337,23 @@ declare @result table(
 	length nvarchar(30),
 	memo nvarchar(max),
 	totax float
-	primary key (custno,productno,gno,datea,noa,noq) 
+--	primary key (custno,gno,xproduct,datea,noa,noq) 
 ) 
 
 insert into @result 
 select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon, 
 	   a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
-	   , b.product+' '+b.size+' '+b.spec+' '+convert(nvarchar,b.lengthb)+'M'+' '+b.ucolor
-	   , b.unit,b.mount, b.weight, b.price, b.total, 0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
+	   , b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
+	   , b.unit,
+	   (case when a.typea='1' then 1 else -1 end)*b.mount
+	   ,(case when a.typea='1' then 1 else -1 end)* b.weight
+	   , b.price
+	   ,(case when a.typea='1' then 1 else -1 end)* b.total, 
+	   (case when a.typea='1' then 1 else -1 end)* (b.total+a.tax) money, 0 back, a.tax tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
 	   ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,b.ucolor,b.spec,b.size,b.lengthb,b.memo,a.tax+b.total 
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
@@ -349,7 +365,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb)
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 order by custno,productno,gno,datea,noa,noq 
 
 --*********************************************************************** 
@@ -382,154 +398,28 @@ declare @t_totax2 float
 set @t_custno1 = '#zzzz#zzzz' 
 set @t_custno2 = '#zzzz#zzzz' 
 set @t_productno = '#zzzz#zzzz' 
-set @t_xproduct = '' 
+set @t_xproduct = '#zzzz#zzzz' 
 set @t_mount1 = 0 
 set @t_weight1 = 0 
 set @t_total1 = 0 
 set @t_mount2 = 0 
 set @t_weight2 = 0 
 set @t_total2 = 0 
-
+declare @i nvarchar(10) =0
 --*********************************************************************** 
-declare cursor_table cursor for 
-select gno,typea,custno,comp,productno,xproduct,datea,total,mount,weight,totax from @result 
-open cursor_table 
-fetch next from cursor_table 
-into @gno,@typea,@custno,@comp,@productno,@xproduct,@datea,@total,@mount,@weight,@totax 
-while(@@FETCH_STATUS <> -1) 
-	begin 
-		if @gno='0' 
-			begin 
-				if NOT(@t_custno1 = @custno and @t_productno = @productno) 
-				begin 
-					if NOT(@t_custno1 = '#zzzz#zzzz' and @t_productno = '#zzzz#zzzz') 
-					begin 
-						insert into @result 
-						select '1' gno, '' typea, '' noa, '' noq, '' datea, '' mon, @t_custno1, @t_comp1 comp, '' addr_invo, '' tel, 
-								@t_productno, @xproduct xproduct, '' unit, @t_mount1 mount, @t_weight1 weight, 0 price, @t_total1 total, 
-								0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' ,'' ucolor,'' spec,'' size,'' length,'' memo, @t_totax1 totax
-						end 
-						set @t_custno1 = @custno 
-						set @t_comp1 = @comp 
-						set @t_productno = @productno 
-						set @t_xproduct = @xproduct 
-						set @t_mount1 = case @typea 
-										when'1' then @mount 
-										when'2' then -@mount 
-										else 0 
-										end 
-						set @t_weight1 = case @typea 
-										 when'1' then @weight 
-									     when'2' then -@weight 
-										 else 0 
-										 end 
-						set @t_total1 = case @typea 
-										when'1' then @total 
-									    when'2' then -@total 
-										end 
-						set @t_totax1 = case @typea
-										when '1' then @totax
-										when '2' then -@totax
-										end
-					end 
-				else 
-					begin 
-						set @t_mount1 = @t_mount1 + case @typea 
-										when'1' then @mount 
-										when'2' then -@mount 
-										else 0 
-										end 
-						set @t_weight1 = @t_mount1 + case @typea 
-										 when'1' then @weight 
-										 when'2' then -@weight 
-										 else 0 
-										 end 
-						set @t_total1 = @t_total1 + case @typea 
-										when'1' then @total 
-										when'2' then -@total 
-										end 
-						set @t_totax1 = @t_totax1 + case @typea
-										when '1' then @totax
-										when '2' then -@totax
-										end
-				end 
-				if @t_custno2 != @custno 
-					begin 
-						if @t_custno2 != '#zzzz#zzzz' 
-						begin 
-							insert into @result 
-							select '2' gno, '' typea, '' noa, '' noq, '' datea, '' mon, @t_custno2, @t_comp2 comp, '' addr_invo, '' tel, 
-							CHAR(255) productno, '' xproduct, '' unit, @t_mount2 mount, @t_weight2 weight, 0 price, @t_total2 total, 
-							0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' ,'' ucolor,'' spec,'' size,'' length,'' memo,@t_totax2 totax
-						end 
-					set @t_custno2 = @custno 
-					set @t_comp2 = @comp 
-					set @t_mount2 = case @typea 
-									when'1' then @mount 
-									when'2' then -@mount 
-									else 0 
-									end 
-					set @t_weight2 = case @typea 
-									when'1' then @weight 
-									when'2' then -@weight 
-									else 0 
-									end 
-					set @t_total2 = case @typea 
-									when'1' then @total 
-									when'2' then -@total 
-									end 
-					set @t_totax2 = case @typea
-										when '1' then @totax
-										when '2' then -@totax
-										end
-					end 
-				else 
-				begin 
-					set @t_mount2 = @t_mount2 + case @typea 
-						when'1' then @mount 
-						when'2' then -@mount 
-						else 0 
-						end 
-					set @t_weight2 = @t_mount2 + case @typea 
-									 when'1' then @weight 
-									 when'2' then -@weight 
-									 else 0 
-									 end 
-					set @t_total2 = @t_total2 + case @typea 
-								    when'1' then @total 
-									when'2' then -@total 
-									end 
-					set @t_totax2 = @t_totax2 + case @typea
-									when '1' then @totax
-									when '2' then -@totax
-									end
-				end 
-		end 
-		fetch next from cursor_table 
-		into @gno,@typea,@custno,@comp,@productno,@xproduct,@datea,@total,@mount,@weight,@totax
-	end 
-	close cursor_table 
-	deallocate cursor_table 
-	if NOT(@t_custno1 = '#zzzz#zzzz' and @t_productno = '#zzzz#zzzz') 
-	begin 
-		insert into @result 
-		select '1' gno, '' typea, '' noa, '' noq, '' datea, '' mon, @t_custno1, @t_comp1 comp, '' addr_invo, '' tel, 
-		@t_productno, @xproduct xproduct, '' unit, @t_mount1 mount, @t_weight1 weight, 0 price, @t_total1 total, 
-		0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' ,'' ucolor,'' spec,'' size,'' length,'' memo,@t_totax1 totax
-	end 
-	if @t_custno2 != '#zzzz#zzzz' 
-	begin 
-		insert into @result 
-		select '2' gno, '' typea, '' noa, '' noq, '' datea, '' mon, @t_custno2, @t_comp2 comp, '' addr_invo, '' tel, 
-		CHAR(255) productno, '' xproduct, '' unit, @t_mount2 mount, @t_weight2 weight, 0 price, @t_total2 total, 
-		0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount,'' ,'' ucolor,'' spec,'' size,'' length,'' memo,@t_totax2 totax
-	end 
---*********************************************************************** 
-update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
+insert @result(gno,custno,xproduct,mount,weight,total,totax)
+select	'1',custno,xproduct,sum(mount),SUM(weight),SUM(total),SUM(totax)
+from @result
+where gno='0'
+group by xproduct,custno
 
-update @result 
-set mount=mount*-1,total=total*-1 ,totax=totax*-1
-where typea='退' 
+insert @result (gno,custno,mount,weight,total,totax,xproduct)
+select	'2',custno,sum(mount),SUM(weight),SUM(total),SUM(totax),char(255)
+from @result
+where gno='1'
+group by custno
+
+
 
 select gno, typea, noa, noq, datea, mon, custno, comp 
 ,addr_invo,tel,productno,xproduct xpdt,unit 
@@ -547,7 +437,11 @@ select gno, typea, noa, noq, datea, mon, custno, comp
 ,pcount ,qhref 
 ,isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)),0) totax 
 ,ucolor,spec,size,length,memo
-from @result order by custno,productno,gno,datea,noa,noq
+from @result 
+
+order by custno,xproduct,gno,datea,noa,noq  
+
+
   ;
   
  z_vcc_vu4:--z_vcc_vu4 
@@ -596,7 +490,6 @@ if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0)
 
 declare @tmp table( 
 	gno nvarchar(1), 
-	productno nvarchar(30), 
 	products nvarchar(MAX), 
 	cno nvarchar(30), 
 	custnick nvarchar(90), 
@@ -608,43 +501,46 @@ declare @tmp table(
 
 ) 
 insert into @tmp 
-select '9',b.productno,b.product+(case when @isspec='1' then ' 
-		'+isnull(b.spec,'') else '' end),a.custno, 
+select '9',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,''),a.custno, 
 		(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
 		,(case when a.typea='1' then 1 else -1 end)*b.mount,(case when a.typea='1' then 1 else -1 end)*b.total 
 		,a.tax ,b.weight
 		,(case when a.typea='1' then 1 else -1 end)*(a.tax+b.total) 
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join cust c on a.custno = c.noa 
-				left join view_ucaucc d on b.productno = d.noa 
+			--	left join view_ucaucc d on b.productno = d.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
 
-order by b.productno,b.product,a.custno,c.nick,c.comp 
+order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
-select '0',productno,products,cno,custnick,SUM(mount),SUM(total),tax,weight,sum(totax) from @tmp 
-group by productno,products,cno,custnick ,tax,weight
+select '0',products,cno,custnick,SUM(mount),SUM(total),sum(tax),sum(weight),sum(totax) from @tmp 
+group by products,cno,custnick 
 
 delete @tmp where gno='9' 
 
-insert into @tmp(gno,productno,products,mount,total) 
-select '1',productno,products,sum(mount),sum(total) 
-from @tmp where gno='0' group by productno,products 
+insert into @tmp(gno,products,mount,total,weight) 
+select '1',products,sum(mount),sum(total),sum(weight) 
+from @tmp where gno='0' group by products 
 
-select gno,productno,products,cno,left(custnick,10) custnick 
+select gno,products,cno,left(custnick,10) custnick 
 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
 ,dbo.getComma(weight,0) weight
-from @tmp order by productno,products,gno,cno  ;
+from @tmp order by products,gno,cno  ;
 
  z_vcc_vu5:--z_vcc_vu5
 declare @t_bdate   nvarchar(20)
@@ -713,7 +609,7 @@ declare @result table(
 	comp nvarchar(90), 
 	addr_invo nvarchar(90), 
 	tel nvarchar(90), 
-	productno nvarchar(30), 
+	
 	xproduct nvarchar(MAX), 
 	unit nvarchar(8), 
 	mount float, 
@@ -732,13 +628,17 @@ declare @result table(
 
 insert into @result 
 select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon, 
-		a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
-		, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
+		a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,'')
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
 		, b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 		,a.tax,b.ucolor,b.spec,b.size,b.lengthb,a.tax+b.total
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
-				 left join view_ucaucc d on b.productno = d.noa 
+		--		 left join view_ucaucc d on b.productno = d.noa 
 				 left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
@@ -746,14 +646,15 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb)
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 order by custno,gno,mon,datea,noa,noq 
 
-insert into @result(gno,custno,pcount,mount,total,totax) 
+insert into @result(gno,custno,pcount,mount,total,totax,weight) 
 select '1',custno, count(*), 
 	sum((case typea when '1' then mount else (-1)*mount end)), 
 	sum((case typea when '1' then total else (-1)*total end)),
-	sum((case typea when '1' then totax else (-1)*totax end))  
+	sum((case typea when '1' then totax else (-1)*totax end)),
+	sum((case typea when '1' then weight else (-1)*weight end))  
 from @result a group by custno 
 
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
@@ -761,7 +662,7 @@ update @result set typea = (case typea when '1' then '出' else '退' end) where
 update @result set mount=mount*-1,total=total*-1 ,totax=totax*-1 
 where typea='退' 
 
-select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,productno,xproduct xpdt,unit, qhref 
+select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,xproduct xpdt,unit, qhref 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
@@ -829,24 +730,24 @@ insert into @tmp
 select 	'0',a.custno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end), 
 		case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end,sum((case when a.typea='1' then 1 else -1 end)*b.mount),sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 		,sum((case when a.typea='1' then 1 else -1 end)*a.tax) 
-		,b.weight,a.tax+b.total 
+		,sum(b.weight),sum(a.tax)+sum(b.total) 
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join cust c on a.custno = c.noa 
-				left join view_ucaucc d on b.productno = d.noa 
+		--		left join view_ucaucc d on b.productno = d.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb)
-group by a.custno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end,b.weight,a.tax+b.total 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+group by a.custno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end
 
-insert into @tmp(gno,custno,custs,mon,mount,total,tax,totax) 
-select '1',custno,custs,'999/99',sum(mount),sum(total),sum(tax),sum(totax) from @tmp group by custno,custs 
+insert into @tmp(gno,custno,custs,mon,mount,total,tax,totax,weight) 
+select '1',custno,custs,'999/99',sum(mount),sum(total),sum(tax),sum(totax),sum(weight) from @tmp group by custno,custs 
 
-insert into @tmp(gno,custno,mount,total,tax,totax) 
-select '2','ZZZZ_ZZZ',sum(mount), sum(total), sum(tax), sum(totax) from @tmp where gno='1' 
+insert into @tmp(gno,custno,mount,total,tax,totax,weight) 
+select '2','ZZZZ_ZZZ',sum(mount), sum(total), sum(tax), sum(totax),sum(weight) from @tmp where gno='1' 
 
 
 select gno,custno cno,left(custs,10) custs,mon 
@@ -925,7 +826,7 @@ declare @result table(
 	addr_invo nvarchar(90), 
 	tel nvarchar(90), 
 	productno nvarchar(30), 
-	xproduct nvarchar(MAX), 
+	xproduct nvarchar(100), 
 	unit nvarchar(8), 
 	mount float, 
 	weight float, 
@@ -941,13 +842,17 @@ declare @result table(
 	pcount int, 
 	qhref nvarchar(MAX),
 	totax float 
-	primary key (productno,gno,datea,noa,noq) 
+	primary key (gno,datea,productno,noa,noq) 
 ) 
 
 insert into @result 
 select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end mon, 
-		a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno 
-		, b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
+		a.custno custno, isnull(c.nick,''), isnull(c.addr_invo,''), isnull(c.tel,''), '00'
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
 		, b.unit,(case when a.typea='1' then 1 else -1 end) *b.mount
 		, b.weight, b.price, b.total, 0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
 		,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
@@ -962,8 +867,8 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
-order by productno,gno,datea,noa,noq 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+order by gno,datea,noa,noq 
 
 --*********************************************************************** 
 declare @gno nvarchar(1) 
@@ -985,6 +890,7 @@ set @t_tax = 0
 set @t_total1 = 0 
 set @t_pcount = 0 
 --*********************************************************************** 
+
 declare cursor_table cursor for 
 select gno,typea,productno,datea,total from @result 
 open cursor_table 
@@ -1053,7 +959,9 @@ select gno, typea, noa, noq, datea, mon, custno, left(comp,10) comp
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax
 ,pcount 
 from @result order by productno,gno,datea,noa,noq ;
-
+end try
+begin catch 
+end catch;
 z_vcc_vu8:--z_vcc_vu8
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1101,7 +1009,7 @@ if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0)
 
 declare @tmp table( 
 	gno nvarchar(1), 
-	productno nvarchar(30), 
+
 	products nvarchar(MAX), 
 	mon nvarchar(15), 
 	mount float, 
@@ -1112,12 +1020,16 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-	'0',b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
+	'0',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'') 
 	,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.mount),sum((case when a.typea='1' then 1 else -1 end)*b.total) 
-	,a.tax,b.weight,sum((case when a.typea='1' then 1 else -1 end)*(a.tax+b.total)) 
+	,sum(a.tax),sum(b.weight),sum((case when a.typea='1' then 1 else -1 end)*(a.tax+b.total)) 
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
-				left join view_ucaucc d on b.productno = d.noa 
+		--		left join view_ucaucc d on b.productno = d.noa 
 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
@@ -1125,25 +1037,30 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
-group by b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor  
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+group by b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')  
 		 ,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
-		 ,a.tax,b.weight
-insert into @tmp(gno,productno,products,mon,mount,total,tax,totax) 
-select '1',productno,products,'999/99',sum(mount),sum(total),SUM(tax),sum(totax) 
-from @tmp group by productno,products 
+		
+insert into @tmp(gno,products,mon,mount,total,tax,totax,weight) 
+select '1',products,'999/99',sum(mount),sum(total),SUM(tax),sum(totax),sum(weight) 
+from @tmp group by products 
 
-insert into @tmp(gno,productno,mount,total,totax) 
-select '2','ZZZZZZZZZZZZ',sum(mount),sum(total),sum(totax)
+insert into @tmp(gno,products,mount,total,totax,weight,mon) 
+select '2',char(255),sum(mount),sum(total),sum(totax),sum(weight),'999/99'
 from @tmp where gno='1' 
 
-select gno,productno,(case when gno='0' then dbo.charbr(products,24) else products end )products,mon 
+select gno,products,mon 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
 ,dbo.getComma(weight,0) weight
-from @tmp order by productno,mon,gno  ;
+from @tmp 
+order by products,mon,gno ;
 -------------------------------------------------- -------------------------------------------------- 
 z_vcc_vu9:--z_vcc_vu9
 declare @t_bdate   nvarchar(20)
@@ -1220,27 +1137,32 @@ declare @tmp table(
 	totax float
 ) 
 insert into @tmp 
-select '0',a.salesno,s.namea,a.comp,a.datea,a.noa,a.typea,b.productno 
-		,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
+select '0',a.salesno,s.namea,c.nick,a.datea,a.noa,a.typea,b.productno 
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
 		,b.unit,b.mount,b.price,b.total ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,a.tax
 		,b.weight,a.tax+b.total
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join view_ucaucc d on b.productno = d.noa 
 				left join sss s on isnull(a.salesno,'')=s.noa 
-
+			    left join cust c on a.custno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb)  
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)  
 order by a.salesno,a.datea 
 
-insert into @tmp(gno,salesno,salesname,mount,total,tax,totax) 
+insert into @tmp(gno,salesno,salesname,mount,total,tax,totax,weight) 
 select '1' gno,salesno,salesname,sum((case when typea='1' then mount else mount*(-1) end)), 
 	   sum((case when typea='1' then total else total*(-1) end)),SUM(tax)
 	   ,sum((case when typea='1' then totax else totax*(-1) end)) 
+	   ,sum(weight)
 from @tmp group by salesno,salesname 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 update @tmp set mount=mount*-1,total=total*-1,totax=totax*-1 
@@ -1312,11 +1234,11 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-	'0',a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
+	'0',isnull(a.salesno,''),s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 	,sum((case when a.typea='1' then 1 else -1 end)*a.tax) 
-	,b.weight
+	,sum((case when a.typea='1' then 1 else -1 end)*b.weight)
 	,sum((case when a.typea='1' then 1 else -1 end)*(a.tax+b.total)) 
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join view_ucaucc d on b.productno = d.noa 
@@ -1327,15 +1249,15 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
-group by a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end,b.weight 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+group by a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 
-insert into @tmp(gno,salesno,salesname,mon,mount,total,tax,totax) 
-select '1',salesno,salesname,'999/99',sum(mount),sum(total),sum(tax),sum(totax)
+insert into @tmp(gno,salesno,salesname,mon,mount,total,tax,totax,weight) 
+select '1',salesno,salesname,'999/99',sum(mount),sum(total),sum(tax),sum(totax),sum(weight)
 from @tmp group by salesno,salesname 
 
-insert into @tmp(gno,salesno,mount,total,tax,totax) 
-select '2','ZZZZZZ',sum(mount),sum(total),SUM(tax),sum(totax)
+insert into @tmp(gno,salesno,mount,total,tax,totax,weight) 
+select '2','ZZZZZZ',sum(mount),sum(total),SUM(tax),sum(totax),sum(weight)
 from @tmp where gno='1' 
 
 
@@ -1423,7 +1345,11 @@ declare @tmp table(
 	totax float 
 ) 
 insert into @tmp 
-select '0',a.salesno,s.namea,a.comp,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor  
+select '0',isnull(a.salesno,''),s.namea,a.nick,b.productno,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
 		  ,a.datea,a.noa,a.typea,b.unit,b.mount,b.price,b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,a.tax
 		  ,b.weight,a.tax+b.total
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
@@ -1435,16 +1361,18 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 order by a.salesno,b.productno 
 
-insert into @tmp(gno,salesno,salesname,mount,total,tax,totax) 
+insert into @tmp(gno,salesno,salesname,mount,total,tax,totax,weight) 
 select '1' gno,salesno,salesname, 
 		sum((case when typea='1' then mount else mount*(-1) end)), 
 		sum((case when typea='1' then total else total*(-1) end)),
 		sum(total)+sum(tax),
-		sum((case when typea='1' then totax else totax*(-1) end))
-from @tmp group by salesno,salesname 
+		sum((case when typea='1' then totax else totax*(-1) end)),
+		sum((case when typea='1' then weight else weight*(-1) end))
+from @tmp 
+group by salesno,salesname 
 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
@@ -1508,7 +1436,7 @@ declare @tmp table(
 	gno nvarchar(1), 
 	salesno nvarchar(30), 
 	salesname nvarchar(50), 
-	productno nvarchar(30), 
+	--productno nvarchar(30), 
 	products nvarchar(max), 
 	mount float, 
 	total float,
@@ -1518,11 +1446,15 @@ declare @tmp table(
 ) 
 
 insert into @tmp 
-select '0',a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
+select '0',isnull(a.salesno,''),isnull(s.namea,''),b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
 ,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
 ,sum((case when a.typea='1' then 1 else -1 end)*a.tax)
-,b.weight
+,sum((case when a.typea='1' then 1 else -1 end)*b.weight)
 ,sum((case when a.typea='1' then 1 else -1 end)*(a.tax+b.total))
 from view_vcc a 
 	left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
@@ -1534,24 +1466,29 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
-group by a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
-		 ,b.weight
-order by a.salesno,b.productno 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+	  
+group by a.salesno,s.namea,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'') 
+		 
+order by a.salesno 
 
-insert into @tmp(gno,mount,total,tax,totax) 
-select '1',sum(mount),sum(total),sum(total)+sum(tax),sum(totax)
+insert into @tmp(gno,mount,total,tax,totax,weight) 
+select '1',sum(mount),sum(total),sum(total)+sum(tax),sum(totax),sum(weight)
 from @tmp 
 
 
-select gno,salesno sno ,salesname,productno,products 
+select gno,salesno sno ,salesname,products 
 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax
 ,dbo.getComma(weight,0) weight
-from @tmp order by gno,salesno,productno ;
+from @tmp order by gno,salesno ;
 
 
 z_vcc_vu13:--z_vcc_vu13
@@ -1632,7 +1569,11 @@ declare @tmp table(
 
 insert into @tmp 
 select '0',a.custno,(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
-a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
+a.salesno,s.namea,b.productno,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'') 
 ,a.datea,a.noa,a.typea,b.unit,b.mount,b.price,b.total 
 ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy ,a.tax
 ,b.weight,a.tax+b.total
@@ -1647,14 +1588,15 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
 order by a.salesno,a.custno,b.productno 
 
-insert into @tmp(gno,salesno,salesname,mount,total,tax,totax) 
+insert into @tmp(gno,salesno,salesname,mount,total,tax,totax,weight) 
 select '1' gno,salesno,salesname, 
 		sum((case when typea='1' then mount else mount*(-1) end)), 
 		sum((case when typea='1' then total else total*(-1) end)),sum(tax),
-		sum((case when typea='1' then totax else totax*(-1) end)) 
+		sum((case when typea='1' then totax else totax*(-1) end)),
+		sum((case when typea='1' then weight else weight*(-1) end)) 
 from @tmp group by salesno,salesname 
 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
@@ -1723,7 +1665,7 @@ declare @tmp table(
 	custnick nvarchar(90), 
 	salesno nvarchar(30), 
 	salesname nvarchar(50), 
-	productno nvarchar(30), 
+	--productno nvarchar(30), 
 	products nvarchar(max), 
 	mount float, 
 	total float,
@@ -1734,14 +1676,18 @@ declare @tmp table(
 
 insert into @tmp 
 select '0',a.custno,(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
-a.salesno,s.namea,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
+a.salesno,s.namea,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'') 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
-,a.tax,b.weight
+,sum(a.tax),sum((case when a.typea='1' then 1 else -1 end)*b.weight)
 ,sum((case when a.typea='1' then 1 else -1 end)*(a.tax+b.total))
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join cust c on a.custno = c.noa 
-				left join view_ucaucc d on b.productno = d.noa 
+			--	left join view_ucaucc d on b.productno = d.noa 
 				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
@@ -1749,22 +1695,32 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
-group by a.salesno,s.namea,a.custno,c.nick,c.comp,b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor  ,tax
-		  ,b.weight
-order by a.salesno,a.custno,b.productno 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+group by a.salesno,s.namea,a.custno,c.nick,c.comp
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'') 
+		 
+		 
+order by a.salesno,a.custno,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')  
 
-insert into @tmp(gno,mount,total,tax,totax) 
-select '1',	sum(mount),	sum(total),sum(tax),sum(totax)
+insert into @tmp(gno,mount,total,tax,totax,weight) 
+select '1',	sum(mount),	sum(total),sum(tax),sum(totax),sum(weight)
 from @tmp 
 
-select gno,custno,left(custnick,7) custnick,salesno sno ,salesname,productno,products 
+select gno,custno,left(custnick,7) custnick,salesno sno ,salesname,products 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax
 ,dbo.getComma(weight,0) weight
-from @tmp order by gno,salesno,custno,productno 
+from @tmp order by gno,salesno,custno
  ;
   
   
@@ -1844,7 +1800,11 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-		'0',b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor  
+		'0',b.productno,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
 		,a.salesno,s.namea,a.custno,(case when isnull(c.nick,'') = '' then left(c.comp,10) else c.nick end), 
 		a.datea,a.noa,a.typea,b.mount,b.price,b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 		,a.tax,b.weight,a.tax+b.total
@@ -1859,19 +1819,20 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 order by b.productno,b.product,a.salesno,s.namea,a.custno,c.nick,c.comp,a.datea,a.noa,a.typea 
-insert into @tmp(gno,productno,products,mount,total,tax,totax) 
+insert into @tmp(gno,productno,products,mount,total,tax,totax,weight) 
 select '1',productno,products, 
 		sum((case when typea='1' then mount else mount*(-1) end)), 
 		sum((case when typea='1' then total else total*(-1) end)),
 		sum(tax)+sum(total) ,
-		sum((case when typea='1' then totax else totax*(-1) end))
+		sum((case when typea='1' then totax else totax*(-1) end)),
+		sum((case when typea='1' then weight else weight*(-1) end))
 from @tmp group by productno,products 
 update @tmp set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
 update @tmp 
-set mount=mount*-1,total=total*-1 ,totax=totax*-1
+set mount=mount*-1,total=total*-1 ,totax=totax*-1,weight=weight*-1
 where typea='退' 
 
 select gno,productno,products,sno,salesname,cno,custnick,datea,noa,typea, qhref 
@@ -1928,7 +1889,7 @@ if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0)
 -------------------------------------------------- 
 declare @tmp table( 
 	gno nvarchar(1), 
-	productno nvarchar(30), 
+--	productno nvarchar(30), 
 	products nvarchar(MAX), 
 	sno nvarchar(30), 
 	salesname nvarchar(90), 
@@ -1942,15 +1903,19 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select 
-	'0',b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
+	'0',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'')
 	,a.salesno,s.namea,a.custno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.mount) 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.total),a.tax
-	,b.weight
+	,sum((case when a.typea='1' then 1 else -1 end)*b.weight)
 	,sum((case when a.typea='1' then 1 else -1 end)*(a.tax+b.total)) 
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join cust c on a.custno = c.noa 
-				left join view_ucaucc d on b.productno = d.noa 
+			--	left join view_ucaucc d on b.productno = d.noa 
 				left join sss s on isnull(a.salesno,'')=s.noa 
 
 where (a.datea between @t_bdate and @t_edate) and 
@@ -1959,19 +1924,27 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (b.lengthb between @t_blengthb and @t_elengthb) 
-group by b.productno,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor 
-		 ,a.salesno,s.namea,a.custno,c.nick,c.comp ,a.tax,b.weight
---order by b.productno,b.product,a.salesno,s.namea,a.custno,c.nick,c.comp 
+	 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+group by b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,'') 
+		 ,a.salesno,s.namea,a.custno,c.nick,c.comp ,a.tax
+	order by b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
+		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
+		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
+		 + isnull(b.ucolor,''),a.salesno,s.namea,a.custno,c.nick,c.comp 
 
-insert into @tmp(gno,productno,products,mount,total,tax,totax) 
-select '1',productno,products,sum(mount),sum(total),sum(total)+sum(tax),sum(totax) 
-from @tmp group by productno,products 
+insert into @tmp(gno,products,mount,total,tax,totax,weight) 
+select '1',products,sum(mount),sum(total),sum(total)+sum(tax),sum(totax),sum(weight) 
+from @tmp group by products 
 
-select gno,productno,products,sno,salesname,cno,left(custnick,10) custnick 
+select gno,products,sno,salesname,cno,left(custnick,10) custnick 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
 ,dbo.getComma(weight,0) weight
-from @tmp order by productno,products,gno,sno,cno ;
+from @tmp order by products,gno,sno,cno ;

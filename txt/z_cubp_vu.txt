@@ -16,7 +16,7 @@ declare @result table(
 	mechno nvarchar(10),
 	comp  nvarchar(20),
 	products nvarchar(max),
-	class float,
+	class nvarchar(30),
 	hmount float,
 	weight float,
 	mount float,

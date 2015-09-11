@@ -102,7 +102,7 @@ begin
 	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 	
 	insert #tmp
-	select '14','cubt',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
+	select '14','cubt',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.gmount,b.gweight 
 	from view_cub a left join view_cubt b on a.noa=b.noa
 	outer apply(select datea from #tmp where uno=b.uno and tablea='ucce')c
 	where a.datea<=@t_edate 
@@ -175,7 +175,7 @@ begin
 	--and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 	
 	insert #tmp
-	select '14','cubt',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
+	select '14','cubt',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.gmount,b.gweight 
 	from view_cub a left join view_cubt b on a.noa=b.noa
 	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate 

@@ -184,9 +184,22 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
 						});
+						
+						$('#checkMins_'+j).click(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2){
+								if($('#checkMins_'+b_seq).prop('checked'))
+									$('#txtMins_'+b_seq).val(1);
+								else
+									$('#txtMins_'+b_seq).val(0);
+							}
+						});
                     }
                 }
                 _bbsAssign();
+                change_check();
                 $('#lblOrdeno_s').text('訂單編號/訂序');
                 $('#lblProduct_s').text('品名');
                 $('#lblUcolor_s').text('類別');
@@ -199,6 +212,7 @@
                 $('#lblMount_s').text('件數');
                 $('#lblWeight_s').text('重量(KG)');
                 $('#lblMemo_s').text('備註');
+                $('#lblMins_s').text('結案');
             }
 
             function btnIns() {
@@ -238,10 +252,13 @@
             ///////////////////////////////////////////////////  以下提供事件程式，有需要時修改
             function refresh(recno) {
                 _refresh(recno);
+                change_check();
             }
 
             function readonly(t_para, empty) {
                 _readonly(t_para, empty);
+                change_check();
+                
             }
 
             function btnMinus(id) {
@@ -295,6 +312,21 @@
             function btnCancel() {
                 _btnCancel();
             }
+            
+            function change_check() {				
+				for (var i = 0; i < q_bbsCount; i++) {
+					if(q_cur==1 || q_cur==2){
+						$('#checkMins_'+i).removeAttr('disabled');
+					}else{
+						$('#checkMins_'+i).attr('disabled', 'disabled');
+					}
+					if($('#txtMins_'+i).val()==0){
+						$('#checkMins_'+i).prop('checked',false);
+					}else{
+						$('#checkMins_'+i).prop('checked',true);
+					}
+				}
+			}
 		</script>
 		<style type="text/css">
             #dmain {
@@ -477,14 +509,15 @@
 						<td style="width:150px;"><a id='lblProduct_s'> </a></td>
 						<td style="width:150px;"><a id='lblUcolor_s'> </a></td>
 						<td style="width:150px;"><a id='lblSpec_s'> </a></td>
-						<td style="width:100px;"><a id='lblSize_s'> </a></td>
-						<td style="width:100px;"><a id='lblLengthb_s'> </a></td>
+						<td style="width:85px;"><a id='lblSize_s'> </a></td>
+						<td style="width:85px;"><a id='lblLengthb_s'> </a></td>
 						<td style="width:150px;"><a id='lblClass_s'> </a></td>
 						<!--<td style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 						<td style="width:85px;"><a id='lblMount1_s'> </a></td>
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
 						<td style="width:150px;"><a id='lblMemo_s'> </a></td>
+						<td style="width:40px;"><a id='lblMins_s'> </a></td>
 					</tr>
 					<tr  style='background:#cad3ff;'>
 						<td align="center"><input class="btn" id="btnMinus.*" type="button" value='-' style=" font-weight: bold;" /></td>
@@ -516,6 +549,10 @@
 						<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
+						<td>
+							<input id="checkMins.*" type="checkbox"/>
+							<input id="txtMins.*" type="hidden"/>
+						</td>
 					</tr>
 				</table>
 			</div>

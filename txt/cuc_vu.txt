@@ -500,3 +500,25 @@ cucttocubt:--cucttocubt
 	END
 ;
 -------------------------------------------------------------------------------------------------------------------------------
+enda:--enda
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	
+	--鎖定時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=CONVERT (VARCHAR(20), GETDATE(),20 )
+	select @now_datetime
+	
+	set @accy=isnull((select accy from view_cucs where noa=@noa and noq=@noq),@accy)
+		
+	EXEC("
+		update cucs"+@accy+" set cubno='"+@userno+"'+'##'+'"+@namea+"'+'##'+'"+@now_datetime+"'
+		,mins=1
+		where noa='"+@noa+"' and noq='"+@noq+"'
+	")
+;

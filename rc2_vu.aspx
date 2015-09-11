@@ -86,7 +86,8 @@
 				$('#txtTax').val(FormatNumber(t_tax));
 				$('#txtTotal').val(FormatNumber(t_total));
 			}
-
+			
+			var t_cont1='#non',t_cont2='#non';
 			function mainPost() {
 				q_getFormat();
 				bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm]];
@@ -576,13 +577,22 @@
 			}
 
 			function q_stPost() {
+				t_cont1=t_cont1.length==0?'#non':t_cont1;
+				t_cont2=t_cont2.length==0?'#non':t_cont2;
+				if(q_cur==3){
+					if(t_cont1.length>0 || t_cont2.length>0){
+						q_func('qtxt.query.changecontgweight', 'rc2.txt,changecont_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_cont1)+ ';' + encodeURI(t_cont2));
+					}
+					t_cont1='#non',t_cont2='#non';
+				}
 				if (!(q_cur == 1 || q_cur == 2))
 					return false;
 				var s1 = xmlString.split(';');
 				abbm[q_recno]['accno'] = s1[0];
 				$('#txtAccno').val(s1[0]);
 				if((!emp($('#textQno1').val()) || !emp($('#textQno2').val())))
-					q_func('qtxt.query.changecontgweight', 'rc2.txt,changecont_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
+					q_func('qtxt.query.changecontgweight', 'rc2.txt,changecont_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_cont1)+ ';' + encodeURI(t_cont2));
+					t_cont1='#non',t_cont2='#non';
 			}
 			
 			var check_startdate=false;
@@ -799,6 +809,8 @@
 			}
 
 			function btnModi() {
+				t_cont1=$('#textQno1').val();
+				t_cont2=$('#textQno2').val();
 				if (emp($('#txtNoa').val()))
 					return;
 				Lock(1, {
@@ -920,6 +932,8 @@
 			}
 
 			function btnDele() {
+				t_cont1=$('#textQno1').val();
+				t_cont2=$('#textQno2').val();
 				Lock(1, {
 					opacity : 0
 				});
@@ -929,6 +943,8 @@
 
 			function btnCancel() {
 				_btnCancel();
+				t_cont1='#non';
+				t_cont2='#non';
 			}
 
 			function q_popPost(s1) {

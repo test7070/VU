@@ -131,7 +131,7 @@
                         name : 'xlengthb', //[15][16]
                         value : xlengthbItem.split(',')
                     },{
-                        type : '6', //[14] //判斷顯示小數點與其他判斷
+                        type : '6', //[17] 
                         name : 'qno',
                       
                     }]
@@ -195,7 +195,19 @@
                 selectbox.id="combQno";
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
-                q_cmbParse("combQno", t_qno); 
+                
+                var t_year='';
+					if(r_len==4){
+					t_date = new Date();
+        				   t_date.setDate(1);
+                		   t_year = t_date.getUTCFullYear() ;						   
+					}else{
+							t_year=r_accy
+					}
+				var t_where="where=^^'"+t_year+"'=case when len(datea)=10 then left(datea,4) else LEFT(datea,3) end^^"
+				q_gt('cont',t_where, 0, 0, 0, "cont");
+                
+                
                 
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
@@ -284,14 +296,15 @@
 						for ( i = 0; i < as.length; i++) {
 							xclassItem+=","+as[i].noa;
 						}
-						q_gt('cont', '', 0, 0, 0, "cont");
+					
 						break;   
 					case 'cont':
                 		var as = _q_appendData("cont", "", true);
 						for ( i = 0; i < as.length; i++) {
 							t_qno+=","+as[i].noa;
 						}
-						       
+						 q_cmbParse("combQno", t_qno); 
+                      
                 		break;
                 	               			
                 }

@@ -116,6 +116,8 @@ declare @t_eproductno nvarchar(30)
 declare @t_stype nvarchar(50) 
 declare @t_acomp nvarchar(MAX)='[13]'
 declare @qhref_acomp nvarchar(10) ='' 
+declare @t_qno nvarchar(max)
+set @t_qno = case when '#non'=[14] then '' else [14] end
 --********************************************************************* 
 set @t_accy = [1]
 set @t_bdate = case when '#non'=[2] then '' else [2] end 

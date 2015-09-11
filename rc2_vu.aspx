@@ -1283,13 +1283,13 @@
 					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
 					<!--<td align="center" style="width:40px;"><a id='lblUnit_s'> </a></td>-->
 					<td align="center" style="width:90px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
-					<!--<td align="center" style="width:180px;"><a id='lblStore_s'> </a></td>-->
+					<td align="center" style="width:180px;"><a id='lblStore_s'> </a></td>
 					<td align="center" style="width:180px;"><a id='lblMemo_s'> </a></td>
 					<!--<td align="center" style="width:60px;"><a id='lblRecord_s'> </a></td>-->
 				</tr>
@@ -1317,7 +1317,7 @@
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
+						<input id="txtClass.*" type="text" class="txt c1" style="width: 60%;"/>
 						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
@@ -1325,11 +1325,11 @@
 					<td><input id="txtWeight.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtPrice.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtTotal.*" type="text" class="txt num c1" /></td>
-					<!--<td>
+					<td>
 						<input id="txtStoreno.*" type="text" class="txt c1" style="width: 65%;"/>
 						<input class="btn" id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;float: left;" />
 						<input id="txtStore.*" type="text" class="txt c1"/>
-					</td>-->
+					</td>
 					<td>
 						<input id="txtMemo.*" type="text" class="txt c1"/>
 						<!--<input id="txtOrdeno.*" type="text" class="txt" style="width:68%;" />

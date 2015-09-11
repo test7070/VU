@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
-		<title></title>
+		<title> </title>
 		<script src="../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -586,15 +586,15 @@
 						<td><span> </span><a id="lblVno" class="lbl"> </a></td>
 						<td><input id="txtVno" type="text" class="txt c1"/></td>
 					</tr>
-					<!--<tr>
+					<tr>
 						<td><span> </span><a id="lblStore" class="lbl btn"> </a></td>
 						<td colspan="3">
 							<input id="txtStoreno" type="text" class="txt c2" />
 							<input id="txtStore" type="text" class="txt c3"/>
 						</td>
-						<td class='td3 isRack'><span> </span><a id="lblRackno" class="lbl btn" > </a></td>
-						<td class="td4 isRack"><input id="txtRackno" type="text" class="txt c1"/></td>
-					</tr>-->
+						<!--<td class='td3 isRack'><span> </span><a id="lblRackno" class="lbl btn" > </a></td>
+						<td class="td4 isRack"><input id="txtRackno" type="text" class="txt c1"/></td>-->
+					</tr>
 					<tr>
 						<td><span> </span><a id="lblCardeal" class="lbl btn"> </a></td>
 						<td colspan="3">

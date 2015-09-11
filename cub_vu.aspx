@@ -38,7 +38,8 @@
             	['txtProductno_', 'btnProduct_', 'ucaucc', 'noa,product', 'txtProductno_,txtProduct_', 'ucaucc_b.aspx'],
             	['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,ucolor,spec,size,lengthb,class,unit,emount,eweight'
             	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtUcolor__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtGmount__,txtGweight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%'],
-            	['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
+            	['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'],
+            	['txtStoreno__', 'btnStoreno__', 'store', 'noa,store', 'txtStoreno__,txtStore__', 'store_b.aspx']
             );
 
             $(document).ready(function() {
@@ -668,6 +669,7 @@
                 $('#lblGmount_t').text('領料數');
                 $('#lblGweight_t').text('領料重');
                 $('#lblMemo2_t').text('備註');
+                $('#lblStore_t').text('領料倉');
             }
 
             function q_appendData(t_Table) {
@@ -1033,10 +1035,11 @@
 					<td style="width:150px;"><a id='lblSpec_t'> </a></td>
 					<td style="width:150px;"><a id='lblSize_t'> </a></td>
 					<td style="width:100px;"><a id='lblLengthb_t'> </a></td>
-					<td style="width:150px;"><a id='lblClass_t'> </a></td>
+					<td style="width:100px;"><a id='lblClass_t'> </a></td>
 					<!--<td style="width:55px;"><a id='lblUnit_t'> </a></td>-->
 					<td style="width:120px;"><a id='lblGmount_t'> </a></td>
 					<td style="width:120px;"><a id='lblGweight_t'> </a></td>
+					<td style="width:150px;"><a id='lblStore_t'> </a></td>
 					<td style="width:150px; text-align: center;"><a id='lblMemo2_t'> </a></td>
 				</tr>
 				<tr>
@@ -1065,12 +1068,17 @@
 					<td><input id="txtSize..*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb..*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass..*" type="text" class="txt c1" style="width: 70%;"/>
+						<input id="txtClass..*" type="text" class="txt c1" style="width: 60%;"/>
 						<select id="combClass..*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<!--<td><input id="txtUnit..*" type="text" class="txt c1"/></td>-->
 					<td><input id="txtGmount..*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtGweight..*" type="text" class="txt c1 num"/></td>
+					<td>
+						<input id="txtStoreno..*" type="text" class="txt c1" style="width: 65%"/>
+						<input class="btn"  id="btnStoreno..*" type="button" value='.' style=" font-weight: bold;" />
+						<input id="txtStore..*" type="text" class="txt c1"/>
+					</td>
 					<td><input id="txtMemo2..*" type="text" class="txt c1"/></td>
 				</tr>
 			</table>

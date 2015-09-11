@@ -186,8 +186,8 @@ cucstocub:--cucstocub
 		")
 		--bbt
 		exec("
-			insert cubt"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,gmount,gweight,memo2)
-			select '"+@cubno+"',* from #tmpa 
+			insert cubt"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,gmount,gweight,memo2,storeno,store)
+			select '"+@cubno+"',*,'7000',isnull((select top 1 store from store where noa='7000'),'') from #tmpa 
 		")
 	
 		insert dno (tablea,noa,usera)
@@ -479,8 +479,8 @@ cucttocubt:--cucttocubt
 		
 		--bbt
 		exec("
-			insert cubt"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,gmount,gweight,memo2)
-			select '"+@cubno+"',* from #tmpa 
+			insert cubt"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,gmount,gweight,memo2,storeno,store)
+			select '"+@cubno+"',*,'7000',isnull((select top 1 store from store where noa='7000'),'') from #tmpa 
 		")
 	
 		insert dno (tablea,noa,usera)

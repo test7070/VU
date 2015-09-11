@@ -26,7 +26,7 @@
             var xproductItem ='';
             var xucolorItem ='';
             var xspecItem ='';
-            	
+            var t_qno='';
             var xlengthbItem ='';
             var xclassItem =''
 
@@ -130,6 +130,10 @@
                         type : '1',
                         name : 'xlengthb', //[15][16]
                         value : xlengthbItem.split(',')
+                    },{
+                        type : '6', //[14] //判斷顯示小數點與其他判斷
+                        name : 'qno',
+                      
                     }]
                 });
                 q_popAssign();
@@ -185,6 +189,17 @@
                     if ($(this).val() == 'NaN')
                     	$(this).val(99);
                 });
+                
+                var tmp = document.getElementById("txtQno");
+                var selectbox = document.createElement("select");
+                selectbox.id="combQno";
+                selectbox.style.cssText ="width:20px;font-size: medium;";
+                tmp.parentNode.appendChild(selectbox,tmp);
+                q_cmbParse("combQno", t_qno); 
+                
+                $('#combQno').change(function() {
+					$('#txtQno').val($('#combQno').find("option:selected").text());
+				});
 				
             }
 
@@ -268,7 +283,15 @@
                 		var as = _q_appendData("class", "", true);
 						for ( i = 0; i < as.length; i++) {
 							xclassItem+=","+as[i].noa;
-						}          
+						}
+						q_gt('cont', '', 0, 0, 0, "cont");
+						break;   
+					case 'cont':
+                		var as = _q_appendData("cont", "", true);
+						for ( i = 0; i < as.length; i++) {
+							t_qno+=","+as[i].noa;
+						}
+						       
                 		break;
                 	               			
                 }

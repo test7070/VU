@@ -13,6 +13,7 @@ declare @t_acomp nvarchar(MAX)='[3]'
 declare @qhref_acomp nvarchar(10) ='' 
 declare @vcctypea nvarchar(10) ='' 
 declare @isspec nvarchar(10)='0'
+declare @t_qno nvarchar(50)
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -53,7 +54,7 @@ set @t_size	   = case when '#non'=[13] then '' else [13] end
 set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-
+set @t_qno = case when '#non'=[17] then '' else [17] end
 --*********************************************************************************** 
 declare @result table( 
 	gno nvarchar(10), 
@@ -107,6 +108,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like isnull(b.size,'')) and
 	  (len(@t_class)=0 or @t_class like isnull(b.class,'')) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by a.datea,gno,noa,noq 
 
 
@@ -162,6 +164,7 @@ declare @t_acomp nvarchar(MAX)='[3]'
 declare @qhref_acomp nvarchar(10) ='' 
 declare @vcctypea nvarchar(10) ='' 
 declare @isspec nvarchar(10)='0' 
+
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -174,6 +177,8 @@ set @t_size	   = case when '#non'=[13] then '' else [13] end
 set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 --***********************************************************************************
 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
@@ -226,6 +231,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
@@ -274,6 +280,8 @@ set @t_size	   = case when '#non'=[13] then '' else [13] end
 set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -366,6 +374,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by custno,productno,gno,datea,noa,noq 
 
 --*********************************************************************** 
@@ -471,6 +480,8 @@ set @t_size	   = case when '#non'=[13] then '' else [13] end
 set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 --*********************************************************************************** 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -520,7 +531,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
-
+		and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
@@ -569,6 +580,8 @@ set @t_size	   = case when '#non'=[13] then '' else [13] end
 set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 --***********************************************************************************
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
@@ -647,6 +660,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by custno,gno,mon,datea,noa,noq 
 
 insert into @result(gno,custno,pcount,mount,total,totax,weight) 
@@ -699,6 +713,8 @@ set @t_size	   = case when '#non'=[13] then '' else [13] end
 set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -741,6 +757,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 group by a.custno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end
 
 insert into @tmp(gno,custno,custs,mon,mount,total,tax,totax,weight) 
@@ -786,6 +803,8 @@ set @t_size	   = case when '#non'=[13] then '' else [13] end
 set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -868,6 +887,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by gno,datea,noa,noq 
 
 --*********************************************************************** 
@@ -977,6 +997,8 @@ declare @t_acomp nvarchar(MAX)='[3]'
 declare @qhref_acomp nvarchar(10) ='' 
 declare @vcctypea nvarchar(10) ='' 
 declare @isspec nvarchar(10)='0' 
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -1038,6 +1060,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 group by b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
 		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
 		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
@@ -1078,6 +1101,8 @@ declare @qhref_acomp nvarchar(10) =''
 declare @vcctypea nvarchar(10) ='' 
 declare @isspec nvarchar(10)='0' 
 ------------------------------------------------- 
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_bcustno = case when '#non'=[8] then '' else [8] end 
@@ -1156,6 +1181,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)  
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by a.salesno,a.datea 
 
 insert into @tmp(gno,salesno,salesname,mount,total,tax,totax,weight) 
@@ -1204,6 +1230,8 @@ set @t_size	   = case when '#non'=[13] then '' else [13] end
 set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+declare @t_qno nvarchar(50)
+set @t_qno = case when '#non'=[17] then '' else [17] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -1250,6 +1278,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+	  and (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 group by a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 
 insert into @tmp(gno,salesno,salesname,mon,mount,total,tax,totax,weight) 

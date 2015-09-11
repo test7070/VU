@@ -18,10 +18,11 @@
 		
 			$(document).ready(function() {
 				q_getId();
-				q_gf('', 'z_rc2_vu');
+				 q_gt('cont', '', 0, 0, 0, "cont");
+				//q_gf('', 'z_rc2_vu');
 			});
 			
-			
+			var t_qno='';
 			
 			function q_gfPost() {
 				$('#q_report').q_report({
@@ -64,12 +65,13 @@
                         value : q_getPara('sys.comp')
                     },{
                         type : '6', //[14] //判斷顯示小數點與其他判斷
-                        name : 'qno'
+                        name : 'qno',
+                      
                     }
                     ]
 				});
 				 
-                
+
                 
                 var r_1911=1911;
 				if(r_len==4){//西元年
@@ -110,7 +112,18 @@
                q_popAssign();
                 q_getFormat();
                 q_langShow();
-               // $('#txtXDate1').val(r_picm);
+               
+               
+                var tmp = document.getElementById("txtQno");
+                var selectbox = document.createElement("select");
+                selectbox.id="combQno";
+                selectbox.style.cssText ="width:20px;font-size: medium;";
+                tmp.parentNode.appendChild(selectbox,tmp);
+                q_cmbParse("combQno", t_qno); 
+                
+                $('#combQno').change(function() {
+					$('#txtQno').val($('#combQno').find("option:selected").text());
+				});
 			}
 
 			function q_boxClose(s2) {
@@ -118,6 +131,22 @@
 
 			function q_gtPost(s2) {
 			}
+			
+			
+			function q_gtPost(t_name) {
+                switch (t_name) {
+                	case 'cont':
+                		var as = _q_appendData("cont", "", true);
+						for ( i = 0; i < as.length; i++) {
+							t_qno+=","+as[i].noa;
+						}
+						
+						q_gf('', 'z_rc2_vu');
+                		break;
+                	default:
+                        break;
+                }
+            }
 		</script>
 	</head>
 	<body ondragstart="return false" draggable="false"

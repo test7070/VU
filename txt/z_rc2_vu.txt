@@ -77,7 +77,8 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
 	  (b.productno between @t_bproductno and @t_eproductno) and 
-	  (len(@t_stype)=0 or a.stype=@t_stype) 
+	  (len(@t_stype)=0 or a.stype=@t_stype) and
+	  (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by b.productno,gno,a.datea,a.noa 
 
 --insert into @result(gno,productno,xproduct,mount,total,tax,btotal,money) 
@@ -171,7 +172,8 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
 	  (b.productno between @t_bproductno and @t_eproductno) and 
-	  (len(@t_stype)=0 or a.stype=@t_stype) 
+	  (len(@t_stype)=0 or a.stype=@t_stype) and
+	  (len(@t_qno)=0 or a.transtart like @t_qno+'%') 
 order by b.productno,gno,a.datea,a.noa 
 
 insert into @result(gno,mount,total,tax,money,weight) 
@@ -283,7 +285,8 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (a.tggno between @t_btggno and @t_etggno) and 
 -- (a.salesno between @t_bsalesno and @t_esalesno) and 
 	  (b.productno between @t_bproductno and @t_eproductno) and 
-	  (len(@t_stype)=0 or a.stype=@t_stype)  and a.transtart like '%'+@t_qno+'%' 
+	  (len(@t_stype)=0 or a.stype=@t_stype)  and
+	    (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by a.tggno,a.datea,a.noa 
 
 insert into @result(gno,tggno,comp,pcount,mount,total,tax,weight,money) 
@@ -389,7 +392,8 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
 	  (b.productno between @t_bproductno and @t_eproductno) and 
-	  (len(@t_stype)=0 or a.stype=@t_stype) and a.transtart like '%'+@t_qno+'%' 
+	  (len(@t_stype)=0 or a.stype=@t_stype) and   
+	  (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by b.productno,gno,a.datea,a.noa 
 insert into @result(gno,tggno,comp,productno,xproduct,mount,total,weight,money) 
 select '3',tggno,comp,productno,xproduct,sum(mount),sum(total),SUM(weight),sum(money) from @result group by tggno,comp,productno,xproduct 

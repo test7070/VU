@@ -66,7 +66,13 @@
                     }, {
                         type : '6',
                         name : 'edate' //[13]
-                    }]
+                    }, {
+						type : '2', //[14][15]
+						name : 'xstore',
+						dbf : 'store',
+						index : 'noa,store',
+						src : 'store_b.aspx'
+					}]
                 });
                 q_popAssign();
                 q_getFormat();

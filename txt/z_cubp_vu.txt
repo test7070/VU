@@ -140,4 +140,60 @@ select gno,mon,mechno,mech,dbo.getComma(mount,0) mount ,dbo.getComma(weight,0) w
 from @result
 order by mon,gno
 ;
- 
+z_cubp_vu04:--z_cubp_vu04
+
+declare @t_bmon nvarchar(10) 
+declare @t_emon nvarchar(10)
+----@t_type=0 未結案	@t_type=1 已結案
+declare @t_type nvarchar(10)
+
+set @t_bmon = case when '#non'=[5] then '' else [5] end 
+set @t_emon = case when '#non'=[6] then char(255) else [6] end 
+set @t_type = case when '#non'=[7] then '' else [7] end 
+set @t_type= case when @t_type='未結案' then '0' when @t_type='已結案' then '1' else '' end
+declare @result table(
+	gno nvarchar(1),
+	comp nvarchar(max),
+	noa  nvarchar(40),
+	ordeno float ,
+	done float,
+	stand float,
+	undone float,
+	unfinal float
+	)
+
+insert @result
+select  '0',a.nick,a.noa,isnull(SUM(b.mount),0) ordeno ,isnull(SUM(e.mount),0) done
+		,case when isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) < 0 then 0
+			 else isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) end stand
+	   ,case when (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) < 0 then 0
+		     else (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) end undone
+	   ,case when isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) < 0 then 0
+			 else isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) end +
+		case when (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) < 0 then 0
+		     else (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) end unfinal
+
+from view_orde a left join view_ordes b on a.noa=b.noa and a.accy=b.accy
+				 left join view_vccs c on a.noa=c.ordeno and a.accy=c.accy
+				 left join view_vcc  d on c.noa=d.noa and c.accy=d.accy
+				 left join view_cubs e on a.noa=e.ordeno and a.accy=e.accy
+where case when len(a.odate) = 10 then left(a.odate,7) else LEFT(a.odate,6) end between @t_bmon and @t_emon 
+group by a.nick,a.noa
+
+
+insert @result(gno,comp,ordeno,done,stand,undone,unfinal)
+select '1',char(255),sum(ordeno),sum(done),sum(stand),sum(undone),sum(unfinal)
+from @result
+
+
+select gno,comp,noa,
+dbo.getComma(ordeno,0) ordeno,
+dbo.getComma(done,0) done,
+dbo.getComma(stand,0) stand,
+dbo.getComma(undone,0) undone,
+dbo.getComma(unfinal,0) unfinal
+from @result
+where (unfinal=case when @t_type=1 then 0 else  
+	  ( case when unfinal >0 then unfinal end) end
+	  or @t_type='')
+order by comp,noa,gno	  ;

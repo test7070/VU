@@ -22,6 +22,7 @@
             	q_getId();
                 q_gf('', 'z_cubp_vu');
             });
+        	
             function q_gfPost() {
 				$('#q_report').q_report({
 					fileName : 'z_cubp_vu',
@@ -32,6 +33,14 @@
 					},{//[3][4]
 						type : '1',
 						name : 'xmechno'
+					},{ //[5][6]
+						type : '1',
+						name : 'xmon'
+					},{//[7]
+						type : '5',
+						name : 'xtype',
+						value :['','未結案','已結案']
+						
 					}]
 				});
                 q_popAssign();
@@ -49,8 +58,9 @@
                  
                  $('#txtXdate1').mask(r_picd);
 	             $('#txtXdate2').mask(r_picd);
-	             
-                
+	             $('#txtXmon1').mask(r_picm);
+	             $('#txtXmon2').mask(r_picm);
+           
                 
                  var t_date, t_year, t_month, t_day;
                 t_date = new Date();
@@ -62,7 +72,9 @@
                 t_day = t_date.getUTCDate();
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
                 $('#txtXdate1').val(t_year + '/' + t_month + '/' + t_day);
-
+				$('#txtXmon1').val(t_year + '/0' + (t_month-3) );
+				
+				
                 t_date = new Date();
                 t_date.setDate(35);
                 t_date.setDate(0);
@@ -73,7 +85,19 @@
                 t_day = t_date.getUTCDate();
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
                 $('#txtXdate2').val(t_year + '/' + t_month + '/' + t_day);
- 
+                $('#txtXmon2').val(t_year + '/' + t_month );
+ 				
+ 				
+ 		
+ 			
+ 				$('#txtXmon1').change(function(){			
+ 					if($('#txtXmon2').val().substring(4,7)-$('#txtXmon1').val().substring(r_len+1,7) > 3)
+ 						alert("月份間距最多選擇3個月");
+ 				});
+ 				$('#txtXmon2').change(function(){
+ 					if($('#txtXmon2').val().substring(4,7)-$('#txtXmon1').val().substring(r_len+1,7) > 3)
+ 						alert("月份間距最多選擇3個月");
+ 				});
 			}
             function q_boxClose(s2) {
             }

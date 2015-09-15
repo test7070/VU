@@ -69,7 +69,7 @@ declare	@memo nvarchar(200)
 declare @no int = 0
 
 declare cursor_table cursor for
-select noa,a,b,c,d,e,f,g,h,i from ztmpxls where CAST(noa as int) > 6 order by CAST(noa as int)
+select noa,a,b,c,d,e,f,g,h,i from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
 open cursor_table
 fetch next from cursor_table
 into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i
@@ -78,7 +78,7 @@ begin
 	set @noa = (select c from ztmpxls where CAST(noa as int) = 2)
 	
 	set @place = (select c from ztmpxls where CAST(noa as int) = 4)
-	set @bdate = (select min(datea) from view_ordes where noa = @noa)
+	set @bdate = (select min(datea) from view_ordes where noa = @noa)	
 	set @edate = (select max(datea) from view_ordes where noa = @noa)
 	set @datea = (select c from ztmpxls where CAST(noa as int) = 5)
 	
@@ -93,10 +93,10 @@ begin
 	set @class = (select class from view_ordes where noa = @ordeno and no2 = @no2)
 	set @size = @c
 	set @spec = @d
-	set @lengthb = CAST(@e as float) 
-	set @mount1 = CAST(@f as float) 
-	set @mount = CAST(@g as float)
-	set @weight = CAST(@h as float)
+	set @lengthb = CAST(replace(@e,',','') as float) 
+	set @mount1 = CAST(replace(@f,',','') as float) 
+	set @mount = CAST(replace(@g,',','') as float)
+	set @weight = CAST(replace(@h,',','') as float)
 	set @memo = @i
 	
 	set @accy = CAST(LEFT((select c from ztmpxls where CAST(noa as int) = 5),4)-1911 as nvarchar(5))

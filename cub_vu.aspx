@@ -124,10 +124,19 @@
                 	$('#div_nouno').show();
 				});
 				
+				$('#textNouno').click(function() {
+                	q_msg($(this),'多批號註銷請用,隔開');
+				});
+				
 				$('#btnOk_div_nouno').click(function() {
 					var t_nouno=$.trim($('#textNouno').val());
 					if(t_nouno.length>0){
-						var t_where = "where=^^ uno='"+t_nouno+"' and tablea='cubu' ^^";
+						t_nouno=t_nouno.split(',');
+						var t_where="";
+						for (var i=0;i<t_nouno.length;i++){
+							t_where=t_where+(t_where.length>0?" or ":"")+"uno='"+t_nouno[i]+"'";
+						}
+						var t_where = "where=^^ ("+t_where+") and tablea='cubu' ^^";
 						q_gt('view_uccb', t_where, 0, 0, 0, "nouno_getuno", r_accy);
 					}
 				});
@@ -266,7 +275,25 @@
 					case 'nouno_getuno':
 						var as = _q_appendData("view_uccb", "", true);
 						if (as[0] != undefined) {
-							q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(as[0].uno));
+							var t_nouno=$.trim($('#textNouno').val()).split(',');
+							var tt_nouno='';
+							for (var i=0;i<t_nouno.length;i++){
+								var t_exists=false;
+								for (var j=0;j<as.length;j++){
+									if(as[j].uno==t_nouno[i]){
+										t_exists=true;
+										break;
+									}
+								}
+								if(!t_exists){
+									alert("批號【"+t_nouno[i]+"】不存在或已註銷!!")
+									break;
+								}else{
+									tt_nouno=tt_nouno+t_nouno[i]+"#";
+								}
+							}
+								
+							q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno));
 						}else{
 							alert("批號不存在或已註銷!!");
 						}
@@ -287,7 +314,7 @@
 				}*/
             }
             
-            var nouno_noa='';
+            var nouno_noa=[];
             function q_funcPost(t_func, result) {
 				switch(t_func) {
 					case 'cubu_post.post.a1':					
@@ -301,19 +328,36 @@
 					case 'qtxt.query.cubnouno':
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
-							nouno_noa=as[0].noa;
-							if(nouno_noa.length>0)
-								q_func('cubu_post.post.a4', r_accy + ',' + nouno_noa + ',0');
+							nouno_noa=as;
+							for(var i=0;i<nouno_noa.length;i++){
+								nouno_noa[i].post0='N';
+								nouno_noa[i].post1='N';
+								q_func('cubu_post.post.a4_'+i, r_accy + ',' + nouno_noa[i].noa + ',0');
+							}
 						}
 						break;
-					case 'cubu_post.post.a4':
-						q_func('cubu_post.post.a5', r_accy + ',' + nouno_noa + ',1');
-						break;
-					case 'cubu_post.post.a5':
-						nouno_noa='';
+				}
+				if(t_func.indexOf('cubu_post.post.a4_')>-1){
+					var n=replaceAll(t_func,'cubu_post.post.a4_','');
+					nouno_noa[n].post0='Y'
+					q_func('cubu_post.post.a5_'+n, r_accy + ',' + nouno_noa[n].noa + ',1');
+				}
+				if(t_func.indexOf('cubu_post.post.a5_')>-1){
+					var n=replaceAll(t_func,'cubu_post.post.a5_','');
+					nouno_noa[n].post1='Y'
+					
+					var t_enda=true;
+					for(var i=0;i<nouno_noa.length;i++){
+						if(nouno_noa[i].post0!='Y' && nouno_noa[i].post1!='Y'){
+							t_enda=false;
+							break;
+						}
+					}
+					if(t_enda){
+						nouno_noa=[];
 						$('#div_nouno').hide();
 						alert("批號註銷完成!!");
-						break;
+					}
 				}
 			}
 

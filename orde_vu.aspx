@@ -236,16 +236,38 @@
 					}
 					$('#div_addr2').hide();
 				});
-				
+				//-----------------------------------------------------------------------------------------------------
 				$('#btnOrdem').click(function() {
 					q_box("ordem_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + $('#txtNoa').val() + "';" + r_accy + ";" + q_cur, 'ordem', "95%", "95%", q_getMsg('popOrdem'));
 				});
+				
 				$('#chkCancel').click(function(){
 					if($(this).prop('checked')){
 						for(var k=0;k<q_bbsCount;k++){
 							$('#chkCancel_'+k).prop('checked',true);
 						}
 					}
+				});
+				
+				$('#btnCub_nouno').click(function() {
+                	$('#div_nouno').show();
+				});
+				
+				$('#textNouno').click(function() {
+                	q_msg($(this),'多批號註銷請用,隔開');
+				});
+				
+				$('#btnOk_div_nouno').click(function() {
+					var t_nouno=$.trim($('#textNouno').val());
+					if(t_nouno.length>0){
+						var t_where = "where=^^ uno='"+t_nouno+"' and tablea='cubu' ^^";
+						q_gt('view_uccb', t_where, 0, 0, 0, "nouno_getuno", r_accy);
+					}
+				});
+				
+				$('#btnClose_div_nouno').click(function() {
+					$('#textNouno').val('');
+                	$('#div_nouno').hide();
 				});
 				
 			}
@@ -387,6 +409,32 @@
 						if (as[0] != undefined && focus_addr != '') {
 							$('#' + focus_addr).val(as[0].addr_fact);
 							focus_addr = '';
+						}
+						break;
+					case 'nouno_getuno':
+						var as = _q_appendData("view_uccb", "", true);
+						if (as[0] != undefined) {
+							var t_nouno=$.trim($('#textNouno').val()).split(',');
+							var tt_nouno='';
+							for (var i=0;i<t_nouno.length;i++){
+								var t_exists=false;
+								for (var j=0;j<as.length;j++){
+									if(as[j].uno==t_nouno[i]){
+										t_exists=true;
+										break;
+									}
+								}
+								if(!t_exists){
+									alert("批號【"+t_nouno[i]+"】不存在或已註銷!!")
+									break;
+								}else{
+									tt_nouno=tt_nouno+t_nouno[i]+"#";
+								}
+							}
+								
+							q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno));
+						}else{
+							alert("批號不存在或已註銷!!");
 						}
 						break;
 					case q_name:
@@ -718,6 +766,45 @@
                 	$('#txtTax').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
                 }
             }
+            
+             var nouno_noa=[];
+            function q_funcPost(t_func, result) {
+				switch(t_func) {
+					case 'qtxt.query.cubnouno':
+						var as = _q_appendData("tmp0", "", true, true);
+						if (as[0] != undefined) {
+							nouno_noa=as;
+							for(var i=0;i<nouno_noa.length;i++){
+								nouno_noa[i].post0='N';
+								nouno_noa[i].post1='N';
+								q_func('cubu_post.post.a4_'+i, r_accy + ',' + nouno_noa[i].noa + ',0');
+							}
+						}
+						break;
+				}
+				if(t_func.indexOf('cubu_post.post.a4_')>-1){
+					var n=replaceAll(t_func,'cubu_post.post.a4_','');
+					nouno_noa[n].post0='Y'
+					q_func('cubu_post.post.a5_'+n, r_accy + ',' + nouno_noa[n].noa + ',1');
+				}
+				if(t_func.indexOf('cubu_post.post.a5_')>-1){
+					var n=replaceAll(t_func,'cubu_post.post.a5_','');
+					nouno_noa[n].post1='Y'
+					
+					var t_enda=true;
+					for(var i=0;i<nouno_noa.length;i++){
+						if(nouno_noa[i].post0!='Y' && nouno_noa[i].post1!='Y'){
+							t_enda=false;
+							break;
+						}
+					}
+					if(t_enda){
+						nouno_noa=[];
+						$('#div_nouno').hide();
+						alert("批號註銷完成!!");
+					}
+				}
+			}
 		</script>
 		<style type="text/css">
 			#dmain {
@@ -837,6 +924,20 @@
 	</head>
 	<body>
 		<!--#include file="../inc/toolbar.inc"-->
+		<div id="div_nouno" style="position:absolute; top:70px; left:840px; display:none; width:400px; background-color: #CDFFCE; border: 1px solid gray;">
+			<table id="table_nouno" style="width:100%;" border="1" cellpadding='2'  cellspacing='0'>
+				<tr>
+					<td style="background-color: #f8d463;width: 150px;" align="center">批號</td>
+					<td style="background-color: #f8d463;width: 250px;"><input id="textNouno" type="text" class="txt c1"/></td>
+				</tr>
+				<tr id='nouno_close'>
+					<td align="center" colspan='2'>
+						<input id="btnOk_div_nouno" type="button" value="註銷">
+						<input id="btnClose_div_nouno" type="button" value="取消">
+					</td>
+				</tr>
+			</table>
+		</div>
 		<div id="div_addr2" style="position:absolute; top:244px; left:500px; display:none; width:530px; background-color: #CDFFCE; border: 5px solid gray;">
 			<table id="table_addr2" style="width:100%;" border="1" cellpadding='2' cellspacing='0'>
 				<tr>
@@ -890,6 +991,7 @@
 						<td><span> </span><a id='lblNoa' class="lbl"> </a></td>
 						<td colspan="2"><input id="txtNoa" type="text" class="txt c1"/></td>
 						<!--<td align="center"><input id="btnOrdei" type="button" /></td>-->
+						<td><input type="button" id="btnCub_nouno" value="註銷條碼"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblAcomp" class="lbl btn"> </a></td>

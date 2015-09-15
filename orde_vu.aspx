@@ -249,20 +249,8 @@
 					}
 				});
 				
-				$('#btnCub_nouno').click(function() {
-                	$('#div_nouno').show();
-				});
-				
 				$('#textNouno').click(function() {
                 	q_msg($(this),'多批號註銷請用,隔開');
-				});
-				
-				$('#btnOk_div_nouno').click(function() {
-					var t_nouno=$.trim($('#textNouno').val());
-					if(t_nouno.length>0){
-						var t_where = "where=^^ uno='"+t_nouno+"' and tablea='cubu' ^^";
-						q_gt('view_uccb', t_where, 0, 0, 0, "nouno_getuno", r_accy);
-					}
 				});
 				
 				$('#btnClose_div_nouno').click(function() {
@@ -412,30 +400,36 @@
 						}
 						break;
 					case 'nouno_getuno':
-						var as = _q_appendData("view_uccb", "", true);
+						var as = _q_appendData("view_cubs", "", true);
 						if (as[0] != undefined) {
-							var t_nouno=$.trim($('#textNouno').val()).split(',');
-							var tt_nouno='';
-							for (var i=0;i<t_nouno.length;i++){
-								var t_exists=false;
-								for (var j=0;j<as.length;j++){
-									if(as[j].uno==t_nouno[i]){
-										t_exists=true;
-										break;
-									}
-								}
-								if(!t_exists){
-									alert("批號【"+t_nouno[i]+"】不存在或已註銷!!")
-									break;
-								}else{
-									tt_nouno=tt_nouno+t_nouno[i]+"#";
-								}
+							var rowslength=document.getElementById("table_nouno").rows.length-2;
+							for (var j = 0; j < rowslength; j++) {
+								document.getElementById("table_nouno").deleteRow(1);
 							}
-								
-							q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno));
+							for (var i = 0; i < as.length; i++) {
+								var tr = document.createElement("tr");
+								tr.id = "nouno_"+j;
+								tr.innerHTML = "<td id='uno_"+i+"'>"+as[i].uno+"</td>";
+								if(dec(as[i].vtcount)>0)
+									tr.innerHTML+="<td>已出貨</td>";
+								else
+									tr.innerHTML+="<td><input id='btnNouno_"+i+"' type='button' class='btnuno' value='註銷'></td>";
+								var tmp = document.getElementById("nouno_close");
+								tmp.parentNode.insertBefore(tr,tmp);
+							}
+							
+							$('#div_nouno').show();
 						}else{
-							alert("批號不存在或已註銷!!");
+							alert("無生產批號!!");
 						}
+						//事件
+						$('#div_nouno .btnuno').each(function(index) {
+							$(this).click(function() {
+								var n=$(this).attr('id').split('_')[1];
+								var tt_nouno=$('#uno_'+n).text();
+								q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno));
+							});
+						});
 						break;
 					case q_name:
 						if (q_cur == 4)
@@ -572,6 +566,19 @@
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2)
 								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
+						});
+						
+						$('#btnCub_nouno_'+j).click(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							var t_noa=$('#txtNoa').val();
+							var t_no2=$('#txtNo2_'+b_seq).val();
+							if(q_cur!=1 && q_cur!=2){
+								$('#div_nouno').css('top',($(this).offset().top-$('#div_nouno').height())+"px").css('left',($(this).offset().left-$('#div_nouno').width())+"px");
+								var t_where = "where=^^ ordeno='"+t_noa+"' and no2='"+t_no2+"' and isnull(uno,'')!='' ^^";
+								q_gt('cubs_vcct', t_where, 0, 0, 0, "nouno_getuno", r_accy);
+							}
 						});
 					}
 				}
@@ -924,17 +931,14 @@
 	</head>
 	<body>
 		<!--#include file="../inc/toolbar.inc"-->
-		<div id="div_nouno" style="position:absolute; top:70px; left:840px; display:none; width:400px; background-color: #CDFFCE; border: 1px solid gray;">
+		<div id="div_nouno" style="position:absolute; top:70px; left:840px; display:none; width:300px; background-color: #CDFFCE; border: 1px solid gray;">
 			<table id="table_nouno" style="width:100%;" border="1" cellpadding='2'  cellspacing='0'>
 				<tr>
-					<td style="background-color: #f8d463;width: 150px;" align="center">批號</td>
-					<td style="background-color: #f8d463;width: 250px;"><input id="textNouno" type="text" class="txt c1"/></td>
+					<td style="background-color: #f8d463;width: 250px;" align="center">批號</td>
+					<td style="background-color: #f8d463;width: 50px;" align="center">註銷</td>
 				</tr>
 				<tr id='nouno_close'>
-					<td align="center" colspan='2'>
-						<input id="btnOk_div_nouno" type="button" value="註銷">
-						<input id="btnClose_div_nouno" type="button" value="取消">
-					</td>
+					<td align="center" colspan='2'><input id="btnClose_div_nouno" type="button" value="取消"></td>
 				</tr>
 			</table>
 		</div>
@@ -991,7 +995,6 @@
 						<td><span> </span><a id='lblNoa' class="lbl"> </a></td>
 						<td colspan="2"><input id="txtNoa" type="text" class="txt c1"/></td>
 						<!--<td align="center"><input id="btnOrdei" type="button" /></td>-->
-						<td><input type="button" id="btnCub_nouno" value="註銷條碼"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblAcomp" class="lbl btn"> </a></td>
@@ -1113,6 +1116,7 @@
 					<td align="center" style="width:90px;display: none;"><a id='lblDateas'> </a></td>
 					<td align="center" style="width:30px;"><a id='lblEndas'> </a></td>
 					<td align="center" style="width:30px;"><a id='lblCancels'> </a></td>
+					<td align="center" style="width:30px;"><a id='lblNouno_s'>註銷</a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
@@ -1157,6 +1161,7 @@
 					<td style="display: none;"><input id="txtDatea.*" type="text" class="txt c1"/></td>
 					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
 					<td align="center"><input id="chkCancel.*" type="checkbox"/></td>
+					<td align="center"><input id="btnCub_nouno.*" type="button" value="."/></td>
 				</tr>
 			</table>
 		</div>

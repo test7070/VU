@@ -573,7 +573,7 @@
 					<td align="center" style="width:85px;"><a id='lblEweight2_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
-					<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>
+					<!--<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>-->
 					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
@@ -610,7 +610,7 @@
 					<td><input id="txtEweight2.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtTotal.*" type="text" class="txt num c1"/></td>
-					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->
 					<td>
 						<input class="txt c1" id="txtMemo.*"type="text" />
 						<input id="txtNoq.*" type="hidden" />

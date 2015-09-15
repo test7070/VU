@@ -18,10 +18,12 @@
 		
 			$(document).ready(function() {
 				q_getId();
+				var t_year='';
+						
 				q_gf('', 'z_rc2_vu');
 			});
 			
-			
+			var t_qno='';
 			
 			function q_gfPost() {
 				$('#q_report').q_report({
@@ -57,19 +59,20 @@
 					}, {
 						type : '5', //[12]
 						name : 'xstype',
-						value : [q_getPara('report.all')].concat(q_getPara('rc2.stype').split(','))
+						value : [].concat(trim(q_getPara('vccs_vu.product')).split(','))
 					}, {
                         type : '0', //[13] //判斷顯示小數點與其他判斷
                         name : 'acomp',
                         value : q_getPara('sys.comp')
                     },{
                         type : '6', //[14] //判斷顯示小數點與其他判斷
-                        name : 'qno'
+                        name : 'qno',
+                      
                     }
                     ]
 				});
 				 
-                
+
                 
                 var r_1911=1911;
 				if(r_len==4){//西元年
@@ -110,7 +113,29 @@
                q_popAssign();
                 q_getFormat();
                 q_langShow();
-               // $('#txtXDate1').val(r_picm);
+               
+               
+                var tmp = document.getElementById("txtQno");
+                var selectbox = document.createElement("select");
+                selectbox.id="combQno";
+                selectbox.style.cssText ="width:20px;font-size: medium;";
+                tmp.parentNode.appendChild(selectbox,tmp);
+                
+                if(r_len==4){
+						   t_date = new Date();
+        				   t_date.setDate(1);
+                		   t_year = t_date.getUTCFullYear() ;
+						   
+						}else{
+							t_year=r_accy
+						}
+				 var t_where="where=^^'"+t_year+"'=case when len(datea)=10 then left(datea,4) else LEFT(datea,3) end^^"
+				 q_gt('cont', t_where, 0, 0, 0, "cont");
+                
+                
+                $('#combQno').change(function() {
+					$('#txtQno').val($('#combQno').find("option:selected").text());
+				});
 			}
 
 			function q_boxClose(s2) {
@@ -118,6 +143,22 @@
 
 			function q_gtPost(s2) {
 			}
+			
+			
+			function q_gtPost(t_name) {
+                switch (t_name) {
+                	case 'cont':
+                		var as = _q_appendData("cont", "", true);
+						for ( i = 0; i < as.length; i++) {
+							t_qno+=","+as[i].noa;
+						}
+						q_cmbParse("combQno", t_qno); 
+					//	q_gf('', 'z_rc2_vu');
+                		break;
+                	default:
+                        break;
+                }
+            }
 		</script>
 	</head>
 	<body ondragstart="return false" draggable="false"

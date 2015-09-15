@@ -42,9 +42,9 @@
 				//['txtPost', 'lblAddr', 'addr', 'post,addr', 'txtPost,txtAddr', 'addr_b.aspx'],
 				//['txtPost2', 'lblAddr2', 'addr', 'post,addr', 'txtPost2,txtAddr2', 'addr_b.aspx'],
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
-				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx']
-				//['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,spec,size,lengthb,class,unit,emount,eweight'
-            	//, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtMount__,txtWeight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%'],
+				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
+				['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,spec,size,lengthb,class,unit,emount,eweight'
+            	, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtMount__,txtWeight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
 				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
 			);
 
@@ -94,7 +94,8 @@
 				$('#txtTax').val(FormatNumber(t_tax));
 				$('#txtTotal').val(FormatNumber(t_total));
 			}
-
+			
+			var t_cont1='#non',t_cont2='#non';
 			function mainPost() {
 				q_getFormat();
 				bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm],['txtPaydate','99:99']];
@@ -249,6 +250,7 @@
 						t_where=t_where+" and noa!='"+$('#textQno1').val()+"'";
 					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat2_b', "600px", "700px", '出貨合約');
 				});
+				
 			}
 			
 			function refreshBbm() {
@@ -588,9 +590,9 @@
 							var t_date=$('#txtDatea').val();
 							var nextdate='';
 							if(r_len==4)
-								nextdate=new Date(dec(t_date.substr(0,4))+1911,dec(t_date.substr(5,2))-1,dec(t_date.substr(8,2)));
+								nextdate=new Date(dec(t_date.substr(0,4)),dec(t_date.substr(5,2))-1,1);
 							else
-								nextdate=new Date(dec(t_date.substr(0,3))+1911,dec(t_date.substr(4,2))-1,dec(t_date.substr(7,2)));
+								nextdate=new Date(dec(t_date.substr(0,3))+1911,dec(t_date.substr(4,2))-1,1);
 				    		nextdate.setMonth(nextdate.getMonth() +1)
 				    		if(r_len==4)
 				    			t_date=''+(nextdate.getFullYear())+'/'+(nextdate.getMonth()<9?'0':'')+(nextdate.getMonth()+1);
@@ -615,6 +617,30 @@
 							$('#txtMemo__'+b_seq).val(as[0].memo);
 						}else{
 							alert('無此批號!!');
+						}
+						break;
+					case 'getordes':
+						var as = _q_appendData('view_ordes', '', true);
+						if (as[0] != undefined) {
+							var t_nocust=true;
+							if(!emp($('#txtCustno').val())){
+								for (var i = 0; i < as.length; i++) {
+									if(as[i].custno!=$('#txtCustno').val())
+										t_nocust=false;
+								}
+							}
+							if(!t_nocust){
+								alert('領料批號含其他客戶的訂單批號!!');
+							}else{
+								for (var i = 0; i < q_bbsCount; i++) {
+			                		$('#btnMinus_'+i).click();
+			                	}
+								q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtPrice,txtMount,txtWeight,txtOrdeno,txtNo2'
+								, as.length, as, 'product,ucolor,spec,size,lengthb,class,price,mount,weight,noa,no2', 'txtProduct,txtSpec');
+							}
+							sum();
+						}else{
+							alert('無訂單資料!!');
 						}
 						break;
 				}
@@ -851,6 +877,20 @@
 						});
                     }
                 }
+                $('#btnVccttoOrde').click(function() {
+                	if(q_cur==1 || q_cur==2){
+	                	var t_ordeno="";
+	                	for (var i = 0; i < q_bbtCount; i++) {
+	                		if(!emp($('#txtUno__'+i).val())){
+	                			var t_index=$('#txtUno__'+i).val().indexOf('-');
+	                			t_ordeno=t_ordeno+$('#txtUno__'+i).val().substr(0,t_index);
+	                		}
+	                	}
+	                	if(t_ordeno.length>0){
+	                		q_gt('view_ordes', "where=^^charindex(isnull(noa,'')+isnull(no2,''),'"+t_ordeno+"')>0 ^^ ", 0, 0, 0, "getordes");
+	                	}
+                	}
+                });
                 _bbtAssign();
                 
                 $('#lblUno_t').text('領料批號');
@@ -865,6 +905,7 @@
                 $('#lblMount_t').text('領料數');
                 $('#lblWeight_t').text('領料重');
                 $('#lblMemo_t').text('備註');
+                
             }
 
 			function btnIns() {
@@ -881,6 +922,8 @@
 			}
 
 			function btnModi() {
+				t_cont1=$('#textQno1').val();
+				t_cont2=$('#textQno2').val();
 				if (emp($('#txtNoa').val()))
 					return;
 				Lock(1, {
@@ -938,16 +981,21 @@
             }
 
 			function q_stPost() {
+				t_cont1=t_cont1.length==0?'#non':t_cont1;
+				t_cont2=t_cont2.length==0?'#non':t_cont2;
+				if(q_cur==3){
+					if(t_cont1.length>0 || t_cont2.length>0){
+						q_func('qtxt.query.changequatgweight', 'vcc.txt,changequat_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_cont1)+ ';' + encodeURI(t_cont2));
+					}
+				}
 				if (q_cur == 1 || q_cur == 2) {
 					var s2 = xmlString.split(';');
 					abbm[q_recno]['accno'] = s2[0];
 					$('#txtAccno').val(s2[0]);
 					if((!emp($('#textQno1').val()) || !emp($('#textQno2').val())))
-						q_func('qtxt.query.changequatgweight', 'vcc.txt,changequat_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
-					
-					if(!emp($('#txtNoa').val()))
-						q_func('qtxt.query.vcct', 'vcc.txt,changevcct_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
+						q_func('qtxt.query.changequatgweight', 'vcc.txt,changequat_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_cont1)+ ';' + encodeURI(t_cont2));
 				}
+				t_cont1='#non',t_cont2='#non';
 			}
 
 			function refresh(recno) {
@@ -1060,6 +1108,8 @@
 			}
 
 			function btnDele() {
+				t_cont1=$('#textQno1').val();
+				t_cont2=$('#textQno2').val();
 				if (q_chkClose())
 					return;
 				Lock(1, {
@@ -1071,6 +1121,8 @@
 
 			function btnCancel() {
 				_btnCancel();
+				t_cont1='#non';
+				t_cont2='#non';
 			}
 
 			function q_popPost(s1) {
@@ -1402,7 +1454,7 @@
 					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
 					<!--<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
@@ -1434,7 +1486,7 @@
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
+						<input id="txtClass.*" type="text" class="txt c1" style="width: 60%;"/>
 						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
@@ -1461,7 +1513,10 @@
 				<tr class="head" style="color:white; background:#003366;">
 					<td style="width:20px;"><input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 					<td style="width:20px;"> </td>
-					<td style="width:200px;"><a id='lblUno_t'> </a></td>
+					<td style="width:200px;">
+						<a id='lblUno_t'> </a>
+						<input id="btnVccttoOrde" type="button" style="font-size: medium; font-weight: bold;" value="出貨匯入"/>
+					</td>
 					<!--<td style="width:150px;"><a id='lblProductno_t'> </a></td>-->
 					<td style="width:150px;"><a id='lblProduct_t'> </a></td>
 					<td style="width:150px;"><a id='lblUcolor_t'> </a></td>

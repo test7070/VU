@@ -86,7 +86,8 @@
 				$('#txtTax').val(FormatNumber(t_tax));
 				$('#txtTotal').val(FormatNumber(t_total));
 			}
-
+			
+			var t_cont1='#non',t_cont2='#non';
 			function mainPost() {
 				q_getFormat();
 				bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm]];
@@ -555,9 +556,9 @@
 							var t_date=$('#txtDatea').val();
 							var nextdate='';
 							if(r_len==4)
-								nextdate=new Date(dec(t_date.substr(0,4))+1911,dec(t_date.substr(5,2))-1,dec(t_date.substr(8,2)));
+								nextdate=new Date(dec(t_date.substr(0,4)),dec(t_date.substr(5,2))-1,1);
 							else
-								nextdate=new Date(dec(t_date.substr(0,3))+1911,dec(t_date.substr(4,2))-1,dec(t_date.substr(7,2)));
+								nextdate=new Date(dec(t_date.substr(0,3))+1911,dec(t_date.substr(4,2))-1,1);
 				    		nextdate.setMonth(nextdate.getMonth() +1)
 				    		if(r_len==4)
 				    			t_date=''+(nextdate.getFullYear())+'/'+(nextdate.getMonth()<9?'0':'')+(nextdate.getMonth()+1);
@@ -576,13 +577,22 @@
 			}
 
 			function q_stPost() {
+				t_cont1=t_cont1.length==0?'#non':t_cont1;
+				t_cont2=t_cont2.length==0?'#non':t_cont2;
+				if(q_cur==3){
+					if(t_cont1.length>0 || t_cont2.length>0){
+						q_func('qtxt.query.changecontgweight', 'rc2.txt,changecont_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_cont1)+ ';' + encodeURI(t_cont2));
+					}
+					t_cont1='#non',t_cont2='#non';
+				}
 				if (!(q_cur == 1 || q_cur == 2))
 					return false;
 				var s1 = xmlString.split(';');
 				abbm[q_recno]['accno'] = s1[0];
 				$('#txtAccno').val(s1[0]);
 				if((!emp($('#textQno1').val()) || !emp($('#textQno2').val())))
-					q_func('qtxt.query.changecontgweight', 'rc2.txt,changecont_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val()));
+					q_func('qtxt.query.changecontgweight', 'rc2.txt,changecont_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_cont1)+ ';' + encodeURI(t_cont2));
+					t_cont1='#non',t_cont2='#non';
 			}
 			
 			var check_startdate=false;
@@ -622,7 +632,7 @@
 				}
 				
 				//判斷批號是否已使用
-				if(!check_uccb_uno){
+				/*if(!check_uccb_uno){
                 	var t_uno = "1=0";
                     for (var i = 0; i < q_bbsCount; i++) {
                         if ($.trim($('#txtUno_' + i).val()).length > 0)
@@ -631,11 +641,11 @@
 					var t_where = "where=^^ ("+t_uno+") and noa!='"+$('#txtNoa').val()+"' ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_uccb", r_accy);
 					return;
-                }
+                }*/
 				
 				//產生批號當天最大批號數
 				//判斷是否要產生批號
-				if(!get_uno){
+				/*if(!get_uno){
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 						if(!emp($('#txtStyle_'+j).val()) && emp($('#txtUno_'+j).val())){
 							get_uno=true;
@@ -648,7 +658,7 @@
 					var t_where = "where=^^ uno=isnull((select MAX(uno) from view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "getuno", r_accy);
 					return;
-				}
+				}*/
 				
 				check_uccb_uno=false;
 				check_startdate=false;
@@ -799,6 +809,8 @@
 			}
 
 			function btnModi() {
+				t_cont1=$('#textQno1').val();
+				t_cont2=$('#textQno2').val();
 				if (emp($('#txtNoa').val()))
 					return;
 				Lock(1, {
@@ -920,6 +932,8 @@
 			}
 
 			function btnDele() {
+				t_cont1=$('#textQno1').val();
+				t_cont2=$('#textQno2').val();
 				Lock(1, {
 					opacity : 0
 				});
@@ -929,6 +943,8 @@
 
 			function btnCancel() {
 				_btnCancel();
+				t_cont1='#non';
+				t_cont2='#non';
 			}
 
 			function q_popPost(s1) {
@@ -1259,15 +1275,15 @@
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;"><input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" /></td>
 					<td align="center" style="width:55px;"><a id='lblNoq_s'> </a></td>
-					<td align="center" style="width:180px;"><a id='lblUno_s'> </a></td>
+					<!--<td align="center" style="width:180px;"><a id='lblUno_s'> </a></td>-->
 					<!--<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:160px;"><a id='lblUcolor_s'> </a></td>
-					<td align="center" style="width:40px;"><a id='lblStyle_s'> </a></td>
+					<!--<td align="center" style="width:40px;"><a id='lblStyle_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblSize_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
+					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
 					<!--<td align="center" style="width:40px;"><a id='lblUnit_s'> </a></td>-->
 					<td align="center" style="width:90px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblWeight_s'> </a></td>
@@ -1280,7 +1296,7 @@
 				<tr style='background:#cad3ff;'>
 					<td><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td><input id="txtNoq.*" type="text" class="txt c1"/></td>
-					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->
 					<!--<td>
 						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />
@@ -1293,7 +1309,7 @@
 						<input id="txtUcolor.*" type="text" class="txt c1" style="width: 110px;"/>
 						<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td><input id="txtStyle.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtStyle.*" type="text" class="txt c1"/></td>-->
 					<td>
 						<input id="txtSpec.*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
@@ -1301,7 +1317,7 @@
 					<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
+						<input id="txtClass.*" type="text" class="txt c1" style="width: 60%;"/>
 						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->

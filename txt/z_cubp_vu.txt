@@ -1,0 +1,199 @@
+z_cubp_vu01:--z_cubp_vu01
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bmechno nvarchar(30)
+declare @t_emechno nvarchar(30)
+
+set @t_bdate = case when '#non'=[1] then '' else [1] end 
+set @t_edate = case when '#non'=[2] then char(255) else [2] end 
+set @t_bmechno = case when '#non'=[3] then '' else [3] end 
+set @t_emechno = case when '#non'=[4] then char(255) else [4] end 
+
+ -----------------------------------------------------------------------------------
+declare @result table(
+	gno nvarchar(1),
+	datea nvarchar(20),
+	mechno nvarchar(10),
+	comp  nvarchar(20),
+	products nvarchar(max),
+	class nvarchar(30),
+	hmount float,
+	weight float,
+	mount float,
+	need nvarchar(max),
+	memo nvarchar(max),
+	dateb nvarchar(20),
+	ordeno nvarchar(30),
+	no2 nvarchar(10),
+	datec nvarchar(20),
+	dno int
+	
+)
+insert @result 
+select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
+		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(order by a.datea) dno
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
+
+insert @result(gno,hmount,mount,weight,dno)
+select '1' gno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
+from @result
+
+select gno,datea,mechno,comp,products,class,
+dbo.getComma(hmount,0) hmount,dbo.getComma(weight,0) weight,dbo.getComma(mount,0) mount,need,memo,dateb,ordeno,no2,datec
+,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,dno
+from @result
+;
+
+z_cubp_vu02:--z_cubp_vu02
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bmechno nvarchar(30)
+declare @t_emechno nvarchar(30)
+
+set @t_bdate = case when '#non'=[1] then '' else [1] end 
+set @t_edate = case when '#non'=[2] then char(255) else [2] end 
+set @t_bmechno = case when '#non'=[3] then '' else [3] end 
+set @t_emechno = case when '#non'=[4] then char(255) else [4] end
+------------------------------------------------------------------------------------------------
+declare @result table(
+	gno nvarchar(1),
+	datea nvarchar(20),
+	mechno nvarchar(10),
+	comp  nvarchar(20),
+	products nvarchar(max),
+	class nvarchar(30),
+	hmount float,
+	weight float,
+	mount float,
+	need nvarchar(max),
+	memo nvarchar(max),
+	dateb nvarchar(20),
+	ordeno nvarchar(30),
+	no2 nvarchar(10),
+	datec nvarchar(20),
+	dno int,
+	mech nvarchar(30)
+	
+)
+insert @result 
+select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
+		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(partition by a.mechno order by a.mechno,a.datea) dno
+		,a.mech
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	 where a.mechno between @t_bmechno and @t_emechno
+	 		and  a.datea between @t_bdate and @t_edate
+insert @result(gno,datea,mechno,hmount,mount,weight,dno)
+select '1' gno,'9999/999',mechno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
+from @result
+group by mechno
+
+select gno,datea,mechno,comp,products,class,dbo.getComma(hmount,0) hmount,dbo.getComma(weight,0) weight,dbo.getComma(mount,0) mount,need,memo,dateb,ordeno,no2,datec
+,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,dno,mech
+,row_number()over(partition by mechno order by mechno,datea,gno) idno
+from @result
+order by mechno,datea,gno
+; 
+
+
+z_cubp_vu03:--z_cubp_vu03
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bmechno nvarchar(30)
+declare @t_emechno nvarchar(30)
+
+set @t_bdate = case when '#non'=[1] then '' else [1] end 
+set @t_edate = case when '#non'=[2] then char(255) else [2] end 
+set @t_bmechno = case when '#non'=[3] then '' else [3] end 
+set @t_emechno = case when '#non'=[4] then char(255) else [4] end
+-----------------------------------------------------------------------------------------------------
+declare @result table(
+	gno nvarchar(1),
+	mon nvarchar(10),
+	mechno nvarchar(10),
+	mech nvarchar(20),
+	mount float,
+	weight float
+	
+)
+
+insert @result 
+select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6)
+ end ,a.mechno,a.mech,sum(b.mount),SUM(b.weight)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where a.datea between @t_bdate and @t_edate
+group by case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6)
+ end,a.mechno,a.mech
+
+insert @result (gno,mon,mount,weight)
+select '1',mon,SUM(mount),sum(weight)
+from @result
+group by mon
+
+insert @result (gno,mon,mount,weight)
+select '2','9999/999',SUM(mount),sum(weight)
+from @result
+where gno='1'
+
+
+select gno,mon,mechno,mech,dbo.getComma(mount,0) mount ,dbo.getComma(weight,0) weight
+from @result
+order by mon,gno
+;
+z_cubp_vu04:--z_cubp_vu04
+
+declare @t_bmon nvarchar(10) 
+declare @t_emon nvarchar(10)
+----@t_type=0 未結案	@t_type=1 已結案
+declare @t_type nvarchar(10)
+
+set @t_bmon = case when '#non'=[5] then '' else [5] end 
+set @t_emon = case when '#non'=[6] then char(255) else [6] end 
+set @t_type = case when '#non'=[7] then '' else [7] end 
+set @t_type= case when @t_type='未結案' then '0' when @t_type='已結案' then '1' else '' end
+declare @result table(
+	gno nvarchar(1),
+	comp nvarchar(max),
+	noa  nvarchar(40),
+	ordeno float ,
+	done float,
+	stand float,
+	undone float,
+	unfinal float
+	)
+
+insert @result
+select  '0',a.nick,a.noa,isnull(SUM(b.mount),0) ordeno ,isnull(SUM(e.mount),0) done
+		,case when isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) < 0 then 0
+			 else isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) end stand
+	   ,case when (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) < 0 then 0
+		     else (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) end undone
+	   ,case when isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) < 0 then 0
+			 else isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) end +
+		case when (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) < 0 then 0
+		     else (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) end unfinal
+
+from view_orde a left join view_ordes b on a.noa=b.noa and a.accy=b.accy
+				 left join view_vccs c on a.noa=c.ordeno and a.accy=c.accy
+				 left join view_vcc  d on c.noa=d.noa and c.accy=d.accy
+				 left join view_cubs e on a.noa=e.ordeno and a.accy=e.accy
+where case when len(a.odate) = 10 then left(a.odate,7) else LEFT(a.odate,6) end between @t_bmon and @t_emon 
+group by a.nick,a.noa
+
+
+insert @result(gno,comp,ordeno,done,stand,undone,unfinal)
+select '1',char(255),sum(ordeno),sum(done),sum(stand),sum(undone),sum(unfinal)
+from @result
+
+
+select gno,comp,noa,
+dbo.getComma(ordeno,0) ordeno,
+dbo.getComma(done,0) done,
+dbo.getComma(stand,0) stand,
+dbo.getComma(undone,0) undone,
+dbo.getComma(unfinal,0) unfinal
+from @result
+where (unfinal=case when @t_type=1 then 0 else  
+	  ( case when unfinal >0 then unfinal end) end
+	  or @t_type='')
+order by comp,noa,gno	  ;

@@ -247,7 +247,7 @@
                     return;
                 }
                 //判斷批號是否已使用
-                if(!check_uccb_uno){
+                /*if(!check_uccb_uno){
                 	var t_uno = "1=0";
                     for (var i = 0; i < q_bbsCount; i++) {
                         if ($.trim($('#txtUno_' + i).val()).length > 0)
@@ -256,30 +256,30 @@
 					var t_where = "where=^^ ("+t_uno+") and noa!='"+$('#txtNoa').val()+"' ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_uccb", r_accy);
 					return;
-                }
+                }*/
                 
                 //判斷是否要產生批號
-				if(!get_uno){
+				/*if(!get_uno){
 					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
 						if((!emp($('#txtProductno_'+j).val()) || !emp($('#txtProduct_'+j).val()))&& emp($('#txtUno_'+j).val())){
 							get_uno=true;
 							break;
 						}
 					}
-				}
+				}*/
                 
                 //預設產生批號
-                if(get_uno && !get_maxuno){
+                /*if(get_uno && !get_maxuno){
 	                var t_where = "where=^^ uno=isnull((select MAX(uno) from view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
 					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_getuno", r_accy);
 					return;
                 }
                 
                 check_uccb_uno=false;
-                get_uno=false,get_maxuno=false;
+                get_uno=false,get_maxuno=false;*/
                 
                 //檢查是否批號重複
-                var uno_repeat=false;
+                /*var uno_repeat=false;
                 for (var i = 0; i < q_bbsCount; i++) {
                 	if(!emp($('#txtUno_'+i).val())){
 	                	for (var j = i+1; j < q_bbsCount; j++) {
@@ -295,7 +295,7 @@
                 if(uno_repeat){
                 	alert("批號重複!!");
                     return;
-                }
+                }*/
                 
                 var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
                 if (s1.length == 0 || s1 == "AUTO")
@@ -736,7 +736,7 @@
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;"><input class="btn"  id="btnPlus" type="button" value='＋' style="font-weight: bold;"  /></td>
 					<td align="center" style="width:55px;"><a id='lblNoq_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblUno_s'> </a></td>
+					<!--<td align="center" style="width:150px;"><a id='lblUno_s'> </a></td>-->
 					<!--<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>-->
 					<td align="center" style="width:150px;"><a id='lblProduct_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
@@ -754,7 +754,7 @@
 				<tr  style='background:#cad3ff;'>
 					<td ><input class="btn"  id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
 					<td><input id="txtNoq.*" type="text" class="txt c1"/></td>
-					<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+					<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->
 					<!--<td>
 						<input id="txtProductno.*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno.*" type="button" value='.' style="font-weight: bold;" />

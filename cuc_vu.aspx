@@ -430,14 +430,15 @@
 						string+='<td id="cucs_spec" title="材質" align="center" style="width:70px; color:black;">材質</td>';
 						string+='<td id="cucs_size" title="號數" align="center" style="width:50px; color:black;">號數</td>';
 						string+='<td id="cucs_lengthb" title="米數" align="center" style="width:50px; color:black;">米數</td>';
-						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:50px; color:black;">訂單件數</td>';
-						string+='<td id="cucs_weight" title="訂單重" align="center" style="width:80px; color:black;">訂單重</td>';
-						string+='<td id="cucs_1mount" title="加工支數" align="center" style="width:50px; color:black;">加工支數</td>';
-						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;">未完工件數</td>';
-						string+='<td id="cucs_eweight" title="未完工重" align="center" style="width:80px; color:black;">未完工重</td>';
-						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;">件數</td>';
-						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;">支數</td>';
-						string+='<td id="cucs_xweight" title="重量" align="center" style="width:80px; color:black;">重量</td>';
+						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:50px; color:black;" class="co1">訂單件數</td>';
+						string+='<td id="cucs_1mount" title="訂單支數" align="center" style="width:50px; color:black;" class="co1">訂單支數</td>';
+						string+='<td id="cucs_weight" title="訂單重量" align="center" style="width:50px; color:black;" class="co1">訂單重量</td>';
+						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;" class="co2">未完工件數</td>';
+						string+='<td id="cucs_ehmount" title="未完工件數" align="center" style="width:60px; color:black;" class="co2">未完工件數</td>';
+						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:60px; color:black;" class="co2">未完工重量</td>';
+						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;" class="co3">件數</td>';
+						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;" class="co3">支數</td>';
+						string+='<td id="cucs_xweight" title="重量" align="center" style="width:60px; color:black;" class="co3">重量</td>';
 						string+='<td id="cucs_memo" title="備註" align="center" style="width:100px; color:black;">備註</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:75px; color:black;display:none;">客戶編號</td>';
 						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
@@ -462,14 +463,15 @@
 						string+='<td id="cucs_spec" title="材質" align="center" style="width:70px; color:black;">材質</td>';
 						string+='<td id="cucs_size" title="號數" align="center" style="width:50px; color:black;">號數</td>';
 						string+='<td id="cucs_lengthb" title="米數" align="center" style="width:50px; color:black;">米數</td>';
-						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:50px; color:black;">訂單件數</td>';
-						string+='<td id="cucs_weight" title="訂單重" align="center" style="width:80px; color:black;">訂單重</td>';
-						string+='<td id="cucs_1mount" title="加工支數" align="center" style="width:50px; color:black;">加工支數</td>';
-						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;">未完工件數</td>';
-						string+='<td id="cucs_eweight" title="未完工重" align="center" style="width:80px; color:black;">未完工重</td>';
-						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;">件數</td>';
-						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;">支數</td>';
-						string+='<td id="cucs_xweight" title="重量" align="center" style="width:80px; color:black;">重量</td>';
+						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:50px; color:black;" class="co1" >訂單件數</td>';
+						string+='<td id="cucs_1mount" title="訂單支數" align="center" style="width:50px; color:black;" class="co1">訂單支數</td>';
+						string+='<td id="cucs_weight" title="訂單重量" align="center" style="width:50px; color:black;" class="co1">訂單重量</td>';
+						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;" class="co2">未完工件數</td>';
+						string+='<td id="cucs_ehmount" title="未完工件數" align="center" style="width:60px; color:black;" class="co2">未完工件數</td>';
+						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:60px; color:black;" class="co2">未完工重量</td>';
+						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;" class="co3">件數</td>';
+						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;" class="co3">支數</td>';
+						string+='<td id="cucs_xweight" title="重量" align="center" style="width:60px; color:black;" class="co3">重量</td>';
 						string+='<td id="cucs_memo" title="備註" align="center" style="width:100px; color:black;">備註</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:75px; color:black;display:none;">客戶編號</td>';
 						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
@@ -587,6 +589,7 @@
 										$('#cucs_1mount'+j).text(as[i].mount1);
 										$('#cucs_emount'+j).text(round(as[i].emount,3));
 										$('#cucs_eweight'+j).text(round(as[i].eweight,3));
+										$('#cucs_ehmount'+j).text(round(as[i].ehmount,3));
 										$('#cucs_memo'+j).text(as[i].memo);
 										$('#cucs_custno'+j).text(as[i].acustno);
 										$('#cucs_cust'+j).text(as[i].acust.substr(0,4));
@@ -603,6 +606,9 @@
 								if(isupdate && !bbsexists){//更新資料 bbs 一定要存在 , 不存在表示已完工或資料被刪除
 									//刪除bbs 資料
 									$('#cucs_tr'+j).find('td').css('background', 'lavender');
+									$('#cucs_tr'+j+' .co1').css('background-color', 'antiquewhite');
+		                            $('#cucs_tr'+j+' .co2').css('background-color', 'lightpink');
+		                            $('#cucs_tr'+j+' .co3').css('background-color', 'lightsalmon');
 									$('#cucs_chk'+j).remove();
 									$('#textXmount_'+j).remove();
 									$('#textXcount_'+j).remove();
@@ -622,6 +628,7 @@
 									$('#cucs_1mount'+j).text('');
 									$('#cucs_emount'+j).text('');
 									$('#cucs_eweight'+j).text('');
+									$('#cucs_ehmount'+j).text('');
 									$('#cucs_memo'+j).text('');
 									$('#cucs_custno'+j).text('');
 									$('#cucs_cust'+j).text('');
@@ -638,7 +645,7 @@
 						t_color = ['DarkBlue','DarkRed'];
 						var string='';
 						for(var i=0;i<as.length;i++){
-							if(table_noa!='' && table_noa!=as[i].noa){ //不同暗號 空依格
+							if(table_noa!='' && table_noa!=as[i].noa){ //不同案號 空依格
 								string+='<tr id="cucs_tr'+(i+bbsrow)+'">';
 								string+='<td style="text-align: center;"></td>';
 								string+='<td id="cucs_cubno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
@@ -650,14 +657,15 @@
 								string+='<td id="cucs_spec'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_size'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_lengthb'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_weight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_1mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_emount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_eweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
+								string+='<td id="cucs_mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1"></td>';
+								string+='<td id="cucs_1mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1"></td>';
+								string+='<td id="cucs_weight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1"></td>';
+								string+='<td id="cucs_emount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_ehmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_eweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
+								string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
+								string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
@@ -679,14 +687,15 @@
 							string+='<td id="cucs_spec'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].spec+'</td>';
 							string+='<td id="cucs_size'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].size+'</td>';
 							string+='<td id="cucs_lengthb'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].lengthb+'</td>';
-							string+='<td id="cucs_mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].mount+'</td>';
-							string+='<td id="cucs_weight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].weight+'</td>';
-							string+='<td id="cucs_1mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].mount1+'</td>';
-							string+='<td id="cucs_emount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+round(as[i].emount,3)+'</td>';
-							string+='<td id="cucs_eweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+round(as[i].eweight,3)+'</td>';
-							string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><input id="textXmount_'+(i+bbsrow)+'"  type="text" class="xmount txt c1 num" disabled="disabled" /></td>';
-							string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><input id="textXcount_'+(i+bbsrow)+'"  type="text" class="xcount txt c1 num" disabled="disabled"/></td>';
-							string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><input id="textXweight_'+(i+bbsrow)+'"  type="text" class="xweight txt c1 num" disabled="disabled"/></td>';
+							string+='<td id="cucs_mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1">'+as[i].mount+'</td>';
+							string+='<td id="cucs_1mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1">'+as[i].mount1+'</td>';
+							string+='<td id="cucs_weight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1">'+as[i].weight+'</td>';
+							string+='<td id="cucs_emount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].emount,3)+'</td>';
+							string+='<td id="cucs_ehmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].ehmount,3)+'</td>';
+							string+='<td id="cucs_eweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].eweight,3)+'</td>';
+							string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXmount_'+(i+bbsrow)+'"  type="text" class="xmount txt c1 num" disabled="disabled" /></td>';
+							string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXcount_'+(i+bbsrow)+'"  type="text" class="xcount txt c1 num" disabled="disabled"/></td>';
+							string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXweight_'+(i+bbsrow)+'"  type="text" class="xweight txt c1 num" disabled="disabled"/></td>';
 							string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].memo+'</td>';
 							string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acustno+'</td>';
 							string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acust.substr(0,4)+'</td>';
@@ -704,15 +713,18 @@
 						//事件更新
 						$('#cucs .cucs_chk').unbind('click');
 						$('#cucs .cucs_chk').click(function(e) {
+							var n=$(this).attr('id').replace('cucs_chk','')
 							if($(this).prop('checked')){
 								var t_err = q_chkEmpField([['combMechno', '機台']]);
 				                if (t_err.length > 0) {
 				                    alert(t_err);
 				                    $(this).prop("checked",false).parent().parent().find('td').css('background', 'lavender');
+				                    $('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
+		                            $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
+		                            $('#cucs_tr'+n+' .co3').css('background-color', 'lightsalmon');
 				                    return;
 				                }
 							}
-							var n=$(this).attr('id').replace('cucs_chk','')
 							//Lock();
 							var t_where="where=^^  1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and a.noa='"+$('#cucs_noa'+n).text()+"' and b.noq='"+$('#cucs_noq'+n).text()+"' and isnull(b.mins,0)=0 ^^";
 							//判斷是否能被鎖定或解除
@@ -1007,7 +1019,10 @@
 							alert("該筆排程已被"+mechno+"鎖定!!");
 							$('#cucs_lbla'+n).text(mechno);
 							$('#cucs_cubno'+n).text(cubno);
-							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');	
+							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');
+							$('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
+                            $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
+                            $('#cucs_tr'+n+' .co3').css('background-color', 'lightsalmon');	
                         	//檢查是否有暫存 並刪除暫存資料
                         	 for(var i =0 ;i<chk_cucs.length;i++){
                         	 	if(chk_cucs[i].noa==$('#cucs_noa'+n).text() && chk_cucs[i].noq==$('#cucs_noq'+n).text()){
@@ -1046,7 +1061,10 @@
 							$('#textXweight_'+n).removeAttr('disabled');
 						}
 					}else{
-						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');	
+						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');
+						$('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
+						$('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
+						$('#cucs_tr'+n+' .co3').css('background-color', 'lightsalmon');	
 						alert('該筆排程已完工!!');
 					}
 					//Unlock();
@@ -1058,19 +1076,31 @@
 						if(as[0].cubno==''){
 							$('#cucs_cubno'+n).text('');
 							$('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', 'lavender');
+							$('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
+                            $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
+                            $('#cucs_tr'+n+' .co3').css('background-color', 'lightsalmon');
 							alert('該筆排程已被解除鎖定!!');
 						}else if(as[0].cubno!='' && as[0].cubno.split('##')[0] != r_userno){//其他人被鎖定
 							$('#cucs_cubno'+n).text(as[0].cubno);
 							$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');
+							$('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
+                            $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
+                            $('#cucs_tr'+n+' .co3').css('background-color', 'lightsalmon');
 							alert('該筆排程已被鎖定!!');
 						}else{//自己鎖定的資料
                         	//取消鎖定資料
                             q_func('qtxt.query.unlock', 'cuc_vu.txt,unlock,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
                             $('#cucs_chk'+n).prop("checked",false).parent().parent().find('td').css('background', 'lavender');
+                            $('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
+                            $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
+                            $('#cucs_tr'+n+' .co3').css('background-color', 'lightsalmon');
                             $('#cucs_cubno'+n).text('');
 						}
 					}else{
-						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');	
+						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');
+						$('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
+                        $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
+                        $('#cucs_tr'+n+' .co3').css('background-color', 'lightsalmon');	
 						alert('該筆排程已完工!!');
 					}
 					//刪除暫存資料
@@ -1420,6 +1450,9 @@
 							$('#cucs_lbla'+i).text(mechno);
 							$('#cucs_chk' + i).attr('disabled', 'disabled');
                             $('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'lavender');
+                            $('#cucs_tr'+i+' .co1').css('background-color', 'antiquewhite');
+                            $('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
+                            $('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
 						}else if (islock && cubno.split('##')[0]==r_userno){//自己鎖定
 							$('#cucs_lbla'+i).text('');
 							$('#cucs_chk' + i).removeAttr('disabled');
@@ -1438,11 +1471,17 @@
 							$('#cucs_lbla'+i).text('');
 							$('#cucs_chk' + i).removeAttr('disabled');
 							$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'lavender');
+							$('#cucs_tr'+i+' .co1').css('background-color', 'antiquewhite');
+                            $('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
+                            $('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
 						}
 					}else{//無人鎖定
 						$('#cucs_lbla'+i).text('');
 						$('#cucs_chk' + i).removeAttr('disabled');
 						$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'lavender');
+						$('#cucs_tr'+i+' .co1').css('background-color', 'antiquewhite');
+						$('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
+						$('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
 					}
 				}
 			}
@@ -1583,6 +1622,15 @@
                 background-color: lavender;
                 color: blue;
             }
+            #cucs_table .co1{
+                background-color: antiquewhite;
+            }
+            #cucs_table .co2{
+                background-color: lightpink;
+            }
+            #cucs_table .co3{
+                background-color: lightsalmon;
+            }
             
             #cucs_table2 {
                 border: 5px solid gray;
@@ -1598,6 +1646,15 @@
                 border-width: 0px;
                 background-color: lavender;
                 color: blue;
+            }
+            #cucs_table2 .co1{
+                background-color: antiquewhite;
+            }
+            #cucs_table2 .co2{
+                background-color: lightpink;
+            }
+            #cucs_table2 .co3{
+                background-color: lightsalmon;
             }
             
             #cuct_table {

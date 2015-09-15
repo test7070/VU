@@ -54,6 +54,7 @@
                 $('#textDatea').mask(r_picd);
                 $('#textDatea').val(q_date());
                 q_cur=2;
+                document.title='現場加工作業';
 				
 				//載入案號 資料
                 var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and isnull(b.mins,0)=0 ^^";

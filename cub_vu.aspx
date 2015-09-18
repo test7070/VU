@@ -18,7 +18,7 @@
             q_tables = 't';
             var q_name = "cub";
             var q_readonly = ['txtNoa'];
-            var q_readonlys = ['txtOrdeno', 'txtNo2'];
+            var q_readonlys = ['txtOrdeno', 'txtNo2','txtProductno2','txtProduct2'];
             var q_readonlyt = [];
             var bbmNum = [];
             var bbsNum = [];
@@ -678,7 +678,8 @@
                 $('#lblNo2_s').text('訂序');
                 $('#lblDatea_s').text('預定出貨日期');
                 $('#lblHend_s').text('過磅結案');
-                
+                $('#lblProductno2_s').text('案號');
+                $('#lblProduct2_s').text('案序');
             }
 
             function distinct(arr1) {
@@ -1039,7 +1040,7 @@
 					</tr>
 				</table>
 			</div>
-			<div class='dbbs' style="min-width: 2200px;">
+			<div class='dbbs' style="min-width: 2410px;">
 				<table id="tbbs" class='tbbs'>
 					<tr style='color:white; background:#003366;' >
 						<td style="width:20px;"><input id="btnPlus" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
@@ -1066,14 +1067,14 @@
 						<td style="width:60px;"><a id='lblNo2_s'> </a></td>
 						<td style="width:100px;"><a id='lblDatea_s'> </a></td>
 						<td style="width:200px;"><a id='lblUno_s'> </a></td>
+						<td style="width:150px;"><a id='lblProductno2_s'> </a></td>
+						<td style="width:60px;"><a id='lblProduct2_s'> </a></td>
 						<!--<td style="width:45px;"><a id='lblHend_s'> </a></td>-->
 					</tr>
 					<tr style='background:#cad3ff;'>
 						<td align="center">
 							<input id="btnMinus.*" type="button" style="font-size: medium; font-weight: bold;" value="－"/>
 							<input id="txtNoq.*" type="text" style="display: none;"/>
-							<input id="txtProductno2.*" type="hidden"/>
-							<input id="txtProduct2.*" type="hidden"/>
 						</td>
 						<td><a id="lblNo.*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
 						<td>
@@ -1120,6 +1121,8 @@
 						<td><input id="txtNo2.*" type="text" class="txt c1"/></td>
 						<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
 						<td><input id="txtUno.*" type="text" class="txt c1"/></td>
+						<td><input id="txtProductno2.*" type="text" class="txt c1"/></td>
+						<td><input id="txtProduct2.*" type="text" class="txt c1"/></td>
 						<!--<td><input id="chkHend.*" type="checkbox"/></td>-->
 					</tr>
 				</table>

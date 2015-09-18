@@ -522,3 +522,102 @@ enda:--enda
 		where noa='"+@noa+"' and noq='"+@noq+"'
 	")
 ;
+-------------------------------------------------------------------------------------------------------------------------------
+cucutocubs:--cucutocubs
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @datea nvarchar(max) = case when '#non'=[2] then '' else [2] end
+	declare @mechno nvarchar(max) = case when '#non'=[3] then '' else [3] end
+	declare @memo nvarchar(max) = case when '#non'=[4] then '' else [4] end
+	declare @userno nvarchar(max) = [5]
+	declare @namea nvarchar(max) = [6]
+	--cuct資料
+	declare @xcucu nvarchar(max) = [7]
+	if(@xcucu='#non')
+	begin
+		set @xcucu=''
+	end
+	
+	declare @mech nvarchar(max) = isnull((select mech from mech where noa=@mechno),'')
+	declare @cubno nvarchar(100) --新加工單號
+	set @cubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
+	set @cubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@cubno,3) as int) +1 as nvarchar(50)),3)
+
+	--*********************************************************************************************
+	IF OBJECT_ID('tempdb..#tmpa')is not null
+	BEGIN
+		set @cmd = 'drop table #tmpa'
+		EXECUTE sp_executesql @cmd
+	END
+			
+	declare @bbscount int=0
+	create table #tmpa( 
+		noq nvarchar(50),
+		product nvarchar(MAX),  
+		ucolor nvarchar(MAX),  
+		spec nvarchar(MAX),  
+		size nvarchar(MAX),  
+		lengthb float,  
+		class nvarchar(50),  
+		mount float,
+		hmount float,
+		weight float,
+		memo nvarchar(MAX),
+		uno nvarchar(MAX)
+	) 
+	
+	--拆解字串
+	set @bbscount=0
+	while (CHARINDEX('^#^',@xcucu)>0)
+	begin
+		set @bbscount=@bbscount+1
+		
+		insert #tmpa
+		select  right('000'+cast(@bbscount as nvarchar(10)),3)
+		,dbo.split(@xcucu,'^@^',0)
+		,dbo.split(@xcucu,'^@^',1)
+		,dbo.split(@xcucu,'^@^',2)
+		,dbo.split(@xcucu,'^@^',3)
+		,cast(dbo.split(@xcucu,'^@^',4) as float)
+		,dbo.split(@xcucu,'^@^',5)
+		,cast(dbo.split(@xcucu,'^@^',6) as float)
+		,cast(dbo.split(@xcucu,'^@^',7) as float)
+		,cast(dbo.split(@xcucu,'^@^',8) as float)
+		,dbo.split(@xcucu,'^@^',9)
+		,@cubno+right('000'+cast(@bbscount as nvarchar(10)),3)
+		
+		set @xcucu=SUBSTRING(@xcucu,CHARINDEX('^#^',@xcucu)+3,LEN(@xcucu))
+	end
+	
+	--產生cub
+	if((select count(*) from #tmpa)>0)
+	begin
+		--bbm
+		exec("
+			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker)
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"' 
+		")
+		
+		--bbs
+		exec("
+			insert cubs"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,mount,hmount,weight,memo,uno,date2)
+			select '"+@cubno+"',*,'"+@datea+"' from #tmpa 
+		")
+	
+		insert dno (tablea,noa,usera)
+		select 'cub',@cubno,@userno
+	end
+	else
+	begin
+		set @cubno=''
+	end
+	
+	select @cubno cubno
+	
+	IF OBJECT_ID('tempdb..#tmpa')is not null
+	BEGIN
+		set @cmd = 'drop table #tmpa'
+		EXECUTE sp_executesql @cmd
+	END
+;

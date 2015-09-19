@@ -607,7 +607,7 @@
 				$('#txtOdate').val(q_date());
 				$('#txtOdate').focus();
 
-				var t_where = "where=^^ 1=1 group by post,addr^^";
+				var t_where = "where=^^ 1=1 ^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
 			}
 
@@ -618,7 +618,7 @@
 				$('#txtOdate').focus();
 
 				if (!emp($('#txtCustno').val())) {
-					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' group by post,addr ^^";
+					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
 					q_gt('custaddr', t_where, 0, 0, 0, "");
 				}
 			}
@@ -744,7 +744,7 @@
 				switch (s1) {
 					case 'txtCustno':
 						if (!emp($('#txtCustno').val())) {
-							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' group by post,addr^^";
+							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
 							q_gt('custaddr', t_where, 0, 0, 0, "");
 						}
 						break;

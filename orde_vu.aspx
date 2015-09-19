@@ -123,7 +123,7 @@
 					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
 				});
 
-				var t_where = "where=^^ 1=1 group by post,addr^^";
+				var t_where = "where=^^ 1=1 ^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
 				
 				/*$('#btnQuat').val('合約匯入');

@@ -30,10 +30,13 @@
 					{	//[1][2]
 						type : '1',
 						name : 'xdate'
-					},{//[3][4]
-						type : '1',
-						name : 'xmechno'
-					},{ //[5][6]
+					}, {/*[3][4]*/
+                        type : '2',
+                        name : 'xmechno',
+                        dbf  : 'mech',
+                        index: 'noa,mech',
+                        src  : 'mech_b.aspx'
+                    },{ //[5][6]
 						type : '1',
 						name : 'xmon'
 					},{//[7]

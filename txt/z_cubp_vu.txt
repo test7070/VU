@@ -145,15 +145,16 @@ order by mon,gno
 ;
 --------------------------------------------------------------------------------------------------
 z_cubp_vu04:--z_cubp_vu04
+SET QUOTED_IDENTIFIER OFF 
 declare @t_bmon nvarchar(10) 
 declare @t_emon nvarchar(10)
-----@t_type=0 未結案	@t_type=1 已結案
-declare @t_type nvarchar(10)
+declare @t_type nvarchar(10) ----@t_type=0 未結案	@t_type=1 已結案
 
 set @t_bmon = case when '#non'=[5] then '' else [5] end 
 set @t_emon = case when '#non'=[6] then char(255) else [6] end 
 set @t_type = case when '#non'=[7] then '' else [7] end 
 set @t_type= case when @t_type='未結案' then '0' when @t_type='已結案' then '1' else '' end
+
 declare @result table(
 	gno nvarchar(1),
 	comp nvarchar(max),
@@ -163,41 +164,42 @@ declare @result table(
 	stand float,
 	undone float,
 	unfinal float,
-	memo nvarchar(MAX)
-	)
+	memo nvarchar(MAX),
+	qhrefa nvarchar(MAX)
+)
 
 insert @result
-select  '0',a.nick,a.noa,isnull(SUM(b.mount),0) ordeno ,isnull(SUM(e.mount),0) done
-		,case when isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) < 0 then 0
-			 else isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) end stand
-	   ,case when (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) < 0 then 0
-		     else (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) end undone
-	   ,case when isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) < 0 then 0
-			 else isnull(SUM(e.mount),0)-isnull(SUM(c.mount),0) end +
-		case when (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) < 0 then 0
-		     else (isnull(SUM(b.mount),0)-isnull(SUM(e.mount),0)) end unfinal
+select '0',a.cust,a.noa
+,isnull(SUM(b.weight),0)
+,isnull(SUM(c.bweight),0)
+,isnull(SUM(d.vweight),0)
+,isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)
+,isnull(SUM(d.vweight),0)+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0))
+,a.memo
+,"z_cucp_vu?report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' and "+a.noa+"=$noa"
+from view_cuc a left join view_cucs b on a.noa=b.noa
+outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product=b.noq)c
+outer apply (select SUM(weight) vweight from view_vccs where ordeno=b.ordeno and no2=b.no2)d
+where a.datea between @t_bmon and @t_emon
+group by a.cust,a.noa,a.memo
 
-from view_orde a left join view_ordes b on a.noa=b.noa and a.accy=b.accy
-				 left join view_vccs c on a.noa=c.ordeno and a.accy=c.accy
-				 left join view_vcc  d on c.noa=d.noa and c.accy=d.accy
-				 left join view_cubs e on a.noa=e.ordeno and a.accy=e.accy
-where case when len(a.odate) = 10 then left(a.odate,7) else LEFT(a.odate,6) end between @t_bmon and @t_emon 
-group by a.nick,a.noa
+delete @result
+where not(unfinal=(case when @t_type=1 then 0 else  unfinal end) or @t_type='')
 
+if((select count(*) from @result)>0)
+begin
+	insert @result(gno,comp,ordeno,done,stand,undone,unfinal)
+	select '1',char(255),sum(ordeno),sum(done),sum(stand),sum(undone),sum(unfinal)
+	from @result
+end
 
-insert @result(gno,comp,ordeno,done,stand,undone,unfinal)
-select '1',char(255),sum(ordeno),sum(done),sum(stand),sum(undone),sum(unfinal)
-from @result
-
-
-select gno,comp,noa,
+select 
 dbo.getComma(ordeno,0) ordeno,
 dbo.getComma(done,0) done,
 dbo.getComma(stand,0) stand,
 dbo.getComma(undone,0) undone,
 dbo.getComma(unfinal,0) unfinal
+,ROW_NUMBER() over (order by gno,noa) recno,*
 from @result
-where (unfinal=case when @t_type=1 then 0 else  
-	  ( case when unfinal >0 then unfinal end) end
-	  or @t_type='')
-order by comp,noa,gno	  ;
+order by gno,noa
+;

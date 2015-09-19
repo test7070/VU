@@ -32,7 +32,7 @@
                 q_getFormat();
                 q_langShow();
 				
-				if(q_getHref()[0]='noa' &&q_getHref()[1].length>0 && q_getHref()[1]!= undefined){
+				if(q_getHref()[0]=='noa' &&q_getHref()[1].length>0 && q_getHref()[1]!= undefined){
 					$('#txtXnoa1').val(q_getHref()[1]);
                     $('#txtXnoa2').val(q_getHref()[1]);
 				}

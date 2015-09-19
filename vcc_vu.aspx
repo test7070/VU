@@ -114,7 +114,7 @@
 				//q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
 				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
 				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
-				var t_where = "where=^^ 1=1  group by post,addr^^";
+				var t_where = "where=^^ 1=1  ^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
 				
 				$('#lblPaydate').text('入廠時間');
@@ -228,7 +228,7 @@
 
 				$('#txtCustno').change(function() {
 					if (!emp($('#txtCustno').val())) {
-						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' group by post,addr ^^";
+						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "'  ^^";
 						q_gt('custaddr', t_where, 0, 0, 0, "");
 					}
 				});
@@ -563,7 +563,7 @@
 						$('#txtDatea').focus();
 
 						if (!emp($('#txtCustno').val())) {
-							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' group by post,addr ^^";
+							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "'  ^^";
 							q_gt('custaddr', t_where, 0, 0, 0, "");
 						}
 						//取得車號下拉式選單
@@ -917,7 +917,7 @@
 				$('#cmbTypea').val('1');
 				$('#txtDatea').focus();
 				//$('#cmbTaxtype').val('1');
-				var t_where = "where=^^ 1=1  group by post,addr^^";
+				var t_where = "where=^^ 1=1  ^^";
 				q_gt('custaddr', t_where, 0, 0, 0, "");
 			}
 
@@ -1135,7 +1135,7 @@
 						break;
 					case 'txtCustno':
 						if (!emp($('#txtCustno').val())) {
-							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' group by post,addr ^^";
+							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
 							q_gt('custaddr', t_where, 0, 0, 0, "");
 						}
 						break;

@@ -81,7 +81,11 @@ begin
 	set @bdate = (select min(datea) from view_ordes where noa = @noa)	
 	set @edate = (select max(datea) from view_ordes where noa = @noa)
 	set @datea = (select c from ztmpxls where CAST(noa as int) = 5)
-	
+	if(len(@datea)=8)
+		set @datea=left(@datea,4)+'/'+left(right(@datea,4),2)+'/'+right(@datea,2)
+	else
+		set @datea=left(@datea,4)+'/'+right(left(@datea,6),2)+'/'+right(left(@datea,8),2)
+		
 	set @no = @no + 1
 	set @noq = REPLICATE('0',3-LEN(CAST(@no as varchar(3))))+CAST(@no as varchar(3))
 	set @ordeno = @a
@@ -91,7 +95,7 @@ begin
 	set @product = (select product from view_ordes where noa = @ordeno and no2 = @no2)
 	set @ucolor = (select ucolor from view_ordes where noa = @ordeno and no2 = @no2)
 	set @class = (select class from view_ordes where noa = @ordeno and no2 = @no2)
-	set @size = @c
+	set @size = '#'+@c
 	set @spec = @d
 	set @lengthb = CAST(replace(@e,',','') as float) 
 	set @mount1 = CAST(replace(@f,',','') as float) 

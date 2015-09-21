@@ -89,7 +89,7 @@ begin
 	set @no = @no + 1
 	set @noq = REPLICATE('0',3-LEN(CAST(@no as varchar(3))))+CAST(@no as varchar(3))
 	set @ordeno = @a
-	set @no2 = @b
+	set @no2 = right('000'+@b,3)
 	set @cust = (select c from ztmpxls where CAST(noa as int) = 3)
 	set @productno = (select productno from view_ordes where noa = @ordeno and no2 = @no2)
 	set @product = (select product from view_ordes where noa = @ordeno and no2 = @no2)

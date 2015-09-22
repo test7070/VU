@@ -22,11 +22,14 @@ declare @tmp table(
 	total float,
 	enda  bit,
 	datea nvarchar(10),
-	weight float
+	weight float,
+	atax float,
+	money float
 )
 insert @tmp
 select '0', a.odate,a.noa,b.no2,a.nick,b.product,b.spec,b.size
 				,b.lengthb,b.ucolor,b.mount,b.price,b.total,b.enda,a.datea,b.weight
+				,a.atax,(b.total*a.atax*0.05)+b.total
 from view_ordes b left join view_orde a on b.noa=a.noa and a.accy=b.accy
 where (a.odate between @t_bodate and @t_eodate and
 	   a.datea between @t_bdatea and @t_edatea) and
@@ -41,8 +44,8 @@ FETCH NEXT FROM my_cursor
 INTO @odate
 WHILE @@FETCH_STATUS = 0
 	BEGIN	
-		insert @tmp(gno,odate,mount,total,weight)
-		select '1',odate,sum(mount),SUM(total),SUM(weight)
+		insert @tmp(gno,odate,mount,total,weight,money)
+		select '1',odate,sum(mount),SUM(total),SUM(weight),SUM(money)
 		from @tmp
 		where @odate=odate
 		group by odate
@@ -53,20 +56,18 @@ end
 
 CLOSE my_cursor
 DEALLOCATE my_cursor
-insert @tmp(gno,odate,mount,total,weight)
-		select '2',max(odate),sum(mount),SUM(total),SUM(weight)
+insert @tmp(gno,odate,mount,total,weight,money)
+		select '2',max(odate),sum(mount),SUM(total),SUM(weight),SUM(money)
 		from @tmp
 		where gno =1
 		
-select gno,odate,noa,no2,comp,product+' '+isnull(size,'')+' '+isnull(spec,'')+' '+
-		 case when (isnull(convert(nvarchar,lengthb),'')=''  
-		 or isnull(convert(nvarchar,lengthb),'') = '0') then '' 
-		 else isnull(convert(nvarchar,lengthb),'')+'M ' end 
-		 + isnull(ucolor,'')  xproduct,
+select gno,odate,noa,no2,comp,product+' '+spec+' '+size+' '+convert(nvarchar,lengthb)+' '+ucolor xproduct,
 		dbo.getComma(mount,0) mount,
 		dbo.getComma(price,0) price,
 		dbo.getComma(total,0) total,
 		case when enda=0 then 'X' else 'Y' end enda,
-		dbo.getComma(weight,0) weight
+		weight,atax*total*0.05 tax,dbo.getComma(money,0) money
 from @tmp
 order by odate,gno;
+
+

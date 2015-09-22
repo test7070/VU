@@ -37,9 +37,9 @@
 			aPop = new Array(
 				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
-				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,paytype,trantype,tel,fax,zip_home,addr_home', 'txtCustno,txtComp,txtNick,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
-				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
-				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx']
+				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,paytype,trantype,tel,fax,zip_home,addr_home', 'txtCustno,txtComp,txtNick,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx']
+				//['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
+				//['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
 				//,['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
 				//['txtUno__', '', 'view_uccc2', 'uno,uno,productno,product,spec,size,lengthb,class,unit,emount,eweight'
             	//, '0txtUno__,txtUno__,txtProductno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtMount__,txtWeight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
@@ -122,9 +122,6 @@
 				$('#txtBenifit').change(function() {
 					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
 				});
-
-				var t_where = "where=^^ 1=1 ^^";
-				q_gt('custaddr', t_where, 0, 0, 0, "");
 				
 				/*$('#btnQuat').val('合約匯入');
 				$('#btnQuat').click(function() {
@@ -165,19 +162,10 @@
 					}
 				});
 				
-				$('#txtAddr2').change(function() {
-					var t_custno = trim($(this).val());
-					if (!emp(t_custno)) {
-						focus_addr = $(this).attr('id');
-						var t_where = "where=^^ noa='" + t_custno + "' ^^";
-						q_gt('cust', t_where, 0, 0, 0, "");
-					}
-				});
-
 				$('#txtCustno').change(function() {
 					if (!emp($('#txtCustno').val())) {
 						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-						q_gt('custaddr', t_where, 0, 0, 0, "");
+						q_gt('custm', t_where, 0, 0, 0, "");
 					}
 				});
 
@@ -186,57 +174,7 @@
 						q_box("z_credit.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";custno='" + $('#txtCustno').val() + "';" + r_accy + ";" + q_cur, 'ordei', "95%", "95%", q_getMsg('btnCredit'));
 					}
 				});
-				////-----------------以下為addr2控制事件---------------
-				$('#btnAddr2').mousedown(function(e) {
-					var t_post2 = $('#txtPost2').val().split(';');
-					var t_addr2 = $('#txtAddr2').val().split(';');
-					var maxline=0;//判斷最多有幾組地址
-					t_post2.length>t_addr2.length?maxline=t_post2.length:maxline=t_addr2.length;
-					maxline==0?maxline=1:maxline=maxline;
-					var rowslength=document.getElementById("table_addr2").rows.length-1;
-					for (var j = 1; j < rowslength; j++) {
-						document.getElementById("table_addr2").deleteRow(1);
-					}
-					
-					for (var i = 0; i < maxline; i++) {
-						var tr = document.createElement("tr");
-						tr.id = "bbs_"+i;
-						tr.innerHTML = "<td id='addr2_tdBtn2_"+i+"'><input class='btn addr2' id='btnAddr_minus_"+i+"' type='button' value='-' style='width: 30px' onClick=minus_addr2("+i+") /></td>";
-						tr.innerHTML+= "<td id='addr2_tdPost2_"+i+"'><input id='addr2_txtPost2_"+i+"' type='text' class='txt addr2' value='"+t_post2[i]+"' style='width: 70px'/></td>";
-						tr.innerHTML+="<td id='addr2_tdAddr2_"+i+"'><input id='addr2_txtAddr2_"+i+"' type='text' class='txt c1 addr2' value='"+t_addr2[i]+"' /></td>";
-						var tmp = document.getElementById("addr2_close");
-						tmp.parentNode.insertBefore(tr,tmp);
-					}
-					readonly_addr2();
-					$('#div_addr2').show();
-				});
-				$('#btnAddr_plus').click(function() {
-					var rowslength=document.getElementById("table_addr2").rows.length-2;
-					var tr = document.createElement("tr");
-						tr.id = "bbs_"+rowslength;
-						tr.innerHTML = "<td id='addr2_tdBtn2_"+rowslength+"'><input class='btn addr2' id='btnAddr_minus_"+rowslength+"' type='button' value='-' style='width: 30px' onClick=minus_addr2("+rowslength+") /></td>";
-						tr.innerHTML+= "<td id='addr2_tdPost2_"+rowslength+"'><input id='addr2_txtPost2_"+rowslength+"' type='text' class='txt addr2' value='' style='width: 70px' /></td>";
-						tr.innerHTML+="<td id='addr2_tdAddr2_"+rowslength+"'><input id='addr2_txtAddr2_"+rowslength+"' type='text' class='txt c1 addr2' value='' /></td>";
-						var tmp = document.getElementById("addr2_close");
-						tmp.parentNode.insertBefore(tr,tmp);
-				});
-				$('#btnClose_div_addr2').click(function() {
-					if(q_cur==1||q_cur==2){
-						var rows=document.getElementById("table_addr2").rows.length-3;
-						var t_post2 = '';
-						var t_addr2 = '';
-						for (var i = 0; i <= rows; i++) {
-							if(!emp($('#addr2_txtPost2_'+i).val())||!emp($('#addr2_txtAddr2_'+i).val())){
-								t_post2 += $('#addr2_txtPost2_'+i).val()+';';
-								t_addr2 += $('#addr2_txtAddr2_'+i).val()+';';
-							}
-						}
-						$('#txtPost2').val(t_post2.substr(0,t_post2.length-1));
-						$('#txtAddr2').val(t_addr2.substr(0,t_addr2.length-1));
-					}
-					$('#div_addr2').hide();
-				});
-				//-----------------------------------------------------------------------------------------------------
+				
 				$('#btnOrdem').click(function() {
 					q_box("ordem_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + $('#txtNoa').val() + "';" + r_accy + ";" + q_cur, 'ordem', "95%", "95%", q_getMsg('popOrdem'));
 				});
@@ -257,24 +195,7 @@
 					$('#textNouno').val('');
                 	$('#div_nouno').hide();
 				});
-				
 			}
-			
-			//addr2控制事件vvvvvv-------------------
-			function minus_addr2(seq) {	
-				$('#addr2_txtPost2_'+seq).val('');
-				$('#addr2_txtAddr2_'+seq).val('');
-			}
-			
-			function readonly_addr2() {
-				if(q_cur==1||q_cur==2){
-					$('.addr2').removeAttr('disabled');
-				}else{
-					$('.addr2').attr('disabled', 'disabled');
-				}
-			}
-			
-			//addr2控制事件^^^^^^--------------------
 			
 			function q_boxClose(s2) {
 				var ret;
@@ -370,16 +291,23 @@
 							z_nick = as[0].nick;
 						}
 						break;
-					case 'custaddr':
-						var as = _q_appendData("custaddr", "", true);
-						var t_item = " @ ";
-						if (as[0] != undefined) {
-							for ( i = 0; i < as.length; i++) {
-								t_item = t_item + (t_item.length > 0 ? ',' : '') + as[i].post + '@' + as[i].addr;
+					case 'custm':
+						var as = _q_appendData("custm", "", true);
+						if(as[0] != undefined){
+							var ass = _q_appendData("custms", "", true);
+							if(ass[0] != undefined){
+								var t_item = " @ ";
+								for ( i = 0; i < ass.length; i++) {
+									t_item = t_item + (t_item.length > 0 ? ',' : '') + ass[i].account + '@' + ass[i].account;
+								}
+								$('#combAddr').text('');
+								q_cmbParse("combAddr", t_item);
+							}else{
+								$('#combAddr').text('');
 							}
+						}else{
+							$('#combAddr').text('');
 						}
-						document.all.combAddr.options.length = 0;
-						q_cmbParse("combAddr", t_item);
 						break;
 					case 'quat':
 						var as = _q_appendData("quat", "", true);
@@ -494,8 +422,7 @@
 
 			function combAddr_chg() {
 				if (q_cur == 1 || q_cur == 2) {
-					$('#txtAddr2').val($('#combAddr').find("option:selected").text());
-					$('#txtPost2').val($('#combAddr').find("option:selected").val());
+					$('#txtAddr2').val($('#combAddr').find("option:selected").val());
 				}
 			}
 
@@ -606,9 +533,7 @@
 				$('#txtAcomp').val(z_acomp);
 				$('#txtOdate').val(q_date());
 				$('#txtOdate').focus();
-
-				var t_where = "where=^^ 1=1 ^^";
-				q_gt('custaddr', t_where, 0, 0, 0, "");
+				$('#combAddr').text('');
 			}
 
 			function btnModi() {
@@ -619,7 +544,9 @@
 
 				if (!emp($('#txtCustno').val())) {
 					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-					q_gt('custaddr', t_where, 0, 0, 0, "");
+					q_gt('custm', t_where, 0, 0, 0, "");
+				}else{
+					$('#combAddr').text('');
 				}
 			}
 
@@ -663,7 +590,6 @@
 				$('input[id*="txt"]').click(function() {
 					browTicketForm($(this).get(0));
 				});
-				$('#div_addr2').hide();
 				refreshBbm();
 			}
 
@@ -680,9 +606,6 @@
 					//$('#txtOdate').datepicker();
 					$('#btnOrdem').attr('disabled', 'disabled');
 				}	
-				
-				$('#div_addr2').hide();
-				readonly_addr2();
 				refreshBbm();
 			}
 
@@ -745,7 +668,7 @@
 					case 'txtCustno':
 						if (!emp($('#txtCustno').val())) {
 							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-							q_gt('custaddr', t_where, 0, 0, 0, "");
+							q_gt('custm', t_where, 0, 0, 0, "");
 						}
 						break;
 				}
@@ -942,22 +865,6 @@
 				</tr>
 			</table>
 		</div>
-		<div id="div_addr2" style="position:absolute; top:244px; left:500px; display:none; width:530px; background-color: #CDFFCE; border: 5px solid gray;">
-			<table id="table_addr2" style="width:100%;" border="1" cellpadding='2' cellspacing='0'>
-				<tr>
-					<td style="width:30px;background-color: #f8d463;" align="center">
-						<input class="btn addr2" id="btnAddr_plus" type="button" value='＋' style="width: 30px" />
-					</td>
-					<td style="width:70px;background-color: #f8d463;" align="center">郵遞區號</td>
-					<td style="width:430px;background-color: #f8d463;" align="center">指送地址</td>
-				</tr>
-				<tr id='addr2_close'>
-					<td align="center" colspan='3'>
-						<input id="btnClose_div_addr2" type="button" value="確定">
-					</td>
-				</tr>
-			</table>
-		</div>
 		<div id='dmain' style="overflow:hidden;">
 			<div class="dview" id="dview">
 				<table class="tview" id="tview">
@@ -1032,11 +939,8 @@
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblAddr2' class="lbl"> </a></td>
-						<td><input id="txtPost2" type="text" class="txt c1"/></td>
-						<td colspan='5'>
-							<input id="txtAddr2" type="text" class="txt c1" style="width: 522px;"/>
-							<select id="combAddr" style="width: 20px" onchange='combAddr_chg()'> </select>
-						</td>
+						<td colspan='3'><input id="txtAddr2" type="text" class="txt c1" /></td>
+						<td><select id="combAddr" style="width: 20px" onchange='combAddr_chg()'> </select></td>
 						<!--<td><input id="btnAddr2" type="button" value='...' style="width: 30px;height: 21px" /></td>-->
 					</tr>
 					<tr>

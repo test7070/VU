@@ -196,23 +196,12 @@
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
                 
-                var t_year='';
-					if(r_len==4){
-					t_date = new Date();
-        				   t_date.setDate(1);
-                		   t_year = t_date.getUTCFullYear() ;						   
-					}else{
-							t_year=r_accy
-					}
-				var t_where="where=^^'"+t_year+"'=case when len(datea)=10 then left(datea,4) else LEFT(datea,3) end^^"
-				q_gt('cont',t_where, 0, 0, 0, "cont");
-                
-                
+				var t_where="where=^^1=1 ^^ stop=100 "
+				q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
                 
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
 				});
-				
             }
 
             function q_boxClose(s2) {
@@ -298,8 +287,8 @@
 						}
 					
 						break;   
-					case 'cont':
-                		var as = _q_appendData("cont", "", true);
+					case 'view_quat':
+                		var as = _q_appendData("view_quat", "", true);
 						for ( i = 0; i < as.length; i++) {
 							t_qno+=","+as[i].noa;
 						}
@@ -315,21 +304,6 @@
                  
             }
             
-          
-          
-          	/*<style type="text/css">
-            .num {
-                text-align: right;
-                padding-right: 2px;
-            }
-            #q_report select {
-            	font-size: medium;
-    			margin-top: 2px;
-            }
-            select {
-            	font-size: medium;
-            }
-		</style>  */
 		</script>
 		<style type="text/css">
             .num {
@@ -345,46 +319,17 @@
             }
 		</style> 
 	</head>
-	
-	
 	<body ondragstart="return false" draggable="false"
 	ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"
 	ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
 	ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();">
-		<div id="q_menu"></div>
+		<div id="q_menu"> </div>
 		<div style="position: absolute;top: 10px;left:50px;z-index: 1;width:2000px;">
 			<div id="container">
-				<div id="q_report"></div>
+				<div id="q_report"> </div>
 			</div>
 			<div class="prt" style="margin-left: -40px;">
-				<div>
-  <div id="q_acDiv"></div>
-  <input type="button" id="btnOk"  onMouseOver="this.style.cursor='hand'"  alt=""  style=' font-size: 16px; font-weight:bold;color:blue'/>
-  <input id="btnTop" type="button" onclick="q_topPage()"  style="background:url(../image/first_32o.png) no-repeat;width: 36px;height: 36px;border-style: hidden;"/>
-  <input id="btnPrev" type="button" onclick="q_prevPage()"  style="background:url(../image/prev_32o.png) no-repeat;width: 36px;height: 36px;border-style: hidden;"/>
-  <input id="btnNext" type="button" onclick="q_nextPage()"  style="background:url(../image/next_32o.png) no-repeat;width: 36px;height: 36px;border-style: hidden;"/>
-  <input id="btnBott" type="button" onclick="q_bottPage()"  style="background:url(../image/bott_32o.png) no-repeat;width: 36px;height: 36px;border-style: hidden;"/>
-  <input id="txtPageno" value="1" type="text" style=" margin-top: 5px; text-align: center;top:1px; left:110px; width: 45px;"/>
-  <label style=" vertical-align: middle;position:inherit; left:165px">/</label>
-  <input id="txtEnd" value="XXXX" type="text" style=" vertical-align: middle ;text-align: center; top:1px; left:175px; width: 45px;"/>
-  <input id="txtTotpage" value="1" type="hidden"/>
-  <input id="txtHtmfile" value="" type="hidden"/>
-  <input id="txtUrl2" value="" type="hidden"/>
-  <input id="btnPrint" type="button" style="background:url(../image/print_32.png) no-repeat;width: 36px;height: 36px;border-style: hidden;"/>
-  <input id="chkXlsHead" value="" type="checkbox" />
-  <input id="btnXls" type="button" style="background:url(../image/excel.jpg) no-repeat;width: 36px;height: 36px;border-style: hidden;"/>
-    <a id='lblPageRange'></a>
-  <input id="txtPageRange" type="text" style='width:40px;'/>
-  <input id="btnWebPrint" type="button" style="font-size: medium;color: #0000FF;" value=""/>
-  <select id="cmbPcPrinter" style='width:220px;'></select>
-  <input id="btnAuthority" type="button"  style="font-size: medium;" />
-  <input id="txtUrl" value="" type="text" style='width:70px;'/>
-  <input id="btnClose" type="button" onclick=""  style="background:url(../image/colose_32r.png) no-repeat;width: 36px;height: 36px;border-style: hidden;"/>
-  <!--<a id='lblPaperSize'></a><a id='lblLandScape'></a>-->
-  <select id="cmbPaperSize" style='width:80px;visibility:hidden;'></select>
-  <input id="chkLandScape" value="" type="checkbox" style='width:80px;visibility:hidden;'/>
-  <div id="frameReport"  style="visibility:visible;top: 35px; left: 0px; height: 100% ; width: 100%; border-top-color:Red; border-top-style:groove;" /div>
-</div>
+				<!--#include file="../inc/print_ctrl.inc"-->
 			</div>
 		</div>
 	</body>

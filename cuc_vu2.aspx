@@ -62,7 +62,7 @@
                 
                 $('#lblNoa').text('案號'); 
                 $('#lblCust').text('客戶名稱');
-                $('#lblMemo').text('工地名稱');
+                $('#lblMemo').text('備註');
                 $('#lblDatea').text('日期'); 
             }
 
@@ -213,6 +213,8 @@
                 $('#lblWeight_s').text('重量(KG)');
                 $('#lblMemo_s').text('備註');
                 $('#lblMins_s').text('結案');
+                $('#vewNoa').text('案號');
+                $('#vewCust').text('客戶');
             }
 
             function btnIns() {
@@ -228,7 +230,8 @@
             }
 
             function btnPrint() {
-
+				var t_where = "noa='" + $.trim($('#txtNoa').val()) + "'";
+               	q_box("z_cucp_vu.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, '', "95%", "95%", q_getMsg('popPrint'));
             }
 
             function wrServer(key_value) {
@@ -455,15 +458,15 @@
 				<table class="tview" id="tview" >
 					<tr>
 						<td align="center" style="width:5%"><a id='vewChk'> </a></td>
-						<td align="center" style="width:20%"><a id='vewDatea'> </a></td>
-						<td align="center" style="width:25%"><a id='vewMech'> </a></td>
+						<td align="center" style="width:20%"><a id='vewNoa'> </a></td>
+						<td align="center" style="width:25%"><a id='vewCust'> </a></td>
 					</tr>
 					<tr>
 						<td>
 						<input id="chkBrow.*" type="checkbox" style=' '/>
 						</td>
-						<td align="center" id='datea'>~datea</td>
-						<td align="center" id='mech'>~mech</td>
+						<td align="center" id='noa'>~noa</td>
+						<td align="center" id='cust'>~cust</td>
 					</tr>
 				</table>
 			</div>

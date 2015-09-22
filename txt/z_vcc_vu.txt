@@ -20,28 +20,8 @@ declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =4 
-	set @weight_decimal =4 
-	set @price_decimal =4
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =4 
 -------------------------------------------------- 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @qhref_acomp='_it' 
-if(charindex('永勝',@t_acomp)>0) 
-	set @qhref_acomp='_uu' 
-if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-	set @qhref_acomp='_tn' 
-if(charindex('有達',@t_acomp)>0 ) 
-	set @qhref_acomp='_xy' 
-if(charindex('義橋',@t_acomp)>0 ) 
-	set @qhref_acomp='_yc' 
-if(charindex('智勝',@t_acomp)>0 ) 
-	set @qhref_acomp='_vu' 
+set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -122,8 +102,8 @@ select '93',datea,'ZZZZZZZZZZZZ',
 from @result group by datea 
 
 insert into @result(gno,datea,noa,mount,price,total,money,weight) 
-select '94',left(datea,6)+'z','ZZZZZZZZZZZZ',sum(mount),sum(price),sum(total),sum(money),sum(weight) 
-from @result a where gno='93' group by left(datea,6) 
+select '94',left(datea,7)+'z','ZZZZZZZZZZZZ',sum(mount),sum(price),sum(total),sum(money),sum(weight) 
+from @result a where gno='93' group by left(datea,7) 
 --*************************************************************************	
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 update @result set gno='0' where gno='91' 
@@ -138,7 +118,8 @@ where typea='退'
 select gno, noa, noq, typea, datea, LEFT(datea,6) xdatea, mon, custno, left(comp,10) comp,  xproduct  xpros,unit,qhref 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+--,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+,dbo.getComma(price,-1) price
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,invono,idate 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,imoney),1)),@total_decimal,30)) imoney 
@@ -187,14 +168,6 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
 
-if(charindex('永勝',@t_acomp)>0) 
-	begin 
-		set @mount_decimal =4 
-		set @weight_decimal =4 
-		set @price_decimal =4 
-	end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =0 
 -------------------------------------------------- 
 
 declare @tmp table( 
@@ -288,28 +261,8 @@ declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =4 
-	set @weight_decimal =4 
-	set @price_decimal =4 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =0 
 -------------------------------------------------- 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @qhref_acomp='_it' 
-if(charindex('永勝',@t_acomp)>0) 
-	set @qhref_acomp='_uu' 
-if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-	set @qhref_acomp='_tn' 
-if(charindex('有達',@t_acomp)>0 ) 
-	set @qhref_acomp='_xy' 
-if(charindex('義橋',@t_acomp)>0 ) 
-	set @qhref_acomp='_yc' 
-if(charindex('智勝',@t_acomp)>0 ) 
-	set @qhref_acomp='_vu' 
+set @qhref_acomp='_vu' 
 --*********************************************************************************** 
 
 declare @result table( 
@@ -428,13 +381,12 @@ from @result
 where gno='1'
 group by custno
 
-
-
 select gno, typea, noa, noq, datea, mon, custno, comp 
 ,addr_invo,tel,productno,xproduct xpdt,unit 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+--,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+,dbo.getComma(price,-1)price
 ,isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)),0) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,back),1)),@total_decimal,30)) back 
@@ -447,12 +399,9 @@ select gno, typea, noa, noq, datea, mon, custno, comp
 ,isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)),0) totax 
 ,ucolor,spec,size,length,memo
 from @result 
-
 order by custno,xproduct,gno,datea,noa,noq  
-
-
   ;
-  
+--************************************************************************************  
  z_vcc_vu4:--z_vcc_vu4 
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -488,15 +437,6 @@ declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =4 
-	set @weight_decimal =4 
-	set @price_decimal =4 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =0 
 -------------------------------------------------- 
 
 declare @tmp table( 
@@ -552,7 +492,7 @@ select gno,products,cno,left(custnick,10) custnick
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
 ,dbo.getComma(weight,0) weight
 from @tmp order by products,gno,cno  ;
-
+--***************************************************************************************
  z_vcc_vu5:--z_vcc_vu5
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -589,26 +529,8 @@ declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =0 
-	set @weight_decimal =0 
-	set @price_decimal =0 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =0 
 -------------------------------------------------- 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @qhref_acomp='_it' 
-if(charindex('永勝',@t_acomp)>0) 
-	set @qhref_acomp='_uu' 
-if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-	set @qhref_acomp='_tn' 
-if(charindex('有達',@t_acomp)>0 ) 
-	set @qhref_acomp='_xy' 
-if(charindex('智勝',@t_acomp)>0 ) 
-	set @qhref_acomp='_vu' 
+set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 
 declare @result table( 
@@ -679,13 +601,14 @@ where typea='退'
 select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,xproduct xpdt,unit, qhref 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+--,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price
+,dbo.getComma(price,-1)price 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax  
 ,pcount ,ucolor,spec ,size,length
 from @result order by custno,gno,mon,datea,noa,noq ;
-
+--**************************************************************************************
 z_vcc_vu6:--z_vcc_vu6
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -721,15 +644,6 @@ declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =0 
-	set @weight_decimal =0 
-	set @price_decimal =0 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =0 
 -------------------------------------------------- 
 declare @tmp table( 
 	gno nvarchar(1), 
@@ -766,7 +680,6 @@ select '1',custno,custs,'999/99',sum(mount),sum(total),sum(tax),sum(totax),sum(w
 insert into @tmp(gno,custno,mount,total,tax,totax,weight) 
 select '2','ZZZZ_ZZZ',sum(mount), sum(total), sum(tax), sum(totax),sum(weight) from @tmp where gno='1' 
 
-
 select gno,custno cno,left(custs,10) custs,mon 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
@@ -775,7 +688,7 @@ select gno,custno cno,left(custs,10) custs,mon
 ,dbo.getComma(weight,0) weight
 from @tmp order by custno,mon,gno ;
 
-
+--**************************************************************************************
 z_vcc_vu7:--z_vcc_vu7
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -812,25 +725,8 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
 
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =0 
-	set @weight_decimal =0 
-	set @price_decimal =0 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =4 
 -------------------------------------------------- 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @qhref_acomp='_it' 
-if(charindex('永勝',@t_acomp)>0) 
-	set @qhref_acomp='_uu' 
-if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-	set @qhref_acomp='_tn' 
-if(charindex('有達',@t_acomp)>0 ) 
-	set @qhref_acomp='_xy' 
-if(charindex('智勝',@t_acomp)>0 ) 
-	set @qhref_acomp='_vu' 	
+set @qhref_acomp='_vu' 	
 ------------------------------------------------- 
 
 declare @result table( 
@@ -967,7 +863,8 @@ select gno, typea, noa, noq, datea, mon, custno, left(comp,10) comp
 ,addr_invo,tel,productno,xproduct xpdt,unit, qhref 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+--,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price
+,dbo.getComma(price,-1)price 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,back),1)),@total_decimal,30)) back 
@@ -982,6 +879,7 @@ from @result order by productno,gno,datea,noa,noq ;
 end try
 begin catch 
 end catch;
+--********************************************************************************
 z_vcc_vu8:--z_vcc_vu8
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1019,14 +917,6 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
 
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =0 
-	set @weight_decimal =0 
-	set @price_decimal =0 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =0 
 -------------------------------------------------- 
 
 declare @tmp table( 
@@ -1115,32 +1005,13 @@ set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
 --***********************************************************************************
--------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =0 
-	set @weight_decimal =0 
-	set @price_decimal =0 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =0 
 -------------------------------------------------- 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @qhref_acomp='_it' 
-if(charindex('永勝',@t_acomp)>0) 
-	set @qhref_acomp='_uu' 
-if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-	set @qhref_acomp='_tn' 
-if(charindex('有達',@t_acomp)>0 ) 
-	set @qhref_acomp='_xy' 
-if(charindex('智勝',@t_acomp)>0 ) 
-	set @qhref_acomp='_vu' 
+set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 declare @tmp table( 
 	gno nvarchar(1), 
@@ -1195,14 +1066,15 @@ update @tmp set mount=mount*-1,total=total*-1,totax=totax*-1
 where typea='退' 
 
 select gno,salesno,salesname,left(comp,10)comp,datea,noa,typea,productno,products,unit,qhref 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+--,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price
+,dbo.getComma(price,-1)price 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
 ,dbo.getComma(weight,0) weight 
 from @tmp order by salesno,salesname,gno,datea,productno ;
-
+--*********************************************************************
 z_vcc_vu10:--z_vcc_vu10
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1239,14 +1111,6 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
 
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =0 
-	set @weight_decimal =0 
-	set @price_decimal =0 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =0 
 -------------------------------------------------- 
 
 declare @tmp table( 
@@ -1298,7 +1162,7 @@ select gno,salesno sno,salesname,mon
 ,dbo.getComma(weight,0) weight
 from @tmp order by salesno,mon,gno 
 ;
-  
+--********************************************************************************
 z_vcc_vu11:--z_vcc_vu11
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1327,32 +1191,13 @@ set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
 --***********************************************************************************
--------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =0 
-	set @weight_decimal =0 
-	set @price_decimal =0 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-set @mount_decimal =0 
 -------------------------------------------------- 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @qhref_acomp='_it' 
-if(charindex('永勝',@t_acomp)>0) 
-	set @qhref_acomp='_uu' 
-if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-	set @qhref_acomp='_tn' 
-if(charindex('有達',@t_acomp)>0 ) 
-	set @qhref_acomp='_xy' 
-if(charindex('智勝',@t_acomp)>0 ) 
-	set @qhref_acomp='_vu' 
+set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 declare @tmp table( 
 	gno nvarchar(1), 
@@ -1409,14 +1254,15 @@ update @tmp set mount=mount*-1,total=total*-1,totax=totax*-1 where typea='退'
 
 select 
 	gno,salesno,salesname,left(comp,10) comp,productno,products,datea,noa,typea,unit, qhref 
-	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+	--,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price
+	,dbo.getComma(price,-1)price 
 	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax
 	,dbo.getComma(weight,0) weight
 from @tmp order by salesno,salesname,gno,productno,datea ;
-
+--******************************************************************************************
 z_vcc_vu12:--z_vcc_vu12
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1445,21 +1291,11 @@ set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
 --***********************************************************************************
-
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =0 
-	set @weight_decimal =0 
-	set @price_decimal =0 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =0 
 -------------------------------------------------- 
 declare @tmp table( 
 	gno nvarchar(1), 
@@ -1509,7 +1345,6 @@ insert into @tmp(gno,mount,total,tax,totax,weight)
 select '1',sum(mount),sum(total),sum(total)+sum(tax),sum(totax),sum(weight)
 from @tmp 
 
-
 select gno,salesno sno ,salesname,products 
 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
@@ -1519,7 +1354,7 @@ select gno,salesno sno ,salesname,products
 ,dbo.getComma(weight,0) weight
 from @tmp order by gno,salesno ;
 
-
+--********************************************************************************************
 z_vcc_vu13:--z_vcc_vu13
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1554,26 +1389,8 @@ declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =4 
-	set @weight_decimal =4 
-	set @price_decimal =4 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =4 
 -------------------------------------------------- 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @qhref_acomp='_it' 
-if(charindex('永勝',@t_acomp)>0) 
-	set @qhref_acomp='_uu' 
-if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-	set @qhref_acomp='_tn' 
-if(charindex('有達',@t_acomp)>0 ) 
-	set @qhref_acomp='_xy' 
-if(charindex('智勝',@t_acomp)>0 ) 
-	set @qhref_acomp='_vu' 
+set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 declare @tmp table( 
 	gno nvarchar(1), 
@@ -1634,14 +1451,15 @@ update @tmp set mount=mount*-1,total=total*-1 ,totax=totax *-1
 where typea='退' 
 
 select gno,custno,custnick,salesno,salesname,productno,products,datea,noa,typea,unit,qhref 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+--,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price
+,dbo.getComma(price,-1)price 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
 ,dbo.getComma(weight,0) weight
 from @tmp order by salesno,gno,custno,productno,datea ;
-
+--***********************************************************************
 z_vcc_vu14:--z_vcc_vu14
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1670,22 +1488,11 @@ set @t_class   = case when '#non'=[14] then '' else [14] end
 set @t_blengthb = case when '#non'=[15] then 0 else [15] end
 set @t_elengthb = case when '#non'=[16] then 99 else [16] end
 --***********************************************************************************
-
--------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =4 
-	set @weight_decimal =4 
-	set @price_decimal =4 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =4 
 -------------------------------------------------- 
 
 declare @tmp table( 
@@ -1732,7 +1539,6 @@ group by a.salesno,s.namea,a.custno,c.nick,c.comp
 		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
 		 + isnull(b.ucolor,'') 
 		 
-		 
 order by a.salesno,a.custno,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
 		 case when (isnull(convert(nvarchar,b.lengthb),'')=''  
 		 or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' 
@@ -1751,8 +1557,7 @@ select gno,custno,left(custnick,7) custnick,salesno sno ,salesname,products
 ,dbo.getComma(weight,0) weight
 from @tmp order by gno,salesno,custno
  ;
-  
-  
+ --*****************************************************************************************
 z_vcc_vu15:--z_vcc_vu15
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1787,26 +1592,8 @@ declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =4 
-	set @weight_decimal =4 
-	set @price_decimal =4 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =4 
 -------------------------------------------------- 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @qhref_acomp='_it' 
-if(charindex('永勝',@t_acomp)>0) 
-	set @qhref_acomp='_uu' 
-if(charindex('楊家',@t_acomp)>0 or charindex('德芳',@t_acomp)>0) 
-	set @qhref_acomp='_tn' 
-if(charindex('有達',@t_acomp)>0 ) 
-	set @qhref_acomp='_xy' 
-if(charindex('智勝',@t_acomp)>0 ) 
-	set @qhref_acomp='_vu' 
+set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 declare @tmp table( 
 	gno nvarchar(1), 
@@ -1865,14 +1652,15 @@ set mount=mount*-1,total=total*-1 ,totax=totax*-1,weight=weight*-1
 where typea='退' 
 
 select gno,productno,products,sno,salesname,cno,custnick,datea,noa,typea, qhref 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
+--,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price
+,dbo.getComma(price,-1)price 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax
 ,dbo.getComma(weight,0) weight
 from @tmp order by productno,products,gno,sno,cno,datea,typea ;
-
+--**************************************************************************************
 z_vcc_vu16:--z_vcc_vu16
 declare @t_bdate   nvarchar(20)
 declare @t_edate   nvarchar(20)
@@ -1906,15 +1694,6 @@ declare @mount_decimal int = 4
 declare @weight_decimal int = 4 
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
-
-if(charindex('永勝',@t_acomp)>0) 
-begin 
-	set @mount_decimal =4 
-	set @weight_decimal =4 
-	set @price_decimal =4 
-end 
-if(charindex('英特瑞',@t_acomp)>0 or charindex('安美得',@t_acomp)>0) 
-	set @mount_decimal =4 
 -------------------------------------------------- 
 declare @tmp table( 
 	gno nvarchar(1), 

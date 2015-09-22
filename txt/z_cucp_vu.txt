@@ -1,0 +1,62 @@
+z_cucp_vu01:--z_cucp_vu01
+declare @t_bnoa nvarchar(100)
+declare @t_enoa nvarchar(100)
+
+set @t_bnoa = case when '#non'=[1] then '' else [1] end 
+set @t_enoa = case when '#non'=[2] then char(255) else [2] end 
+ -----------------------------------------------------------------------------------
+declare @result table(
+	gno nvarchar(10),
+	noa nvarchar(30),
+	comp nvarchar(100),
+	memo nvarchar(MAX),
+	datea nvarchar(20),
+	odatea nvarchar(MAX),
+	
+	no2 nvarchar(20),
+	size nvarchar(max),
+	spec nvarchar(MAX),
+	lengthb float,
+	om float,
+	oh float,
+	ow float,
+	bm float,
+	bh float,
+	bw float,
+	enda nvarchar(10),
+	vm float,
+	vh float,
+	vw float,
+	bmemo nvarchar(max)
+)
+
+insert @result
+select '0',a.noa,a.cust,a.memo,a.datea,stuff((select ','+datea from view_orde where noa=b.ordeno group by datea FOR XML PATH('')),1,1,'')
+,b.no2,b.size,b.spec,b.lengthb,isnull(b.mount,0),isnull(b.mount1,0),isnull(b.weight,0),isnull(c.bm,0),isnull(c.bh,0),isnull(c.bw,0)
+,(case when isnull(b.mins,0)=0 and isnull(b.weight,0)-isnull(c.bw,0)>0  then '' else 'V' end )
+,isnull(d.vm,0),isnull(d.vh,0),isnull(d.vw,0),b.memo
+from view_cuc a left join view_cucs b on a.noa=b.noa
+outer apply (select SUM(mount) bm,SUM(hmount) bh,SUM(weight) bw from view_cubs where productno2=a.noa and product2=b.noq)c
+outer apply (select SUM(mount) vm,SUM(0) vh,SUM(weight) vw from view_vccs where ordeno=b.ordeno and no2=b.no2)d
+where a.noa between @t_bnoa and @t_enoa
+
+if((select count(*) from @result)>0)
+begin
+	insert @result (gno,noa,om,oh,ow,bm,bh,bw,vm,vh,vw)
+	select '1',noa,sum(om),sum(oh),sum(ow),sum(bm),sum(bh),sum(bw),sum(vm),sum(vh),sum(vw) 
+	from @result group by noa
+end
+
+select 
+dbo.getComma(lengthb,-1) lengthb,
+dbo.getComma(om,0) om,
+dbo.getComma(oh,0) oh,
+dbo.getComma(ow,0) ow,
+dbo.getComma(bm,0) bm,
+dbo.getComma(bh,0) bh,
+dbo.getComma(bw,0) bw,
+dbo.getComma(vm,0) vm,
+dbo.getComma(vh,0) vh,
+dbo.getComma(vw,0) vw,
+* from @result order by noa,gno,no2
+;

@@ -72,7 +72,11 @@
 						dbf : 'store',
 						index : 'noa,store',
 						src : 'store_b.aspx'
-					}]
+					}, {
+                        type : '5',
+                        name : 'xorde', //[16]
+                        value:("1@含訂單,0@不含訂單").split(',')
+                    }]
                 });
                 q_popAssign();
                 q_getFormat();
@@ -202,10 +206,10 @@
 	ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"
 	ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
 	ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();">
-		<div id="q_menu"></div>
+		<div id="q_menu"> </div>
 		<div style="position: absolute;top: 10px;left:50px;z-index: 1;width:2000px;">
 			<div id="container">
-				<div id="q_report"></div>
+				<div id="q_report"> </div>
 				<!--<input type="button" id="btnUcf" value="成本結轉" style="font-weight: bold;font-size: medium;color: red;">-->
 			</div>
 			<div class="prt" style="margin-left: -40px;">

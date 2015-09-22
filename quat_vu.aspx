@@ -97,8 +97,15 @@
 				$('#lblTotal').text('合約金額');
 				$('#lblEnda').text('終止');
 				$('#lblAcomp').text('簽約公司');
+				$('#lblAddr2').text('工地名稱');
 				document.title='出貨合約';
-
+				
+				$('#txtCustno').change(function() {
+					if (!emp($('#txtCustno').val())) {
+						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
+						q_gt('custm', t_where, 0, 0, 0, "");
+					}
+				});
 			}
 
 			function q_boxClose(s2) {
@@ -154,6 +161,24 @@
 							z_cno = as[0].noa;
 							z_acomp = as[0].acomp;
 							z_nick = as[0].nick;
+						}
+						break;
+					case 'custm':
+						var as = _q_appendData("custm", "", true);
+						if(as[0] != undefined){
+							var ass = _q_appendData("custms", "", true);
+							if(ass[0] != undefined){
+								var t_item = " @ ";
+								for ( i = 0; i < ass.length; i++) {
+									t_item = t_item + (t_item.length > 0 ? ',' : '') + ass[i].account + '@' + ass[i].account;
+								}
+								$('#combAddr').text('');
+								q_cmbParse("combAddr", t_item);
+							}else{
+								$('#combAddr').text('');
+							}
+						}else{
+							$('#combAddr').text('');
 						}
 						break;
 					case q_name:
@@ -295,6 +320,7 @@
 
 				$('#txtCno').val(z_cno);
 				$('#txtAcomp').val(z_acomp);
+				$('#combAddr').text('');
 			}
 
 			function btnModi() {
@@ -303,6 +329,12 @@
 				_btnModi();
 				$('#txtProduct').focus();
 				
+				if (!emp($('#txtCustno').val())) {
+					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
+					q_gt('custm', t_where, 0, 0, 0, "");
+				}else{
+					$('#combAddr').text('');
+				}
 			}
 
 			function btnPrint() {
@@ -410,7 +442,12 @@
 
 			function q_popPost(s1) {
 				switch (s1) {
-					
+					case 'txtCustno':
+						if (!emp($('#txtCustno').val())) {
+							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
+							q_gt('custm', t_where, 0, 0, 0, "");
+						}
+						break;
 				}
 			}
 			function refreshBbm() {
@@ -420,6 +457,12 @@
                     $('#txtNoa').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
                 }
             }
+            
+            function combAddr_chg() {
+				if (q_cur == 1 || q_cur == 2) {
+					$('#txtAddr2').val($('#combAddr').find("option:selected").val());
+				}
+			}
 		</script>
 		<style type="text/css">
 			#dmain {
@@ -611,6 +654,11 @@
 							<input id="txtComp" type="text" class="txt c1"/>
 							<input id="txtNick" type="text" class="txt c1" style="display: none;"/>
 						</td>
+					</tr>
+					<tr>
+						<td><span> </span><a id='lblAddr2' class="lbl"> </a></td>
+						<td colspan='3'><input id="txtAddr2" type="text" class="txt c1"/></td>
+						<td><select id="combAddr" style="width: 20px" onchange='combAddr_chg()'> </select></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblBoss' class="lbl"> </a></td>

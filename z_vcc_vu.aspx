@@ -196,16 +196,12 @@
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
                 
-                
 				var t_where="where=^^1=1 ^^ stop=100 "
 				q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
-                
-                
                 
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
 				});
-				
             }
 
             function q_boxClose(s2) {

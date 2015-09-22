@@ -35,7 +35,7 @@
 				//['txtPost', 'lblAddr', 'addr', 'post,addr', 'txtPost,txtAddr', 'addr_b.aspx'],
 				//['txtPost2', 'lblAddr2', 'addr', 'post,addr', 'txtPost2,txtAddr2', 'addr_b.aspx'],
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
-				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
+				['txtPost2', 'lblAddr2', 'cust', 'noa,comp', 'txtPost2,txtAddr2', 'cust_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp,addr', 'txtCno,txtAcomp,txtAddr2', 'acomp_b.aspx']
 				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
@@ -487,8 +487,8 @@
 					case 'cust':
 						var as = _q_appendData("cust", "", true);
 						if (as[0] != undefined && focus_addr != '') {
-							$('#' + zip_fact).val(as[0].zip_fact);
-							$('#' + focus_addr).val(as[0].addr_fact);
+							$('#' + zip_fact).val(as[0].noa);
+							$('#' + focus_addr).val(as[0].comp);
 							zip_fact = '';
 							focus_addr = '';
 						}
@@ -534,7 +534,7 @@
 							q_gt('custaddr', t_where, 0, 0, 0, "");
 						}
 						break;
-					case 'ordc':
+					/*case 'ordc':
 						var ordc = _q_appendData("ordc", "", true);
 						if (ordc[0] != undefined) {
 							$('#combPaytype').val(ordc[0].paytype);
@@ -543,7 +543,7 @@
 							$('#txtPost2').val(ordc[0].post2);
 							$('#txtAddr2').val(ordc[0].addr2);
 						}
-						break;
+						break;*/
 					case 'startdate':
 						var as = _q_appendData('tgg', '', true);
 						var t_startdate='';

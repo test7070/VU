@@ -172,9 +172,9 @@ insert @result
 select '0',left(a.cust,4),a.noa
 ,isnull(SUM(b.weight),0)
 ,isnull(SUM(c.bweight),0)
-,isnull(SUM(d.vweight),0)
-,isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)
-,isnull(SUM(d.vweight),0)+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0))
+,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) 
+,isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) 
+,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0))+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)) 
 ,a.memo
 ,"z_cucp_vu?report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' and "+a.noa+"=$noa"
 from view_cuc a left join view_cucs b on a.noa=b.noa

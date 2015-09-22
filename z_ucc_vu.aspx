@@ -72,7 +72,11 @@
 						dbf : 'store',
 						index : 'noa,store',
 						src : 'store_b.aspx'
-					}]
+					}, {
+                        type : '5',
+                        name : 'xorde', //[16]
+                        value:("1@含訂單,0@不含訂單").split(',')
+                    }]
                 });
                 q_popAssign();
                 q_getFormat();

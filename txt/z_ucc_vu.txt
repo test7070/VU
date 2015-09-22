@@ -338,6 +338,7 @@ declare @t_elengthb nvarchar(50)
 declare @t_class nvarchar(50)
 declare @t_uno nvarchar(50)
 declare @t_edate nvarchar(20)
+declare @t_ordeshow nvarchar(20)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -348,6 +349,7 @@ set @t_elengthb = case when '#non'=[10] then '999' else [10] end
 set @t_class = case when '#non'=[11] then '' else [11] end
 set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
+set @t_ordeshow = case when '#non'=[16] then '1' else [16] end
 
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
@@ -371,12 +373,14 @@ create table #tmp(
 	uno nvarchar(50),
 	mount decimal(20,2),
 	hmount decimal(20,2),
-	weight decimal(20,2)
+	weight decimal(20,2),
+	memo nvarchar(MAX),
+	cust nvarchar(50)
 )
 
 
 insert #tmp
-select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.hmount,b.weight 
+select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.hmount,b.weight,b.memo,b.comp
 from view_cub a left join view_cubs b on a.noa=b.noa
 where (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
@@ -384,6 +388,7 @@ and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and isnull(uno,'')!='' --and b.datea<=@t_edate 
+and (len(b.ordeno)=(case when @t_ordeshow='0' then 0 else len(b.ordeno) end))
 
 if((select count(*) from #tmp)>0)
 begin
@@ -391,7 +396,6 @@ begin
 	select '1',@t_edate,CHAR(255),sum(a.mount),sum(a.hmount),sum(a.weight) 
 	from #tmp a where gno='0'
 end
-
 
 select dbo.getComma(lengthb,-1)lengthb
 ,dbo.getComma(mount,[2])mount

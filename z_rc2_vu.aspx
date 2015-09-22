@@ -121,17 +121,8 @@
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
                 
-                if(r_len==4){
-						   t_date = new Date();
-        				   t_date.setDate(1);
-                		   t_year = t_date.getUTCFullYear() ;
-						   
-						}else{
-							t_year=r_accy
-						}
-				 var t_where="where=^^'"+t_year+"'=case when len(datea)=10 then left(datea,4) else LEFT(datea,3) end^^"
+				 var t_where="where=^^1=1 ^^ stop=100 "
 				 q_gt('cont', t_where, 0, 0, 0, "cont");
-                
                 
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
@@ -143,7 +134,6 @@
 
 			function q_gtPost(s2) {
 			}
-			
 			
 			function q_gtPost(t_name) {
                 switch (t_name) {

@@ -1,0 +1,68 @@
+z_orde_vu01:--z_orde_vu01
+declare @t_bdatea nvarchar(10)=case when '#non' = [1] then '' else [1] end
+declare @t_edatea nvarchar(10) = case when '#non' = [2] then char(255) else [2] end
+declare @t_bodate nvarchar(10) =case when '#non' = [3] then '' else [3] end
+declare @t_eodate nvarchar(10)=case when '#non' = [4] then char(255) else [4] end
+declare @t_bcustno nvarchar(15) =case when '#non' = [5] then '' else [6] end
+declare @t_ecustno nvarchar(15) = case when '#non' = [5] then char(255) else [6] end
+-----------------------------------------------------------------------------------------------------
+declare @tmp table(
+	gno nvarchar(1),
+	odate nvarchar(10),
+	noa nvarchar(30),
+	no2 nvarchar(20),
+	comp nvarchar(30),
+	product nvarchar(100),
+	spec nvarchar(max),
+	size nvarchar(30),
+	lengthb float,
+	ucolor nvarchar(30),
+	mount float,
+	price float,
+	total float,
+	enda  bit,
+	datea nvarchar(10),
+	weight float
+)
+insert @tmp
+select '0', a.odate,a.noa,b.no2,a.nick,b.product,b.spec,b.size
+				,b.lengthb,b.ucolor,b.mount,b.price,b.total,b.enda,a.datea,b.weight
+from view_ordes b left join view_orde a on b.noa=a.noa and a.accy=b.accy
+where (a.odate between @t_bodate and @t_eodate and
+	   a.datea between @t_bdatea and @t_edatea) and
+	   b.custno between @t_bcustno and @t_ecustno 
+	   
+	   
+declare @odate nvarchar(10)
+DECLARE my_cursor CURSOR FOR 
+select odate from @tmp group by odate
+OPEN my_cursor
+FETCH NEXT FROM my_cursor 
+INTO @odate
+WHILE @@FETCH_STATUS = 0
+	BEGIN	
+		insert @tmp(gno,odate,mount,total,weight)
+		select '1',odate,sum(mount),SUM(total),SUM(weight)
+		from @tmp
+		where @odate=odate
+		group by odate
+  
+	fetch next from my_cursor 
+	into @odate
+end 
+
+CLOSE my_cursor
+DEALLOCATE my_cursor
+insert @tmp(gno,odate,mount,total,weight)
+		select '2',max(odate),sum(mount),SUM(total),SUM(weight)
+		from @tmp
+		where gno =1
+		
+select gno,odate,noa,no2,comp,product+' '+spec+' '+size+' '+convert(nvarchar,lengthb)+' '+ucolor xproduct,
+		dbo.getComma(mount,0) mount,
+		dbo.getComma(price,0) price,
+		dbo.getComma(total,0) total,
+		case when enda=0 then 'X' else 'Y' end enda,
+		dbo.getComma(weight,0) weight
+from @tmp
+order by odate,gno;

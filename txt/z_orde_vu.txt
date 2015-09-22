@@ -58,7 +58,11 @@ insert @tmp(gno,odate,mount,total,weight)
 		from @tmp
 		where gno =1
 		
-select gno,odate,noa,no2,comp,product+' '+spec+' '+size+' '+convert(nvarchar,lengthb)+' '+ucolor xproduct,
+select gno,odate,noa,no2,comp,product+' '+isnull(size,'')+' '+isnull(spec,'')+' '+
+		 case when (isnull(convert(nvarchar,lengthb),'')=''  
+		 or isnull(convert(nvarchar,lengthb),'') = '0') then '' 
+		 else isnull(convert(nvarchar,lengthb),'')+'M ' end 
+		 + isnull(ucolor,'')  xproduct,
 		dbo.getComma(mount,0) mount,
 		dbo.getComma(price,0) price,
 		dbo.getComma(total,0) total,

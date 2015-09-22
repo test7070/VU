@@ -41,8 +41,8 @@
 				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],				
 				//['txtPost', 'lblAddr', 'addr', 'post,addr', 'txtPost,txtAddr', 'addr_b.aspx'],
 				//['txtPost2', 'lblAddr2', 'addr', 'post,addr', 'txtPost2,txtAddr2', 'addr_b.aspx'],
-				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
-				['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
+				//['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
+				//['txtPost2', 'lblAddr2', 'addr2', 'noa,post', 'txtPost2,txtAddr2', 'addr2_b.aspx'],
 				['txtUno__', '', 'view_uccc2', 'uno,uno,product,spec,size,lengthb,class,unit,emount,eweight'
             	, '0txtUno__,txtUno__,txtProduct__,txtSpec__,txtSize__,txtLengthb__,txtClass__,txtUnit__,txtMount__,txtWeight__', 'uccc_seek_b2.aspx?;;;1=0', '95%', '60%']
 				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
@@ -114,8 +114,6 @@
 				//q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
 				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
 				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
-				var t_where = "where=^^ 1=1  ^^";
-				q_gt('custaddr', t_where, 0, 0, 0, "");
 				
 				$('#lblPaydate').text('入廠時間');
 				$('#lblAddr2').text('工地名稱');
@@ -217,19 +215,10 @@
 					}
 				});
 
-				$('#txtAddr2').change(function() {
-					var t_custno = trim($(this).val());
-					if (!emp(t_custno)) {
-						focus_addr = $(this).attr('id');
-						var t_where = "where=^^ noa='" + t_custno + "' ^^";
-						q_gt('cust', t_where, 0, 0, 0, "");
-					}
-				});
-
 				$('#txtCustno').change(function() {
 					if (!emp($('#txtCustno').val())) {
-						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "'  ^^";
-						q_gt('custaddr', t_where, 0, 0, 0, "");
+						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
+						q_gt('custm', t_where, 0, 0, 0, "");
 					}
 				});
 				
@@ -481,16 +470,23 @@
 							z_nick = as[0].nick;
 						}
 						break;
-					case 'custaddr':
-						var as = _q_appendData("custaddr", "", true);
-						var t_item = " @ ";
-						if (as[0] != undefined) {
-							for ( i = 0; i < as.length; i++) {
-								t_item = t_item + (t_item.length > 0 ? ',' : '') + as[i].post + '@' + as[i].addr;
+					case 'custm':
+						var as = _q_appendData("custm", "", true);
+						if(as[0] != undefined){
+							var ass = _q_appendData("custms", "", true);
+							if(ass[0] != undefined){
+								var t_item = " @ ";
+								for ( i = 0; i < ass.length; i++) {
+									t_item = t_item + (t_item.length > 0 ? ',' : '') + ass[i].account + '@' + ass[i].account;
+								}
+								$('#combAddr').text('');
+								q_cmbParse("combAddr", t_item);
+							}else{
+								$('#combAddr').text('');
 							}
+						}else{
+							$('#combAddr').text('');
 						}
-						document.all.combAddr.options.length = 0;
-						q_cmbParse("combAddr", t_item);
 						break;
 					case 'orde':
 						var as = _q_appendData("orde", "", true);
@@ -561,11 +557,7 @@
 						_btnModi();
 						Unlock(1);
 						$('#txtDatea').focus();
-
-						if (!emp($('#txtCustno').val())) {
-							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "'  ^^";
-							q_gt('custaddr', t_where, 0, 0, 0, "");
-						}
+						
 						//取得車號下拉式選單
 						var thisVal = $('#txtCardealno').val();
 						var t_where = "where=^^ noa=N'" + thisVal + "' ^^";
@@ -722,8 +714,7 @@
 
 			function combAddr_chg() {
 				if (q_cur == 1 || q_cur == 2) {
-					$('#txtAddr2').val($('#combAddr').find("option:selected").text());
-					$('#txtPost2').val($('#combAddr').find("option:selected").val());
+					$('#txtAddr2').val($('#combAddr').find("option:selected").val());
 				}
 			}
 			
@@ -917,8 +908,7 @@
 				$('#cmbTypea').val('1');
 				$('#txtDatea').focus();
 				//$('#cmbTaxtype').val('1');
-				var t_where = "where=^^ 1=1  ^^";
-				q_gt('custaddr', t_where, 0, 0, 0, "");
+				$('#combAddr').text('');
 			}
 
 			function btnModi() {
@@ -929,6 +919,14 @@
 				Lock(1, {
 					opacity : 0
 				});
+				
+				if (!emp($('#txtCustno').val())) {
+					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
+					q_gt('custm', t_where, 0, 0, 0, "");
+				}else{
+					$('#combAddr').text('');
+				}
+				
 				var t_where = " where=^^ vccno='" + $('#txtNoa').val() + "'^^";
 				q_gt('umms', t_where, 0, 0, 0, 'btnModi', r_accy);
 			}
@@ -1136,7 +1134,7 @@
 					case 'txtCustno':
 						if (!emp($('#txtCustno').val())) {
 							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-							q_gt('custaddr', t_where, 0, 0, 0, "");
+							q_gt('custm', t_where, 0, 0, 0, "");
 						}
 						break;
 				}
@@ -1367,12 +1365,14 @@
 						<td><input id="txtOrdeno" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id='lblAddr2' class="lbl"> </a></td>
-						<td><input id="txtPost2"  type="text" class="txt c1"/></td>
-						<td colspan='4'>
-							<input id="txtAddr2"  type="text" class="txt c1" style="width: 412px;"/>
+						<td><span> </span><a id='lblAddr2' class="lbl"> </a></td>						
+						<td colspan='2'><input id="txtAddr2"  type="text" class="txt c1"/></td>
+						<td>
 							<select id="combAddr" style="width: 20px" onchange='combAddr_chg()'> </select>
+							<span> </span><a id='lblSales' class="lbl btn"> </a>
 						</td>
+						<td><input id="txtSalesno" type="text" class="txt c1"/></td>
+						<td><input id="txtSales" type="text" class="txt c1"/></td>
 						<td><span> </span><a id='lblInvono' class="lbl btn"> </a></td>
 						<td><input id="txtInvono" type="text" class="txt c1"/></td>
 					</tr>
@@ -1398,13 +1398,6 @@
 						<td><input id="txtTranmoney" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id='lblSales' class="lbl btn"> </a></td>
-						<td><input id="txtSalesno" type="text" class="txt c1"/></td>
-						<td><input id="txtSales" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
-						<td colspan='2'><input id="txtAccno" type="text" class="txt c1"/></td>
-					</tr>
-					<tr>
 						<td><span> </span><a id="lblMoney" class="lbl"> </a></td>
 						<td colspan='2'><input id="txtMoney" type="text" class="txt num c1"/></td>
 						<td><span> </span><a id='lblTax' class="lbl"> </a></td>
@@ -1428,16 +1421,20 @@
 						<td colspan='2'><input id="textQno1" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblQweight1" class="lbl">合約1重量</a></td>
 						<td colspan='2'><input id="textQweight1" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
-						<td><input id="txtWorker" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblQno2" class="lbl btn">合約2號碼</a></td>
 						<td colspan='2'><input id="textQno2" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblQweight2" class="lbl">合約2重量</a></td>
 						<td colspan='2'><input id="textQweight2" type="text" class="txt num c1"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
+						<td colspan='2'><input id="txtWorker" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
-						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
+						<td colspan='2'><input id="txtWorker2" type="text" class="txt c1"/></td>
+						<td><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
+						<td><input id="txtAccno" type="text" class="txt c1"/></td>
 					</tr>
 				</table>
 			</div>

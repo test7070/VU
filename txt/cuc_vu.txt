@@ -217,6 +217,11 @@ cucstocub:--cucstocub
 	
 	select @cubno cubno
 	
+	--104/09/24 自動結案
+	EXEC("update a set mins=1 from cucs"+@accy+" a
+	outer apply (select SUM(mount) cubmount,SUM(weight) cubweight,SUM(hmount)cubhmount from view_cubs where productno2=a.noa and product2=a.noq)b
+	where (isnull(a.weight,0)-isnull(b.cubweight,0)<=0 and isnull(a.mins,0)=0) ")
+	
 	IF OBJECT_ID('tempdb..#tmp')is not null
 	BEGIN
 		set @cmd = 'drop table #tmp'

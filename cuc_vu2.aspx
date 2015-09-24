@@ -212,7 +212,7 @@
                 $('#lblMount_s').text('件數');
                 $('#lblWeight_s').text('重量(KG)');
                 $('#lblMemo_s').text('備註');
-                $('#lblMins_s').text('結案');
+                $('#lblMins_s').text('完工');
                 $('#vewNoa').text('案號');
                 $('#vewCust').text('客戶');
             }

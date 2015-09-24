@@ -659,7 +659,7 @@
 						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
-						string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">結案</td>';
+						string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs').html(string);
@@ -692,7 +692,7 @@
 						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
-						string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">結案</td>';
+						string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs_float').remove();
@@ -978,11 +978,11 @@
 							});
 						});
 						
-						//結案
+						//完工
 						$('#cucs .cucs_mins').unbind('click');
 						$('#cucs .cucs_mins').click(function(e) {
 							if($(this).prop('checked')){
-								if(confirm("確認要結案?")){
+								if(confirm("確認要完工?")){
 									var n=$(this).attr('id').replace('cucs_mins','')
 									q_func('qtxt.query.enda', 'cuc_vu.txt,enda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
 								}else{
@@ -1385,6 +1385,7 @@
 					case 'cubu_post.post':
 						alert('加工單產生完畢!!');
 						//更新畫面
+						chk_cucs=[];
 						cucsupdata();
 						//並重新啟動刷新
 						intervalupdate=setInterval("cucsupdata()",1000*60);

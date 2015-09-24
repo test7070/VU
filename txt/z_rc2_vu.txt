@@ -62,13 +62,13 @@ declare @result table(
 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea, 
-a.tggno, isnull(c.nick,''), b.productno, b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
-,(case when a.typea='2' then -1 else 1 end)*b.mount 
-,(case when a.typea='2' then -1 else 1 end)*b.weight 
-,b.price 
-,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,a.addr2,b.ucolor,b.spec,b.size,b.lengthb 
-,(case when a.typea='2' then b.total else 0 end)
-,a.carno,(case when a.typea='2' then -1 else 1 end)*(b.total+a.tax)
+		a.tggno, isnull(c.nick,''), b.productno, b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
+		,(case when a.typea='2' then -1 else 1 end)*b.mount 
+		,(case when a.typea='2' then -1 else 1 end)*b.weight 
+		,b.price 
+		,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,convert(float,a.atax)*b.total*0.05,a.memo,a.addr2,b.ucolor,b.spec,b.size,b.lengthb 
+		,(case when a.typea='2' then b.total else 0 end)
+		,a.carno,(case when a.typea='2' then -1 else 1 end)*(convert(float,a.atax)*b.total*0.05+a.tax)
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
@@ -165,19 +165,21 @@ declare @result table(
 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea, 
-a.tggno, isnull(c.nick,''), b.productno,  b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
-,(case when a.typea='2' then -1 else 1 end)*b.mount 
-,(case when a.typea='2' then -1 else 1 end)*b.weight 
-,b.price 
-,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,c.conn,b.ucolor,b.spec,b.size,b.lengthb,b.total+a.tax
+		a.tggno, isnull(c.nick,''), b.productno,  b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
+		,(case when a.typea='2' then -1 else 1 end)*b.mount 
+		,(case when a.typea='2' then -1 else 1 end)*b.weight 
+		,b.price 
+		,(case when a.typea='2' then -1 else 1 end)*b.total
+		,'rc2'+b.accy,convert(float,a.atax)*b.total*0.05,a.memo,c.conn
+		,b.ucolor,b.spec,b.size,b.lengthb,b.total+convert(float,a.atax)*b.total*0.05
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
-(a.tggno between @t_btggno and @t_etggno) and 
+	  ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+	  (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_stype)=0 or a.stype=@t_stype) and
-(len(@t_qno)=0 or a.transtart like @t_qno+'%') 
+		(b.productno between @t_bproductno and @t_eproductno) and 
+		(len(@t_stype)=0 or a.stype=@t_stype) and
+		(len(@t_qno)=0 or a.transtart like @t_qno+'%') 
 order by b.productno,gno,a.datea,a.noa 
 
 insert into @result(gno,mount,total,tax,money,weight) 
@@ -263,20 +265,20 @@ declare @result table(
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono, a.datea
-,a.tggno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno
-,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
-,(case when a.typea='2' then -1 else 1 end)*b.mount,(case when a.typea='2' then -1 else 1 end)*b.weight 
-,b.price,(case when a.typea='2' then -1 else 1 end)*b.total,a.tax
-,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb
-,(case when a.typea='2' then -1 else 1 end)*(b.total+a.tax)
+		,a.tggno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
+		,(case when a.typea='2' then -1 else 1 end)*b.mount,(case when a.typea='2' then -1 else 1 end)*b.weight 
+		,b.price,(case when a.typea='2' then -1 else 1 end)*b.total,convert(float,a.atax)*b.total*0.05
+		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb
+		,(case when a.typea='2' then -1 else 1 end)*(b.total+convert(float,a.atax)*b.total*0.05)
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
-(a.tggno between @t_btggno and @t_etggno) and 
+	  ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+	  (a.tggno between @t_btggno and @t_etggno) and 
 -- (a.salesno between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
-(len(@t_stype)=0 or a.stype=@t_stype)  and
-(len(@t_qno)=0 or a.transtart like @t_qno+'%')
+	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (len(@t_stype)=0 or a.stype=@t_stype)  and
+	  (len(@t_qno)=0 or a.transtart like @t_qno+'%')
 order by a.tggno,a.datea,a.noa 
 
 insert into @result(gno,tggno,comp,pcount,mount,total,tax,weight,money) 
@@ -362,14 +364,14 @@ declare @result table(
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea,a.tggno, isnull(c.nick,'')
-,b.productno, b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
-,(case when a.typea='2' then -1 else 1 end)*b.mount 
-,(case when a.typea='2' then -1 else 1 end)*b.weight 
-,b.price 
-,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,a.tax,a.memo,c.conn,b.ucolor,b.spec,b.size,b.lengthb 
-,(case when a.typea='2' then b.total else 0 end)
-,b.product+' '+b.size+' '+b.spec+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor
-,(case when a.typea='2' then -1 else 1 end)*(b.total+tax)
+		,b.productno, b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
+		,(case when a.typea='2' then -1 else 1 end)*b.mount 
+		,(case when a.typea='2' then -1 else 1 end)*b.weight 
+		,b.price 
+		,(case when a.typea='2' then -1 else 1 end)*b.total,'rc2'+b.accy,convert(float,a.atax)*b.total*0.05,a.memo,c.conn,b.ucolor,b.spec,b.size,b.lengthb 
+		,(case when a.typea='2' then b.total else 0 end)
+		,b.product+' '+b.size+' '+b.spec+' '+convert(nvarchar,b.lengthb)+'M '+b.ucolor
+		,(case when a.typea='2' then -1 else 1 end)*(b.total+convert(float,a.atax)*b.total*0.05)
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 

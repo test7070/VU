@@ -74,7 +74,7 @@ select '91' gno, a.noa noa, b.noq noq, a.typea typea, a.datea datea, (case when 
 		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
 		 + isnull(b.ucolor,''), 
 		 b.unit, b.mount, b.weight, b.price, b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-		,a.invono,v.datea,v.money,b.total*0.05*a.atax,b.total 
+		,a.invono,v.datea,v.money,b.total*0.05*convert(float,a.atax),b.total 
 		,b.ucolor,b.spec,b.size,b.lengthb,a.addr,b.memo,a.carno,b.total*0.05*a.atax+b.total
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 			--	 left join view_ucaucc c on b.productno = c.noa 
@@ -191,9 +191,9 @@ select '9',
 		 + isnull(b.ucolor,'')
 	   ,a.custno,	(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
 	   ,(case when a.typea='1' then 1 else -1 end)*b.mount,(case when a.typea='1' then 1 else -1 end)*b.total 
-	   ,(case when a.typea='1' then 1 else -1 end)*a.atax*b.total*0.05
+	   ,(case when a.typea='1' then 1 else -1 end)*convert(float,a.atax)*b.total*0.05
 	   ,(case when a.typea='1' then 1 else -1 end)*b.weight
-	   ,(case when a.typea='1' then 1 else -1 end)*(a.atax*b.total*0.05+b.total)
+	   ,(case when a.typea='1' then 1 else -1 end)*(convert(float,a.atax)*b.total*0.05+b.total)
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 			    left join cust c on a.custno = c.noa 
 				
@@ -314,8 +314,8 @@ select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon,
 	   ,(case when a.typea='1' then 1 else -1 end)* b.weight
 	   , b.price
 	   ,(case when a.typea='1' then 1 else -1 end)* b.total, 
-	   (case when a.typea='1' then 1 else -1 end)* (b.total+a.tax) money, 0 back, a.tax tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
-	   ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,b.ucolor,b.spec,b.size,b.lengthb,b.memo,a.tax+b.total 
+	   (case when a.typea='1' then 1 else -1 end)* (b.total+a.tax) money, 0 back, convert(float,a.atax)*0.05*b.total tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
+	   ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy,b.ucolor,b.spec,b.size,b.lengthb,b.memo,convert(float,a.atax)*0.05*b.total+b.total 
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
 			     left join view_ucaucc d on b.productno = d.noa 
@@ -459,8 +459,8 @@ select '9',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+
 		 + isnull(b.ucolor,''),a.custno, 
 		(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
 		,(case when a.typea='1' then 1 else -1 end)*b.mount,(case when a.typea='1' then 1 else -1 end)*b.total 
-		,a.atax*0.05*b.total ,b.weight
-		,(case when a.typea='1' then 1 else -1 end)*(a.atax*0.05*b.total+b.total) 
+		,convert(float,a.atax)*0.05*b.total ,b.weight
+		,(case when a.typea='1' then 1 else -1 end)*(convert(float,a.atax)*0.05*b.total+b.total) 
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 				left join cust c on a.custno = c.noa 
 			--	left join view_ucaucc d on b.productno = d.noa 
@@ -570,7 +570,8 @@ select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon,
 		 else isnull(convert(nvarchar,b.lengthb),'')+'M ' end 
 		 + isnull(b.ucolor,'')
 		, b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-		,a.atax*0.05*b.total,b.ucolor,b.spec,b.size,b.lengthb,a.atax*0.05*b.total+b.total
+		,convert(float,a.atax)*0.05*b.total,b.ucolor,b.spec,b.size,b.lengthb,
+		convert(float,a.atax)*0.05*b.total+b.total
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
 		--		 left join view_ucaucc d on b.productno = d.noa 
@@ -771,7 +772,7 @@ select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, case when isnull(a
 		, b.unit,(case when a.typea='1' then 1 else -1 end) *b.mount
 		, b.weight, b.price, b.total, 0 money, 0 back, 0 tax, 0 total1, 0 pay, 0 unpay, 0 total2, 0 pcount 
 		,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-		,(case when a.typea='1' then 1 else -1 end)*(b.total+tax)
+		,(case when a.typea='1' then 1 else -1 end)*(b.total+(a.tax*0.05*b.total))
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join cust c on a.custno = c.noa 
 				 left join view_ucaucc d on b.productno = d.noa 
@@ -939,7 +940,8 @@ select
 		 + isnull(b.ucolor,'') 
 	,case when charindex('永勝',@t_acomp)>0 then left(a.datea,6) when isnull(a.mon,'')!='' then a.mon else left(a.datea,6) end 
 	,sum((case when a.typea='1' then 1 else -1 end)*b.mount),sum((case when a.typea='1' then 1 else -1 end)*b.total) 
-	,sum(a.tax),sum(b.weight),sum((case when a.typea='1' then 1 else -1 end)*(a.tax+b.total)) 
+	,max(convert(float,a.atax))*0.05*sum(b.total),sum(b.weight),
+	sum(case when a.typea='1' then 1 else -1 end)*(max(convert(float,a.atax))*0.05*sum(b.total)+sum(b.total))
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 		--		left join view_ucaucc d on b.productno = d.noa 
 

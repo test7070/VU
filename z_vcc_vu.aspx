@@ -198,18 +198,23 @@
                 
                 
 				var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
-								"'^^  "
+								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
 				q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
             
                  $('.c3.text').change(function(){
                  	var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
-								"'^^  "
+								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
+					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");               
+                 });
+                  $('.c2.text').change(function(){
+                 	var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
+								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
 					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");               
                  });
                  $('#combQno').click(function() {
                  	
                  	var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
-								"'^^  "
+								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
 					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
                  });
                 $('#combQno').change(function() {

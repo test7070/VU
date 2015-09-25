@@ -122,17 +122,21 @@
                 tmp.parentNode.appendChild(selectbox,tmp);
                 
 				 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
-								"/30'^^  "
+								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
 					q_gt('cont',t_where, 0, 0, 0, "cont"); 
 				 
                  $('.c3.text').change(function(){
                  	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
-								"/30'^^  "
+								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
 					q_gt('cont',t_where, 0, 0, 0, "cont");               
+                 });
+                 $('c2.text').change(function(){
+                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+                 				"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
                  });
                  $('#combQno').click(function() {       	
                  	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
-								"/30'^^  "
+								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
 					q_gt('cont',t_where, 0, 0, 0, "cont");
                  });
                 $('#combQno').change(function() {

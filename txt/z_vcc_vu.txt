@@ -304,33 +304,19 @@ declare @result table(
 	order by custno,productno,gno,datea,noa,noq 
 
 --*********************************************************************** 
-insert @result(gno,custno,xproduct,mount,weight,money,total)
-select '1',custno,xproduct,sum(mount),SUM(weight),SUM(money),SUM(total)
-from @result where gno='0' group by xproduct,custno
+insert @result(gno,comp,xproduct,mount,weight,money,total)
+select '1',comp,xproduct,sum(mount),SUM(weight),SUM(money),SUM(total)
+from @result where gno='0' group by xproduct,comp
 
-insert @result (gno,custno,comp,mount,weight,money,total,xproduct)
-select '2',custno,MAX(comp),sum(mount),SUM(weight),SUM(money),SUM(total),char(255)
-from @result where gno='0' group by custno
+insert @result (gno,comp,mount,weight,money,total,xproduct)
+select '2',comp,sum(mount),SUM(weight),SUM(money),SUM(total),char(255)
+from @result where gno='0' group by comp
 
-select gno, typea, noa, noq, datea, mon, custno, comp 
-,addr_invo,tel,productno,xproduct xpdt,unit 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
---,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,price),1)),@price_decimal,30)) price 
-,dbo.getComma(price,-1)price
-,isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)),0) total 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,back),1)),@total_decimal,30)) back 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total1),1)),@total_decimal,30)) total1 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,pay),1)),@total_decimal,30)) pay 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,unpay),1)),@total_decimal,30)) unpay 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total2),1)),@total_decimal,30)) total2 
-,pcount ,qhref 
-,isnull(reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)),0) totax 
-,ucolor,spec,size,length,memo
-from @result 
-order by custno,xproduct,gno,datea,noa,noq  
+select gno,xproduct xpdt,datea,noa,dbo.getComma(mount,0) mount,dbo.getComma(weight,0) weight,
+	   dbo.getComma(money,0) money,dbo.getComma(tax,0) tax,dbo.getComma(price,0) price,
+	   dbo.getComma(total,0) total,memo,comp,custno
+from @result
+order by comp,xpdt,gno
   ;
 --************************************************************************************  
  z_vcc_vu4:--z_vcc_vu4 

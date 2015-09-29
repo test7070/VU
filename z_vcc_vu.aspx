@@ -178,7 +178,7 @@
                 $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
                 $('#txtMon2').val(t_year + '/' + t_month);
                 
-
+				//$('.c3').css('display : none');
                  $('#txtXlengthb1').addClass('num').val(0).change(function() {
                     $(this).val(dec($(this).val()));
                     if ($(this).val() == 'NaN')
@@ -196,9 +196,27 @@
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
                 
-				var t_where="where=^^1=1 ^^ stop=100 "
-				q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
                 
+				var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
+								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
+				q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
+            
+                 $('.c3.text').change(function(){
+                 	var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
+								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
+					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");               
+                 });
+                  $('.c2.text').change(function(){
+                 	var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
+								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
+					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");               
+                 });
+                 $('#combQno').click(function() {
+                 	
+                 	var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
+								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
+					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
+                 });
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
 				});
@@ -289,11 +307,16 @@
 						break;   
 					case 'view_quat':
                 		var as = _q_appendData("view_quat", "", true);
-						for ( i = 0; i < as.length; i++) {
-							t_qno+=","+as[i].noa;
-						}
-						 q_cmbParse("combQno", t_qno); 
-                      
+                		if(as != undefined){
+							for ( i = 0; i < as.length; i++) {
+								t_qno+=","+as[i].noa;
+							}
+							if(t_qno.length != 0){							
+								$('#combQno').empty();
+								 q_cmbParse("combQno", t_qno); 
+							}
+							t_qno='';
+                     	}
                 		break;
                 	               			
                 }

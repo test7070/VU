@@ -121,9 +121,24 @@
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
                 
-				 var t_where="where=^^1=1 ^^ stop=100 "
-				 q_gt('cont', t_where, 0, 0, 0, "cont");
-                
+				 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
+					q_gt('cont',t_where, 0, 0, 0, "cont"); 
+				 
+                 $('.c3.text').change(function(){
+                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
+					q_gt('cont',t_where, 0, 0, 0, "cont");               
+                 });
+                 $('c2.text').change(function(){
+                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+                 				"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
+                 });
+                 $('#combQno').click(function() {       	
+                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
+					q_gt('cont',t_where, 0, 0, 0, "cont");
+                 });
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
 				});
@@ -142,8 +157,12 @@
 						for ( i = 0; i < as.length; i++) {
 							t_qno+=","+as[i].noa;
 						}
-						q_cmbParse("combQno", t_qno); 
-					//	q_gf('', 'z_rc2_vu');
+						$('#combQno').empty();
+						if(t_qno.length != 0){							
+								
+								 q_cmbParse("combQno", t_qno); 
+							}
+							t_qno='';
                 		break;
                 	default:
                         break;

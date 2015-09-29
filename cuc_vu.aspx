@@ -35,7 +35,7 @@
 						if(!emp($('#cucs_noa'+i).text()) && new_where.indexOf($('#cucs_noa'+i).text())==-1)
 							new_where=new_where+" or a.noa='"+$('#cucs_noa'+i).text()+"'";
 					}
-					var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and ("+new_where+") and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
+					var t_where = "where=^^ 1=1 and ("+new_where+") and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);
 					Lock();
 				}
@@ -57,14 +57,15 @@
                 document.title='現場加工作業';
 				
 				//載入案號 資料
-                var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
+                var t_where = "where=^^ 1=1 and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
 				q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
 				
 				q_cmbParse("combSize", ',#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16');
 				
 				//庫存
 				$('#btnStk').click(function() {
-					window.open("./z_ucc_vu.aspx"+ "?"+ r_userno + ";" + r_name + ";" + q_id +";;" + r_accy);
+					//window.open("./z_ucc_vu.aspx"+ "?"+ r_userno + ";" + r_name + ";" + q_id +";;" + r_accy);
+					q_box('z_ucc_vu.aspx', 'z_ucc_vu', "95%", "95%", $('#btnStk').val());
 				});
 				
 				//匯入
@@ -78,7 +79,7 @@
 							return;
 						}
                 		
-	                    var t_where = " 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and isnull(b.mins,0)=0 ";
+	                    var t_where = " 1=1 and isnull(b.mins,0)=0 ";
 	                    t_where += q_sqlPara2("a.noa", t_cucno);
 	                    t_where += q_sqlPara2("b.size", t_size);
 	                    
@@ -105,7 +106,7 @@
 						$(this).click();
                     });
                 	//初始化cucs
-                	var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq^^";
+                	var t_where = "where=^^ 1=1 and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
                 });
                 
@@ -137,19 +138,34 @@
 								break;
                     		}
                     	}
+                    	var bbsrow=document.getElementById("cucs_table").rows.length-1;
+                    	t_err='';
+                    	for(var j=0;j<bbsrow;j++){
+                    		if($('#cucs_chk'+j).prop('checked')){
+                    			var t_ordeweight=dec($('#cucs_weight'+j).text());
+                    			var t_ordebweight=q_sub(t_ordeweight,dec($('#cucs_eweight'+j).text()));
+                    			var t_ordexweight=dec($('#textXweight_'+j).val());
+                    			if(q_div(q_add(t_ordebweight,t_ordexweight),t_ordeweight)>=1.03){
+                    				t_err=t_err+(t_err.length>0?'\n':'')+'案號【'+$('#cucs_noa'+j).text()+'-'+$('#cucs_noq'+j).text()+'】完工重量超過訂單重量3%，確定是否要入庫?';
+                    			}
+                    		}
+                    	}
 						
 						if(hasbbtnoweight){
-							/*if(confirm("無領料資料是否要轉至加工單?")){
-								var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 ^^";
-								q_gt('cucs_vu', t_where, 0, 0, 0,'tocub', r_accy);
-								Lock();
-							}*/
 							alert('領料重量等於零。');
 						}else{
-							if(confirm("確定轉至加工單?")){
-								var t_where = "where=^^ 1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
-								q_gt('cucs_vu', t_where, 0, 0, 0,'tocub', r_accy);
-								Lock();
+							if(t_err.length>0){
+								if(confirm(t_err)){
+									var t_where = "where=^^ 1=1 and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
+									q_gt('cucs_vu', t_where, 0, 0, 0,'tocub', r_accy);
+									Lock();
+								}
+							}else{
+								if(confirm("確定是否要入庫?")){//確定轉至加工單
+									var t_where = "where=^^ 1=1 and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
+									q_gt('cucs_vu', t_where, 0, 0, 0,'tocub', r_accy);
+									Lock();
+								}
 							}
 						}
 					}
@@ -941,11 +957,18 @@
 				                    $('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
 		                            $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
 		                            $('#cucs_tr'+n+' .co3').css('background-color', 'lightsalmon');
+		                            
+		                            var cucsno=$('#cucs_noa' + n).text();
+									var eweight=dec($('#cucs_eweight' + n).text());
+									if(cucsno!='' && eweight<=0){
+										$('#cucs_tr'+n).find('td').css('background', 'darkturquoise');
+									}
+		                            
 				                    return;
 				                }
 							}
 							//Lock();
-							var t_where="where=^^  1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and a.noa='"+$('#cucs_noa'+n).text()+"' and b.noq='"+$('#cucs_noq'+n).text()+"' and isnull(b.mins,0)=0 ^^";
+							var t_where="where=^^  1=1 and a.noa='"+$('#cucs_noa'+n).text()+"' and b.noq='"+$('#cucs_noq'+n).text()+"' and isnull(b.mins,0)=0 ^^";
 							//判斷是否能被鎖定或解除
 							if($(this).prop('checked')){
 								q_gt('cucs_vu', t_where, 0, 0, 0,'getcanlock_'+n, r_accy);
@@ -1002,7 +1025,7 @@
 								if($('#cucs_noa'+i).text()==imp_cucno && !$('#cucs_chk'+i).prop('checked')
 								&& !$('#cucs_chk'+i).prop('disabled')){ //沒有被核取過的資料 且目前沒被鎖定過
 									$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
-									var t_where="where=^^  1=1 and isnull(d.oenda,0)!=1 and isnull(d.ocancel,0)!=1 and isnull(b.weight,0)-isnull(c.cubweight,0)>0 and a.noa='"+$('#cucs_noa'+i).text()+"' and b.noq='"+$('#cucs_noq'+i).text()+"' and isnull(b.mins,0)=0 ^^";
+									var t_where="where=^^ 1=1 and a.noa='"+$('#cucs_noa'+i).text()+"' and b.noq='"+$('#cucs_noq'+i).text()+"' and isnull(b.mins,0)=0 ^^";
 									q_gt('cucs_vu', t_where, 0, 0, 0,'getcanlock_'+i, r_accy);
 									//$('#cucs_chk'+i).click();
 									//$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
@@ -1011,6 +1034,7 @@
 							cucs_refresh();
 						}
 						imp_cucno='';
+						
 						//移動下一格
 						var SeekF= new Array();
 						$('input:text,select').each(function() {
@@ -1360,6 +1384,12 @@
 					$('#textXmount_'+n).val('').attr('disabled', 'disabled');
 					$('#textXcount_'+n).val('').attr('disabled', 'disabled');
 					$('#textXweight_'+n).val('').attr('disabled', 'disabled');
+					
+					var cucsno=$('#cucs_noa' + n).text();
+					var eweight=dec($('#cucs_eweight' + n).text());
+					if(cucsno!='' && eweight<=0){
+						$('#cucs_tr'+n).find('td').css('background', 'darkturquoise');
+					}
 					//Unlock();	
 				}
 			}
@@ -1694,6 +1724,8 @@
 				var bbsrow=document.getElementById("cucs_table").rows.length-1;
 				for (var i=0;i<bbsrow;i++){
 					var cubno=$('#cucs_cubno' + i).text();
+					var cucsno=$('#cucs_noa' + i).text();
+					var eweight=dec($('#cucs_eweight' + i).text());
 					$('#textXmount_'+i).val('').attr('disabled', 'disabled');
 					$('#textXcount_'+i).val('').attr('disabled', 'disabled');
 					$('#textXweight_'+i).val('').attr('disabled', 'disabled');
@@ -1724,11 +1756,13 @@
                             $('#cucs_tr'+i+' .co1').css('background-color', 'antiquewhite');
                             $('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
                             $('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
+                            $('#cucs_mins' + i).attr('disabled', 'disabled');
 						}else if (islock && cubno.split('##')[0]==r_userno){//自己鎖定
 							$('#cucs_lbla'+i).text('');
 							$('#cucs_chk' + i).removeAttr('disabled');
                             $('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
                             $('#combMechno').val(cubno.split('##')[2]!=undefined?cubno.split('##')[2]:'');
+                            $('#cucs_mins' + i).removeAttr('disabled');
                             //text寫入
                             for(var j =0 ;j<chk_cucs.length;j++){
                             	if(chk_cucs[j].noa==$('#cucs_noa'+i).text() && chk_cucs[j].noq==$('#cucs_noq'+i).text()){
@@ -1742,6 +1776,7 @@
 							$('#cucs_lbla'+i).text('');
 							$('#cucs_chk' + i).removeAttr('disabled');
 							$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'lavender');
+							$('#cucs_mins' + i).removeAttr('disabled');
 							$('#cucs_tr'+i+' .co1').css('background-color', 'antiquewhite');
                             $('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
                             $('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
@@ -1750,9 +1785,14 @@
 						$('#cucs_lbla'+i).text('');
 						$('#cucs_chk' + i).removeAttr('disabled');
 						$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'lavender');
+						$('#cucs_mins' + i).removeAttr('disabled');
 						$('#cucs_tr'+i+' .co1').css('background-color', 'antiquewhite');
 						$('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
 						$('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
+					}
+					
+					if(cucsno!='' && eweight<=0){
+						$('#cucs_tr'+i).find('td').css('background', 'darkturquoise');
 					}
 				}
 			}

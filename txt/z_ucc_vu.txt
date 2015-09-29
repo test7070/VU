@@ -370,7 +370,7 @@ create table #tmp(
 	size nvarchar(50),
 	lengthb float,
 	class nvarchar(50),
-	uno nvarchar(50),
+	uno nvarchar(MAX),
 	mount decimal(20,2),
 	hmount decimal(20,2),
 	weight decimal(20,2),
@@ -380,7 +380,9 @@ create table #tmp(
 
 
 insert #tmp
-select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.hmount,b.weight,b.memo,b.comp
+select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class
+,'<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+a.noa+''+CHAR(59)+'104'',''95%'',''95%'',''104'')">'+b.uno+'</a>'
+,b.mount,b.hmount,b.weight,b.memo,b.comp
 from view_cub a left join view_cubs b on a.noa=b.noa
 where (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
@@ -388,7 +390,7 @@ and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and isnull(uno,'')!='' --and b.datea<=@t_edate 
-and (len(b.ordeno)=(case when @t_ordeshow='0' then 0 else len(b.ordeno) end))
+and (len(isnull(b.ordeno,''))=(case when @t_ordeshow='0' then 0 else len(isnull(b.ordeno,'')) end)) 
 
 if((select count(*) from #tmp)>0)
 begin

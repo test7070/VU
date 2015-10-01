@@ -94,19 +94,19 @@ begin
 	
 	if(LEN(@h)=0 and LEN(@c)>0 and LEN(@e)>0 and LEN(@f)>0)
 	begin
-		set @weight = case when @c = '3'  then ROUND(0.560*@lengthb*@mount1,2)
-						   when @c = '4'  then ROUND(0.994*@lengthb*@mount1,2)
-						   when @c = '5'  then ROUND(1.560*@lengthb*@mount1,2)
-						   when @c = '6'  then ROUND(2.250*@lengthb*@mount1,2)
-						   when @c = '7'  then ROUND(3.040*@lengthb*@mount1,2)
-						   when @c = '8'  then ROUND(3.980*@lengthb*@mount1,2)
-						   when @c = '9'  then ROUND(5.080*@lengthb*@mount1,2)
-						   when @c = '10' then ROUND(6.390*@lengthb*@mount1,2)
-						   when @c = '11' then ROUND(7.900*@lengthb*@mount1,2)
-						   when @c = '12' then ROUND(9.570*@lengthb*@mount1,2)
-						   when @c = '14' then ROUND(11.40*@lengthb*@mount1,2)
-						   when @c = '16' then ROUND(15.50*@lengthb*@mount1,2)
-						   when @c = '18' then ROUND(20.20*@lengthb*@mount1,2) end
+		set @weight = case when @c = '3'  then ROUND(0.560*@lengthb*@mount1,0)
+						   when @c = '4'  then ROUND(0.994*@lengthb*@mount1,0)
+						   when @c = '5'  then ROUND(1.560*@lengthb*@mount1,0)
+						   when @c = '6'  then ROUND(2.250*@lengthb*@mount1,0)
+						   when @c = '7'  then ROUND(3.040*@lengthb*@mount1,0)
+						   when @c = '8'  then ROUND(3.980*@lengthb*@mount1,0)
+						   when @c = '9'  then ROUND(5.080*@lengthb*@mount1,0)
+						   when @c = '10' then ROUND(6.390*@lengthb*@mount1,0)
+						   when @c = '11' then ROUND(7.900*@lengthb*@mount1,0)
+						   when @c = '12' then ROUND(9.570*@lengthb*@mount1,0)
+						   when @c = '14' then ROUND(11.40*@lengthb*@mount1,0)
+						   when @c = '16' then ROUND(15.50*@lengthb*@mount1,0)
+						   when @c = '18' then ROUND(20.20*@lengthb*@mount1,0) end
 	end
 	else
 	begin

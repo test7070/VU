@@ -157,8 +157,12 @@
 								$('#txtUcolor_'+b_seq).val($('#combUcolor_'+b_seq).find("option:selected").text());
 						});
 						$('#txtSize_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
 							 if ($(this).val().substr(0, 1) != '#')
                         		$(this).val('#' + $(this).val());
+                        	bbsweight(b_seq);
 						});
 						
 						$('#combSpec_' + j).change(function() {
@@ -167,6 +171,21 @@
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2)
 								$('#txtSpec_'+b_seq).val($('#combSpec_'+b_seq).find("option:selected").text());
+							bbsweight(b_seq);
+						});
+						
+						$('#txtLengthb_'+j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							bbsweight(b_seq);
+						});
+						
+						$('#txtMount1_'+j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							bbsweight(b_seq);
 						});
 						
 						$('#combClass_' + j).change(function() {
@@ -215,6 +234,31 @@
                 $('#lblMins_s').text('完工');
                 $('#vewNoa').text('案號');
                 $('#vewCust').text('客戶');
+            }
+            
+            function bbsweight(n) {
+            	var t_siez=replaceAll($('#txtSize_'+n).val(),'#','');
+            	var t_weight=0;
+            	switch(t_siez){
+            		case '3': t_weight=0.560; break;
+            		case '4': t_weight=0.994; break;
+            		case '5': t_weight=1.560; break;
+            		case '6': t_weight=2.250; break;
+            		case '7': t_weight=3.040; break;
+            		case '8': t_weight=3.980; break;
+            		case '9': t_weight=5.080; break;
+            		case '10': t_weight=6.390; break;
+            		case '11': t_weight=7.900; break;
+            		case '12': t_weight=9.570; break;
+            		case '14': t_weight=11.40; break;
+            		case '16': t_weight=15.50; break;
+            		case '18': t_weight=20.20; break;
+            	}
+            	
+            	var t_lengthb=dec($('#txtLengthb_'+n).val());
+            	var t_mount1=dec($('#txtMount1_'+n).val());
+            	
+            	$('#txtWeight_'+n).val(round(q_mul(q_mul(t_weight,t_lengthb),t_mount1),0));
             }
 
             function btnIns() {

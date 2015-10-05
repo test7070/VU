@@ -76,6 +76,10 @@
                         type : '5',
                         name : 'xorde', //[16]
                         value:("1@含訂單,0@不含訂單").split(',')
+                    },{
+                        type : '0', //[17]
+                        name : 'xrank',
+                        value : r_rank
                     }]
                 });
                 q_popAssign();

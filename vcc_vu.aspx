@@ -1513,8 +1513,8 @@
 					<td style="width:20px;"><input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 					<td style="width:20px;"> </td>
 					<td style="width:200px;">
-						<a id='lblUno_t'> </a>
-						<input id="btnVccttoOrde" type="button" style="font-size: medium; font-weight: bold;" value="出貨匯入"/>
+						1.<a id='lblUno_t'> </a>
+						<input id="btnVccttoOrde" type="button" style="font-size: medium; font-weight: bold;" value="2.出貨明細產生"/>
 					</td>
 					<!--<td style="width:150px;"><a id='lblProductno_t'> </a></td>-->
 					<td style="width:150px;"><a id='lblProduct_t'> </a></td>

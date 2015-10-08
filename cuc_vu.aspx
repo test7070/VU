@@ -402,7 +402,7 @@
 				string+='<td id="cuct_gmount" align="center" style="width:80px; color:black;">領料件數</td>';
 				string+='<td id="cuct_gweight" align="center" style="width:90px; color:black;">領料重量</td>';
 				string+='<td id="cuct_avgweight" align="center" style="width:90px; color:black;">均重</td>';
-				string+='<td id="cuct_memo" align="center" style="width:220px; color:black;">備註&nbsp;&nbsp;<input id="btnCubt2" type="button" style="font-size: medium; font-weight: bold;" value="領料"/></td>';
+				string+='<td id="cuct_memo" align="center" style="width:220px; color:black;">備註&nbsp;&nbsp;<input id="btnCubt2" type="button" style="font-size: medium; font-weight: bold;" value="領料"/><input type="button" id="btnCub_nouno" value="註銷條碼" style="width:80px;font-size: medium; font-weight: bold"/></td>';
 				string+='</tr>';
 				string+='</table>';
 				$('#cuct').append(string);
@@ -412,6 +412,31 @@
 				});
 				$('#btnCubt2').click(function() {
 					$('#btnCubt').click();
+				});
+				
+				$('#btnCub_nouno').click(function(e) {
+					$('#div_nouno').css('top',($('#btnCub_nouno').offset().top-$('#div_nouno').height())+'px');
+					$('#div_nouno').css('left',($('#btnCub_nouno').offset().left-$('#div_nouno').width())+'px');
+					$('#div_nouno').show();
+				});
+				$('#textNouno').click(function() {
+                	q_msg($(this),'多批號註銷請用,隔開');
+				});
+				$('#btnOk_div_nouno').click(function() {
+					var t_nouno=$.trim($('#textNouno').val());
+					if(t_nouno.length>0){
+						t_nouno=t_nouno.split(',');
+						var t_where="";
+						for (var i=0;i<t_nouno.length;i++){
+							t_where=t_where+(t_where.length>0?" or ":"")+"uno='"+t_nouno[i]+"'";
+						}
+						var t_where = "where=^^ ("+t_where+") and tablea='cubu' ^^";
+						q_gt('view_uccb', t_where, 0, 0, 0, "nouno_getuno", r_accy);
+					}
+				});
+				$('#btnClose_div_nouno').click(function() {
+					$('#textNouno').val('');
+                	$('#div_nouno').hide();
 				});
 				
 				//設定滾動條移動時浮動表頭與div的距離
@@ -1255,6 +1280,33 @@
 						}
 						$('#combMechno').text();
 						q_cmbParse("combMechno", t_mech);
+						break;
+					case 'nouno_getuno':
+						var as = _q_appendData("view_uccb", "", true);
+						if (as[0] != undefined) {
+							var t_nouno=$.trim($('#textNouno').val()).split(',');
+							var tt_nouno='';
+							for (var i=0;i<t_nouno.length;i++){
+								var t_exists=false;
+								for (var j=0;j<as.length;j++){
+									if(as[j].uno==t_nouno[i]){
+										t_exists=true;
+										break;
+									}
+								}
+								if(!t_exists){
+									alert("批號【"+t_nouno[i]+"】不存在或已註銷!!")
+									break;
+								}else{
+									tt_nouno=tt_nouno+t_nouno[i]+"#";
+								}
+							}
+								
+							q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno));
+						}else{
+							alert("批號不存在或已註銷!!");
+						}
+						break;
 					case q_name:
 						if (q_cur == 4)
 							q_Seek_gtPost();
@@ -1395,6 +1447,7 @@
 			}
 			
 			var func_cubno='';
+			var nouno_noa=[];
 			function q_funcPost(t_func, result) {
                 switch(t_func) {
                 	case 'qtxt.query.unlockall':
@@ -1468,7 +1521,40 @@
 						//更新畫面
 						cucsupdata();
 						break;
+					case 'qtxt.query.cubnouno':
+						var as = _q_appendData("tmp0", "", true, true);
+						if (as[0] != undefined) {
+							nouno_noa=as;
+							for(var i=0;i<nouno_noa.length;i++){
+								nouno_noa[i].post0='N';
+								nouno_noa[i].post1='N';
+								q_func('cubu_post.post.a4_'+i, r_accy + ',' + nouno_noa[i].noa + ',0');
+							}
+						}
+						break;
                 }
+                if(t_func.indexOf('cubu_post.post.a4_')>-1){
+					var n=replaceAll(t_func,'cubu_post.post.a4_','');
+					nouno_noa[n].post0='Y'
+					q_func('cubu_post.post.a5_'+n, r_accy + ',' + nouno_noa[n].noa + ',1');
+				}
+				if(t_func.indexOf('cubu_post.post.a5_')>-1){
+					var n=replaceAll(t_func,'cubu_post.post.a5_','');
+					nouno_noa[n].post1='Y'
+					
+					var t_enda=true;
+					for(var i=0;i<nouno_noa.length;i++){
+						if(nouno_noa[i].post0!='Y' && nouno_noa[i].post1!='Y'){
+							t_enda=false;
+							break;
+						}
+					}
+					if(t_enda){
+						nouno_noa=[];
+						$('#div_nouno').hide();
+						alert("批號註銷完成!!");
+					}
+				}
                 if(t_func.indexOf('qtxt.query.getweight_')>-1){
                 	var n=t_func.split('_')[1];
                 	$('#textAvgweight_'+n).focusin();
@@ -2062,5 +2148,19 @@
 		<!--<div id="cucs_control" style="width:100%;"> </div>--> 
 		<div id="cuct" style="float:left;width:100%;height:110px;overflow:auto;position: relative;"> </div>
 		<div id="cucu" style="float:left;width:100%;height:110px;overflow:auto;position: relative;"> </div>
+		<div id="div_nouno" style="position:absolute; top:70px; left:840px; display:none; width:400px; background-color: #CDFFCE; border: 1px solid gray;">
+			<table id="table_nouno" style="width:100%;" border="1" cellpadding='2'  cellspacing='0'>
+				<tr>
+					<td style="background-color: #f8d463;width: 150px;" align="center">批號</td>
+					<td style="background-color: #f8d463;width: 250px;"><input id="textNouno" type="text" class="txt c1"/></td>
+				</tr>
+				<tr id='nouno_close'>
+					<td align="center" colspan='2'>
+						<input id="btnOk_div_nouno" type="button" value="註銷">
+						<input id="btnClose_div_nouno" type="button" value="取消">
+					</td>
+				</tr>
+			</table>
+		</div>
 	</body>
 </html>

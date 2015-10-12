@@ -129,7 +129,7 @@
                 	}
                 	q_gt('pay_import',"where=^^['"+t_noa+"','"+t_tggno+"','"+t_tggno2+"','"+t_mon+"','VU#"+t_payc+"#"+q_getPara('rc2.d4taxtype')+"')^^", 0, 0, 0, "pay_import");
 		        });
-		        $('#btnMon').click(function (e) {
+		        /*$('#btnMon').click(function (e) {
 		        	var t_noa = $.trim($('#txtNoa').val());
                 	var t_tggno = $.trim($('#txtTggno').val());
                 	var t_tggno2 = $.trim($('#txtTggno2').val()).replace(/\,/g,'@');
@@ -143,7 +143,7 @@
                 		return;
                 	}
                 	q_gt('pay_import',"where=^^['"+t_noa+"','"+t_tggno+"','"+t_tggno2+"','"+t_mon+"','mon')^^", 0, 0, 0, "pay_import");
-		        });
+		        });*/
 		        
 		         $('#btnAuto').click(function (e) {
 		        		/// 自動沖帳
@@ -252,16 +252,27 @@
                 		getOpay();
 		        		break;
 		        	case 'pay_import':
-                		as = _q_appendData(t_name, "", true);
-                		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtTggno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtRc2no,txtMemo2', as.length, as, 'cno,tggno,mon,coin,unpay,unpay,tablea,tableaccy,rc2no,memo', '', '');
-                		
-                		var t_comp = q_getPara('sys.comp').substring(0,2);
+                		var as = _q_appendData(t_name, "", true);
+                		var t_unpay=0;
                 		for(var i=0;i<q_bbsCount;i++){
                 			if($('#txtTablea_'+i).val()=='rc2'){
                 				as[i].tablea='rc2_vu';
+                				t_unpay=q_add(t_unpay,dec(as[i].unpay));
 							}
                 		}
+                		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtTggno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtRc2no,txtMemo2', as.length, as, 'cno,tggno,mon,coin,unpay,unpay,tablea,tableaccy,rc2no,memo', '', '');
                 		
+                		var t_opay=dec($('#textOpay').val());
+                		if(t_opay>0){
+                			if(t_opay>=t_unpay)
+                				$('#txtUnopay').val(t_unpay);
+                			else
+                				$('#txtUnopay').val(t_opay);
+                			sum();
+                			$('#btnAuto').click();	
+                		}
+                		
+                		var t_comp = q_getPara('sys.comp').substring(0,2);
                 		sum();
                 		break;
 		        	case 'cno_acomp':

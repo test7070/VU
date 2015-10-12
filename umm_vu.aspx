@@ -160,7 +160,7 @@
                 	
                 });
                 
-                $('#btnMon').click(function(e) {
+                /*$('#btnMon').click(function(e) {
                 	var t_noa = $.trim($('#txtNoa').val());
                 	var t_custno = $.trim($('#txtCustno').val());
                 	var t_custno2 = $.trim($('#txtCustno2').val()).replace(/\,/g,'@');
@@ -174,7 +174,7 @@
                 		return;
                 	}
                 	q_gt('umm_import',"where=^^['"+t_noa+"','"+t_custno+"','"+t_custno2+"','"+t_mon+"','mon')^^", 0, 0, 0, "umm_import");
-                });
+                });*/
             }
 			
             function getOpay() {
@@ -304,11 +304,24 @@
                 		getOpay();
                 		break;
                 	case 'umm_import':
-                		as = _q_appendData(t_name, "", true);
+                		var as = _q_appendData(t_name, "", true);
+                		var t_unpay=0;
                 		for (var i = 0; i < as.length; i++) {
                 			as[i].tablea='vcc_vu';
+                			t_unpay=q_add(t_unpay,dec(as[i].unpay));
 						}
                 		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtCustno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtVccno,txtMemo2', as.length, as, 'cno,custno,mon,coin,unpay,unpay,tablea,tableaccy,vccno,memo', '', '');
+                		
+                		var t_opay=dec($('#textOpay').val());
+                		if(t_opay>0){
+                			if(t_opay>=t_unpay)
+                				$('#txtUnopay').val(t_unpay);
+                			else
+                				$('#txtUnopay').val(t_opay);
+                			sum();
+                			$('#btnAuto').click();	
+                		}
+                		
                 		var t_comp = q_getPara('sys.comp').substring(0,2);
                 		sum();
                 		break;

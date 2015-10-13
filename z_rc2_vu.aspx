@@ -68,12 +68,12 @@
                         type : '6', //[14] //判斷顯示小數點與其他判斷
                         name : 'qno',
                       
-                    }
-                    ]
+                    }]
 				});
-				 
-
-                
+				q_popAssign();
+				q_getFormat();
+				q_langShow();
+               
                 var r_1911=1911;
 				if(r_len==4){//西元年
 					r_1911=0;
@@ -110,10 +110,6 @@
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
                 $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
                 $('#txtMon2').val(t_year + '/' + t_month);
-               q_popAssign();
-                q_getFormat();
-                q_langShow();
-               
                
                 var tmp = document.getElementById("txtQno");
                 var selectbox = document.createElement("select");

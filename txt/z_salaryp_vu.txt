@@ -165,3 +165,192 @@ BEGIN
 END
 ;
 ------------------------------------------------------------------------------------------------------------------------------
+z_salaryp_vu03:--z_salaryp_vu03
+SET QUOTED_IDENTIFIER OFF
+declare @t_xmon nvarchar(20)
+declare @t_xkind nvarchar(20)
+set @t_xmon = case when '#non' = [1] then '' else [1] end
+set @t_xkind = case when '#non' = [2] then '上期' else [2] end
+---------------------------------------------------------------------------------------------------------------------------------
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+   drop table #tmp
+END
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+   drop table #tmpa
+END
+
+create table #tmp(
+	idno int identity(1,1),
+	sssno nvarchar(50),
+	namea nvarchar(50),
+	money decimal(18, 0),
+	mi_total decimal(18, 0),
+	days decimal(18, 0),
+	mtotal decimal(18, 0),
+	total1 decimal(18, 0),
+	bo_admin decimal(18, 0),
+	bo_traffic decimal(18, 0),
+	addh decimal(18, 1),
+	addmoney decimal(18, 0),
+	bo_oth decimal(18, 0),
+	bo_special decimal(18, 0),
+	bo_full decimal(18, 0),
+	total2 decimal(18, 0),
+	total3 decimal(18, 0),
+	ch_labor decimal(18, 0),
+	ch_health decimal(18, 0),
+	minus decimal(18, 0),
+	total5 decimal(18, 0),
+	memo nvarchar(MAX),
+	typea nvarchar(20)
+)
+
+insert #tmp
+select b.sno,b.namea,isnull(b.money,0)+isnull(b.mtotal,0),b.mi_total
+,b.day,b.daymoney,isnull(b.money,0)+isnull(b.mtotal,0)-ISNULL(b.mi_total,0)
+,b.bo_admin,b.bo_traffic,b.addh2_1,b.addmoney,b.bo_oth,b.bo_special,b.bo_full
+,ISNULL(b.bo_admin,0)+ISNULL(b.bo_traffic,0)+ISNULL(b.addmoney,0)+ISNULL(b.bo_oth,0)+ISNULL(b.bo_special,0)+ISNULL(b.bo_full,0)
+,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
+,case when b.memo2!='' then b.memo2 else c.typea end
+from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
+where a.mon=@t_xmon and a.monkind=@t_xkind
+order by 
+(case when charindex('晚班',(case when b.memo2!='' then b.memo2 else c.typea end))>0 then '3'
+when charindex('早班',(case when b.memo2!='' then b.memo2 else c.typea end))>0 then '2' else '1' end)
+,b.sno
+
+update #tmp set total3=total1+total2
+update #tmp set total5=total3-ISNULL(ch_labor,0)-ISNULL(ch_health,0)-ISNULL(minus,0)
+
+create table #tmpa(
+	idno int identity(1,1),	gno nvarchar(10),
+	
+	sssno_1 nvarchar(50),namea_1 nvarchar(50),money_1 nvarchar(200),
+	mi_total_1 nvarchar(200),mtotal_1 nvarchar(200),bo_admin_1 nvarchar(200),bo_traffic_1 nvarchar(200),
+	addh_1 nvarchar(200),addmoney_1 nvarchar(200),
+	bo_oth_1 nvarchar(200),bo_special_1 nvarchar(200),bo_full_1 nvarchar(200),total3_1 nvarchar(200),
+	ch_labor_1 nvarchar(200),ch_health_1 nvarchar(200),minus_1 nvarchar(200),total5_1 nvarchar(200),
+	memo_1 nvarchar(MAX),typea_1 nvarchar(20),
+	
+	sssno_2 nvarchar(50),namea_2 nvarchar(50),money_2 nvarchar(200),
+	mi_total_2 nvarchar(200),mtotal_2 nvarchar(200),bo_admin_2 nvarchar(200),bo_traffic_2 nvarchar(200),
+	addh_2 nvarchar(200),addmoney_2 nvarchar(200),
+	bo_oth_2 nvarchar(200),bo_special_2 nvarchar(200),bo_full_2 nvarchar(200),total3_2 nvarchar(200),
+	ch_labor_2 nvarchar(200),ch_health_2 nvarchar(200),minus_2 nvarchar(200),total5_2 nvarchar(200),
+	memo_2 nvarchar(MAX),typea_2 nvarchar(20),
+	
+	sssno_3 nvarchar(50),namea_3 nvarchar(50),money_3 nvarchar(200),
+	mi_total_3 nvarchar(200),mtotal_3 nvarchar(200),bo_admin_3 nvarchar(200),bo_traffic_3 nvarchar(200),
+	addh_3 nvarchar(200),addmoney_3 nvarchar(200),
+	bo_oth_3 nvarchar(200),bo_special_3 nvarchar(200),bo_full_3 nvarchar(200),total3_3 nvarchar(200),
+	ch_labor_3 nvarchar(200),ch_health_3 nvarchar(200),minus_3 nvarchar(200),total5_3 nvarchar(200),
+	memo_3 nvarchar(MAX),typea_3 nvarchar(20),
+	
+	sssno_4 nvarchar(50),namea_4 nvarchar(50),money_4 nvarchar(200),
+	mi_total_4 nvarchar(200),mtotal_4 nvarchar(200),bo_admin_4 nvarchar(200),bo_traffic_4 nvarchar(200),
+	addh_4 nvarchar(200),addmoney_4 nvarchar(200),
+	bo_oth_4 nvarchar(200),bo_special_4 nvarchar(200),bo_full_4 nvarchar(200),total3_4 nvarchar(200),
+	ch_labor_4 nvarchar(200),ch_health_4 nvarchar(200),minus_4 nvarchar(200),total5_4 nvarchar(200),
+	memo_4 nvarchar(MAX),typea_4 nvarchar(20)
+)
+
+declare @idno int
+declare @nidno nvarchar(50)
+declare @n_idno int=0
+declare @nn_idno nvarchar(50)
+declare @typea nvarchar(50)
+declare @gcount int
+declare @fcount nvarchar(10)
+
+declare cursor_table cursor for
+select idno,typea from #tmp order by idno
+open cursor_table
+fetch next from cursor_table
+into @idno,@typea
+while(@@FETCH_STATUS <> -1)
+begin
+	set @fcount=cast(@idno % 4 as nvarchar(10))
+	
+	if(@fcount='1')
+	begin
+		--插入資料行
+		set @gcount=5
+		insert #tmpa(gno,sssno_1 ,namea_1 ,money_1 ,mi_total_1 ,mtotal_1 ,bo_admin_1 ,bo_traffic_1 ,
+		addh_1 ,addmoney_1 ,bo_oth_1 ,bo_special_1 ,bo_full_1 ,total3_1 ,ch_labor_1 ,ch_health_1 ,minus_1 ,
+		total5_1 ,memo_1,typea_1)
+		select @gcount,sssno,namea
+		,'$'+dbo.getComma(money,0),'$'+dbo.getComma(mi_total,0),dbo.getComma(days,0)+'天*$'+dbo.getComma(mtotal,0)
+		,'$'+dbo.getComma(bo_admin,0),'$'+dbo.getComma(bo_traffic,0),dbo.getComma(addh,0)+'H','$'+dbo.getComma(addmoney,0)
+		,'$'+dbo.getComma(bo_oth,0),'$'+dbo.getComma(bo_special,0),'$'+dbo.getComma(bo_full,0),'$'+dbo.getComma(total3,0)
+		,'$'+dbo.getComma(ch_labor,0),'$'+dbo.getComma(ch_health,0),'$'+dbo.getComma(minus,0),'$'+dbo.getComma(total5,0)
+		,memo,typea
+		from #tmp where idno=@idno
+		
+		set @n_idno=@n_idno+1
+	end
+	else
+	begin
+		if(@fcount='0')
+			set @fcount='4'
+		
+		set @nidno=cast(@idno as nvarchar(10))
+		set @nn_idno=cast(@n_idno as nvarchar(10))
+				
+		EXEC("
+			update a
+			set sssno_"+@fcount+" = b.sssno
+			,namea_"+@fcount+" = b.namea
+			,money_"+@fcount+" = '$'+dbo.getComma(b.money,0)
+			,mi_total_"+@fcount+" = '$'+dbo.getComma(b.mi_total,0)
+			,mtotal_"+@fcount+" = dbo.getComma(b.days,0)+'天*$'+dbo.getComma(b.mtotal,0)
+			,bo_admin_"+@fcount+" = '$'+dbo.getComma(b.bo_admin,0)
+			,bo_traffic_"+@fcount+" = '$'+dbo.getComma(b.bo_traffic,0)
+			,addh_"+@fcount+" = dbo.getComma(b.addh,0)+'H'
+			,addmoney_"+@fcount+" = '$'+dbo.getComma(b.addmoney,0)
+			,bo_oth_"+@fcount+" = '$'+dbo.getComma(b.bo_oth,0)
+			,bo_special_"+@fcount+" = '$'+dbo.getComma(b.bo_special,0)
+			,bo_full_"+@fcount+" = '$'+dbo.getComma(b.bo_full,0)
+			,total3_"+@fcount+" = '$'+dbo.getComma(b.total3,0)
+			,ch_labor_"+@fcount+" = '$'+dbo.getComma(b.ch_labor,0)
+			,ch_health_"+@fcount+" = '$'+dbo.getComma(b.ch_health,0)
+			,minus_"+@fcount+" = '$'+dbo.getComma(b.minus,0)
+			,total5_"+@fcount+"= '$'+dbo.getComma(b.total5,0)
+			,memo_"+@fcount+"=b.memo,typea_"+@fcount+"=b.typea
+			from #tmpa a outer apply(select * from #tmp where idno="+@nidno+")b
+			where a.idno="+@nn_idno+"
+		")
+	end
+	
+	if(charindex('早班',@typea)=0 and charindex('晚班',@typea)=0)
+		set @gcount=@gcount-1
+		
+	update #tmpa set gno=@gcount where idno=@n_idno
+	
+	if(@idno%12=0)
+	begin
+		insert #tmpa (gno)
+		select '6'
+		set @n_idno=@n_idno+1
+	end
+	
+	fetch next from cursor_table
+	into @idno,@typea
+end
+close cursor_table
+deallocate cursor_table
+
+select * from #tmpa order by idno
+
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+   drop table #tmp
+END
+
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+   drop table #tmpa
+END
+;

@@ -1,0 +1,167 @@
+﻿z_salaryp_vu01:--z_salaryp_vu01
+SET QUOTED_IDENTIFIER OFF
+declare @t_xmon nvarchar(20)
+declare @t_xkind nvarchar(20)
+set @t_xmon = case when '#non' = [1] then '' else [1] end
+set @t_xkind = case when '#non' = [2] then '上期' else [2] end
+---------------------------------------------------------------------------------------------------------------------------------
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+   drop table #tmp
+END
+
+create table #tmp(
+	gno nvarchar(10),
+	datea nvarchar(10),
+	sssno nvarchar(50),
+	namea nvarchar(50),
+	money decimal(18, 0),
+	mi_total decimal(18, 0),
+	total1 decimal(18, 0),
+	bo_admin decimal(18, 0),
+	addh decimal(18, 1),
+	addmoney decimal(18, 0),
+	bo_oth decimal(18, 0),
+	bo_full decimal(18, 0),
+	total2 decimal(18, 0),
+	total3 decimal(18, 0),
+	ch_labor decimal(18, 0),
+	ch_health decimal(18, 0),
+	minus decimal(18, 0),
+	total5 decimal(18, 0),
+	memo nvarchar(MAX)
+)
+
+insert #tmp
+select '0',dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,b.money,b.mi_total,isnull(b.money,0)-isnull(b.mi_total,0)
+,b.bo_admin,b.addh2_1,b.addmoney,b.bo_oth,b.bo_full,ISNULL(b.bo_admin,0)+ISNULL(b.addmoney,0)+ISNULL(b.bo_oth,0)+ISNULL(b.bo_full,0)
+,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
+from salary a left join salarys b on a.noa=b.noa
+where a.mon=@t_xmon and a.monkind=@t_xkind and a.person='本國'
+
+update #tmp set total3=total1+total2
+update #tmp set total5=total3-ISNULL(ch_labor,0)-ISNULL(ch_health,0)-ISNULL(minus,0)
+
+if((select count(*) from #tmp)>0)
+begin
+	insert #tmp
+	select '1',MAX(datea),CHAR(255),CHAR(255)
+	,SUM(money),SUM(mi_total),SUM(total1),SUM(bo_admin),SUM(addh),SUM(addmoney),SUM(bo_oth),SUM(bo_full)
+	,SUM(total2),SUM(total3),SUM(ch_labor),SUM(ch_health),SUM(minus),SUM(total5),''
+	from #tmp where gno='0'
+end
+
+select 
+case when isnull(money,0)>0 then '$'+dbo.getComma(money,0) else '' end  money,
+case when isnull(mi_total,0)>0 then '$'+dbo.getComma(mi_total,0) else '' end mi_total,
+case when isnull(total1,0)>0 then '$'+dbo.getComma(total1,0) else '' end  total1,
+case when isnull(bo_admin,0)>0 then '$'+dbo.getComma(bo_admin,0) else '' end bo_admin,
+case when isnull(addmoney,0)+isnull(bo_oth,0)>0 then '$'+dbo.getComma(isnull(addmoney,0)+isnull(bo_oth,0),0) else '' end addmoney,
+case when isnull(bo_full,0)>0 then '$'+dbo.getComma(bo_full,0) else '' end bo_full,
+case when isnull(total2,0)>0 then '$'+dbo.getComma(total2,0) else '' end total2,
+case when isnull(total3,0)>0 then '$'+dbo.getComma(total3,0) else '' end total3,
+case when isnull(ch_labor,0)>0 then '$'+dbo.getComma(ch_labor,0) else '' end ch_labor,
+case when isnull(ch_health,0)>0 then '$'+dbo.getComma(ch_health,0) else '' end ch_health,
+case when isnull(minus,0)>0 then '$'+dbo.getComma(minus,0) else '' end minus,
+case when isnull(total5,0)>0 then '$'+dbo.getComma(total5,0) else '' end  total5,
+case when isnull(addmoney,0)>0 and isnull(bo_oth,0)>0 then dbo.getComma(addh,0)+'H+津貼'
+when isnull(addh,0)>0 then dbo.getComma(addh,0)+'H' when isnull(bo_oth,0)>0 then '津貼' else '' end addh,
+case when isnull(bo_admin,0)>0 then '獎金' else '' end sale,
+case when isnull(bo_full,0)>0 then '全勤' else '' end bfull,
+LEFT(datea,3)+'年'+LEFT(RIGHT(datea,5),2)+'月'+RIGHT(datea,2)+'日' datea,* 
+from #tmp order by gno,sssno
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+   drop table #tmp
+END
+;
+------------------------------------------------------------------------------------------------------------------------------
+z_salaryp_vu02:--z_salaryp_vu02
+SET QUOTED_IDENTIFIER OFF
+declare @t_xmon nvarchar(20)
+declare @t_xkind nvarchar(20)
+declare @t_xclass nvarchar(20)
+set @t_xmon = case when '#non' = [1] then '' else [1] end
+set @t_xkind = case when '#non' = [2] then '上期' else [2] end
+set @t_xclass = case when '#non' = [3] then '早班' else [3] end
+---------------------------------------------------------------------------------------------------------------------------------
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+   drop table #tmp
+END
+
+create table #tmp(
+	gno nvarchar(10),
+	datea nvarchar(10),
+	sssno nvarchar(50),
+	namea nvarchar(50),
+	money decimal(18, 0),
+	days decimal(18, 0),
+	mtotal decimal(18, 0),
+	total1 decimal(18, 0),
+	bo_traffic decimal(18, 0),
+	addh decimal(18, 1),
+	addmoney decimal(18, 0),
+	bo_oth decimal(18, 0),
+	bo_special decimal(18, 0),
+	bo_full decimal(18, 0),
+	total2 decimal(18, 0),
+	total3 decimal(18, 0),
+	ch_labor decimal(18, 0),
+	ch_health decimal(18, 0),
+	minus decimal(18, 0),
+	total5 decimal(18, 0),
+	memo nvarchar(MAX)
+)
+
+insert #tmp
+select '0',dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,b.daymoney,b.day,b.mtotal,isnull(b.mtotal,0)
+,b.bo_traffic,b.addh2_1,b.addmoney,b.bo_oth,b.bo_special,b.bo_full
+,ISNULL(b.bo_traffic,0)+ISNULL(b.addmoney,0)+ISNULL(b.bo_oth,0)+ISNULL(b.bo_special,0)+ISNULL(b.bo_full,0)
+,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
+from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
+where a.mon=@t_xmon and a.monkind=@t_xkind and a.person='日薪' 
+and charindex(@t_xclass,case when b.memo2!='' then b.memo2 else c.typea end )>0
+
+update #tmp set total3=total1+total2
+update #tmp set total5=total3-ISNULL(ch_labor,0)-ISNULL(ch_health,0)-ISNULL(minus,0)
+
+if((select count(*) from #tmp)>0)
+begin
+	insert #tmp
+	select '1',MAX(datea),CHAR(255),CHAR(255)
+	,SUM(money),SUM(days),SUM(mtotal),SUM(total1),SUM(bo_traffic),SUM(addh),SUM(addmoney),SUM(bo_oth),SUM(bo_special),SUM(bo_full)
+	,SUM(total2),SUM(total3),SUM(ch_labor),SUM(ch_health),SUM(minus),SUM(total5),''
+	from #tmp where gno='0'
+end
+
+select
+case when isnull(mtotal,0)>0 then '$'+dbo.getComma(mtotal,0) else '' end  mtotal, 
+case when isnull(money,0)>0 then '<'+cast(days as nvarchar(10))+'天>$'+dbo.getComma(money,0)+'/天' else '' end  money,
+case when isnull(total1,0)>0 then '$'+dbo.getComma(total1,0) else '' end  total1,
+case when isnull(bo_traffic,0)>0 then '$'+dbo.getComma(bo_traffic,0) else '' end bo_traffic,
+case when isnull(addmoney,0)+isnull(bo_oth,0)>0 then '$'+dbo.getComma(isnull(addmoney,0)+isnull(bo_oth,0),0) else '' end addmoney,
+case when isnull(bo_special,0)>0 then '$'+dbo.getComma(bo_special,0) else '' end bo_special,
+case when isnull(bo_full,0)>0 then '$'+dbo.getComma(bo_full,0) else '' end bo_full,
+case when isnull(bo_special,0)+isnull(bo_full,0)>0 then '$'+dbo.getComma(isnull(bo_special,0)+isnull(bo_full,0),0) else '' end bo_spefull ,
+case when isnull(total2,0)>0 then '$'+dbo.getComma(total2,0) else '' end total2,
+case when isnull(total3,0)>0 then '$'+dbo.getComma(total3,0) else '' end total3,
+case when isnull(ch_labor,0)>0 then '$'+dbo.getComma(ch_labor,0) else '' end ch_labor,
+case when isnull(ch_health,0)>0 then '$'+dbo.getComma(ch_health,0) else '' end ch_health,
+case when isnull(minus,0)>0 then '$'+dbo.getComma(minus,0) else '' end minus,
+case when isnull(total5,0)>0 then '$'+dbo.getComma(total5,0) else '' end  total5,
+case when isnull(addmoney,0)>0 and isnull(bo_oth,0)>0 then dbo.getComma(addh,0)+'H+津貼'
+when isnull(addh,0)>0 then dbo.getComma(addh,0)+'H' when isnull(bo_oth,0)>0 then '津貼' else '' end addh,
+case when isnull(bo_traffic,0)>0 then '生產獎金' else '' end traffic,
+case when isnull(bo_full,0)>0 and isnull(bo_special,0)>0 then '<font size="2">全勤.績效獎金</font>' 
+when isnull(bo_special,0)>0 then '績效獎金' when isnull(bo_full,0)>0 then '全勤獎金' else '' end spefull,
+LEFT(datea,3)+'年'+LEFT(RIGHT(datea,5),2)+'月'+RIGHT(datea,2)+'日' datea,* 
+from #tmp order by gno,sssno
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+   drop table #tmp
+END
+;
+------------------------------------------------------------------------------------------------------------------------------

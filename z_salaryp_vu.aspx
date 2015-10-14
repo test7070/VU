@@ -32,11 +32,11 @@
                         name : 'xmon'
                     }, {
 						type : '5',
-						name : 'kind',
+						name : 'xkind',
 						value : [].concat(trim('上期,下期').split(','))
 					}, {
 						type : '5',
-						name : 'class',
+						name : 'xclass',
 						value : [].concat(trim('早班,晚班').split(','))
 					}, {
                         type : '2',

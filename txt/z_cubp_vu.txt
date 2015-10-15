@@ -34,7 +34,7 @@ select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+conve
 		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(order by a.datea) dno
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
-and isnull(b.uno,'')!=''
+and isnull(b.uno,'')!='' and isnull(b.ordeno,'')!=''
 
 insert @result(gno,hmount,mount,weight,dno)
 select '1' gno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
@@ -87,7 +87,7 @@ select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+conve
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.mechno between @t_bmechno and @t_emechno
       and  a.datea between @t_bdate and @t_edate
-	  and isnull(b.uno,'')!=''
+	  and isnull(b.uno,'')!='' and isnull(b.ordeno,'')!=''
 	 		
 insert @result(gno,datea,mechno,hmount,mount,weight,dno)
 select '1' gno,'9999/999',mechno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
@@ -131,7 +131,7 @@ select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else l
  	   end ,a.mechno,a.mech,sum(b.mount),SUM(b.weight)
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.datea between @t_bdate and @t_edate
-	  and isnull(b.uno,'')!=''
+	  and isnull(b.uno,'')!=''  and isnull(b.ordeno,'')!=''
 group by case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6)
  		 end,a.mechno,a.mech
 
@@ -221,7 +221,6 @@ declare @t_emechno nvarchar(30)
 declare @t_pno nvarchar(50)
 declare @t_spec nvarchar(50)
 declare @t_size nvarchar(50)
-
 
 set @t_rank = case when '#non'='[5]' then '' else '[5]' end
 set @t_bdate = case when '#non'=[6] then '' else [6] end 
@@ -359,7 +358,7 @@ begin
 		set @aprice=0
 	end
 	
-	if(@tablea in ('ucce','rc2s','inas','cubu'))
+	if(@tablea in ('ucce','rc2s','inas'))
 	begin
 		set @t_mount=@t_mount+@mount
 		set @t_weight=@t_weight+@weight

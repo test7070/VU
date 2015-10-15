@@ -389,8 +389,8 @@
 						}
 						q1_weight=0,q2_weight=0;
 						break;
-					case 'btnOk_uccb':
-						var as = _q_appendData("view_uccb", "", true);
+					case 'btnOk_cubs':
+						var as = _q_appendData("view_cubs", "", true);
                         if (as[0] != undefined) {
                         	var t_uno='';
                         	for ( i = 0; i < as.length; i++) {
@@ -398,12 +398,12 @@
                         	}
                             alert(t_uno+"批號已存在!!");
                         }else{
-                        	check_uccb_uno=true;
+                        	check_cubs_uno=true;
                         	btnOk();
                         }
                         break;
 					case 'getuno':
-						var as = _q_appendData("view_uccb", "", true);
+						var as = _q_appendData("view_cubs", "", true);
 						var maxnoq=0; 
 						if(as[0] != undefined){
 							maxnoq=dec(as[0].uno.slice(-3));
@@ -596,7 +596,7 @@
 			}
 			
 			var check_startdate=false;
-			var check_uccb_uno=false;
+			var check_cubs_uno=false;
 			var get_uno=false,get_maxuno=false;
 			var check_cont=false;
 			function btnOk() {
@@ -634,14 +634,14 @@
 				}
 				
 				//判斷批號是否已使用
-				/*if(!check_uccb_uno){
+				/*if(!check_cubs_uno){
                 	var t_uno = "1=0";
                     for (var i = 0; i < q_bbsCount; i++) {
                         if ($.trim($('#txtUno_' + i).val()).length > 0)
                             t_uno += " or uno='" + $.trim($('#txtUno_' + i).val()) + "'";
                     }
 					var t_where = "where=^^ ("+t_uno+") and noa!='"+$('#txtNoa').val()+"' ^^";
-					q_gt('view_uccb', t_where, 0, 0, 0, "btnOk_uccb", r_accy);
+					q_gt('view_cubs', t_where, 0, 0, 0, "btnOk_cubs", r_accy);
 					return;
                 }*/
 				
@@ -657,12 +657,12 @@
 				}
 				
 				if(get_uno && !get_maxuno){
-					var t_where = "where=^^ uno=isnull((select MAX(uno) from view_uccb where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
-					q_gt('view_uccb', t_where, 0, 0, 0, "getuno", r_accy);
+					var t_where = "where=^^ uno=isnull((select MAX(uno) from view_cubs where uno like '"+replaceAll($('#txtDatea').val(),'/','')+"%' and len(uno)=11),'')  and uno!='' ^^";
+					q_gt('view_cubs', t_where, 0, 0, 0, "getuno", r_accy);
 					return;
 				}*/
 				
-				check_uccb_uno=false;
+				check_cubs_uno=false;
 				check_startdate=false;
 				get_uno=false;
 				get_maxuno=false;

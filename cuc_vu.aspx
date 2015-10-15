@@ -32,8 +32,8 @@
 				if(bbsrow>0){ //有資料再刷新
 					var new_where='1=0';
 					for(var i=0;i<bbsrow;i++){
-						if(!emp($('#cucs_noa'+i).text()) && new_where.indexOf($('#cucs_noa'+i).text())==-1)
-							new_where=new_where+" or a.noa='"+$('#cucs_noa'+i).text()+"'";
+						if(!emp($('#cucs_noa'+i).text()) && new_where.indexOf($('#cucs_noa'+i).text()+$('#cucs_noq'+i).text())==-1)
+							new_where=new_where+" or (a.noa+b.noq='"+$('#cucs_noa'+i).text()+"-"+$('#cucs_noq'+i).text()+"' )";
 					}
 					var t_where = "where=^^ 1=1 and ("+new_where+") and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);
@@ -402,7 +402,7 @@
 				string+='<td id="cuct_gmount" align="center" style="width:80px; color:black;">領料件數</td>';
 				string+='<td id="cuct_gweight" align="center" style="width:90px; color:black;">領料重量</td>';
 				string+='<td id="cuct_avgweight" align="center" style="width:90px; color:black;">均重</td>';
-				string+='<td id="cuct_memo" align="center" style="width:220px; color:black;">備註&nbsp;&nbsp;<input id="btnCubt2" type="button" style="font-size: medium; font-weight: bold;" value="領料"/><input type="button" id="btnCub_nouno" value="註銷條碼" style="width:80px;font-size: medium; font-weight: bold"/></td>';
+				string+='<td id="cuct_memo" align="center" style="width:220px; color:black;">備註&nbsp;&nbsp;<input id="btnCubt2" type="button" style="font-size: medium; font-weight: bold;" value="領料"/><input type="button" id="btnCub_nouno" value="條碼領料" style="width:80px;font-size: medium; font-weight: bold"/></td>';
 				string+='</tr>';
 				string+='</table>';
 				$('#cuct').append(string);
@@ -420,7 +420,7 @@
 					$('#div_nouno').show();
 				});
 				$('#textNouno').click(function() {
-                	q_msg($(this),'多批號註銷請用,隔開');
+                	q_msg($(this),'多批號領料請用,隔開');
 				});
 				$('#btnOk_div_nouno').click(function() {
 					var t_nouno=$.trim($('#textNouno').val());
@@ -430,8 +430,8 @@
 						for (var i=0;i<t_nouno.length;i++){
 							t_where=t_where+(t_where.length>0?" or ":"")+"uno='"+t_nouno[i]+"'";
 						}
-						var t_where = "where=^^ ("+t_where+") and tablea='cubu' ^^";
-						q_gt('view_uccb', t_where, 0, 0, 0, "nouno_getuno", r_accy);
+						var t_where = "where=^^ ("+t_where+") ^^";
+						q_gt('view_cubs', t_where, 0, 0, 0, "nouno_getuno", r_accy);
 					}
 				});
 				$('#btnClose_div_nouno').click(function() {
@@ -1282,29 +1282,38 @@
 						q_cmbParse("combMechno", t_mech);
 						break;
 					case 'nouno_getuno':
-						var as = _q_appendData("view_uccb", "", true);
+						var as = _q_appendData("view_cubs", "", true);
 						if (as[0] != undefined) {
 							var t_nouno=$.trim($('#textNouno').val()).split(',');
 							var tt_nouno='';
+							var t_mount=0,t_weight=0;
 							for (var i=0;i<t_nouno.length;i++){
 								var t_exists=false;
 								for (var j=0;j<as.length;j++){
 									if(as[j].uno==t_nouno[i]){
 										t_exists=true;
-										break;
+										t_mount=q_add(t_mount,dec(as[j].mount));
+										t_weight=q_add(t_mount,dec(as[j].weight));
 									}
 								}
 								if(!t_exists){
-									alert("批號【"+t_nouno[i]+"】不存在或已註銷!!")
+									alert("批號【"+t_nouno[i]+"】不存在或已領料!!")
+									tt_nouno='';
+									break;
+								}else if(t_mount<=0 && t_mount<=0){
+									alert("批號【"+t_nouno[i]+"】已領料!!")
+									tt_nouno='';
 									break;
 								}else{
 									tt_nouno=tt_nouno+t_nouno[i]+"#";
 								}
 							}
-								
-							q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno));
+							var t_mechno=emp($('#combMechno').val())?'#non':$('#combMechno').val();
+							
+							if(tt_nouno.length>0)
+								q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno)+ ';' + encodeURI(t_mechno)+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name));
 						}else{
-							alert("批號不存在或已註銷!!");
+							alert("批號不存在!!");
 						}
 						break;
 					case q_name:
@@ -1458,18 +1467,11 @@
                 		var as = _q_appendData("tmp0", "", true, true);
                         if (as[0] != undefined) {
                         	func_cubno=as[0].cubno;
-                        	//產生cubu
-                        	q_func('qtxt.query.cubstocubu', 'cub.txt,cubstocubu,' + encodeURI(r_accy) + ';' + encodeURI(func_cubno));
+                        	q_func('cub_post.post', r_accy + ',' + encodeURI(func_cubno) + ',1');
+                        	func_cubno='';
                 		}
                 		break;
-					case 'qtxt.query.cubstocubu':
-						if(func_cubno.length>0){
-							q_func('cub_post.post', r_accy + ',' + encodeURI(func_cubno) + ',1');
-							q_func('cubu_post.post', r_accy + ',' + encodeURI(func_cubno) + ',1');
-							func_cubno='';
-						}
-						break;
-					case 'cubu_post.post':
+					case 'cub_post.post':
 						alert('加工單產生完畢!!');
 						//更新畫面
 						chk_cucs=[];
@@ -1501,18 +1503,11 @@
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
                         	func_cubno=as[0].cubno;
-                        	//產生cubu
-                        	q_func('qtxt.query.cubstocubu2', 'cub.txt,cubstocubu,' + encodeURI(r_accy) + ';' + encodeURI(func_cubno));
+                        	q_func('cub_post.post.2', r_accy + ',' + encodeURI(func_cubno) + ',1');
+                        	func_cubno='';
                 		}
 						break;
-					case 'qtxt.query.cubstocubu2':
-						if(func_cubno.length>0){
-							q_func('cub_post.post.2', r_accy + ',' + encodeURI(func_cubno) + ',1');
-							q_func('cubu_post.post.2', r_accy + ',' + encodeURI(func_cubno) + ',1');
-							func_cubno='';
-						}
-						break;
-					case 'cubu_post.post.2':
+					case 'cub_post.post.2':
 						Unlock();
                         alert('入庫完成!!');
                         $('#cucu_table .minut').each(function() {
@@ -1524,37 +1519,15 @@
 					case 'qtxt.query.cubnouno':
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
-							nouno_noa=as;
-							for(var i=0;i<nouno_noa.length;i++){
-								nouno_noa[i].post0='N';
-								nouno_noa[i].post1='N';
-								q_func('cubu_post.post.a4_'+i, r_accy + ',' + nouno_noa[i].noa + ',0');
-							}
+							var t_cubno=as[0].cubno;
+							q_func('cub_post.post.nouno', r_accy + ',' + encodeURI(t_cubno) + ',1');
 						}
 						break;
-                }
-                if(t_func.indexOf('cubu_post.post.a4_')>-1){
-					var n=replaceAll(t_func,'cubu_post.post.a4_','');
-					nouno_noa[n].post0='Y'
-					q_func('cubu_post.post.a5_'+n, r_accy + ',' + nouno_noa[n].noa + ',1');
-				}
-				if(t_func.indexOf('cubu_post.post.a5_')>-1){
-					var n=replaceAll(t_func,'cubu_post.post.a5_','');
-					nouno_noa[n].post1='Y'
-					
-					var t_enda=true;
-					for(var i=0;i<nouno_noa.length;i++){
-						if(nouno_noa[i].post0!='Y' && nouno_noa[i].post1!='Y'){
-							t_enda=false;
-							break;
-						}
-					}
-					if(t_enda){
-						nouno_noa=[];
+					case 'cub_post.post.nouno':
 						$('#div_nouno').hide();
-						alert("批號註銷完成!!");
-					}
-				}
+						alert("批號領料完成!!");
+						break;
+                }
                 if(t_func.indexOf('qtxt.query.getweight_')>-1){
                 	var n=t_func.split('_')[1];
                 	$('#textAvgweight_'+n).focusin();
@@ -2156,7 +2129,7 @@
 				</tr>
 				<tr id='nouno_close'>
 					<td align="center" colspan='2'>
-						<input id="btnOk_div_nouno" type="button" value="註銷">
+						<input id="btnOk_div_nouno" type="button" value="領料">
 						<input id="btnClose_div_nouno" type="button" value="取消">
 					</td>
 				</tr>

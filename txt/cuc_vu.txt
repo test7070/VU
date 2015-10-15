@@ -89,6 +89,10 @@ cucstocub:--cucstocub
 	declare @cubno nvarchar(100) --新加工單號
 	set @cubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
 	set @cubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@cubno,3) as int) +1 as nvarchar(50)),3)
+	
+	--時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=replace(CONVERT (VARCHAR(20), GETDATE(),20 ),'-','/')
 
 	--*********************************************************************************************
 	
@@ -170,8 +174,8 @@ cucstocub:--cucstocub
 	begin
 		--bbm
 		exec("
-			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker)
-			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"' 
+			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"','"+@now_datetime+"'
 		")
 		--bbs
 		exec("
@@ -179,9 +183,8 @@ cucstocub:--cucstocub
 			,hmount,mount,weight,need,memo,date2,ordeno,no2,datea,productno2,product2,uno)
 			select '"+@cubno+"',right('000'+cast(ROW_NUMBER() over(order by a.noa,a.noq) as nvarchar(50)),3)
 			,b.custno,b.cust,c.product,c.ucolor,c.spec,c.size,c.lengthb,c.class,a.xcount,a.xmount,a.xweight,'','','"+@datea+"',c.ordeno,c.no2,d.datea,a.noa,a.noq
-			,isnull(c.ordeno,'')+isnull(c.no2,'')+'-'+'"+@mechno+"'+
-			(right('000'+cast(ROW_NUMBER() over (partition by isnull(c.ordeno,''),isnull(c.no2,'') order by isnull(c.ordeno,''),isnull(c.no2,''))+
-			cast(right(isnull((select MAX(uno) from view_uccb where uno like isnull(c.ordeno,'')+isnull(c.no2,'')+'-%'),'000'),3) as int) as nvarchar(10)),3))
+			,isnull(c.ordeno,'')+'-'+'"+@mechno+"'+
+			(right('000'+cast(1+cast(right(isnull((select MAX(uno) from view_cubs where uno like isnull(c.ordeno,'')+'-%'),'000'),3) as int) as nvarchar(10)),3))
 			from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq left join view_orde d on d.noa=c.ordeno
 		")
 		--bbt
@@ -429,6 +432,10 @@ cucttocubt:--cucttocubt
 	declare @cubno nvarchar(100) --新加工單號
 	set @cubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
 	set @cubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@cubno,3) as int) +1 as nvarchar(50)),3)
+	
+	--時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=replace(CONVERT (VARCHAR(20), GETDATE(),20 ),'-','/')
 
 	--*********************************************************************************************
 	
@@ -478,8 +485,8 @@ cucttocubt:--cucttocubt
 	begin
 		--bbm
 		exec("
-			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker)
-			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"' 
+			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"','"+@now_datetime+"' 
 		")
 		
 		--bbt
@@ -548,6 +555,10 @@ cucutocubs:--cucutocubs
 	declare @cubno nvarchar(100) --新加工單號
 	set @cubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
 	set @cubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@cubno,3) as int) +1 as nvarchar(50)),3)
+	
+	--時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=replace(CONVERT (VARCHAR(20), GETDATE(),20 ),'-','/')
 
 	--*********************************************************************************************
 	IF OBJECT_ID('tempdb..#tmpa')is not null
@@ -590,7 +601,7 @@ cucutocubs:--cucutocubs
 		,cast(dbo.split(@xcucu,'^@^',7) as float)
 		,cast(dbo.split(@xcucu,'^@^',8) as float)
 		,dbo.split(@xcucu,'^@^',9)
-		,@cubno+right('000'+cast(@bbscount as nvarchar(10)),3)
+		,@cubno --+right('000'+cast(@bbscount as nvarchar(10)),3)
 		
 		set @xcucu=SUBSTRING(@xcucu,CHARINDEX('^#^',@xcucu)+3,LEN(@xcucu))
 	end
@@ -600,8 +611,8 @@ cucutocubs:--cucutocubs
 	begin
 		--bbm
 		exec("
-			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker)
-			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"' 
+			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"','"+@now_datetime+"' 
 		")
 		
 		--bbs

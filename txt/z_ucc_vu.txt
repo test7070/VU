@@ -165,7 +165,7 @@ begin
 		set @aprice=0
 	end
 	
-	if(@tablea in ('ucce','rc2s','inas','cubu'))
+	if(@tablea in ('ucce','rc2s','inas'))
 	begin
 		set @t_mount=@t_mount+@mount
 		set @t_weight=@t_weight+@weight
@@ -450,7 +450,7 @@ begin
 		set @aprice=0
 	end
 	
-	if(@tablea in ('ucce','rc2s','inas','cubu'))
+	if(@tablea in ('ucce','rc2s','inas'))
 	begin
 		set @t_mount=@t_mount+@mount
 		set @t_weight=@t_weight+@weight
@@ -599,7 +599,6 @@ create table #tmp(
 	cust nvarchar(50)
 )
 
-
 insert #tmp
 select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class
 ,'<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+a.noa+''+CHAR(59)+'104'',''95%'',''95%'',''104'')">'+b.uno+'</a>'
@@ -611,7 +610,10 @@ and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and isnull(uno,'')!='' --and b.datea<=@t_edate 
-and (len(isnull(b.ordeno,''))=(case when @t_ordeshow='0' then 0 else len(isnull(b.ordeno,'')) end)) 
+and (len(isnull(b.ordeno,''))=(case when @t_ordeshow='0' then 0 else len(isnull(b.ordeno,'')) end))
+and (mount>0 or weight>0) 
+and not exists (select * from view_vcct where uno=b.uno)
+and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0))
 
 if((select count(*) from #tmp)>0)
 begin

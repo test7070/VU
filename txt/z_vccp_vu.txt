@@ -435,16 +435,16 @@ declare @result table(
 ) 
 insert @result 
 select '0',ROW_NUMBER() over(order by product,uno) 
-,product,ucolor,spec,size,lengthb,class,uno,
-a.mount-isnull(b.vtmount,0),a.weight-isnull(b.vtweight,0)  
+,product,ucolor,spec,size,lengthb,class,uno,a.mount,a.weight  
 from view_cubs a 
-outer apply (select sum(mount)vtmount,sum(weight)vtweight from view_vcct b where b.uno=a.uno)b
 where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and datea <= @t_edate 
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) 
 and (len(@t_size)=0 or isnull(size,'')=@t_size) 
 and ((@t_slengthb='' and @t_elengthb=char(255)) or isnull(lengthb,0) between cast(@t_slengthb as float) and cast(@t_elengthb as float)) 
 and (len(@t_class)=0 or isnull(class,'')=@t_class) 
-and a.mount-isnull(b.vtmount,0)!=0 and a.weight-isnull(b.vtweight,0)!=0
+and (a.mount>0 or a.weight>0)
+and not exists (select * from view_vcct where uno=a.uno)
+and not exists (select * from view_cubs where uno=a.uno and (mount<0 or weight<0) )
 
 if ((select count(*) from @result) != 0) 
 begin 
@@ -460,5 +460,4 @@ dbo.getComma(mount,0)mount
 ,* 
 from @result 
 order by gno,product,uno
-
 ;

@@ -188,7 +188,7 @@
 				});
 				
 				$('#textNouno').click(function() {
-                	q_msg($(this),'多批號註銷請用,隔開');
+                	q_msg($(this),'多批號領料請用,隔開');
 				});
 				
 				$('#btnClose_div_nouno').click(function() {
@@ -340,8 +340,10 @@
 								tr.innerHTML = "<td id='uno_"+i+"'>"+as[i].uno+"</td>";
 								if(dec(as[i].vtcount)>0)
 									tr.innerHTML+="<td>已出貨</td>";
+								if(dec(as[i].mount)<=0 || dec(as[i].weight)<=0)
+									tr.innerHTML+="<td>已領料</td>";
 								else
-									tr.innerHTML+="<td><input id='btnNouno_"+i+"' type='button' class='btnuno' value='註銷'></td>";
+									tr.innerHTML+="<td><input id='btnNouno_"+i+"' type='button' class='btnuno' value='領料'></td>";
 								var tmp = document.getElementById("nouno_close");
 								tmp.parentNode.insertBefore(tr,tmp);
 							}
@@ -355,7 +357,7 @@
 							$(this).click(function() {
 								var n=$(this).attr('id').split('_')[1];
 								var tt_nouno=$('#uno_'+n).text();
-								q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno));
+								q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno)+ ';' + encodeURI('#non')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name));
 							});
 						});
 						break;
@@ -501,9 +503,9 @@
 							b_seq = t_IdSeq;
 							var t_noa=$('#txtNoa').val();
 							var t_no2=$('#txtNo2_'+b_seq).val();
-							if(q_cur!=1 && q_cur!=2){
+							if(q_cur!=1 && q_cur!=2 && t_no2.length>0){
 								$('#div_nouno').css('top',($(this).offset().top-$('#div_nouno').height())+"px").css('left',($(this).offset().left-$('#div_nouno').width())+"px");
-								var t_where = "where=^^ ordeno='"+t_noa+"' and no2='"+t_no2+"' and isnull(uno,'')!='' ^^";
+								var t_where = "where=^^ a.ordeno='"+t_noa+"' and a.no2='"+t_no2+"' and isnull(a.uno,'')!='' ^^";
 								q_gt('cubs_vcct', t_where, 0, 0, 0, "nouno_getuno", r_accy);
 							}
 						});
@@ -703,36 +705,14 @@
 					case 'qtxt.query.cubnouno':
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
-							nouno_noa=as;
-							for(var i=0;i<nouno_noa.length;i++){
-								nouno_noa[i].post0='N';
-								nouno_noa[i].post1='N';
-								q_func('cubu_post.post.a4_'+i, r_accy + ',' + nouno_noa[i].noa + ',0');
-							}
+							var t_cubno=as[0].cubno;
+							q_func('cub_post.post', r_accy + ',' + encodeURI(t_cubno) + ',1');
 						}
 						break;
-				}
-				if(t_func.indexOf('cubu_post.post.a4_')>-1){
-					var n=replaceAll(t_func,'cubu_post.post.a4_','');
-					nouno_noa[n].post0='Y'
-					q_func('cubu_post.post.a5_'+n, r_accy + ',' + nouno_noa[n].noa + ',1');
-				}
-				if(t_func.indexOf('cubu_post.post.a5_')>-1){
-					var n=replaceAll(t_func,'cubu_post.post.a5_','');
-					nouno_noa[n].post1='Y'
-					
-					var t_enda=true;
-					for(var i=0;i<nouno_noa.length;i++){
-						if(nouno_noa[i].post0!='Y' && nouno_noa[i].post1!='Y'){
-							t_enda=false;
-							break;
-						}
-					}
-					if(t_enda){
-						nouno_noa=[];
+					case 'cub_post.post':
 						$('#div_nouno').hide();
-						alert("批號註銷完成!!");
-					}
+						alert("批號領料完成!!");
+						break;
 				}
 			}
 		</script>
@@ -858,7 +838,7 @@
 			<table id="table_nouno" style="width:100%;" border="1" cellpadding='2'  cellspacing='0'>
 				<tr>
 					<td style="background-color: #f8d463;width: 250px;" align="center">批號</td>
-					<td style="background-color: #f8d463;width: 50px;" align="center">註銷</td>
+					<td style="background-color: #f8d463;width: 50px;" align="center">領料</td>
 				</tr>
 				<tr id='nouno_close'>
 					<td align="center" colspan='2'><input id="btnClose_div_nouno" type="button" value="取消"></td>
@@ -1020,7 +1000,7 @@
 					<td align="center" style="width:90px;display: none;"><a id='lblDateas'> </a></td>
 					<td align="center" style="width:30px;"><a id='lblEndas'> </a></td>
 					<td align="center" style="width:30px;"><a id='lblCancels'> </a></td>
-					<td align="center" style="width:30px;"><a id='lblNouno_s'>註銷</a></td>
+					<td align="center" style="width:30px;"><a id='lblNouno_s'>領料</a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>

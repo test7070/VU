@@ -72,7 +72,11 @@
                         type : '5',
                         name : 'xsize', //[15]
                         value:(',#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16').split(',')
-                    }]
+                    },{//[16]
+						type : '5',
+						name : 'xshowget',
+						value :('Y@含領料,N@不含領料').split(',')
+					}]
 				});
                 q_popAssign();
 				q_getFormat();

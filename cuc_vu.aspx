@@ -33,7 +33,7 @@
 					var new_where='1=0';
 					for(var i=0;i<bbsrow;i++){
 						if(!emp($('#cucs_noa'+i).text()) && new_where.indexOf($('#cucs_noa'+i).text()+$('#cucs_noq'+i).text())==-1)
-							new_where=new_where+" or (a.noa+b.noq='"+$('#cucs_noa'+i).text()+"-"+$('#cucs_noq'+i).text()+"' )";
+							new_where=new_where+" or (a.noa+'-'+b.noq='"+$('#cucs_noa'+i).text()+"-"+$('#cucs_noq'+i).text()+"' )";
 					}
 					var t_where = "where=^^ 1=1 and ("+new_where+") and isnull(b.mins,0)=0 order by b.spec,b.size,b.lengthb,b.noa,b.noq ^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);

@@ -54,11 +54,13 @@ declare @t_bdate nvarchar(30)
 declare @t_edate nvarchar(30)
 declare @t_bmechno nvarchar(30)
 declare @t_emechno nvarchar(30)
+declare @t_showget nvarchar(30)
 
 set @t_bdate = case when '#non'=[6] then '' else [6] end 
 set @t_edate = case when '#non'=[7] then char(255) else [7] end 
 set @t_bmechno = case when '#non'=[8] then '' else [8] end 
 set @t_emechno = case when '#non'=[9] then char(255) else [9] end
+set @t_showget = case when '#non'=[16] then 'Y' else [16] end
 ------------------------------------------------------------------------------------------------
 declare @result table(
 	gno nvarchar(1),
@@ -81,13 +83,14 @@ declare @result table(
 	
 )
 insert @result 
-select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
+select '0' gno,a.kind,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
 		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(partition by a.mechno order by a.mechno,a.datea) dno
 		,a.mech
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.mechno between @t_bmechno and @t_emechno
       and  a.datea between @t_bdate and @t_edate
-	  and isnull(b.uno,'')!='' and isnull(b.ordeno,'')!=''
+	  and isnull(b.uno,'')!='' and (mount>0 or weight>0)
+	  and (@t_showget='Y' or  not exists(select * from view_cubs where uno=b.uno and (mount<0 or weight<0) ))
 	 		
 insert @result(gno,datea,mechno,hmount,mount,weight,dno)
 select '1' gno,'9999/999',mechno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
@@ -395,7 +398,7 @@ create table #result(
 	gno nvarchar(1),
 	noa nvarchar(50), 
 	noq nvarchar(50), 
-	datea nvarchar(10), 
+	datea nvarchar(50), 
 	mechno nvarchar(10), 
 	mech nvarchar(30), 
 	seq float,
@@ -417,7 +420,7 @@ create table #result(
 ) 
 
 insert #result 
-select '2',a.noa,b.noq,a.datea,a.mechno,a.mech,ROW_NUMBER() over(partition by a.mechno order by a.mechno,a.datea) seq 
+select '2',a.noa,b.noq,a.kind,a.mechno,a.mech,ROW_NUMBER() over(partition by a.mechno order by a.mechno,a.datea) seq 
 ,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class 
 ,b.gmount,b.gweight,case when gmount>0 then round(b.gweight/b.gmount,0) else 0 end,b.storeno,c.aprice,isnull(c.money,0),b.memo,0,0
 from view_cubt b left join view_cub a on a.noa=b.noa 
@@ -494,4 +497,92 @@ BEGIN
 	set @cmd = 'drop table #result'
 	EXECUTE sp_executesql @cmd
 END
+;
+--********************************************************************************************
+z_cubp_vu06:--z_cubp_vu06
+declare @t_rank nvarchar(20)
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bmechno nvarchar(30)
+declare @t_emechno nvarchar(30)
+declare @t_pno nvarchar(50)
+declare @t_spec nvarchar(50)
+declare @t_size nvarchar(50)
+
+set @t_rank = case when '#non'='[5]' then '' else '[5]' end
+set @t_bdate = case when '#non'=[6] then '' else [6] end 
+set @t_edate = case when '#non'=[7] then char(255) else [7] end 
+set @t_bmechno = case when '#non'=[8] then '' else [8] end 
+set @t_emechno = case when '#non'=[9] then char(255) else [9] end 
+set @t_pno = case when '#non'=[13] then '' else [13] end
+set @t_spec = case when '#non'=[14] then '' else [14] end
+set @t_size = case when '#non'=[15] then '' else [15] end
+ -----------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max)
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #tmp(
+	gno nvarchar(2),
+	datea nvarchar(50),
+	seq nvarchar(50),
+	noa nvarchar(50),
+	noq nvarchar(50),
+	mechno nvarchar(100),
+	mech nvarchar(100),
+	product nvarchar(100),
+	ucolor nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	gmount decimal(20,2),
+	gweight decimal(20,2),
+	avgw decimal(20,2),
+	uno nvarchar(50),
+	memo nvarchar(MAX)
+)
+	
+insert #tmp
+select '0',c.kind,ROW_NUMBER() over (partition by a.mechno order by a.mechno,a.kind,a.noa,b.noq)
+,a.noa,b.noq,isnull(a.mechno,''),a.mech,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
+,case when b.mount=0 then 0 else round(b.weight/b.mount,0) end,b.uno,b.memo
+from view_cub a left join view_cubs b on a.noa=b.noa
+outer apply(select top 1 ca.kind from view_cub ca left join view_cubs cb on ca.noa=cb.noa where cb.uno=b.uno and (cb.mount<0 or cb.weight<0))c 
+where a.datea between @t_bdate and @t_edate
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.uno,'')!='' and (b.mount>0 or b.weight>0) 
+and exists( select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) 
+
+if((select count(*) from #tmp)>0)
+begin
+	insert #tmp(gno,datea,seq,mechno,mech,gmount,gweight)
+	select '1',char(255),count(*),mechno,MAX(mech),sum(gmount),sum(gweight)
+	from #tmp where gno='0'
+	group by mechno
+	
+	insert #tmp(gno,datea,seq,mechno,mech,gmount,gweight)
+	select '2',char(255),count(*),char(255),char(255),sum(gmount),sum(gweight)
+	from #tmp where gno='0'
+end
+
+select 
+dbo.getComma(lengthb,0) lengthb
+,class,dbo.getComma(gmount,[2]) gmount
+,dbo.getComma(gweight,[3]) gweight
+,dbo.getComma(avgw,[3]) avgw
+,*
+from #tmp
+order by mechno,gno,datea 
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
 ;

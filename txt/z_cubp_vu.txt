@@ -79,31 +79,42 @@ declare @result table(
 	no2 nvarchar(10),
 	datec nvarchar(20),
 	dno int,
-	mech nvarchar(30)
-	
+	mech nvarchar(30),
+	isget int
 )
 insert @result 
 select '0' gno,a.kind,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
 		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(partition by a.mechno order by a.mechno,a.datea) dno
 		,a.mech
+		,(select count(*) from view_cubs where uno=b.uno and (mount<0 or weight<0))
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.mechno between @t_bmechno and @t_emechno
       and  a.datea between @t_bdate and @t_edate
 	  and isnull(b.uno,'')!='' and (mount>0 or weight>0)
-	  and (@t_showget='Y' or  not exists(select * from view_cubs where uno=b.uno and (mount<0 or weight<0) ))
+	  and (@t_showget='Y' or  not exists(select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) )
 	 		
 insert @result(gno,datea,mechno,hmount,mount,weight,dno)
 select '1' gno,'9999/999',mechno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
 from @result
 group by mechno
 
-select gno,datea,mechno,comp,products,class
-,dbo.getComma(hmount,[2]) hmount
-,dbo.getComma(mount,[2]) mount
-,dbo.getComma(weight,[3]) weight
-,need,memo,dateb,ordeno,no2,datec
+select gno
+,case when isget>0 then '<font color="red">'+cast( row_number()over(partition by mechno order by mechno,datea,gno) as nvarchar(10))+'</font>' else cast(row_number()over(partition by mechno order by mechno,datea,gno) as nvarchar(10)) end idno
+,case when isget>0 then '<font color="red">'+datea+'</font>' else datea end datea
+,case when isget>0 then '<font color="red">'+mechno+'</font>' else mechno end mechno
+,case when isget>0 then '<font color="red">'+comp+'</font>' else comp end comp
+,case when isget>0 then '<font color="red">'+products+'</font>' else products end products
+,case when isget>0 then '<font color="red">'+class+'</font>' else class end class
+,case when isget>0 then '<font color="red">'+need+'</font>' else need end need
+,case when isget>0 then '<font color="red">'+memo+'</font>' else memo end memo
+,case when isget>0 then '<font color="red">'+dateb+'</font>' else dateb end dateb
+,case when isget>0 then '<font color="red">'+ordeno+'</font>' else ordeno end ordeno
+,case when isget>0 then '<font color="red">'+no2+'</font>' else no2 end no2
+,case when isget>0 then '<font color="red">'+datec+'</font>' else datec end datec
+,case when isget>0 then '<font color="red">'+dbo.getComma(hmount,[2]) +'</font>' else dbo.getComma(hmount,[2])  end hmount
+,case when isget>0 then '<font color="red">'+dbo.getComma(mount,[2])+'</font>' else dbo.getComma(mount,[2]) end mount
+,case when isget>0 then '<font color="red">'+dbo.getComma(weight,[3])+'</font>' else dbo.getComma(weight,[3]) end weight
 ,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,dno,mech
-,row_number()over(partition by mechno order by mechno,datea,gno) idno
 from @result
 order by mechno,datea,gno
 ; 

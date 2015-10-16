@@ -423,6 +423,12 @@
                 	q_msg($(this),'多批號領料請用,隔開');
 				});
 				$('#btnOk_div_nouno').click(function() {
+					var t_err = q_chkEmpField([['combMechno', '機台']]);
+	                if (t_err.length > 0) {
+	                    alert(t_err);
+	                    return;
+	                }
+	                
 					var t_nouno=$.trim($('#textNouno').val());
 					if(t_nouno.length>0){
 						t_nouno=t_nouno.split(',');

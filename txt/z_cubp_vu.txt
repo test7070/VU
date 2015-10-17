@@ -34,7 +34,7 @@ select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+conve
 		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(order by a.datea) dno
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
-and isnull(b.uno,'')!='' and isnull(b.ordeno,'')!=''
+and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
 
 insert @result(gno,hmount,mount,weight,dno)
 select '1' gno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
@@ -63,6 +63,7 @@ set @t_emechno = case when '#non'=[9] then char(255) else [9] end
 set @t_showget = case when '#non'=[16] then 'Y' else [16] end
 ------------------------------------------------------------------------------------------------
 declare @result table(
+	recno int identity(1,1),
 	gno nvarchar(1),
 	datea nvarchar(20),
 	mechno nvarchar(10),
@@ -78,21 +79,37 @@ declare @result table(
 	ordeno nvarchar(30),
 	no2 nvarchar(10),
 	datec nvarchar(20),
+	uno nvarchar(50),
 	dno int,
 	mech nvarchar(30),
 	isget int
 )
 insert @result 
 select '0' gno,a.kind,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
-		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(partition by a.mechno order by a.mechno,a.datea) dno
-		,a.mech
-		,(select count(*) from view_cubs where uno=b.uno and (mount<0 or weight<0))
+		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
+		,a.mech,0
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.mechno between @t_bmechno and @t_emechno
       and  a.datea between @t_bdate and @t_edate
-	  and isnull(b.uno,'')!='' and (mount>0 or weight>0)
-	  and (@t_showget='Y' or  not exists(select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) )
-	 		
+	  and isnull(b.uno,'')!='' and (mount>=0 or weight>=0)
+
+if(@t_showget='Y')
+begin
+	insert @result 
+	select '0' gno,a.kind,a.mechno,b.comp,b.product+isnull(' '+b.spec,'')+isnull(' '+b.size,'')+case when convert(nvarchar,b.lengthb)='0' then '' else ' '+convert(nvarchar,b.lengthb) end
+			+isnull(' '+b.ucolor,''),b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
+			,a.mech,1
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	where a.mechno between @t_bmechno and @t_emechno
+	      and  a.datea between @t_bdate and @t_edate
+		  and isnull(b.uno,'')!='' and (mount<=0 or weight<=0)
+end
+
+update a
+set dno=b.dno
+from @result a
+outer apply (select * from (select row_number()over(partition by a.mechno order by a.mechno,a.datea)dno,recno from @result)tmp where recno=a.recno) b
+
 insert @result(gno,datea,mechno,hmount,mount,weight,dno)
 select '1' gno,'9999/999',mechno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
 from @result
@@ -111,14 +128,14 @@ select gno
 ,case when isget>0 then '<font color="red">'+ordeno+'</font>' else ordeno end ordeno
 ,case when isget>0 then '<font color="red">'+no2+'</font>' else no2 end no2
 ,case when isget>0 then '<font color="red">'+datec+'</font>' else datec end datec
+,case when isget>0 then '<font color="red">'+uno+'</font>' else uno end uno
 ,case when isget>0 then '<font color="red">'+dbo.getComma(hmount,[2]) +'</font>' else dbo.getComma(hmount,[2])  end hmount
 ,case when isget>0 then '<font color="red">'+dbo.getComma(mount,[2])+'</font>' else dbo.getComma(mount,[2]) end mount
 ,case when isget>0 then '<font color="red">'+dbo.getComma(weight,[3])+'</font>' else dbo.getComma(weight,[3]) end weight
-,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,dno,mech
+,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,mech,dno,mechno xmech,datea xdatea
 from @result
-order by mechno,datea,gno
+order by xmech,xdatea,gno,dno
 ; 
-
 --------------------------------------------------------------------------------------------------------------------------
 z_cubp_vu03:--z_cubp_vu03
 declare @t_bdate nvarchar(30)

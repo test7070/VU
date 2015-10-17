@@ -598,15 +598,9 @@
 					case 'getcubsuno':
 						var as = _q_appendData('view_cubs', '', true);
 						if (as[0] != undefined) {
-							//$('#txtProduct__'+b_seq).val(as[0].product);
-							//$('#txtUcolor__'+b_seq).val(as[0].ucolor);
-							//$('#txtSpec__'+b_seq).val(as[0].spec);
-							//$('#txtSize__'+b_seq).val(as[0].size);
-							//$('#txtLengthb__'+b_seq).val(as[0].lengthb);
-							//$('#txtClass__'+b_seq).val(as[0].class);
-							$('#txtMount__'+b_seq).val(as[0].mount);
-							$('#txtWeight__'+b_seq).val(as[0].weight);
-							//$('#txtMemo__'+b_seq).val(as[0].memo);
+							$('#btnMinut__'+b_seq).click();
+							q_gridAddRow(bbtHtm, 'tbbt', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtUno,txtMemo'
+								, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,uno,memo', 'txtUno');
 						}else{
 							alert('無此批號!!');
 							$('#btnMinut__'+b_seq).click();
@@ -1270,7 +1264,7 @@
 				text-align: right;
 			}
 			#dbbt {
-                width: 700px;
+                width: 100%;
             }
             #tbbt {
                 margin: 0;
@@ -1518,12 +1512,12 @@
 						<input id="btnVccttoOrde" type="button" style="font-size: medium; font-weight: bold;" value="2.出貨明細產生"/>
 					</td>
 					<!--<td style="width:150px;"><a id='lblProductno_t'> </a></td>-->
-					<td style="width:150px;display: none;"><a id='lblProduct_t'> </a></td>
-					<td style="width:150px;display: none;"><a id='lblUcolor_t'> </a></td>
-					<td style="width:130px;display: none;"><a id='lblSpec_t'> </a></td>
-					<td style="width:100px;display: none;"><a id='lblSize_t'> </a></td>
-					<td style="width:100px;display: none;"><a id='lblLengthb_t'> </a></td>
-					<td style="width:100px;display: none;"><a id='lblClass_t'> </a></td>
+					<td style="width:100px;"><a id='lblProduct_t'> </a></td>
+					<td style="width:150px;"><a id='lblUcolor_t'> </a></td>
+					<td style="width:130px;"><a id='lblSpec_t'> </a></td>
+					<td style="width:50px;"><a id='lblSize_t'> </a></td>
+					<td style="width:70px;"><a id='lblLengthb_t'> </a></td>
+					<td style="width:100px;"><a id='lblClass_t'> </a></td>
 					<!--<td style="width:55px;"><a id='lblUnit_t'> </a></td>-->
 					<td style="width:80px;"><a id='lblMount_t'> </a></td>
 					<td style="width:100px;"><a id='lblWeight_t'> </a></td>
@@ -1540,21 +1534,21 @@
 						<input id="txtProductno..*" type="text" class="txt c1" style="width: 83%;"/>
 						<input class="btn" id="btnProductno..*" type="button" value='.' style="font-weight: bold;" />
 					</td>-->
-					<td style="display: none;">
+					<td>
 						<input id="txtProduct..*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combProduct..*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td style="display: none;">
+					<td>
 						<input id="txtUcolor..*" type="text" class="txt c1" style="width: 110px;"/>
 						<select id="combUcolor..*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td style="display: none;">
+					<td>
 						<input id="txtSpec..*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combSpec..*" class="txt" style="width: 20px;"> </select>
 					</td>
-					<td style="display: none;"><input id="txtSize..*" type="text" class="txt c1" /></td>
-					<td style="display: none;"><input id="txtLengthb..*" type="text" class="txt num c1" /></td>
-					<td style="display: none;">
+					<td><input id="txtSize..*" type="text" class="txt c1" /></td>
+					<td><input id="txtLengthb..*" type="text" class="txt num c1" /></td>
+					<td>
 						<input id="txtClass..*" type="text" class="txt c1" style="width: 70%;"/>
 						<select id="combClass..*" class="txt" style="width: 20px;"> </select>
 					</td>

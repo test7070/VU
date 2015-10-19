@@ -223,7 +223,7 @@
 							q_cmbParse("combProduct_"+n, q_getPara('vccs_vu.product'));
 						}
 						if(objname=='combUcolor'){
-							q_cmbParse("combUcolor_"+n, t_ucolor);
+							q_cmbParse("combUcolor_"+n, ',板料');
 						}
 						if(objname=='combSpec'){
 							q_cmbParse("combSpec_"+n, t_spec);

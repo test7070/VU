@@ -1473,8 +1473,13 @@
                 		var as = _q_appendData("tmp0", "", true, true);
                         if (as[0] != undefined) {
                         	func_cubno=as[0].cubno;
-                        	q_func('cub_post.post', r_accy + ',' + encodeURI(func_cubno) + ',1');
-                        	func_cubno='';
+                        	if(func_cubno.length>0){
+	                        	q_func('cub_post.post', r_accy + ',' + encodeURI(func_cubno) + ',1');
+	                        	q_func( 'barvu.gen1', func_cubno);
+	                        	func_cubno='';
+                        	}else{
+                        		alert('加工單產生失敗!!');
+                        	}
                 		}
                 		break;
 					case 'cub_post.post':
@@ -1509,8 +1514,13 @@
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
                         	func_cubno=as[0].cubno;
-                        	q_func('cub_post.post.2', r_accy + ',' + encodeURI(func_cubno) + ',1');
-                        	func_cubno='';
+                        	if(func_cubno.length>0){
+	                        	q_func('cub_post.post.2', r_accy + ',' + encodeURI(func_cubno) + ',1');
+	                        	q_func( 'barvu.gen1', func_cubno);
+	                        	func_cubno='';
+                        	}else{
+                        		alert('入庫失敗!!');
+                        	}
                 		}
 						break;
 					case 'cub_post.post.2':

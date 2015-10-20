@@ -377,7 +377,7 @@ begin
 	
 	--領料
 	insert #tmp
-	select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.gmount,b.gweight 
+	select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.gmount,-1*b.gweight 
 	from view_cub a left join view_cubt b on a.noa=b.noa
 	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
@@ -388,7 +388,7 @@ begin
 	and (isnull(b.class,'')=@t_class)
 		
 	insert #tmp
-	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
 	from view_get a left join view_gets b on a.noa=b.noa
 	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')

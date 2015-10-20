@@ -1544,7 +1544,7 @@
 						alert("批號領料完成!!");
 						break;
                 }
-                if(t_func.indexOf('qtxt.query.getweight_')>-1){
+                /*if(t_func.indexOf('qtxt.query.getweight_')>-1){
                 	var n=t_func.split('_')[1];
                 	$('#textAvgweight_'+n).focusin();
                 	var as = _q_appendData("tmp0", "", true, true);
@@ -1573,7 +1573,7 @@
 						$('#textAvgweight_'+n).val(0);
 						$('#textGweight_'+n).val(0);
 					}
-                }
+                }*/
                 if(t_func.indexOf('qtxt.query.getweight_')>-1){
                 	var n=t_func.split('_')[1];
                 	var as = _q_appendData("tmp0", "", true, true);

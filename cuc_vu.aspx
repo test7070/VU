@@ -220,10 +220,10 @@
 						var n=$(this).attr('id').split('_')[1];
 						var objname=$(this).attr('id').split('_')[0];
 						if(objname=='combProduct'){
-							q_cmbParse("combProduct_"+n, q_getPara('vccs_vu.product'));
+							q_cmbParse("combProduct_"+n, ',鋼筋,鐵線');
 						}
 						if(objname=='combUcolor'){
-							q_cmbParse("combUcolor_"+n, ',板料');
+							q_cmbParse("combUcolor_"+n, t_ucolor);
 						}
 						if(objname=='combSpec'){
 							q_cmbParse("combSpec_"+n, t_spec);
@@ -288,7 +288,7 @@
 							});
 						}
 						//立刻讀均重
-						if(objname=='textGmount' || objname=='textGweight'){
+						if(objname=='textGmount' ){ //10/20 件數輸入才檢查庫存其餘欄位不用檢查庫存 || objname=='textGweight'
 							$(this).focusin(function() {
 								var x_product=$('#textProduct_'+n).val();
 								var x_spec=$('#textSpec_'+n).val();
@@ -309,8 +309,8 @@
 						}
 						//變動事件
 						$(this).change(function() {
-							//變動均價
-							if(dec($('#textGmount_'+n).val())!=0 || dec($('#textGweight_'+n).val())!=0){
+							//變動均價 //10/20 件數輸入才檢查庫存其餘欄位不用檢查庫存 || dec($('#textGweight_'+n).val())!=0
+							if(dec($('#textGmount_'+n).val())!=0){
 								var x_product=$('#textProduct_'+n).val();
 								var x_spec=$('#textSpec_'+n).val();
 								var x_size=$('#textSize_'+n).val();

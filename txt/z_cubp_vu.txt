@@ -592,14 +592,13 @@ create table #tmp(
 )
 	
 insert #tmp
-select '0',c.kind,ROW_NUMBER() over (partition by a.mechno order by a.mechno,a.kind,a.noa,b.noq)
-,a.noa,b.noq,isnull(a.mechno,''),a.mech,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
+select '0',a.kind,ROW_NUMBER() over (partition by a.mechno order by a.mechno,a.kind,a.noa,b.noq)
+,a.noa,b.noq,isnull(a.mechno,''),a.mech,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight
 ,case when b.mount=0 then 0 else round(b.weight/b.mount,0) end,b.uno,b.memo
-from view_cub a left join view_cubs b on a.noa=b.noa
-outer apply(select top 1 ca.kind from view_cub ca left join view_cubs cb on ca.noa=cb.noa where cb.uno=b.uno and (cb.mount<0 or cb.weight<0))c 
+from view_cub a left join view_cubs b on a.noa=b.noa 
 where a.datea between @t_bdate and @t_edate
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and isnull(b.uno,'')!='' and (b.mount>0 or b.weight>0) 
+and isnull(b.uno,'')!='' and (b.mount<=0 or b.weight<=0) 
 and exists( select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) 
 
 if((select count(*) from #tmp)>0)

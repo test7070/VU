@@ -300,6 +300,7 @@ begin
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 	
 	insert #tmp
 	select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
@@ -311,6 +312,7 @@ begin
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 	
 	--領料
 	insert #tmp
@@ -323,6 +325,7 @@ begin
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 		
 	insert #tmp
 	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
@@ -334,6 +337,7 @@ begin
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 end
 else --強制
 begin
@@ -346,6 +350,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 	
 	delete a
 	from #tmp a outer apply (select MAX(datea) datea from #tmp 
@@ -363,6 +368,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 	
 	insert #tmp
 	select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
@@ -374,6 +380,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 	
 	--領料
 	insert #tmp
@@ -386,6 +393,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 		
 	insert #tmp
 	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
@@ -397,6 +405,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
+	and b.storeno='7000'
 end
 
 select isnull(product,'')product,isnull(spec,'')spec,

@@ -21,7 +21,7 @@
             $(document).ready(function() {
                 q_getId();
                 q_gf('', 'z_salaryp_vu');
-
+                q_gt('part', '', 0, 0, 0, "");
             });
 
             function q_gfPost() {
@@ -31,25 +31,23 @@
                         type : '6',
                         name : 'xmon'
                     }, {
-						type : '5',
-						name : 'xkind',
-						value : [].concat(trim('上期,下期').split(','))
-					}, {
-						type : '5',
-						name : 'xclass',
-						value : [].concat(trim('早班,晚班').split(','))
-					}, {
+                        type : '5',
+                        name : 'xkind',
+                        value : [].concat(trim('上期,下期').split(','))
+                    }, {
+                        type : '5',
+                        name : 'xclass',
+                        value : [].concat(trim('早班,晚班').split(','))
+                    }, {
                         type : '2',
                         name : 'xsssno',
                         dbf : 'sss',
                         index : 'noa,namea',
                         src : 'sss_b.aspx'
                     }, {
-                        type : '2',
+                        type : '5',
                         name : 'xpartno',
-                        dbf : 'part',
-                        index : 'noa,part',
-                        src : 'part_b.aspx'
+                        value :partItem.split(',')
                     }]
                 });
                 q_popAssign();
@@ -62,8 +60,18 @@
 
             function q_boxClose(s2) {
             }
-
-            function q_gtPost(s2) {
+			
+			var partItem = '';
+            function q_gtPost(t_name) {
+                switch (t_name) {
+                    case 'part':
+                        var as = _q_appendData("part", "", true);
+                        partItem = " @全部";
+                        for ( i = 0; i < as.length; i++) {
+                            partItem = partItem + (partItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa + ' . ' + as[i].part;
+                        }
+                        break;
+                }
             }
 
 		</script>

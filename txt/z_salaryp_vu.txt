@@ -2,11 +2,13 @@
 SET QUOTED_IDENTIFIER OFF
 declare @t_xmon nvarchar(20)
 declare @t_xkind nvarchar(20)
+declare @t_xclass nvarchar(20)
 declare @t_bsno nvarchar(50)
 declare @t_esno nvarchar(50)
 declare @t_part nvarchar(50)
 set @t_xmon = case when '#non' = [1] then '' else [1] end
 set @t_xkind = case when '#non' = [2] then '上期' else [2] end
+set @t_xclass = case when '#non' = [3] then '' else [3] end
 set @t_bsno = case when '#non' = [4] then '' else [4] end
 set @t_esno = case when '#non' = [5] then char(255) else [5] end
 set @t_part = case when '#non' = [6] then '' else [6] end
@@ -43,8 +45,9 @@ insert #tmp
 select '0',dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,b.money/2,b.mi_total,isnull(b.money/2,0)-isnull(b.mi_total,0)
 ,b.bo_admin,b.addh2_1,b.addmoney,b.bo_oth,b.bo_full,ISNULL(b.bo_admin,0)+ISNULL(b.addmoney,0)+ISNULL(b.bo_oth,0)+ISNULL(b.bo_full,0)
 ,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
-from salary a left join salarys b on a.noa=b.noa
+from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
 where a.mon=@t_xmon and a.monkind=@t_xkind and a.person='本國'
+and (len(@t_xclass)=0 or charindex(@t_xclass,case when b.memo2!='' then b.memo2 else c.typea end )>0)
 and b.sno between @t_bsno and @t_esno
 and (len(@t_part)=0 or b.partno=@t_part) 
 
@@ -87,6 +90,7 @@ select '0',dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,b.daymoney,b.day,b.mtota
 ,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
 from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
 where a.mon=@t_xmon and a.monkind=@t_xkind and a.person='日薪'
+and (len(@t_xclass)=0 or charindex(@t_xclass,case when b.memo2!='' then b.memo2 else c.typea end )>0)
 and b.sno between @t_bsno and @t_esno
 and (len(@t_part)=0 or b.partno=@t_part) 
 
@@ -211,7 +215,7 @@ select '0',dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,b.daymoney,b.day,b.mtota
 ,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
 from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
 where a.mon=@t_xmon and a.monkind=@t_xkind and a.person='日薪' 
-and charindex(@t_xclass,case when b.memo2!='' then b.memo2 else c.typea end )>0
+and (len(@t_xclass)=0 or charindex(@t_xclass,case when b.memo2!='' then b.memo2 else c.typea end )>0)
 and b.sno between @t_bsno and @t_esno
 and (len(@t_part)=0 or b.partno=@t_part) 
 

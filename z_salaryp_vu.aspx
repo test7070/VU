@@ -37,7 +37,7 @@
                     }, {
                         type : '5',
                         name : 'xclass',
-                        value : [].concat(trim('早班,晚班').split(','))
+                        value : [].concat((' @全部,早班,晚班').split(','))
                     }, {
                         type : '2',
                         name : 'xsssno',

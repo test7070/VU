@@ -169,8 +169,16 @@ z_salaryp_vu03:--z_salaryp_vu03
 SET QUOTED_IDENTIFIER OFF
 declare @t_xmon nvarchar(20)
 declare @t_xkind nvarchar(20)
+declare @t_bsno nvarchar(50)
+declare @t_esno nvarchar(50)
+declare @t_bpart nvarchar(50)
+declare @t_epart nvarchar(50)
 set @t_xmon = case when '#non' = [1] then '' else [1] end
 set @t_xkind = case when '#non' = [2] then '上期' else [2] end
+set @t_bsno = case when '#non' = [4] then '' else [4] end
+set @t_esno = case when '#non' = [5] then char(255) else [5] end
+set @t_bpart = case when '#non' = [6] then '' else [6] end
+set @t_epart = case when '#non' = [7] then char(255) else [7] end
 ---------------------------------------------------------------------------------------------------------------------------------
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -216,6 +224,9 @@ select b.sno,b.namea,isnull(b.money/2,0)+isnull(b.mtotal,0),b.mi_total
 ,case when b.memo2!='' then b.memo2 else c.typea end
 from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
 where a.mon=@t_xmon and a.monkind=@t_xkind
+and b.sno between @t_bsno and @t_esno
+and b.partno between @t_bpart and @t_epart
+
 order by 
 (case when charindex('晚班',(case when b.memo2!='' then b.memo2 else c.typea end))>0 then '3'
 when charindex('早班',(case when b.memo2!='' then b.memo2 else c.typea end))>0 then '2' else '1' end)

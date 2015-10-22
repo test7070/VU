@@ -1585,7 +1585,7 @@
 						}
 						$('#lblMount_'+n).text(t_mount);
 						$('#lblWeight_'+n).text(t_weight);
-						$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),0));
+						$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
 						
 						if(dec($('#textGmount_'+n).val())>t_mount){
 							alert('領料件數大於庫存件數!!');

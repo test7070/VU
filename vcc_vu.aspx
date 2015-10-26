@@ -624,6 +624,19 @@
 			                	}
 								q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtPrice,txtMount,txtWeight,txtOrdeno,txtNo2'
 								, as.length, as, 'product,ucolor,spec,size,lengthb,class,price,mount,weight,noa,no2', 'txtProduct,txtSpec');
+								
+								for (var i = 0; i < q_bbsCount; i++) {
+									var t_ordeno='',t_weight=0;
+									if(!emp($('#txtOrdeno_'+i).val())){
+										t_ordeno=$('#txtOrdeno_'+i).val();
+										for (var j = 0; j < q_bbtCount; j++) {
+											if($('#txtUno__'+j).val().indexOf(t_ordeno)>-1){
+												t_weight=q_add(t_weight,dec($('#txtWeight__'+j).val()));
+											}
+										}
+										$('#txtWeight_'+i).val(t_weight);
+									}
+								}
 							}
 							sum();
 						}else{

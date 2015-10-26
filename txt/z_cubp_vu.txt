@@ -9,7 +9,7 @@ set @t_bdate = case when '#non'=[6] then '' else [6] end
 set @t_edate = case when '#non'=[7] then char(255) else [7] end 
 set @t_bmechno = case when '#non'=[8] then '' else [8] end 
 set @t_emechno = case when '#non'=[9] then char(255) else [9] end 
-set @t_showget = case when '#non'=[16] then 'Y' else [16] end
+set @t_showget = case when '#non'=[16] then 'N' else [16] end
  -----------------------------------------------------------------------------------
 declare @result table(
 	gno nvarchar(1),
@@ -73,7 +73,7 @@ set @t_bdate = case when '#non'=[6] then '' else [6] end
 set @t_edate = case when '#non'=[7] then char(255) else [7] end 
 set @t_bmechno = case when '#non'=[8] then '' else [8] end 
 set @t_emechno = case when '#non'=[9] then char(255) else [9] end
-set @t_showget = case when '#non'=[16] then 'Y' else [16] end
+set @t_showget = case when '#non'=[16] then 'N' else [16] end
 ------------------------------------------------------------------------------------------------
 declare @result table(
 	recno int identity(1,1),
@@ -161,7 +161,7 @@ set @t_bdate = case when '#non'=[6] then '' else [6] end
 set @t_edate = case when '#non'=[7] then char(255) else [7] end 
 set @t_bmechno = case when '#non'=[8] then '' else [8] end 
 set @t_emechno = case when '#non'=[9] then char(255) else [9] end
-set @t_showget = case when '#non'=[16] then 'Y' else [16] end
+set @t_showget = case when '#non'=[16] then 'N' else [16] end
 -----------------------------------------------------------------------------------------------------
 declare @result table(
 	gno nvarchar(1),

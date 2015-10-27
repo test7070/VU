@@ -595,16 +595,44 @@
 						check_startdate=true;
 						btnOk();
 						break;
+					case 'getuno_vcct':
+						var as = _q_appendData('view_vcct', '', true);
+						if (as[0] != undefined) {
+							alert('該批號已出貨!!');
+							$('#btnMinut__'+b_seq).click();
+						}else{
+							q_gt('view_cubs', "where=^^uno='"+$('#txtUno__'+b_seq).val()+"' ^^ ", 0, 0, 0, "getcubsuno");
+						}
+						break;
 					case 'getcubsuno':
 						var as = _q_appendData('view_cubs', '', true);
 						if (as[0] != undefined) {
 							$('#btnMinut__'+b_seq).click();
-							q_gridAddRow(bbtHtm, 'tbbt', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtUno,txtMemo'
-								, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,uno,memo', 'txtUno');
+							q_gridAddRow(bbtHtm, 'tbbt', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtUno,txtMemo,txtOrdeno,txtNo2,txtItemno,txtItem'
+								, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,uno,memo,ordeno,no2,noa,noq', 'txtUno');
+							
+							$('#txtProduct__'+(dec(b_seq)+as.length-1)).focusin();
+							//檢查批號是否重複 已 cubsnoa和cubsnoq為主
+							var t_repeat=false;
+							for (var i = 0; i < q_bbtCount; i++) {
+								var t_cubsnoa=$('#txtItemno__'+i).val();
+								var t_cubsnoq=$('#txtItem__'+i).val();
+								if(t_cubsnoa.length>0){
+									for (var j = i+1; j < q_bbtCount; j++) {
+										if(t_cubsnoa==$('#txtItemno__'+j).val() &&t_cubsnoq==$('#txtItem__'+j).val()){
+											t_repeat=true;
+											$('#btnMinut__'+j).click();
+										}
+									}
+								}
+							}
+							if(t_repeat)
+								alert('該批號重複!!');
 						}else{
 							alert('無此批號!!');
 							$('#btnMinut__'+b_seq).click();
 						}
+						
 						break;
 					case 'getordes':
 						var as = _q_appendData('view_ordes', '', true);
@@ -626,14 +654,17 @@
 								, as.length, as, 'product,ucolor,spec,size,lengthb,class,price,mount,weight,noa,no2', 'txtProduct,txtSpec');
 								
 								for (var i = 0; i < q_bbsCount; i++) {
-									var t_ordeno='',t_weight=0;
+									var t_ordeno='',t_no2='',t_mount=0,t_weight=0;
 									if(!emp($('#txtOrdeno_'+i).val())){
 										t_ordeno=$('#txtOrdeno_'+i).val();
+										t_no2=$('#txtNo2_'+i).val();
 										for (var j = 0; j < q_bbtCount; j++) {
-											if($('#txtUno__'+j).val().indexOf(t_ordeno)>-1){
+											if($('#txtOrdeno__'+j).val()==t_ordeno && $('#txtNo2__'+j).val()==t_no2){
+												t_mount=q_add(t_mount,dec($('#txtMount__'+j).val()));
 												t_weight=q_add(t_weight,dec($('#txtWeight__'+j).val()));
 											}
 										}
+										$('#txtMount_'+i).val(t_mount);
 										$('#txtWeight_'+i).val(t_weight);
 									}
 								}
@@ -839,7 +870,10 @@
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							
-							q_gt('view_cubs', "where=^^uno='"+$(this).val()+"' ^^ ", 0, 0, 0, "getcubsuno");
+							if($(this).val().length>0){
+								var t_where = "where=^^ uno='" + $(this).val() + "' and noa!='"+$('#txtNoa').val()+"' ^^";
+								q_gt('view_vcct', t_where, 0, 0, 0, "getuno_vcct");
+							}
 						});
                     	
                     	$('#combUcolor__' + i).change(function() {
@@ -875,6 +909,20 @@
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2)
 								$('#txtProduct__'+b_seq).val($('#combProduct__'+b_seq).find("option:selected").text());
+						});
+						
+						$('#txtProduct__'+i).focusin(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							
+							if(q_cur==1 || q_cur==2){
+								var t_b_seq=dec(b_seq)+1;
+								if(t_b_seq>=q_bbtCount){
+									$('#btnPlut').click();
+								}
+								$('#txtUno__'+t_b_seq).focus();
+							}
 						});
                     }
                 }
@@ -1568,7 +1616,13 @@
 					<!--<td><input id="txtUnit..*" type="text" class="txt c1"/></td>-->
 					<td><input id="txtMount..*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtWeight..*" type="text" class="txt c1 num"/></td>
-					<td><input id="txtMemo..*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtMemo..*" type="text" class="txt c1"/>
+						<input id="txtOrdeno..*" type="hidden"/>
+						<input id="txtNo2..*" type="hidden"/>
+						<input id="txtItemno..*" type="hidden"/>
+						<input id="txtItem..*" type="hidden"/>
+					</td>
 				</tr>
 			</table>
 		</div>

@@ -125,7 +125,8 @@
 						var bbtrow=document.getElementById("cuct_table").rows.length-1;
 						var hasbbtnoweight=false; //是否有表身資料 //09/04 有重量才能入庫
 						//09/08沒領料仍可入庫但有資料沒重量仍不可入庫
-                    	for(var j=0;j<bbtrow;j++){
+						//10/27領料入庫要獨立分開
+                    	/*for(var j=0;j<bbtrow;j++){
                     		var ts_product=$('#textProduct_'+j).val(),ts_ucolor=$('#textUcolor_'+j).val(),ts_spec=$('#textSpec_'+j).val();
 							var ts_size=$('#textSize_'+j).val(),ts_lengthb=$('#textLengthb_'+j).val(),ts_class=$('#textClass_'+j).val();
 							var ts_gmount=$('#textGmount_'+j).val(),ts_gweight=dec($('#textGweight_'+j).val()),ts_avgweight=dec($('#textAvgweight_'+j).val()),ts_memo=$('#textMemo_'+j).val();
@@ -137,7 +138,7 @@
 								hasbbtnoweight=true;
 								break;
                     		}
-                    	}
+                    	}*/
                     	var bbsrow=document.getElementById("cucs_table").rows.length-1;
                     	t_err='';
                     	for(var j=0;j<bbsrow;j++){
@@ -1130,8 +1131,10 @@
                     		}else{
                     			//表身資料更新
                     			//更新庫存
+				                //10/27領料入庫要獨立分開 故不更新庫存
+				                stkupdate=0
 				                var bbtrow=document.getElementById("cuct_table").rows.length-1;
-				                for(var j=0;j<bbtrow;j++){
+				                /*for(var j=0;j<bbtrow;j++){
 					                if(dec($('#textGmount_'+j).val())!=0 || dec($('#textGweight_'+j).val())!=0){
 										var x_product=$('#textProduct_'+j).val();
 										var x_spec=$('#textSpec_'+j).val();
@@ -1150,7 +1153,7 @@
 											stkupdate++;
 										}
 									}
-								}
+								}*/
 								//無庫存更新
 								if(stkupdate==0){
 									var t_datea=emp($('#textDatea').val())?'#non':$('#textDatea').val();
@@ -1159,7 +1162,7 @@
 	                    			
 	                    			//表身資料
 	                    			var ts_bbt='';
-	                    			var bbtrow=document.getElementById("cuct_table").rows.length-1;
+	                    			/*var bbtrow=document.getElementById("cuct_table").rows.length-1;
 	                    			for(var j=0;j<bbtrow;j++){
 	                    				var ts_product=$('#textProduct_'+j).val();
 		                    			var ts_ucolor=$('#textUcolor_'+j).val();
@@ -1187,7 +1190,7 @@
 											+ts_memo+"^@^"
 											+"^#^";
 	                    				}
-	                    			}
+	                    			}*/
 	                    			if(ts_bbt.length==0){
 	                    				ts_bbt='#non'
 	                    			}

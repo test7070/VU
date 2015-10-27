@@ -529,7 +529,7 @@
 
 			function btnIns() {
 				_btnIns();
-				$('#chkIsproj').attr('checked', true);
+				$('#chkIsproj').prop('checked', false).attr('disabled', 'disabled');
 				$('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val('AUTO');
 				$('#txtCno').val(z_cno);
 				$('#txtAcomp').val(z_acomp);
@@ -608,6 +608,7 @@
 					//$('#txtOdate').datepicker();
 					$('#btnOrdem').attr('disabled', 'disabled');
 				}	
+				$('#chkIsproj').attr('disabled', 'disabled');
 				refreshBbm();
 			}
 

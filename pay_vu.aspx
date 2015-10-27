@@ -47,7 +47,7 @@
 		    
 		    function mainPost() {
 		        q_getFormat();
-		        bbmMask = [['txtDatea', r_picd], ['txtMon', '9999/99']];
+		        bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm]];
 		        q_mask(bbmMask);
 		        bbsMask = [['txtIndate', r_picd]];
 		        q_gt('part', '', 0, 0, 0, "");
@@ -527,7 +527,7 @@
 		    function btnOk() {
 		    	Lock(1,{opacity:0});
 				$('#txtMon').val($.trim($('#txtMon').val()));
-					if ($('#txtMon').val().length > 0 && !(/^[0-9]{3}\/(?:0?[1-9]|1[0-2])$/g).test($('#txtMon').val())){
+					if ($('#txtMon').val().length > 0 && !(/^[0-9]{4}\/(?:0?[1-9]|1[0-2])$/g).test($('#txtMon').val())){
 						alert(q_getMsg('lblMon')+'錯誤。');   
 						Unlock(1);
 						return;

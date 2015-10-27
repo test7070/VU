@@ -936,8 +936,48 @@
 	                	}
 	                	if(t_ordeno.length>0){
 	                		//q_gt('view_ordes', "where=^^charindex(isnull(noa,'')+isnull(no2,''),'"+t_ordeno+"')>0 ^^ ", 0, 0, 0, "getordes");
-	                		q_gt('view_ordes', "where=^^ exists( select * from view_cubs where ordeno=view_ordes.noa and no2=view_ordes.no2 and charindex(uno,'"+t_ordeno+"')>0 ) ^^ ", 0, 0, 0, "getordes");
+	                		//104/10/27 不處理直接加總
+	                		//q_gt('view_ordes', "where=^^ exists( select * from view_cubs where ordeno=view_ordes.noa and no2=view_ordes.no2 and charindex(uno,'"+t_ordeno+"')>0 ) ^^ ", 0, 0, 0, "getordes");
 	                	}
+	                	
+	                	for (var i = 0; i < q_bbsCount; i++) {
+	                		if(!emp($('#txtOrdeno_'+i).val()))
+			            		$('#btnMinus_'+i).click();
+						}
+						
+						var as=[];
+						for (var i = 0; i < q_bbtCount; i++) {
+							if(!emp($('#txtUno__'+i).val())){
+								var is_exists=false;
+								for (var j = 0; j < as.length; j++) {
+									if(as[j].product==$('#txtProduct__'+i).val() 
+									&& as[j].ucolor==$('#txtUcolor__'+i).val()
+									&& as[j].spec==$('#txtSpec__'+i).val()
+									&& as[j].size==$('#txtSize__'+i).val()){
+										is_exists=true;
+										as[j].mount=q_add(dec(as[j].mount),dec($('#txtMount__'+i).val()));
+										as[j].weight=q_add(dec(as[j].weight),dec($('#txtWeight__'+i).val()));
+									}
+								}
+								if(!is_exists){	
+									as.push({
+										product:$('#txtProduct__'+i).val(),
+										ucolor:$('#txtUcolor__'+i).val(),
+										spec:$('#txtSpec__'+i).val(),
+										size:$('#txtSize__'+i).val(),
+										lengthb:$('#txtLengthb__'+i).val(),
+										class:$('#txtClass__'+i).val(),
+										mount:$('#txtMount__'+i).val(),
+										weight:$('#txtWeight__'+i).val(),
+										noa:$('#txtOrdeno__'+i).val(),
+										no2:$('#txtNo2__'+i).val()
+									});
+								}
+							}
+						}
+						
+						q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtOrdeno,txtNo2'
+						, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,noa,no2', 'txtOrdeno,txtNo2');
                 	}
                 });
                 _bbtAssign();

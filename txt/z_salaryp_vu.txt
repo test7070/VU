@@ -24,6 +24,8 @@ create table #tmp(
 	datea nvarchar(10),
 	sssno nvarchar(50),
 	namea nvarchar(50),
+	partno nvarchar(50),
+	stype nvarchar(50),
 	a01 decimal(18, 0),--薪資
 	a02 decimal(18, 1),--天數
 	a03 decimal(18, 0),--日薪
@@ -45,7 +47,8 @@ create table #tmp(
 
 --本國
 insert #tmp
-select '0','1',dbo.AD2ChineseEraName(a.datea),b.sno,b.namea
+select '0',case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
+,dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,c.partno,c.typea
 ,(isnull(b.money,0)/2)+isnull(b.mtotal,0),b.day,isnull(b.daymoney,0),isnull(b.bo_admin,0)+isnull(b.bo_traffic,0),null,null
 ,isnull(b.addmoney,0),isnull(b.addh2_1,0)+isnull(b.addh100,0),isnull(b.bo_full,0),ISNULL(b.bo_special,0)
 ,isnull(b.bo_full,0)+ISNULL(b.bo_special,0)
@@ -61,7 +64,8 @@ and (len(@t_part)=0 or b.partno=@t_part)
 
 --日薪
 insert #tmp
-select '0','2',dbo.AD2ChineseEraName(a.datea),b.sno,b.namea
+select '0',case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
+,dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,c.partno,c.typea
 ,(isnull(b.money,0)/2)+isnull(b.mtotal,0),b.day,isnull(b.daymoney,0),isnull(b.bo_admin,0)+isnull(b.bo_traffic,0),null,null
 ,isnull(b.addmoney,0),isnull(b.addh2_1,0)+isnull(b.addh100,0),isnull(b.bo_full,0),ISNULL(b.bo_special,0)
 ,isnull(b.bo_full,0)+ISNULL(b.bo_special,0)
@@ -77,8 +81,14 @@ and (len(@t_part)=0 or b.partno=@t_part)
 
 if((select count(*) from #tmp)>0)
 begin
-	insert #tmp(gno,datea,sssno,a01,a04,a07,a11,a12,a13,a14,a15,a16)
-	select '1',MAX(datea),CHAR(255)
+	insert #tmp(gno,typea,sssno)
+	select '1',typea,CHAR(255)
+	from #tmp where gno='0' group by typea
+	having typea != (select MAX(typea) from #tmp where gno='0') --最後一個分頁排除
+	
+
+	insert #tmp(gno,typea,datea,sssno,a01,a04,a07,a11,a12,a13,a14,a15,a16)
+	select '2','9',MAX(datea),CHAR(255)
 	,SUM(a01),SUM(a04),SUM(a07),SUM(a11),SUM(a12),SUM(a13),SUM(a14),SUM(a15),SUM(a16)
 	from #tmp where gno='0'
 end
@@ -100,9 +110,10 @@ dbo.getComma(a01,0) a01
 ,case when a14<=0 then null else dbo.getComma(a14,0) end a14
 ,case when a15<=0 then null else dbo.getComma(a15,0) end a15
 ,dbo.getComma(a16,0) a16
-,LEFT(datea,3)+'年'+LEFT(RIGHT(datea,5),2)+'月'+RIGHT(datea,2)+'日' datea,gno,sssno,namea,memo
+,LEFT(datea,3)+'年'+LEFT(RIGHT(datea,5),2)+'月'+RIGHT(datea,2)+'日' datea
+,gno,sssno,namea,memo,partno,stype,typea
 from #tmp 
-order by gno,sssno
+order by typea,gno,sssno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

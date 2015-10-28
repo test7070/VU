@@ -953,7 +953,10 @@
 									if(as[j].product==$('#txtProduct__'+i).val() 
 									&& as[j].ucolor==$('#txtUcolor__'+i).val()
 									&& as[j].spec==$('#txtSpec__'+i).val()
-									&& as[j].size==$('#txtSize__'+i).val()){
+									&& as[j].size==$('#txtSize__'+i).val()
+									&& as[j].noa==$('#txtOrdeno__'+i).val()
+									&& as[j].no2==$('#txtNo2__'+i).val()
+									){
 										is_exists=true;
 										as[j].mount=q_add(dec(as[j].mount),dec($('#txtMount__'+i).val()));
 										as[j].weight=q_add(dec(as[j].weight),dec($('#txtWeight__'+i).val()));
@@ -965,7 +968,7 @@
 										ucolor:$('#txtUcolor__'+i).val(),
 										spec:$('#txtSpec__'+i).val(),
 										size:$('#txtSize__'+i).val(),
-										lengthb:$('#txtLengthb__'+i).val(),
+										lengthb:0,//$('#txtLengthb__'+i).val()
 										class:$('#txtClass__'+i).val(),
 										mount:$('#txtMount__'+i).val(),
 										weight:$('#txtWeight__'+i).val(),

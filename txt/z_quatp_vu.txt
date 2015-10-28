@@ -90,7 +90,7 @@ begin
 			set @tweight=@tweight+cast(dbo.split(dbo.split(@qweight,'##',1),'@',1) as float)
 		end
 		
-		set @ttotal=@ttotal+(@total*@weight/@tweight)
+		set @ttotal=@ttotal+case when @tweight=0 then 0 else (@total*@weight/@tweight) end
 		
 		fetch next from cursor_table2
 		into @qweight,@total

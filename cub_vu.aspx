@@ -145,6 +145,12 @@
 					$('#textNouno').val('');
                 	$('#div_nouno').hide();
 				});
+				
+				$('#btnUnoprint').click(function() {
+					if(!emp($('#txtNoa').val())){
+						q_func( 'barvu.gen1', $('#txtNoa').val());
+					}
+				});
 
                 document.title = '加工單';
                 $('#lblDatea').text('加工日');
@@ -996,6 +1002,7 @@
 							<!--<input type="button" id="btnOrdes_vu" value="訂單匯入" style="width:120px;"/>
 							<input type="button" id="btnCubu_vu" value="入庫" style="width:120px;"/>-->
 						</td>
+						<td><input type="button" id="btnUnoprint" value="條碼列印" style="width:120px;"/></td>
 					</tr>
 					<!--<tr>
 						<td><span> </span><a id="lblBdate" class="lbl" > </a></td>

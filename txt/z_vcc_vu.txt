@@ -43,8 +43,8 @@ declare @result table(
 	typea nvarchar(12), 
 	datea nvarchar(10), 
 	mon nvarchar(7), 
-	custno nvarchar(30), 
-	comp nvarchar(90), 
+	custno nvarchar(50), 
+	comp nvarchar(100), 
 	xproduct nvarchar(MAX), 
 	unit nvarchar(12), 
 	mount float, 
@@ -61,9 +61,9 @@ declare @result table(
 	spec nvarchar(30),
 	size nvarchar(30),
 	lengh nvarchar(30),
-	conn nvarchar(30),
-	memo nvarchar(30),
-	carno nvarchar(30),
+	conn nvarchar(MAX),
+	memo nvarchar(MAX),
+	carno nvarchar(100),
 	money float
 ) 
 insert into @result 

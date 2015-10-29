@@ -601,7 +601,36 @@
 							alert('該批號已出貨!!');
 							$('#btnMinut__'+b_seq).click();
 						}else{
-							q_gt('view_cubs', "where=^^uno='"+$('#txtUno__'+b_seq).val()+"' ^^ ", 0, 0, 0, "getcubsuno");
+							q_gt('view_orde', "where=^^ exists( select * from view_cubs where ordeno=view_orde.noa  and uno='"+$('#txtUno__'+b_seq).val()+"' ) ^^ ", 0, 0, 0, "getordecust");
+						}
+						break;
+					case 'getordecust':
+						var as = _q_appendData('view_orde', '', true);
+						if (as[0] != undefined) {
+							if(emp($('#txtCustno').val())){
+								$('#txtCustno').val(as[0].custno);
+								$('#txtComp').val(as[0].comp);
+								$('#txtNick').val(as[0].nick);
+								$('#txtTel').val(as[0].tel);
+								$('#txtFax').val(as[0].fax);
+								$('#txtPaytype').val(as[0].paytype);
+								$('#cmbTrantype').val(as[0].trantype);
+								$('#txtPost').val(as[0].post);
+								$('#txtAddr').val(as[0].addr);
+								$('#txtAddr2').val(as[0].addr2);
+								
+								q_gt('view_cubs', "where=^^uno='"+$('#txtUno__'+b_seq).val()+"' ^^ ", 0, 0, 0, "getcubsuno");
+							}else{
+								if($('#txtCustno').val()!=as[0].custno){
+									alert('該批號訂單客戶與出貨客戶不同!!');
+									$('#btnMinut__'+b_seq).click();
+								}else{
+									q_gt('view_cubs', "where=^^uno='"+$('#txtUno__'+b_seq).val()+"' ^^ ", 0, 0, 0, "getcubsuno");
+								}
+							}
+						}else{
+							alert('該訂單批號不存在!!');
+							$('#btnMinut__'+b_seq).click();
 						}
 						break;
 					case 'getcubsuno':
@@ -693,6 +722,17 @@
 				
 				if((!emp($('#textQno1').val()) && !emp($('#textQno2').val())) && $('#textQno1').val()==$('#textQno2').val() ){
 					alert('合約1號碼與合約2號碼相同!!');
+					return;
+				}
+				
+				var nostore=false;
+				for (var i = 0; i < q_bbsCount; i++) {
+					if((dec($('#txtMount_'+i).val())>0 || dec($('#txtWeight_'+i).val())>0) && emp($('#txtStoreno_'+i).val()))
+						nostore=true;
+				}
+				
+				if(nostore){
+					alert('出貨倉庫未填入!!');
 					return;
 				}
 				

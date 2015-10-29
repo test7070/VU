@@ -632,7 +632,7 @@
 							alert('無此批號!!');
 							$('#btnMinut__'+b_seq).click();
 						}
-						
+						bbtsum();
 						break;
 					case 'getordes':
 						var as = _q_appendData('view_ordes', '', true);
@@ -837,6 +837,10 @@
 							if(q_cur==1 || q_cur==2)
 								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
 						});
+						
+						$('#btnMinus_' + i).click(function() {
+							setTimeout(bbssum,10);
+						});
 					}
 				}
 				_bbsAssign();
@@ -859,12 +863,33 @@
 				$('#lblTotal_s').text('小計');
 				$('#lblMemo_s').text('備註');
 				$('#lblStore_s').text('出貨倉庫');
+				bbssum();
 			}
+			
+			function bbssum() {
+            	var sot_mount=0,sot_weight=0;
+                for (var i = 0; i < q_bbsCount; i++) {
+	                sot_mount=q_add(sot_mount,dec($('#txtMount_'+i).val()));
+	                sot_weight=q_add(sot_weight,dec($('#txtWeight_'+i).val()));
+				}
+				if(sot_mount!=0)
+					$('#lblSot_mount').text(FormatNumber(sot_mount));
+				else
+					$('#lblSot_mount').text('');
+				if(sot_weight!=0)
+					$('#lblSot_weight').text(FormatNumber(sot_weight));
+				else
+					$('#lblSot_weight').text('');
+            }
 			
 			function bbtAssign() {
                 for (var i = 0; i < q_bbtCount; i++) {
                     $('#lblNo__' + i).text(i + 1);
                     if (!$('#btnMinut__' + i).hasClass('isAssign')) {
+                    	$('#btnMinut__' + i).click(function() {
+							setTimeout(bbtsum,10);
+						});
+                    	
                     	$('#txtUno__' + i).change(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
@@ -998,6 +1023,23 @@
                 $('#lblWeight_t').text('領料重');
                 $('#lblMemo_t').text('備註');
                 
+                bbtsum();
+            }
+            
+            function bbtsum() {
+            	var tot_mount=0,tot_weight=0;
+                for (var i = 0; i < q_bbtCount; i++) {
+	                tot_mount=q_add(tot_mount,dec($('#txtMount__'+i).val()));
+	                tot_weight=q_add(tot_weight,dec($('#txtWeight__'+i).val()));
+				}
+				if(tot_mount!=0)
+					$('#lblTot_mount').text(FormatNumber(tot_mount));
+				else
+					$('#lblTot_mount').text('');
+				if(tot_weight!=0)
+					$('#lblTot_weight').text(FormatNumber(tot_weight));
+				else
+					$('#lblTot_weight').text('');
             }
 
 			function btnIns() {
@@ -1554,8 +1596,14 @@
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblClass_s'> </a></td>
 					<!--<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>-->
-					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
-					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
+					<td align="center" style="width:85px;">
+						<a id='lblMount_s'> </a>
+						<BR><a id='lblSot_mount'> </a>
+					</td>
+					<td align="center" style="width:85px;">
+						<a id='lblWeight_s'> </a>
+						<BR><a id='lblSot_weight'> </a>
+					</td>
 					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblStore_s'> </a></td>
@@ -1623,8 +1671,14 @@
 					<td style="width:70px;"><a id='lblLengthb_t'> </a></td>
 					<td style="width:100px;"><a id='lblClass_t'> </a></td>
 					<!--<td style="width:55px;"><a id='lblUnit_t'> </a></td>-->
-					<td style="width:80px;"><a id='lblMount_t'> </a></td>
-					<td style="width:100px;"><a id='lblWeight_t'> </a></td>
+					<td style="width:80px;">
+						<a id='lblMount_t'> </a>
+						<BR><a id='lblTot_mount'> </a>
+					</td>
+					<td style="width:100px;">
+						<a id='lblWeight_t'> </a>
+						<BR><a id='lblTot_weight'> </a>
+					</td>
 					<td style="text-align: center;"><a id='lblMemo_t'> </a></td>
 				</tr>
 				<tr>

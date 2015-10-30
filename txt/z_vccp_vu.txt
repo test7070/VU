@@ -497,7 +497,7 @@ select '0',a.noa,a.custno,a.comp,a.datea,a.addr2,a.carno
 ,ROW_NUMBER() over(partition by a.noa order by a.noa,b.size,b.spec,b.lengthb,b.product) 
 ,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight,b.memo
 from view_vcc a left join view_vcct  b on a.noa=b.noa
-where a.noa between @t_bxnoa and @t_exnoa
+where a.noa between @t_bxnoa and @t_exnoa and b.noq!=''
 
 if((select count(*) from @result)>0)
 begin

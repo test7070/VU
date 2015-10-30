@@ -823,14 +823,18 @@
 						});
 						
 						$('#txtMount_' + i).focusout(function() {
-							if (q_cur == 1 || q_cur == 2)
+							if (q_cur == 1 || q_cur == 2){
 								sum();
+								bbssum();
+							}
 								$('#btnClose_div_stk').click();
 						});
 						
 						$('#txtWeight_' + i).focusout(function() {
-							if (q_cur == 1 || q_cur == 2)
+							if (q_cur == 1 || q_cur == 2){
 								sum();
+								bbssum();
+							}
 						});
 						
 						$('#btnRecord_' + i).click(function() {
@@ -928,6 +932,16 @@
                     if (!$('#btnMinut__' + i).hasClass('isAssign')) {
                     	$('#btnMinut__' + i).click(function() {
 							setTimeout(bbtsum,10);
+						});
+						
+						$('#txtMount__'+i).focusout(function() {
+							if(q_cur==1 || q_cur==2)
+								bbtsum();
+						});
+						
+						$('#txtWeight__'+i).focusout(function() {
+							if(q_cur==1 || q_cur==2)
+								bbtsum();
 						});
                     	
                     	$('#txtUno__' + i).change(function() {

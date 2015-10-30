@@ -1512,7 +1512,7 @@
 					<tr>
 						<td style="width: 108px;"><span> </span><a id='lblType' class="lbl"> </a></td>
 						<td style="width: 108px;"><select id="cmbTypea"> </select></td>
-						<td style="width: 108px;">
+						<td style="width: 118px;">
 							<a id='lblStype' class="lbl" style="float: left;"> </a>
 							<span style="float: left;"> </span>
 							<select id="cmbStype"> </select>

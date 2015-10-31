@@ -8,6 +8,7 @@ declare @t_elengthb nvarchar(50)
 declare @t_class nvarchar(50)
 declare @t_uno nvarchar(50)
 declare @t_edate nvarchar(20)
+declare @t_rank nvarchar(20)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -18,7 +19,9 @@ set @t_elengthb = case when '#non'=[10] then '999' else [10] end
 set @t_class = case when '#non'=[11] then '' else [11] end
 set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
+set @t_rank = case when '#non'='[17]' then '' else '[17]' end
 
+declare @pageline int =25
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -33,20 +36,23 @@ create table #tmp(
 	tablea nvarchar(50),
 	datea nvarchar(50),
 	noa nvarchar(50),
-	pno nvarchar(50),
 	product nvarchar(100),
 	spec nvarchar(50),
 	size nvarchar(50),
 	lengthb float,
 	class nvarchar(50),
-	uno nvarchar(50),
+	storeno nvarchar(50),
 	mount decimal(20,2),
-	weight decimal(20,2)
-	--primary key (tablea,uno,datea)
+	weight decimal(20,2),
+	money float,
+	avgweight decimal(20,2),
+	aprice  decimal(20,2),
+	page int,
+	idno int
 )
 
-insert #tmp
-select '10','ucce',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight
+insert #tmp (gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '11','ucce',a.datea,MAX(a.noa),b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,sum(b.mount),sum(b.weight),sum(b.total),0,0
 from view_ucce a left join view_ucces b on a.noa=b.noa 
 where a.datea<=@t_edate 
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
@@ -54,97 +60,200 @@ and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and b.storeno='7000'
+group by a.datea,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
 
+--刪除多次盤點的資料 只保留最後一次盤點
+delete a
+from #tmp a outer apply (select MAX(datea) datea from #tmp 
+where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
+where a.datea!=b.datea
 	
-	--刪除多次盤點的資料 只保留最後一次盤點
-	delete a
-	from #tmp a outer apply (select MAX(datea) datea from #tmp 
-	where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
-	where a.datea!=b.datea
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '12','rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
+from view_rc2 a left join view_rc2s b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000'
 	
-	insert #tmp
-	select '11','rc2s',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
-	from view_rc2 a left join view_rc2s b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and b.storeno='7000'
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '13','inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
+from view_ina a left join view_inas b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and a.storeno='7000'
 	
-	insert #tmp
-	select '12','inas',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
-	from view_ina a left join view_inas b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and a.storeno='7000'
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '14','cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
+from view_cub a left join view_cubt b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000'
 	
-	--insert #tmp
-	--select '13','cubu',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
-	--from view_cub a left join view_cubu b on a.noa=b.noa
-	--outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-	--where b.datea<=@t_edate 
-	--and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	--and b.datea>=isnull(c.datea,'')
-	--and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	--and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	--and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	
-	insert #tmp
-	select '14','cubt',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.gmount,b.gweight 
-	from view_cub a left join view_cubt b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and b.storeno='7000'
-	
-	insert #tmp
-	select '15','gets',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.weight 
-	from view_get a left join view_gets b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and a.storeno='7000'
-	
-	insert #tmp
-	select '0','end',@t_edate,CHAR(255),'',a.product,a.spec,a.size,a.lengthb,a.class,''
-	,sum((case when a.tablea in ('ucce','rc2s','inas','cubu') then 1 else -1 end)*a.mount)
-	,sum((case when a.tablea in ('ucce','rc2s','inas','cubu') then 1 else -1 end)*a.weight) 
-	from #tmp a 
-	group by a.product,a.spec,a.size,a.lengthb,a.class
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '15','gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
+from view_get a left join view_gets b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and a.storeno='7000'
 
+declare @tablea nvarchar(100)
+declare @storeno nvarchar(100)
+declare @x_storeno nvarchar(100)
+declare @product nvarchar(100)
+declare @x_product nvarchar(100)='~!@#$%^&*'
+declare @spec nvarchar(100)
+declare @x_spec nvarchar(100)
+declare @size nvarchar(100)
+declare @x_size nvarchar(100)
+declare @lengthb float
+declare @x_lengthb float
+declare @class nvarchar(100)
+declare @x_class nvarchar(100)
+declare @mount decimal(18, 4)
+declare @weight decimal(18, 4)
+declare @money float
+declare @t_money float
+declare @t_mount decimal(18, 4)
+declare @t_weight decimal(18, 4)
+declare @avgweight decimal(18, 4)
+declare @aprice decimal(18, 4)
+declare @stktype float
+set @t_mount=0
+set @t_weight=0
+set @t_money=0
+set @avgweight=0
+set @aprice=0
 
-delete #tmp where mount=0 or weight=0 or gno!='0'
+--板料倉庫在7000
+declare cursor_table cursor for
+select tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp 
+order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa
+open cursor_table
+fetch next from cursor_table
+into @tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+while(@@FETCH_STATUS <> -1)
+begin
+	
+	if(@x_product!='~!@#$%^&*' and (@x_product!=@product or @x_size!=@size or @x_spec!=@spec or @x_lengthb!=@lengthb or @x_class!=@class))
+	begin
+		insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+		select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,'',@t_mount,@t_weight,@t_money,@avgweight,@aprice
+	
+		set @t_mount=0
+		set @t_weight=0
+		set @t_money=0
+		set @aprice=0
+	end
+	
+	if(@tablea in ('ucce','rc2s','inas'))
+	begin
+		set @t_mount=@t_mount+@mount
+		set @t_weight=@t_weight+@weight
+		set @t_money=@t_money+@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+	end
+	else
+	begin
+		set @t_mount=@t_mount-@mount
+		set @t_weight=@t_weight-@weight
+		set @t_money=@t_money-round((@weight*@aprice),0)
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+	end
+	
+	set @x_storeno=@storeno
+	set @x_product=@product
+	set @x_size=@size
+	set @x_spec=@spec
+	set @x_lengthb=@lengthb
+	set @x_class=@class
+	
+	fetch next from cursor_table
+	into @tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+end
+close cursor_table
+deallocate cursor_table
+
+--最後一筆
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,'',@t_mount,@t_weight,@t_money,@avgweight,@aprice
+
+delete #tmp where mount=0 or weight=0 or gno!='2'
 
 if((select count(*) from #tmp)>0)
 begin
-	insert #tmp (gno,tablea,datea,uno,mount,weight)
-	select '1','total',@t_edate,CHAR(255),sum(a.mount),sum(a.weight) 
-	from #tmp a where gno='0'
+	insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+	select '3','datea','','',product,spec,size,0,'','',sum(mount),SUM(weight),SUM(money)
+	,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
+	,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
+	from #tmp group by product,spec,size
+	
+	insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+	select '4','datea','','',char(255),char(255),char(255),999,'ZZZ','',sum(mount),SUM(weight),SUM(money)
+	,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
+	,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
+	from #tmp where gno='3' 
 end
 
+--更新目前的順序,頁數
+update a
+set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
+from #tmp a
+outer apply (select * from (
+	select ROW_NUMBER() over (order by product,spec,size,gno,lengthb,class)rr,* from #tmp
+	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
+) b
 
-	select ROW_NUMBER() over (order by gno,product,spec,size,lengthb,class) rr
-	,dbo.getComma(mount,[2])mount
-	,dbo.getComma(weight,[3])weight
-	,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
-	,* 
-	from #tmp order by gno,product,spec,size,lengthb,class
+--表頭
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice,page,idno)
+select '1','title','','',MIN(product),MIN(spec),MIN(size),MIN(lengthb),MIN(class),MIN(storeno),0,0,0,0,0,page,MIN(idno)-1
+from #tmp where gno!='1' and gno!='5' group by page
+
+--分頁
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice,page,idno)
+select '5','Paging','','',MAX(product),MAX(spec),MAX(size),MAX(lengthb),MAX(class),MAX(storeno),0,0,0,0,0,page,MAX(idno)+1
+from #tmp where gno!='1' and gno!='5' group by page
+
+if(@t_rank<'8')
+begin
+	update #tmp
+	set gno=CAST(CAST(gno as int)+5 as nvarchar(10))
+end
+
+declare @totpage int= isnull((select MAX(page) from #tmp),0)
+declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')
+
+select ROW_NUMBER() over (partition by product,spec,size order by product,spec,size,cast(gno as int),lengthb,class) rr
+,dbo.getComma(mount,[2])mount
+,dbo.getComma(weight,[3])weight
+,dbo.getComma(avgweight,[3])avgweight
+,dbo.getComma(aprice,[4])aprice
+,dbo.getComma(money,0)money
+,@today today
+,@totpage totpage
+,* 
+from #tmp order by page,product,spec,size,cast(gno as int),lengthb,class,idno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -165,6 +274,7 @@ declare @t_uno nvarchar(50)
 declare @t_edate nvarchar(20)
 declare @t_bstoreno nvarchar(50)
 declare @t_estoreno nvarchar(50)
+declare @t_rank nvarchar(20)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -177,6 +287,9 @@ set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
 set @t_bstoreno = case when '#non'=[14] then '' else [14] end
 set @t_estoreno = case when '#non'=[15] then char(255) else [15] end
+set @t_rank = case when '#non'='[17]' then '' else '[17]' end
+
+declare @pageline int =25
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -191,7 +304,6 @@ create table #tmp(
 	tablea nvarchar(50),
 	datea nvarchar(50),
 	noa nvarchar(50),
-	pno nvarchar(50),
 	product nvarchar(100),
 	spec nvarchar(50),
 	size nvarchar(50),
@@ -199,19 +311,25 @@ create table #tmp(
 	class nvarchar(50),
 	storeno nvarchar(50),
 	mount decimal(20,2),
-	weight decimal(20,2)
+	weight decimal(20,2),
+	money float,
+	avgweight decimal(20,2),
+	aprice  decimal(20,2),
+	page int,
+	idno int
 )
 
-insert #tmp
-select '10','ucce',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '11','ucce',a.datea,MAX(a.noa),b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,sum(b.mount),sum(b.weight),sum(b.total),0,0
 from view_ucce a left join view_ucces b on a.noa=b.noa 
 where a.datea<=@t_edate 
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('Z000','7000')
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
 and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
+group by a.datea,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
 
 --刪除多次盤點的資料 只保留最後一次盤點
 delete a
@@ -219,107 +337,210 @@ from #tmp a outer apply (select MAX(datea) datea from #tmp
 where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class=a.class and storeno=a.storeno)b
 where a.datea!=b.datea
 	
-	insert #tmp
-	select '11','rc2s',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight 
-	from view_rc2 a left join view_rc2s b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('Z000','7000')
-	and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '12','rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0 
+from view_rc2 a left join view_rc2s b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
 	
-	insert #tmp
-	select '12','inas',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight 
-	from view_ina a left join view_inas b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('Z000','7000')
-	and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '13','inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
+from view_ina a left join view_inas b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(a.storeno,'') not in ('7000','7000A')
+and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
+		
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '14','vcc',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,0,0,0
+from view_vcc a left join view_vccs b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
 	
-	--insert #tmp
-	--select '13','cubu',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight 
-	--from view_cub a left join view_cubu b on a.noa=b.noa
-	--outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
-	--where b.datea<=@t_edate 
-	--and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	--and b.datea>=isnull(c.datea,'')
-	--and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	--and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	--and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	
-	insert #tmp
-	select '13','vcc',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight 
-	from view_vcc a left join view_vccs b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('Z000','7000')
-	and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
-	
-	insert #tmp
-	select '14','cubt',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight 
-	from view_cub a left join view_cubt b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('Z000','7000')
-	and isnull(b.gmount,0)>0 and isnull(b.gweight,0)>0
-	
-	insert #tmp
-	select '15','gets',a.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight 
-	from view_get a left join view_gets b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
-	where a.datea<=@t_edate 
-	and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-	and a.datea>=isnull(c.datea,'')
-	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-	and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-	and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('Z000','7000')
-	and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
-	
-	insert #tmp
-	select '0','end',@t_edate,CHAR(255),'',a.product,a.spec,a.size,a.lengthb,a.class,a.storeno
-	,sum((case when a.tablea in ('ucce','rc2s','inas','cubu') then 1 else -1 end)*a.mount)
-	,sum((case when a.tablea in ('ucce','rc2s','inas','cubu') then 1 else -1 end)*a.weight) 
-	from #tmp a 
-	group by a.product,a.spec,a.size,a.lengthb,a.class,a.storeno
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '15','cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
+from view_cub a left join view_cubt b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and isnull(b.gmount,0)>0 and isnull(b.gweight,0)>0
 
-delete #tmp where mount=0 or weight=0 or gno!='0'
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '16','gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
+from view_get a left join view_gets b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and (isnull(a.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and isnull(b.mount,0)>0 and isnull(b.weight,0)>0
+
+declare @tablea nvarchar(100)
+declare @storeno nvarchar(100)
+declare @x_storeno nvarchar(100)
+declare @product nvarchar(100)
+declare @x_product nvarchar(100)='~!@#$%^&*'
+declare @spec nvarchar(100)
+declare @x_spec nvarchar(100)
+declare @size nvarchar(100)
+declare @x_size nvarchar(100)
+declare @lengthb float
+declare @x_lengthb float
+declare @class nvarchar(100)
+declare @x_class nvarchar(100)
+declare @mount decimal(18, 4)
+declare @weight decimal(18, 4)
+declare @money float
+declare @t_money float
+declare @t_mount decimal(18, 4)
+declare @t_weight decimal(18, 4)
+declare @avgweight decimal(18, 4)
+declare @aprice decimal(18, 4)
+declare @stktype float
+set @t_mount=0
+set @t_weight=0
+set @t_money=0
+set @avgweight=0
+set @aprice=0
+
+declare cursor_table cursor for
+select tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp 
+order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa
+open cursor_table
+fetch next from cursor_table
+into @tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+while(@@FETCH_STATUS <> -1)
+begin
+	
+	if(@x_product!='~!@#$%^&*' and (@x_storeno!=@storeno or @x_product!=@product or @x_size!=@size or @x_spec!=@spec or @x_lengthb!=@lengthb or @x_class!=@class))
+	begin
+		insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+		select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,@storeno,@t_mount,@t_weight,@t_money,@avgweight,@aprice
+	
+		set @t_mount=0
+		set @t_weight=0
+		set @t_money=0
+		set @aprice=0
+	end
+	
+	if(@tablea in ('ucce','rc2s','inas'))
+	begin
+		set @t_mount=@t_mount+@mount
+		set @t_weight=@t_weight+@weight
+		set @t_money=@t_money+@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+	end
+	else
+	begin
+		set @t_mount=@t_mount-@mount
+		set @t_weight=@t_weight-@weight
+		set @t_money=@t_money-round((@weight*@aprice),0)
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+	end
+	
+	set @x_storeno=@storeno
+	set @x_product=@product
+	set @x_size=@size
+	set @x_spec=@spec
+	set @x_lengthb=@lengthb
+	set @x_class=@class
+	
+	fetch next from cursor_table
+	into @tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+end
+close cursor_table
+deallocate cursor_table
+
+--最後一筆
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,@storeno,@t_mount,@t_weight,@t_money,@avgweight,@aprice
+
+delete #tmp where mount=0 or weight=0 or gno!='2'
 
 if((select count(*) from #tmp)>0)
 begin
-	insert #tmp (gno,tablea,datea,mount,weight,storeno) 
-	select '1','total',@t_edate,sum(a.mount),sum(a.weight),storeno
-	from #tmp a where gno='0' 
-	group by storeno 
+	insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+	select '3','datea','','',product,spec,size,0,'',storeno,sum(mount),SUM(weight),SUM(money)
+	,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
+	,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
+	from #tmp group by storeno,product,spec,size
+	
+	insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+	select '4','datea','','',char(255),char(255),char(255),999,'ZZZ',storeno,sum(mount),SUM(weight),SUM(money)
+	,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
+	,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
+	from #tmp where gno='2'  group by storeno
 end
 
-	select ROW_NUMBER() over (order by gno,product,spec,size,lengthb,class) rr
-	,dbo.getComma(mount,[2])mount
-	,dbo.getComma(weight,[3])weight
-	,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
-	,isnull((select top 1 store from store where noa=a.storeno),'') store
-	,* 
-	from #tmp a order by storeno,gno,product,spec,size,lengthb,class
+--更新目前的順序,頁數
+update a
+set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
+from #tmp a
+outer apply (select * from (
+	select ROW_NUMBER() over (partition by storeno order by storeno,product,spec,size,gno,lengthb,class)rr,* from #tmp
+	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
+) b
 
+--表頭
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice,page,idno)
+select '1','title','','',MIN(product),MIN(spec),MIN(size),MIN(lengthb),MIN(class),storeno,0,0,0,0,0,page,MIN(idno)-1
+from #tmp where gno!='1' and gno!='5' group by storeno,page
+
+--分頁
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice,page,idno)
+select '5','Paging','','',MAX(product),MAX(spec),MAX(size),MAX(lengthb),MAX(class),storeno,0,0,0,0,0,page,MAX(idno)+1
+from #tmp where gno!='1' and gno!='5' group by storeno,page
+
+if(@t_rank<'8')
+begin
+	update #tmp
+	set gno=CAST(CAST(gno as int)+5 as nvarchar(10))
+end
+
+declare @totpage int= isnull((select MAX(page) from #tmp),0)
+declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')
+
+select ROW_NUMBER() over (partition by storeno,product,spec,size order by storeno,product,spec,size,cast(gno as int),lengthb,class) rr
+,dbo.getComma(mount,[2])mount
+,dbo.getComma(weight,[3])weight
+,dbo.getComma(avgweight,[3])avgweight
+,dbo.getComma(aprice,[4])aprice
+,dbo.getComma(money,0)money
+,@today today
+,@totpage totpage
+,isnull((select top 1 store from store where noa=a.storeno),'') store
+,* 
+from #tmp a
+order by storeno,page,product,spec,size,cast(gno as int),lengthb,class,idno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -339,6 +560,10 @@ declare @t_class nvarchar(50)
 declare @t_uno nvarchar(50)
 declare @t_edate nvarchar(20)
 declare @t_ordeshow nvarchar(20)
+declare @t_bcustno nvarchar(50)
+declare @t_ecustno nvarchar(50)
+declare @t_bordeno nvarchar(50)
+declare @t_eordeno nvarchar(50)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -350,7 +575,10 @@ set @t_class = case when '#non'=[11] then '' else [11] end
 set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
 set @t_ordeshow = case when '#non'=[16] then '1' else [16] end
-
+set @t_bcustno=case when '#non' = [18] then '' else [18] end
+set @t_ecustno=case when '#non' = [19] then char(255)  else [19] end
+set @t_bordeno=case when '#non' = [20] then '' else [20] end
+set @t_eordeno=case when '#non' = [21] then char(255)  else [21] end
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -370,7 +598,7 @@ create table #tmp(
 	size nvarchar(50),
 	lengthb float,
 	class nvarchar(50),
-	uno nvarchar(50),
+	uno nvarchar(MAX),
 	mount decimal(20,2),
 	hmount decimal(20,2),
 	weight decimal(20,2),
@@ -378,17 +606,23 @@ create table #tmp(
 	cust nvarchar(50)
 )
 
-
 insert #tmp
-select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class,b.uno,b.mount,b.hmount,b.weight,b.memo,b.comp
+select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class
+,'<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+a.noa+''+CHAR(59)+'104'',''95%'',''95%'',''104'')">'+b.uno+'</a>'
+,b.mount,b.hmount,b.weight,b.memo,b.comp
 from view_cub a left join view_cubs b on a.noa=b.noa
+outer apply (select * from view_orde where noa=b.ordeno) c
 where (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and isnull(uno,'')!='' --and b.datea<=@t_edate 
-and (len(b.ordeno)=(case when @t_ordeshow='0' then 0 else len(b.ordeno) end))
+and (len(isnull(b.ordeno,''))=(case when @t_ordeshow='0' then 0 else len(isnull(b.ordeno,'')) end))
+and (b.mount>0 or b.weight>0) 
+and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
+and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
+and isnull(c.custno,'') between @t_bcustno and @t_ecustno
+and isnull(b.ordeno,'') between @t_bordeno and @t_eordeno
 
 if((select count(*) from #tmp)>0)
 begin

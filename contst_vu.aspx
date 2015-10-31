@@ -281,7 +281,7 @@
 				refreshBbm();
 				
 				$('#txtOdate').val(q_date());
-				$('#txtDatea').val(q_cdn(q_date(), 3));
+				$('#txtDatea').val(q_date());
 				
 				$('#txtDatea').focus();
 

@@ -15,7 +15,7 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
-           var vccgaItem = '';
+            var vccgaItem = '';
             $(document).ready(function() {
                    _q_boxClose();
                 q_getId();
@@ -64,6 +64,15 @@
                     }, {
                         type : '6',
                         name : 'xclass' //[14]
+                    }, {
+                        type : '2',
+                        name : 'xcust', //[15][16]
+                        dbf : 'cust',
+                        index : 'noa,comp',
+                        src : 'cust_b.aspx'
+                    }, {
+                        type : '1', //[17][18]
+                        name : 'xordeno'
                     }]
                 });
                 q_popAssign();

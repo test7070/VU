@@ -20,9 +20,10 @@ declare @tmpa table(
 )
 
 insert into @tmpa
-	select top 1 a.uno ,a.product ,a.unit ,a.datea,a.spec,a.size,a.storeno,a.lengthb,a.class,a.mount,a.weight,b.emount,b.eweight
-	from view_uccb a
-	left join uccy b on a.uno = b.uno
+	select top 1 a.uno ,a.product ,a.unit ,a.datea,a.spec,a.size,a.storeno,a.lengthb,a.class,a.mount,a.weight
+	,isnull(a.mount,0)-isnull(b.mount,0),isnull(a.weight,0)-isnull(b.weight,0)
+	from view_cubs a
+	outer apply (select sum(mount)mount,sum(weight)weight from view_vcct where uno=a.uno)b
 	where rtrim(ltrim(a.uno)) = @t_uno or left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno 
 	order by a.uno
 	
@@ -110,7 +111,7 @@ insert into @tmp
 		select '0',c.*,(case when a.waste > 0 then '廢料' else '加工入庫' end),
 			a.noa,a.datea,isnull(d.nick,e.nick),a.mount,a.weight,0,0,a.uno,a.memo,a.product,
 			a.ucolor,0,'cub_vu'+a.accy,10,a.sprice,a.sprice2
-		from view_cubu a
+		from view_cubs a
 		left join view_cub b on a.noa = b.noa
 		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
 		left join cust d on a.custno = d.noa
@@ -137,57 +138,13 @@ insert into @tmp
 		a.ucolor,a.price,'vcc_vu'+a.accy,12,
 		case when a.weight=0 then null else (a.total/a.weight) end,
 		case when a.weight=0 then null else (a.total/a.weight)+b.price end
-		from view_vccs a
+		from view_vcct a
 		left join view_vcc b on a.noa = b.noa
 		left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
 		left join cust d on a.custno = d.noa
 		left join tgg e on a.custno = e.noa
 		where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
-	--103/12/05 顯示領料的批號
-	--union all
-	--	select '0',c.*,'用料',a.noa,b.datea,b.station,0,0,a.mount,a.weight,a.uno,a.memo,a.product,
-	--	c.ucolor,0,'workb'+a.accy,13,d.sprice,d.sprice2
-	--	from view_workbt a left join view_workb b on a.noa=b.noa
-	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
-	--	left join view_uccc d on left(rtrim(ltrim(d.uno)),len(@t_uno)) = @t_uno
-	--	where (left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno)
-	--union all
-	--	select '0',c.*,'委外用料',a.noa,b.datea,b.tgg,0,0,a.mount,a.weight,a.uno,a.memo,a.product,
-	--	c.ucolor,0,'workd'+a.accy,14,d.sprice,d.sprice2
-	--	from view_workdt a left join view_workd b on a.noa=b.noa
-	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
-	--	left join view_uccc d on left(rtrim(ltrim(d.uno)),len(@t_uno)) = @t_uno
-	--	where (left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno)
-	--union all
-	--	select '0',c.*,'訂單扣料', a.noa,d.odate,'訂序='+a.no2,a.ordmount,a.ordweight,0,0,a.uno,b.memo,a.product,
-	--	a.ucolor,isnull(b.price,0),'orde_vu'+a.accy,3,null,null
-	--	from view_ordet a
-	--	left join uccb b on a.uno = b.noa
-	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
-	--	left join view_orde d on a.noa = d.noa
-	--	where left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno
-	--union all
-	--	select '0',c.*,'裁領',a.noa,a.datea,isnull(d.nick,e.nick),0,0,a.gmount,a.gweight,a.uno,a.memo,a.product,
-	--	a.ucolor,0,'cut_vu'+a.accy,9,null,null
-	--	from view_cut a
-	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
-	--	left join cust d on a.custno = d.noa
-	--	left join tgg e on a.custno = e.noa
-	--	outer apply(select top 1 * from view_cuts where (noa=a.noa) and (left(rtrim(ltrim(bno)),len(@t_uno)) = @t_uno)) f
-	--	where (left(rtrim(ltrim(a.uno)),len(@t_uno)) = @t_uno) or (isnull(f.bno,'') != '')
-	--union all
-	--	select '0',c.*,
-	--	case isnull(b.typea,'')	when '1' then '分條' when '2' then '剪板' when '3' then '分捲' when '4' then '貼膜' 
-	--	when '5' then '壓延' when '6' then '領料' when '7' then '退火' when '8' then '壓脫' else '裁入' end,
-	--	a.noa,a.datea,isnull(d.nick,e.nick),a.mount,a.weight,0,0,a.bno,a.memo,a.product,
-	--	a.ucolor,0,'cut_vu'+a.accy,5,a.sprice,a.sprice2
-	--	from view_cuts a
-	--	left join @tmpa c on left(rtrim(ltrim(c.auno)),len(@t_uno)) = @t_uno
-	--	left join cust d on a.custno = d.noa
-	--	left join tgg e on a.custno = e.noa
-	--	left join view_cut b on a.noa = b.noa
-	--	where left(rtrim(ltrim(a.bno)),len(@t_uno)) = @t_uno
-
+	
 update a
 set aemount=aemount
 -isnull((select sum(mount) from view_workbt wa left join view_workb wb on wa.noa=wb.noa where wa.uno=a.auno and wb.noa>=isnull((select top 1 datea from view_ucce where uno=wa.uno order by datea desc),'000/00/00')),0)

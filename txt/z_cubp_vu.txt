@@ -3,12 +3,13 @@ declare @t_bdate nvarchar(30)
 declare @t_edate nvarchar(30)
 declare @t_bmechno nvarchar(30)
 declare @t_emechno nvarchar(30)
+declare @t_showget nvarchar(30)
 
-set @t_bdate = case when '#non'=[1] then '' else [1] end 
-set @t_edate = case when '#non'=[2] then char(255) else [2] end 
-set @t_bmechno = case when '#non'=[3] then '' else [3] end 
-set @t_emechno = case when '#non'=[4] then char(255) else [4] end 
-
+set @t_bdate = case when '#non'=[6] then '' else [6] end 
+set @t_edate = case when '#non'=[7] then char(255) else [7] end 
+set @t_bmechno = case when '#non'=[8] then '' else [8] end 
+set @t_emechno = case when '#non'=[9] then char(255) else [9] end 
+set @t_showget = case when '#non'=[16] then 'N' else [16] end
  -----------------------------------------------------------------------------------
 declare @result table(
 	gno nvarchar(1),
@@ -34,14 +35,29 @@ select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+conve
 		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(order by a.datea) dno
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
-and isnull(b.uno,'')!=''
+and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
+and (b.mount>=0 or b.weight>=0)
+
+if(@t_showget='Y')
+begin
+	insert @result 
+	select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
+		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(order by a.datea) dno
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
+	and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
+		  and (mount<=0 or weight<=0)
+end
 
 insert @result(gno,hmount,mount,weight,dno)
 select '1' gno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
 from @result
 
-select gno,datea,mechno,comp,products,class,
-dbo.getComma(hmount,0) hmount,dbo.getComma(weight,0) weight,dbo.getComma(mount,0) mount,need,memo,dateb,ordeno,no2,datec
+select gno,datea,mechno,comp,products,class
+,dbo.getComma(hmount,[2]) hmount
+,dbo.getComma(mount,[2]) mount
+,dbo.getComma(weight,[3]) weight
+,need,memo,dateb,ordeno,no2,datec
 ,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,dno
 from @result
 ;
@@ -51,13 +67,16 @@ declare @t_bdate nvarchar(30)
 declare @t_edate nvarchar(30)
 declare @t_bmechno nvarchar(30)
 declare @t_emechno nvarchar(30)
+declare @t_showget nvarchar(30)
 
-set @t_bdate = case when '#non'=[1] then '' else [1] end 
-set @t_edate = case when '#non'=[2] then char(255) else [2] end 
-set @t_bmechno = case when '#non'=[3] then '' else [3] end 
-set @t_emechno = case when '#non'=[4] then char(255) else [4] end
+set @t_bdate = case when '#non'=[6] then '' else [6] end 
+set @t_edate = case when '#non'=[7] then char(255) else [7] end 
+set @t_bmechno = case when '#non'=[8] then '' else [8] end 
+set @t_emechno = case when '#non'=[9] then char(255) else [9] end
+set @t_showget = case when '#non'=[16] then 'N' else [16] end
 ------------------------------------------------------------------------------------------------
 declare @result table(
+	recno int identity(1,1),
 	gno nvarchar(1),
 	datea nvarchar(20),
 	mechno nvarchar(10),
@@ -73,42 +92,76 @@ declare @result table(
 	ordeno nvarchar(30),
 	no2 nvarchar(10),
 	datec nvarchar(20),
+	uno nvarchar(50),
 	dno int,
-	mech nvarchar(30)
-	
+	mech nvarchar(30),
+	isget int
 )
 insert @result 
-select '0' gno,a.datea,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
-		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,row_number()over(partition by a.mechno order by a.mechno,a.datea) dno
-		,a.mech
+select '0' gno,a.kind,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
+		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
+		,a.mech,0
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
-	 where a.mechno between @t_bmechno and @t_emechno
-	 		and  a.datea between @t_bdate and @t_edate
-	 		and isnull(b.uno,'')!=''
-	 		
+where a.mechno between @t_bmechno and @t_emechno
+      and  a.datea between @t_bdate and @t_edate
+	  and isnull(b.uno,'')!='' and (mount>=0 or weight>=0)
+
+if(@t_showget='Y')
+begin
+	insert @result 
+	select '0' gno,a.kind,a.mechno,b.comp,b.product+isnull(' '+b.spec,'')+isnull(' '+b.size,'')+case when convert(nvarchar,b.lengthb)='0' then '' else ' '+convert(nvarchar,b.lengthb) end
+			+isnull(' '+b.ucolor,''),b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
+			,a.mech,1
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	where a.mechno between @t_bmechno and @t_emechno
+	      and  a.datea between @t_bdate and @t_edate
+		  and isnull(b.uno,'')!='' and (mount<=0 or weight<=0)
+end
+
+update a
+set dno=b.dno
+from @result a
+outer apply (select * from (select row_number()over(partition by a.mechno order by a.mechno,a.datea)dno,recno from @result)tmp where recno=a.recno) b
+
 insert @result(gno,datea,mechno,hmount,mount,weight,dno)
 select '1' gno,'9999/999',mechno,SUM(hmount),SUM(mount),SUM(weight),MAX(dno)
 from @result
 group by mechno
 
-select gno,datea,mechno,comp,products,class,dbo.getComma(hmount,0) hmount,dbo.getComma(weight,0) weight,dbo.getComma(mount,0) mount,need,memo,dateb,ordeno,no2,datec
-,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,dno,mech
-,row_number()over(partition by mechno order by mechno,datea,gno) idno
+select gno
+,case when isget>0 then '<font color="red">'+cast( row_number()over(partition by mechno order by mechno,datea,gno) as nvarchar(10))+'</font>' else cast(row_number()over(partition by mechno order by mechno,datea,gno) as nvarchar(10)) end idno
+,case when isget>0 then '<font color="red">'+datea+'</font>' else datea end datea
+,case when isget>0 then '<font color="red">'+mechno+'</font>' else mechno end mechno
+,case when isget>0 then '<font color="red">'+comp+'</font>' else comp end comp
+,case when isget>0 then '<font color="red">'+products+'</font>' else products end products
+,case when isget>0 then '<font color="red">'+class+'</font>' else class end class
+,case when isget>0 then '<font color="red">'+need+'</font>' else need end need
+,case when isget>0 then '<font color="red">'+memo+'</font>' else memo end memo
+,case when isget>0 then '<font color="red">'+dateb+'</font>' else dateb end dateb
+,case when isget>0 then '<font color="red">'+ordeno+'</font>' else ordeno end ordeno
+,case when isget>0 then '<font color="red">'+no2+'</font>' else no2 end no2
+,case when isget>0 then '<font color="red">'+datec+'</font>' else datec end datec
+,case when isget>0 then '<font color="red">'+uno+'</font>' else uno end uno
+,case when isget>0 then '<font color="red">'+dbo.getComma(hmount,[2]) +'</font>' else dbo.getComma(hmount,[2])  end hmount
+,case when isget>0 then '<font color="red">'+dbo.getComma(mount,[2])+'</font>' else dbo.getComma(mount,[2]) end mount
+,case when isget>0 then '<font color="red">'+dbo.getComma(weight,[3])+'</font>' else dbo.getComma(weight,[3]) end weight
+,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,mech,dno,mechno xmech,datea xdatea
 from @result
-order by mechno,datea,gno
+order by xmech,xdatea,gno,dno
 ; 
-
 --------------------------------------------------------------------------------------------------------------------------
 z_cubp_vu03:--z_cubp_vu03
 declare @t_bdate nvarchar(30)
 declare @t_edate nvarchar(30)
 declare @t_bmechno nvarchar(30)
 declare @t_emechno nvarchar(30)
+declare @t_showget nvarchar(30)
 
-set @t_bdate = case when '#non'=[1] then '' else [1] end 
-set @t_edate = case when '#non'=[2] then char(255) else [2] end 
-set @t_bmechno = case when '#non'=[3] then '' else [3] end 
-set @t_emechno = case when '#non'=[4] then char(255) else [4] end
+set @t_bdate = case when '#non'=[6] then '' else [6] end 
+set @t_edate = case when '#non'=[7] then char(255) else [7] end 
+set @t_bmechno = case when '#non'=[8] then '' else [8] end 
+set @t_emechno = case when '#non'=[9] then char(255) else [9] end
+set @t_showget = case when '#non'=[16] then 'N' else [16] end
 -----------------------------------------------------------------------------------------------------
 declare @result table(
 	gno nvarchar(1),
@@ -117,17 +170,17 @@ declare @result table(
 	mech nvarchar(20),
 	mount float,
 	weight float
-	
 )
 
 insert @result 
 select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6)
- end ,a.mechno,a.mech,sum(b.mount),SUM(b.weight)
+ 	   end ,a.mechno,a.mech,sum(b.mount),SUM(b.weight)
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
-where a.datea between @t_bdate and @t_edate
-and isnull(b.uno,'')!=''
+where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
+	  and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
+	  and (@t_showget='Y' or  (b.mount>=0 or b.weight>=0) )
 group by case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6)
- end,a.mechno,a.mech
+ 		 end,a.mechno,a.mech
 
 insert @result (gno,mon,mount,weight)
 select '1',mon,SUM(mount),sum(weight)
@@ -139,7 +192,9 @@ select '2','9999/999',SUM(mount),sum(weight)
 from @result
 where gno='1'
 
-select gno,mon,mechno,mech,dbo.getComma(mount,0) mount ,dbo.getComma(weight,0) weight
+select gno,mon,mechno,mech
+,dbo.getComma(mount,[2]) mount
+,dbo.getComma(weight,[3]) weight
 from @result
 order by mon,gno
 ;
@@ -150,9 +205,9 @@ declare @t_bmon nvarchar(10)
 declare @t_emon nvarchar(10)
 declare @t_type nvarchar(10) ----@t_type=0 未結案	@t_type=1 已結案
 
-set @t_bmon = case when '#non'=[5] then '' else [5] end 
-set @t_emon = case when '#non'=[6] then char(255) else [6] end 
-set @t_type = case when '#non'=[7] then '' else [7] end 
+set @t_bmon = case when '#non'=[10] then '' else [10] end 
+set @t_emon = case when '#non'=[11] then char(255) else [11] end 
+set @t_type = case when '#non'=[12] then '' else [12] end 
 set @t_type= case when @t_type='未結案' then '0' when @t_type='已結案' then '1' else '' end
 
 declare @result table(
@@ -170,13 +225,13 @@ declare @result table(
 
 insert @result
 select '0',left(a.cust,4),a.noa
-,isnull(SUM(b.weight),0)
-,isnull(SUM(c.bweight),0)
-,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) 
-,isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) 
-,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0))+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)) 
-,a.memo
-,"z_cucp_vu?report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' and "+a.noa+"=$noa"
+		,isnull(SUM(b.weight),0)
+		,isnull(SUM(c.bweight),0)
+		,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) 
+		,isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) 
+		,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0))+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)) 
+		,a.memo
+		,"z_cucp_vu?report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' and "+a.noa+"=$noa"
 from view_cuc a left join view_cucs b on a.noa=b.noa
 outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c
 outer apply (select SUM(weight) vweight from view_vccs where ordeno=b.ordeno and no2=b.no2)d
@@ -202,4 +257,374 @@ dbo.getComma(unfinal,0) unfinal
 ,ROW_NUMBER() over (order by gno,noa) recno,*
 from @result
 order by gno,noa
+;
+--********************************************************************************************
+z_cubp_vu05:--z_cubp_vu05
+declare @t_rank nvarchar(20)
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bmechno nvarchar(30)
+declare @t_emechno nvarchar(30)
+declare @t_pno nvarchar(50)
+declare @t_spec nvarchar(50)
+declare @t_size nvarchar(50)
+
+set @t_rank = case when '#non'='[5]' then '' else '[5]' end
+set @t_bdate = case when '#non'=[6] then '' else [6] end 
+set @t_edate = case when '#non'=[7] then char(255) else [7] end 
+set @t_bmechno = case when '#non'=[8] then '' else [8] end 
+set @t_emechno = case when '#non'=[9] then char(255) else [9] end 
+set @t_pno = case when '#non'=[13] then '' else [13] end
+set @t_spec = case when '#non'=[14] then '' else [14] end
+set @t_size = case when '#non'=[15] then '' else [15] end
+ -----------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max)
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#result')is not null
+BEGIN
+	set @cmd = 'drop table #result'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #tmp(
+	gno nvarchar(2),
+	tablea nvarchar(50),
+	datea nvarchar(50),
+	noa nvarchar(50),
+	noq nvarchar(50),
+	product nvarchar(100),
+	spec nvarchar(50),
+	size nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	storeno nvarchar(50),
+	mount decimal(20,2),
+	weight decimal(20,2),
+	money float,
+	aweight decimal(20,2),
+	aprice  decimal(20,2),
+)
+
+insert #tmp (gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
+select '11','ucce',a.datea,MAX(a.noa),b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,sum(b.mount),sum(b.weight),sum(b.total),0
+from view_ucce a left join view_ucces b on a.noa=b.noa 
+where a.datea<=@t_edate and b.storeno='7000'
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+group by a.datea,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
+
+--取起始日之前最後一次盤點並刪除此盤點時間之前的資料
+delete a
+from #tmp a outer apply (select MAX(datea) datea from #tmp 
+where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class and datea<=@t_bdate)b
+where a.datea<b.datea
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
+select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0
+from view_rc2 a left join view_rc2s b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea between isnull(c.datea,'') and @t_edate
+and b.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
+select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0
+from view_ina a left join view_inas b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea between isnull(c.datea,'') and @t_edate
+and a.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
+select '14','cubt',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0
+from view_cub a left join view_cubt b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea between isnull(c.datea,'') and @t_edate
+and b.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
+select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0
+from view_get a left join view_gets b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea between isnull(c.datea,'') and @t_edate
+and a.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+
+--計算 成本單價
+declare @noa nvarchar(100)
+declare @noq nvarchar(100)
+declare @tablea nvarchar(100)
+declare @storeno nvarchar(100)
+declare @x_storeno nvarchar(100)
+declare @product nvarchar(100)
+declare @x_product nvarchar(100)='~!@#$%^&*'
+declare @spec nvarchar(100)
+declare @x_spec nvarchar(100)
+declare @size nvarchar(100)
+declare @x_size nvarchar(100)
+declare @lengthb float
+declare @x_lengthb float
+declare @class nvarchar(100)
+declare @x_class nvarchar(100)
+declare @mount decimal(18, 4)
+declare @weight decimal(18, 4)
+declare @money float
+declare @t_money float
+declare @t_mount decimal(18, 4)
+declare @t_weight decimal(18, 4)
+declare @avgweight decimal(18, 4)
+declare @aprice decimal(18, 4)
+declare @stktype float
+set @t_mount=0
+set @t_weight=0
+set @t_money=0
+set @avgweight=0
+set @aprice=0
+
+declare cursor_table cursor for
+select noa,noq,tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp 
+order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa
+open cursor_table
+fetch next from cursor_table
+into @noa,@noq,@tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+while(@@FETCH_STATUS <> -1)
+begin
+	
+	if(@x_product!='~!@#$%^&*' and (@x_product!=@product or @x_size!=@size or @x_spec!=@spec or @x_lengthb!=@lengthb or @x_class!=@class))
+	begin
+		set @t_mount=0
+		set @t_weight=0
+		set @t_money=0
+		set @aprice=0
+	end
+	
+	if(@tablea in ('ucce','rc2s','inas'))
+	begin
+		set @t_mount=@t_mount+@mount
+		set @t_weight=@t_weight+@weight
+		set @t_money=@t_money+@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+		update #tmp set aweight=@avgweight,aprice=@aprice where noa=@noa and noq=@noq
+	end
+	else
+	begin
+		update #tmp set aweight=@avgweight,aprice=@aprice,money=round((@weight*@aprice),0) where noa=@noa and noq=@noq
+		set @t_mount=@t_mount-@mount
+		set @t_weight=@t_weight-@weight
+		set @t_money=@t_money-round((@weight*@aprice),0)
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+	end
+	
+	set @x_storeno=@storeno
+	set @x_product=@product
+	set @x_size=@size
+	set @x_spec=@spec
+	set @x_lengthb=@lengthb
+	set @x_class=@class
+	
+	fetch next from cursor_table
+	into @noa,@noq,@tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+end
+close cursor_table
+deallocate cursor_table
+
+create table #result(
+	xidno int identity(1,1),
+	gno nvarchar(1),
+	noa nvarchar(50), 
+	noq nvarchar(50), 
+	datea nvarchar(50), 
+	mechno nvarchar(10), 
+	mech nvarchar(30), 
+	seq float,
+	product nvarchar(250), 
+	ucolor nvarchar(50), 
+	spec nvarchar(50), 
+	size nvarchar(50), 
+	lengthb nvarchar(50), 
+	class nvarchar(30), 
+	gmount float, 
+	gweight float,
+	avgw float,
+	storeno nvarchar(50),
+	aprice float,
+	money float,
+	memo nvarchar(MAX),
+	page int,
+	idno int
+) 
+
+insert #result 
+select '2',a.noa,b.noq,a.kind,a.mechno,a.mech,ROW_NUMBER() over(partition by a.mechno order by a.mechno,a.datea) seq 
+,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class 
+,b.gmount,b.gweight,case when gmount>0 then round(b.gweight/b.gmount,0) else 0 end,b.storeno,c.aprice,isnull(c.money,0),b.memo,0,0
+from view_cubt b left join view_cub a on a.noa=b.noa 
+outer apply (select * from #tmp where noa=b.noa and noq=b.noq and tablea='cubt') c
+where a.datea between @t_bdate and @t_edate	and a.mechno between @t_bmechno and @t_emechno 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+
+if((select count(*) from #result)>0)
+begin
+	insert #result(gno,mechno,mech,gmount,gweight,avgw,seq,aprice,money) 
+	select '3',mechno,MAX(mech),SUM(gmount),SUM(gweight),SUM(avgw),max(seq)
+	,case when SUM(gweight)=0 then 0 else round(sum(money)/SUM(gweight),0) end,sum(money) 
+	from #result group by mechno 
+
+	insert #result(gno,mechno,gmount,gweight,avgw,seq,aprice,money) 
+	select '4','zzz#zzz',SUM(gmount),SUM(gweight),SUM(avgw),sum(seq) 
+	,case when SUM(gweight)=0 then 0 else round(sum(money)/SUM(gweight),0) end,sum(money) 
+	from #result where gno='3' 
+
+	declare @pageline int =30
+
+	--更新目前的順序,頁數
+	update a
+	set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
+	from #result a
+	outer apply (select * from (
+		select ROW_NUMBER() over (order by mechno,gno,datea,noa)rr,* from #result
+		)tmp where xidno=a.xidno
+	) b
+
+	--表頭
+	insert #result(gno,datea,noa,product,spec,size,lengthb,class,page,idno)
+	select '1','','',MIN(product),MIN(spec),MIN(size),MIN(lengthb),MIN(class),page,MIN(idno)-1
+	from #result where gno!='1' and gno!='5' group by page
+
+	--分頁
+	insert #result(gno,datea,noa,product,spec,size,lengthb,class,page,idno)
+	select '5','','',MAX(product),MAX(spec),MAX(size),MAX(lengthb),MAX(class),page,MAX(idno)+1
+	from #result where gno!='1' and gno!='5' group by page
+end
+
+if(@t_rank<'8')
+begin
+	update #result
+	set gno=CAST(CAST(gno as int)+5 as nvarchar(10))
+end
+
+declare @totpage int= isnull((select MAX(page) from #result),0)
+declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')
+
+select 
+dbo.getComma(lengthb,0) lengthb
+,class,dbo.getComma(gmount,[2]) gmount
+,dbo.getComma(gweight,[3]) gweight
+,dbo.getComma(avgw,[3]) avgw
+,dbo.getComma(aprice,[4]) aprice 
+,dbo.getComma(money ,0) money
+,@today today
+,@totpage totpage
+,*
+from #result 
+order by page,idno,gno
+
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#result')is not null
+BEGIN
+	set @cmd = 'drop table #result'
+	EXECUTE sp_executesql @cmd
+END
+;
+--********************************************************************************************
+z_cubp_vu06:--z_cubp_vu06
+declare @t_rank nvarchar(20)
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bmechno nvarchar(30)
+declare @t_emechno nvarchar(30)
+declare @t_pno nvarchar(50)
+declare @t_spec nvarchar(50)
+declare @t_size nvarchar(50)
+
+set @t_rank = case when '#non'='[5]' then '' else '[5]' end
+set @t_bdate = case when '#non'=[6] then '' else [6] end 
+set @t_edate = case when '#non'=[7] then char(255) else [7] end 
+set @t_bmechno = case when '#non'=[8] then '' else [8] end 
+set @t_emechno = case when '#non'=[9] then char(255) else [9] end 
+set @t_pno = case when '#non'=[13] then '' else [13] end
+set @t_spec = case when '#non'=[14] then '' else [14] end
+set @t_size = case when '#non'=[15] then '' else [15] end
+ -----------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max)
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #tmp(
+	gno nvarchar(2),
+	datea nvarchar(50),
+	seq nvarchar(50),
+	noa nvarchar(50),
+	noq nvarchar(50),
+	mechno nvarchar(100),
+	mech nvarchar(100),
+	product nvarchar(100),
+	ucolor nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	gmount decimal(20,2),
+	gweight decimal(20,2),
+	avgw decimal(20,2),
+	uno nvarchar(50),
+	memo nvarchar(MAX)
+)
+	
+insert #tmp
+select '0',a.kind,ROW_NUMBER() over (partition by a.mechno order by a.mechno,a.kind,a.noa,b.noq)
+,a.noa,b.noq,isnull(a.mechno,''),a.mech,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight
+,case when b.mount=0 then 0 else round(b.weight/b.mount,0) end,b.uno,b.memo
+from view_cub a left join view_cubs b on a.noa=b.noa 
+where a.datea between @t_bdate and @t_edate
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.uno,'')!='' and (b.mount<=0 or b.weight<=0) 
+and exists( select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) 
+
+if((select count(*) from #tmp)>0)
+begin
+	insert #tmp(gno,datea,seq,mechno,mech,gmount,gweight)
+	select '1',char(255),count(*),mechno,MAX(mech),sum(gmount),sum(gweight)
+	from #tmp where gno='0'
+	group by mechno
+	
+	insert #tmp(gno,datea,seq,mechno,mech,gmount,gweight)
+	select '2',char(255),count(*),char(255),char(255),sum(gmount),sum(gweight)
+	from #tmp where gno='0'
+end
+
+select 
+class,dbo.getComma(gmount,[2]) gmount
+,dbo.getComma(gweight,[3]) gweight
+,dbo.getComma(avgw,[3]) avgw
+,*
+from #tmp
+order by mechno,gno,datea 
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
 ;

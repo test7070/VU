@@ -33,10 +33,6 @@
 
                 $('#txtBdate').focus();
 
-                if (q_getPara('sys.project').toUpperCase() == "PK") {//104/06/25 潘小姐 只要顯示外銷
-                    $('.pk').hide();
-                    $('#cmbStype').val('3')
-                }
             }
 
             function q_seekStr() {///  搜尋按下時，執行
@@ -56,8 +52,6 @@
                 /// 100.  .
 
                 var t_where = " 1=1 " + q_sqlPara2("odate", t_bdate, t_edate) + q_sqlPara2("noa", t_noa) + q_sqlPara2("comp", t_comp) + q_sqlPara2("salesno", t_salesno) + q_sqlPara2("custno", t_custno) + q_sqlPara2("stype", t_stype) + q_sqlPara2("custordet", t_custordet);
-                if (t_quatno.length > 0)
-                    t_where += " and exists(select noa from ordes" + r_accy + " where ordes" + r_accy + ".noa=orde" + r_accy + ".noa and ordes" + r_accy + ".quatno='" + t_quatno + "')";
 
                 t_where = ' where=^^' + t_where + '^^ ';
                 return t_where;
@@ -106,10 +100,6 @@
 						&nbsp;
 						<input class="txt" id="txtSales" type="text" style="width:115px; font-size:medium;" />
 					</td>
-				</tr>
-				<tr class='seek_tr'>
-					<td class='seek'  style="width:20%;"><a id='lblQuatno_vu'>合約號碼</a></td>
-					<td><input class="txt" id="txtQuatno" type="text" style="width:215px; font-size:medium;" /></td>
 				</tr>
 				<tr class='seek_tr'>
 					<td class='seek'  style="width:20%;"><a id='lblCustorde'>客單編號 </a></td>

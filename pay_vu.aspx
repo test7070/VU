@@ -47,7 +47,7 @@
 		    
 		    function mainPost() {
 		        q_getFormat();
-		        bbmMask = [['txtDatea', r_picd], ['txtMon', '9999/99']];
+		        bbmMask = [['txtDatea', r_picd], ['txtMon', r_picm]];
 		        q_mask(bbmMask);
 		        bbsMask = [['txtIndate', r_picd]];
 		        q_gt('part', '', 0, 0, 0, "");
@@ -112,7 +112,11 @@
 		            q_box('z_gqbp.aspx' + "?;;;;" + r_accy + ";noa=" + t_noa, '', "95%", "95%", m_print);
 		        });
 		        $('#lblAccc').click(function () {
-		            q_pop('txtAccno', "accc.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";accc3='" + $('#txtAccno').val() + "';" + $('#txtDatea').val().substr(0,3)+ '_' + r_cno, 'accc', 'accc3', 'accc2', "95%", "95%", q_getMsg('btnAccc'), true);
+		        	var t_year=$('#txtDatea').val().substr(0,r_len);
+                	if(r_len==4){
+                		t_year=q_sub(t_year,1911);
+                	}
+		            q_pop('txtAccno', "accc.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";accc3='" + $('#txtAccno').val() + "';" + t_year+ '_' + r_cno, 'accc', 'accc3', 'accc2', "95%", "95%", q_getMsg('btnAccc'), true);
 		        });
 		        $('#txtOpay').change(function () { sum(); });
 		        $('#txtUnopay').change(function () { sum(); });
@@ -129,7 +133,7 @@
                 	}
                 	q_gt('pay_import',"where=^^['"+t_noa+"','"+t_tggno+"','"+t_tggno2+"','"+t_mon+"','VU#"+t_payc+"#"+q_getPara('rc2.d4taxtype')+"')^^", 0, 0, 0, "pay_import");
 		        });
-		        $('#btnMon').click(function (e) {
+		        /*$('#btnMon').click(function (e) {
 		        	var t_noa = $.trim($('#txtNoa').val());
                 	var t_tggno = $.trim($('#txtTggno').val());
                 	var t_tggno2 = $.trim($('#txtTggno2').val()).replace(/\,/g,'@');
@@ -143,7 +147,7 @@
                 		return;
                 	}
                 	q_gt('pay_import',"where=^^['"+t_noa+"','"+t_tggno+"','"+t_tggno2+"','"+t_mon+"','mon')^^", 0, 0, 0, "pay_import");
-		        });
+		        });*/
 		        
 		         $('#btnAuto').click(function (e) {
 		        		/// 自動沖帳
@@ -252,16 +256,27 @@
                 		getOpay();
 		        		break;
 		        	case 'pay_import':
-                		as = _q_appendData(t_name, "", true);
-                		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtTggno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtRc2no,txtMemo2', as.length, as, 'cno,tggno,mon,coin,unpay,unpay,tablea,tableaccy,rc2no,memo', '', '');
-                		
-                		var t_comp = q_getPara('sys.comp').substring(0,2);
+                		var as = _q_appendData(t_name, "", true);
+                		var t_unpay=0;
                 		for(var i=0;i<q_bbsCount;i++){
                 			if($('#txtTablea_'+i).val()=='rc2'){
                 				as[i].tablea='rc2_vu';
+                				t_unpay=q_add(t_unpay,dec(as[i].unpay));
 							}
                 		}
+                		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtTggno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtRc2no,txtMemo2', as.length, as, 'cno,tggno,mon,coin,unpay,unpay,tablea,tableaccy,rc2no,memo', '', '');
                 		
+                		var t_opay=dec($('#textOpay').val());
+                		if(t_opay>0){
+                			if(t_opay>=t_unpay)
+                				$('#txtUnopay').val(t_unpay);
+                			else
+                				$('#txtUnopay').val(t_opay);
+                			sum();
+                			$('#btnAuto').click();	
+                		}
+                		
+                		var t_comp = q_getPara('sys.comp').substring(0,2);
                 		sum();
                 		break;
 		        	case 'cno_acomp':
@@ -516,7 +531,7 @@
 		    function btnOk() {
 		    	Lock(1,{opacity:0});
 				$('#txtMon').val($.trim($('#txtMon').val()));
-					if ($('#txtMon').val().length > 0 && !(/^[0-9]{3}\/(?:0?[1-9]|1[0-2])$/g).test($('#txtMon').val())){
+					if ($('#txtMon').val().length > 0 && !(/^[0-9]{4}\/(?:0?[1-9]|1[0-2])$/g).test($('#txtMon').val())){
 						alert(q_getMsg('lblMon')+'錯誤。');   
 						Unlock(1);
 						return;

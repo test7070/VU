@@ -86,7 +86,11 @@
                 });
 		        
                 $('#lblAccc').click(function() {
-                    q_pop('txtAccno', "accc.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";accc3='" + $('#txtAccno').val() + "';" + $('#txtDatea').val().substr(0,3) + '_' + r_cno, 'accc', 'accc3', 'accc2', "95%", "95%", q_getMsg('btnAccc'), true);
+                	var t_year=$('#txtDatea').val().substr(0,r_len);
+                	if(r_len==4){
+                		t_year=q_sub(t_year,1911);
+                	}
+		            q_pop('txtAccno', "accc.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";accc3='" + $('#txtAccno').val() + "';" + t_year+ '_' + r_cno, 'accc', 'accc3', 'accc2', "95%", "95%", q_getMsg('btnAccc'), true);
                 });
                 
                 $('#lblCust2').click(function(e) {
@@ -160,7 +164,7 @@
                 	
                 });
                 
-                $('#btnMon').click(function(e) {
+                /*$('#btnMon').click(function(e) {
                 	var t_noa = $.trim($('#txtNoa').val());
                 	var t_custno = $.trim($('#txtCustno').val());
                 	var t_custno2 = $.trim($('#txtCustno2').val()).replace(/\,/g,'@');
@@ -174,7 +178,7 @@
                 		return;
                 	}
                 	q_gt('umm_import',"where=^^['"+t_noa+"','"+t_custno+"','"+t_custno2+"','"+t_mon+"','mon')^^", 0, 0, 0, "umm_import");
-                });
+                });*/
             }
 			
             function getOpay() {
@@ -304,11 +308,24 @@
                 		getOpay();
                 		break;
                 	case 'umm_import':
-                		as = _q_appendData(t_name, "", true);
+                		var as = _q_appendData(t_name, "", true);
+                		var t_unpay=0;
                 		for (var i = 0; i < as.length; i++) {
                 			as[i].tablea='vcc_vu';
+                			t_unpay=q_add(t_unpay,dec(as[i].unpay));
 						}
                 		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtCustno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtVccno,txtMemo2', as.length, as, 'cno,custno,mon,coin,unpay,unpay,tablea,tableaccy,vccno,memo', '', '');
+                		
+                		var t_opay=dec($('#textOpay').val());
+                		if(t_opay>0){
+                			if(t_opay>=t_unpay)
+                				$('#txtUnopay').val(t_unpay);
+                			else
+                				$('#txtUnopay').val(t_opay);
+                			sum();
+                			$('#btnAuto').click();	
+                		}
+                		
                 		var t_comp = q_getPara('sys.comp').substring(0,2);
                 		sum();
                 		break;
@@ -591,7 +608,7 @@
             	Lock(1,{opacity:0});
             	$('#txtAcomp').val($('#cmbCno').find(":selected").text());
                 $('#txtMon').val($.trim($('#txtMon').val()));
-                if ($('#txtMon').val().length > 0 && !(/^[0-9]{3}\/(?:0?[1-9]|1[0-2])$/g).test($('#txtMon').val())) {
+                if ($('#txtMon').val().length > 0 && !(/^[0-9]{4}\/(?:0?[1-9]|1[0-2])$/g).test($('#txtMon').val())) {
                     alert(q_getMsg('lblMon') + '錯誤。');
                     Unlock(1);
                     return;

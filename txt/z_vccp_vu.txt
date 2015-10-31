@@ -402,6 +402,10 @@ declare @t_size nvarchar(30)
 declare @t_slengthb nvarchar(30)
 declare @t_elengthb nvarchar(30)
 declare @t_class nvarchar(30)
+declare @t_bcustno nvarchar(50)
+declare @t_ecustno nvarchar(50)
+declare @t_bordeno nvarchar(50)
+declare @t_eordeno nvarchar(50)
 
 set @t_spno=case when '#non' = [6] then '' else [6] end
 set @t_epno=case when '#non' = [7] then char(255)  else [7] end
@@ -412,6 +416,10 @@ set @t_size=case when '#non' = [11] then '' else [11] end
 set @t_slengthb=case when '#non' = [12] then '' else [12] end
 set @t_elengthb=case when '#non' = [13] then char(255)  else [13] end
 set @t_class=case when '#non' = [14] then '' else [14] end
+set @t_bcustno=case when '#non' = [15] then '' else [15] end
+set @t_ecustno=case when '#non' = [16] then char(255)  else [16] end
+set @t_bordeno=case when '#non' = [17] then '' else [17] end
+set @t_eordeno=case when '#non' = [18] then char(255)  else [18] end
 -------------------------------------------------------------------------
 declare @result table(
 	gno nvarchar(1),
@@ -429,16 +437,18 @@ declare @result table(
 ) 
 insert @result 
 select '0',ROW_NUMBER() over(order by product,uno) 
-,product,ucolor,spec,size,lengthb,class,uno,
-a.mount-isnull(b.vtmount,0),a.weight-isnull(b.vtweight,0)  
-from view_cubs a 
-outer apply (select sum(mount)vtmount,sum(weight)vtweight from view_vcct b where b.uno=a.uno)b
-where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and datea <= @t_edate 
+,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,a.uno,a.mount,a.weight  
+from view_cubs a outer apply (select * from view_orde where noa=a.ordeno) b
+where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and a.datea <= @t_edate 
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) 
 and (len(@t_size)=0 or isnull(size,'')=@t_size) 
 and ((@t_slengthb='' and @t_elengthb=char(255)) or isnull(lengthb,0) between cast(@t_slengthb as float) and cast(@t_elengthb as float)) 
 and (len(@t_class)=0 or isnull(class,'')=@t_class) 
-and a.mount-isnull(b.vtmount,0)!=0 and a.weight-isnull(b.vtweight,0)!=0
+and (a.mount>0 or a.weight>0)
+and not exists (select * from view_vcct where uno=a.uno)
+and not exists (select * from view_cubs where uno=a.uno and (mount<0 or weight<0) )
+and isnull(b.custno,'') between @t_bcustno and @t_ecustno
+and isnull(a.ordeno,'') between @t_bordeno and @t_eordeno
 
 if ((select count(*) from @result) != 0) 
 begin 
@@ -450,9 +460,62 @@ end
 select 
 dbo.getComma(mount,0)mount
 ,dbo.getComma(weight,0)weight
-,dbo.getComma(lengthb,0)lengthb
+,dbo.getComma(lengthb,-1)lengthb
 ,* 
 from @result 
 order by gno,product,uno
+;
 
+--******************************************************************************
+z_vccp_vu04:--z_vccp_vu04
+
+declare @t_bxnoa nvarchar(20)
+declare @t_exnoa nvarchar(20)
+
+set @t_bxnoa = case when '#non' = [2] then '' else [2] end
+set @t_exnoa = case when '#non' = [3] then CHAR(255) else [3] end
+
+declare @result table(
+	gno nvarchar(1),
+	noa nvarchar(50),
+	custno nvarchar(50),
+	comp nvarchar(100),
+	datea nvarchar(10),
+	addr2 nvarchar(100),
+	carno nvarchar(100),
+	rank int,
+	uno nvarchar(50),
+	product nvarchar(100),
+	ucolor nvarchar(30),
+	spec nvarchar(30),
+	size nvarchar(30),
+	lengthb float,
+	class nvarchar(30),
+	mount float,
+	weight float,
+	memo nvarchar(MAX)
+) 
+
+insert @result
+select '0',a.noa,a.custno,a.comp,a.datea,a.addr2,a.carno
+,ROW_NUMBER() over(partition by a.noa order by a.noa,b.size,b.spec,b.lengthb,b.product) 
+,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight,b.memo
+from view_vcc a left join view_vcct  b on a.noa=b.noa
+where a.noa between @t_bxnoa and @t_exnoa and b.noq!=''
+
+if((select count(*) from @result)>0)
+begin
+	insert @result (gno,rank,noa,custno,comp,datea,addr2,carno,mount,weight)
+	select '1',99999,noa,MAX(custno),MAX(comp),MAX(datea),MAX(addr2),MAX(carno) ,sum(mount),sum(weight)
+	from @result group by noa
+end
+
+
+select 
+dbo.getComma(mount,0)mount
+,dbo.getComma(weight,0)weight
+,dbo.getComma(lengthb,-1)lengthb
+,* 
+from @result 
+order by noa,gno,rank
 ;

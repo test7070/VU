@@ -14,15 +14,12 @@ create table #z_cucvu(
 	noa nvarchar(30),	
 	
 	place nvarchar(200),--工地名稱	暫存memo
-	bdate nvarchar(10),
-	edate nvarchar(10),
 	datea nvarchar(10),
 	
 	noq nvarchar(3), 
 	ordeno nvarchar(40),
 	no2 nvarchar(10),
 	cust nvarchar(100),
-	productno nvarchar(100),
 	product nvarchar(100),
 	ucolor nvarchar(30),
 	class nvarchar(30),
@@ -48,14 +45,11 @@ declare	@isexist int
 declare	@accy nvarchar(10)
 declare	@noa nvarchar(30)
 declare	@place nvarchar(200)--工地名稱	暫存memo
-declare	@bdate nvarchar(10)
-declare	@edate nvarchar(10)
 declare	@datea nvarchar(10)
 declare @noq nvarchar(3)
 declare	@ordeno nvarchar(40)
 declare	@no2 nvarchar(10)
 declare	@cust nvarchar(100)
-declare	@productno nvarchar(100)
 declare	@product nvarchar(100)
 declare	@ucolor nvarchar(30)
 declare	@class nvarchar(30)
@@ -78,8 +72,6 @@ begin
 	set @noa = (select c from ztmpxls where CAST(noa as int) = 2)
 	
 	set @place = (select c from ztmpxls where CAST(noa as int) = 4)
-	set @bdate = (select min(datea) from view_ordes where noa = @noa)	
-	set @edate = (select max(datea) from view_ordes where noa = @noa)
 	set @datea = (select c from ztmpxls where CAST(noa as int) = 5)
 	if(len(@datea)=8)
 		set @datea=left(@datea,4)+'/'+left(right(@datea,4),2)+'/'+right(@datea,2)
@@ -91,7 +83,6 @@ begin
 	set @ordeno = @a
 	set @no2 = right('000'+@b,3)
 	set @cust = (select c from ztmpxls where CAST(noa as int) = 3)
-	set @productno = (select productno from view_ordes where noa = @ordeno and no2 = @no2)
 	set @product = (select product from view_ordes where noa = @ordeno and no2 = @no2)
 	set @ucolor = (select ucolor from view_ordes where noa = @ordeno and no2 = @no2)
 	set @class = (select class from view_ordes where noa = @ordeno and no2 = @no2)
@@ -103,19 +94,19 @@ begin
 	
 	if(LEN(@h)=0 and LEN(@c)>0 and LEN(@e)>0 and LEN(@f)>0)
 	begin
-		set @weight = case when @c = '3'  then ROUND(0.560*@lengthb*@mount1,2)
-						   when @c = '4'  then ROUND(0.994*@lengthb*@mount1,2)
-						   when @c = '5'  then ROUND(1.560*@lengthb*@mount1,2)
-						   when @c = '6'  then ROUND(2.250*@lengthb*@mount1,2)
-						   when @c = '7'  then ROUND(3.040*@lengthb*@mount1,2)
-						   when @c = '8'  then ROUND(3.980*@lengthb*@mount1,2)
-						   when @c = '9'  then ROUND(5.080*@lengthb*@mount1,2)
-						   when @c = '10' then ROUND(6.390*@lengthb*@mount1,2)
-						   when @c = '11' then ROUND(7.900*@lengthb*@mount1,2)
-						   when @c = '12' then ROUND(9.570*@lengthb*@mount1,2)
-						   when @c = '14' then ROUND(11.40*@lengthb*@mount1,2)
-						   when @c = '16' then ROUND(15.50*@lengthb*@mount1,2)
-						   when @c = '18' then ROUND(20.20*@lengthb*@mount1,2) end
+		set @weight = case when @c = '3'  then ROUND(0.560*@lengthb*@mount1,0)
+						   when @c = '4'  then ROUND(0.994*@lengthb*@mount1,0)
+						   when @c = '5'  then ROUND(1.560*@lengthb*@mount1,0)
+						   when @c = '6'  then ROUND(2.250*@lengthb*@mount1,0)
+						   when @c = '7'  then ROUND(3.040*@lengthb*@mount1,0)
+						   when @c = '8'  then ROUND(3.980*@lengthb*@mount1,0)
+						   when @c = '9'  then ROUND(5.080*@lengthb*@mount1,0)
+						   when @c = '10' then ROUND(6.390*@lengthb*@mount1,0)
+						   when @c = '11' then ROUND(7.900*@lengthb*@mount1,0)
+						   when @c = '12' then ROUND(9.570*@lengthb*@mount1,0)
+						   when @c = '14' then ROUND(11.40*@lengthb*@mount1,0)
+						   when @c = '16' then ROUND(15.50*@lengthb*@mount1,0)
+						   when @c = '18' then ROUND(20.20*@lengthb*@mount1,0) end
 	end
 	else
 	begin
@@ -125,10 +116,12 @@ begin
 	set @memo = @i
 	
 	set @accy = CAST(LEFT((select c from ztmpxls where CAST(noa as int) = 5),4)-1911 as nvarchar(5))
-	set @isexist = case when (LEN(ISNULL((select noa from view_cuc where noa = @noa),''))=0) then 0 else 1 end
+	set @isexist = case when (LEN(ISNULL((select noa from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 ),''))=0) then 0 else 1 end
+	if(@isexist=1)
+		set @noq = (select top 1 noq from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 )
 	
 	insert into #z_cucvu
-	select @isexist,@accy,@noa,@place,@bdate,@edate,@datea,@noq,@ordeno,@no2,@cust,@productno,@product,@ucolor,@class,@size,@spec,@lengthb,@mount1,@mount,@weight,@memo
+	select @isexist,@accy,@noa,@place,@datea,@noq,@ordeno,@no2,@cust,@product,@ucolor,@class,@size,@spec,@lengthb,@mount1,@mount,@weight,@memo
 
 	fetch next from cursor_table
 	into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i
@@ -136,24 +129,53 @@ end
 close cursor_table
 deallocate cursor_table
 
+--104/09/30 不刪除 只更新資料
 --將已存在的資料刪除
-if(@isexist = 1)
+--if(@isexist = 1)
+--begin
+--	set @cmd = 'delete cuc'+@accy+' where noa='+"'"+@noa+"'"
+--	execute sp_executesql @cmd
+--	set @cmd = 'delete cucs'+@accy+' where noa='+"'"+@noa+"'"
+--	execute sp_executesql @cmd
+--end
+
+--無資料
+if((select count(*) from view_cuc where noa=@noa)=0)
 begin
-	set @cmd = 'delete cuc'+@accy+' where noa='+"'"+@noa+"'"
+	--將資料存入資料庫
+	set @cmd = 'insert into cuc'+@accy+'(noa,cust,memo,datea)
+				select MAX(noa),MAX(cust),MAX(place),MAX(datea)
+				from #z_cucvu'
 	execute sp_executesql @cmd
-	set @cmd = 'delete cucs'+@accy+' where noa='+"'"+@noa+"'"
+	
+	set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo)
+				select noa,noq,ordeno,right("000"+no2,3),product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo
+				from #z_cucvu'
 	execute sp_executesql @cmd
 end
+else
+begin
+	set @noa=isnull((select top 1 noa from #z_cucvu),'')
+	set @accy=ISNULL((select top 1 accy from view_cuc where noa=@noa),@accy)
+	
+	--更新表身
+	EXEC("
+	update a
+	set product=b.product,ucolor=b.ucolor,spec=b.spec,size=b.size,lengthb=b.lengthb,class=b.class
+	,mount1=b.mount1,mount=b.mount,weight=b.weight,memo=b.memo
+	from cucs"+@accy+" a left join #z_cucvu b on a.ordeno=b.ordeno and a.no2=b.no2
+	where a.noa='"+@noa+"' and isnull(b.noa,'')!=''")
+		
+	set @no=isnull(cast((select MAX(noq) from view_cucs where noa=@noa)as int),0)
+	
+	--插入未存在的表身
+	EXEC("
+	insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo)
+	select noa,right('000'+cast(ROW_NUMBER() over (order by noq,ordeno,no2) as nvarchar(50)),3)
+	,ordeno,right('000'+no2,3),product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo
+	from #z_cucvu a where not exists(select * from view_cucs where noa='"+@noa+"' and ordeno=a.ordeno and no2=a.no2)
+	")
+end
 
---將資料存入資料庫
-set @cmd = 'insert into cuc'+@accy+'(noa,cust,memo,datea)
-			select MAX(noa),MAX(cust),MAX(place),MAX(datea)
-			from #z_cucvu'
-execute sp_executesql @cmd
-
-set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,productno,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo)
-			select noa,noq,ordeno,right("000"+no2,3),productno,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo
-			from #z_cucvu'
-execute sp_executesql @cmd
-
-drop table #z_cucvu;
+drop table #z_cucvu
+;

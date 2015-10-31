@@ -157,7 +157,7 @@
                             t_where += (t_where.length > 0 ? ' or ' : '') + "(uno='" + $.trim($('#txtUno_' + i).val()) + "' and not(accy='" + r_accy + "' and tablea='cubu' and noa='" + $.trim($('#txtNoa_'+i).val()) + "'))";
                     }
                     if (t_where.length > 0)
-                        q_gt('view_uccb', "where=^^" + t_where + "^^", 0, 0, 0, 'btnOk_checkuno');
+                        q_gt('view_cubs', "where=^^" + t_where + "^^", 0, 0, 0, 'btnOk_checkuno');
                     else{
                         qbtnOk();
                         parent.$.fn.colorbox.close();
@@ -216,7 +216,7 @@
 			function q_gtPost(t_postname) {
 				switch (t_postname) {
 				    case 'btnOk_checkuno':
-                        var as = _q_appendData("view_uccb", "", true);
+                        var as = _q_appendData("view_cubs", "", true);
                         if (as[0] != undefined) {
                             var msg = '';
                             for (var i = 0; i < as.length; i++) {

@@ -628,10 +628,10 @@
 									q_gt('view_cubs', "where=^^uno='"+$('#txtUno__'+b_seq).val()+"' ^^ ", 0, 0, 0, "getcubsuno");
 								}
 							}
-						}else{
+						}/*else{
 							alert('該訂單批號不存在!!');
 							$('#btnMinut__'+b_seq).click();
-						}
+						}*/
 						break;
 					case 'getcubsuno':
 						var as = _q_appendData('view_cubs', '', true);
@@ -1007,7 +1007,7 @@
                 }
                 $('#btnVccttoOrde').click(function() {
                 	if(q_cur==1 || q_cur==2){
-	                	var t_ordeno="";
+	                	/*var t_ordeno="";
 	                	for (var i = 0; i < q_bbtCount; i++) {
 	                		if(!emp($('#txtUno__'+i).val())){
 	                			t_ordeno=t_ordeno+$('#txtUno__'+i).val()+'##';
@@ -1017,10 +1017,11 @@
 	                		//q_gt('view_ordes', "where=^^charindex(isnull(noa,'')+isnull(no2,''),'"+t_ordeno+"')>0 ^^ ", 0, 0, 0, "getordes");
 	                		//104/10/27 不處理直接加總
 	                		//q_gt('view_ordes', "where=^^ exists( select * from view_cubs where ordeno=view_ordes.noa and no2=view_ordes.no2 and charindex(uno,'"+t_ordeno+"')>0 ) ^^ ", 0, 0, 0, "getordes");
-	                	}
+	                	}*/
 	                	
+	                	//104/1031 恢復依號數、材質、類別小計
 	                	for (var i = 0; i < q_bbsCount; i++) {
-	                		if(!emp($('#txtOrdeno_'+i).val()))
+	                		//if(!emp($('#txtOrdeno_'+i).val()))
 			            		$('#btnMinus_'+i).click();
 						}
 						
@@ -1033,8 +1034,8 @@
 									&& as[j].ucolor==$('#txtUcolor__'+i).val()
 									&& as[j].spec==$('#txtSpec__'+i).val()
 									&& as[j].size==$('#txtSize__'+i).val()
-									&& as[j].noa==$('#txtOrdeno__'+i).val()
-									&& as[j].no2==$('#txtNo2__'+i).val()
+									//&& as[j].noa==$('#txtOrdeno__'+i).val()
+									//&& as[j].no2==$('#txtNo2__'+i).val()
 									){
 										is_exists=true;
 										as[j].mount=q_add(dec(as[j].mount),dec($('#txtMount__'+i).val()));
@@ -1051,8 +1052,8 @@
 										class:$('#txtClass__'+i).val(),
 										mount:$('#txtMount__'+i).val(),
 										weight:$('#txtWeight__'+i).val(),
-										noa:$('#txtOrdeno__'+i).val(),
-										no2:$('#txtNo2__'+i).val()
+										noa:'',//$('#txtOrdeno__'+i).val()
+										no2:''//$('#txtNo2__'+i).val()
 									});
 								}
 							}

@@ -560,6 +560,10 @@ declare @t_class nvarchar(50)
 declare @t_uno nvarchar(50)
 declare @t_edate nvarchar(20)
 declare @t_ordeshow nvarchar(20)
+declare @t_bcustno nvarchar(50)
+declare @t_ecustno nvarchar(50)
+declare @t_bordeno nvarchar(50)
+declare @t_eordeno nvarchar(50)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -571,7 +575,10 @@ set @t_class = case when '#non'=[11] then '' else [11] end
 set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
 set @t_ordeshow = case when '#non'=[16] then '1' else [16] end
-
+set @t_bcustno=case when '#non' = [18] then '' else [18] end
+set @t_ecustno=case when '#non' = [19] then char(255)  else [19] end
+set @t_bordeno=case when '#non' = [20] then '' else [20] end
+set @t_eordeno=case when '#non' = [21] then char(255)  else [21] end
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -604,15 +611,18 @@ select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class
 ,'<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+a.noa+''+CHAR(59)+'104'',''95%'',''95%'',''104'')">'+b.uno+'</a>'
 ,b.mount,b.hmount,b.weight,b.memo,b.comp
 from view_cub a left join view_cubs b on a.noa=b.noa
+outer apply (select * from view_orde where noa=b.ordeno) c
 where (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and (len(isnull(b.ordeno,''))=(case when @t_ordeshow='0' then 0 else len(isnull(b.ordeno,'')) end))
-and (mount>0 or weight>0) 
+and (b.mount>0 or b.weight>0) 
 and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
 and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
+and isnull(c.custno,'') between @t_bcustno and @t_ecustno
+and isnull(b.ordeno,'') between @t_bordeno and @t_eordeno
 
 if((select count(*) from #tmp)>0)
 begin

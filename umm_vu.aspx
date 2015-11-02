@@ -916,6 +916,7 @@
 		        	$("#btnVcc").attr("disabled","disabled");
 		        	$("#btnMon").attr("disabled","disabled");
 		        	$("#btnAuto").attr("disabled","disabled");
+		        	getOpay();
 		        }
 		        
 		        if(q_cur==2){

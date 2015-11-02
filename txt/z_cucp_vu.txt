@@ -37,7 +37,7 @@ select '0',a.noa,a.cust,a.memo,a.datea,stuff((select ','+datea from view_orde wh
 ,isnull(d.vm,0),isnull(d.vh,0),isnull(d.vw,0),b.memo
 from view_cuc a left join view_cucs b on a.noa=b.noa
 outer apply (select SUM(mount) bm,SUM(hmount) bh,SUM(weight) bw from view_cubs where productno2=a.noa and product2=b.noq)c
-outer apply (select SUM(mount) vm,SUM(0) vh,SUM(weight) vw from view_vccs where ordeno=b.ordeno and no2=b.no2)d
+outer apply (select SUM(mount) vm,SUM(0) vh,SUM(weight) vw from view_vcct where ordeno=b.ordeno and no2=b.no2)d
 where a.noa between @t_bnoa and @t_enoa
 
 if((select count(*) from @result)>0)

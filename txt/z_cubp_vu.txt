@@ -234,7 +234,7 @@ select '0',left(a.cust,4),a.noa
 		,"z_cucp_vu?report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' and "+a.noa+"=$noa"
 from view_cuc a left join view_cucs b on a.noa=b.noa
 outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c
-outer apply (select SUM(weight) vweight from view_vccs where ordeno=b.ordeno and no2=b.no2)d
+outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d
 where left(a.datea,7) between @t_bmon and @t_emon
 group by a.cust,a.noa,a.memo
 

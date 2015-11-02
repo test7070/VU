@@ -439,7 +439,7 @@ insert @result
 select '0',ROW_NUMBER() over(order by product,uno) 
 ,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,a.uno,a.mount,a.weight  
 from view_cubs a outer apply (select * from view_orde where noa=a.ordeno) b
-where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and a.datea <= @t_edate 
+where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and a.date2 <= @t_edate 
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) 
 and (len(@t_size)=0 or isnull(size,'')=@t_size) 
 and ((@t_slengthb='' and @t_elengthb=char(255)) or isnull(lengthb,0) between cast(@t_slengthb as float) and cast(@t_elengthb as float)) 

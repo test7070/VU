@@ -628,7 +628,11 @@
 									q_gt('view_cubs', "where=^^uno='"+$('#txtUno__'+b_seq).val()+"' ^^ ", 0, 0, 0, "getcubsuno");
 								}
 							}
-						}/*else{
+						}else{
+							q_gt('view_cubs', "where=^^uno='"+$('#txtUno__'+b_seq).val()+"' ^^ ", 0, 0, 0, "getcubsuno");
+						}
+						
+						/*else{
 							alert('該訂單批號不存在!!');
 							$('#btnMinut__'+b_seq).click();
 						}*/

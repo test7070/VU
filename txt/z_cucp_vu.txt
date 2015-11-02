@@ -93,6 +93,7 @@ set @t_eordeno=case when '#non' = [15] then char(255)  else [15] end
 declare @result table(
 	gno nvarchar(1),
 	rank int,
+	comp  nvarchar(100),
 	product nvarchar(100),
 	ucolor nvarchar(30),
 	spec nvarchar(30),
@@ -105,7 +106,7 @@ declare @result table(
 
 ) 
 insert @result 
-select '0',ROW_NUMBER() over(order by product,uno) 
+select '0',ROW_NUMBER() over(order by product,uno) ,a.comp
 ,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,a.uno,a.mount,a.weight  
 from view_cubs a outer apply (select * from view_orde where noa=a.ordeno) b
 where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and a.date2 <= @t_edate 

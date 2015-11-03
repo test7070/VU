@@ -79,7 +79,11 @@
 						t_mount = $('#txtMount_' + j).val();
 					}
 					t_weight=+q_float('txtMount_' + j);
-					$('#txtTotal_' + j).val(round(q_mul(q_float('txtPrice_' + j), dec(t_mount)), 0));
+					
+					if($('#txtProduct_'+j).val().indexOf('費')==-1){
+						$('#txtTotal_' + j).val(round(q_mul(q_float('txtPrice_' + j), dec(t_mount)), 0));
+					}
+					
 					t_money = q_add(t_money, dec(q_float('txtTotal_' + j)));
 				}
 				if($('#chkAtax').prop('checked')){
@@ -120,6 +124,7 @@
 				$('#lblTranadd').text('車空重');
 				$('#lblBenifit').text('車總重');
 				$('#lblWeight').text('淨重');
+				$('#lblTranmoney').text('應付運費');
 				
 				$('#txtTranadd').change(function() {
 					q_tr('txtWeight',q_sub(q_float('txtBenifit'),q_float('txtTranadd')))
@@ -239,8 +244,20 @@
 						t_where=t_where+" and noa!='"+$('#textQno1').val()+"'";
 					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat2_b', "600px", "700px", '出貨合約');
 				});
-				
 			}
+			
+			function totalreadonly() {
+				for (var i = 0; i < q_bbsCount; i++) {
+	                if (q_cur == 1 || q_cur==2) {
+						if($('#txtProduct_'+i).val().indexOf('費')>-1)
+							$('#txtTotal_'+i).css('color', 'black').css('background', 'white').removeAttr('readonly');  
+						else
+							$('#txtTotal_'+i).css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+	                }else{
+	                	$('#txtTotal_'+i).css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+	                }
+                }
+            }
 			
 			function refreshBbm() {
                 if (q_cur == 1 || q_cur==2) {
@@ -825,6 +842,10 @@
 							if (q_cur == 1 || q_cur == 2)
 								sum();
 						});
+						$('#txtTotal_' + i).focusout(function() {
+							if (q_cur == 1 || q_cur == 2)
+								sum();
+						});
 						
 						$('#txtMount_' + i).focusout(function() {
 							if (q_cur == 1 || q_cur == 2){
@@ -884,6 +905,14 @@
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2)
 								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
+							totalreadonly();
+						});
+						
+						$('#txtProduct_' + i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							totalreadonly();
 						});
 						
 						$('#btnMinus_' + i).click(function() {
@@ -1260,6 +1289,7 @@
 				else
 					$('#txtMon').attr('readonly', 'readonly');
 				refreshBbm();
+				totalreadonly();
 			}
 
 			function btnMinus(id) {

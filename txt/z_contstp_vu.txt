@@ -143,6 +143,7 @@ dbo.getComma(eweight,[10])eweight,
 dbo.getComma(emoney,0)emoney,
 dbo.getComma(opay,0)mopay,
 dbo.getComma(rmoney,0)rmoney,
+'contst_vu?noa=$noa?' qhref, 
 * from @tmp
 order by tggno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
 

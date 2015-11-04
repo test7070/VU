@@ -520,3 +520,55 @@ dbo.getComma(mount,0)mount
 from @result 
 order by noa,gno,rank
 ;
+--******************************************************************************
+z_vccp_vu05:--z_vccp_vu05
+
+declare @t_bxnoa nvarchar(20)
+declare @t_exnoa nvarchar(20)
+
+set @t_bxnoa = case when '#non' = [2] then '' else [2] end
+set @t_exnoa = case when '#non' = [3] then CHAR(255) else [3] end
+
+declare @result table(
+	gno nvarchar(1),
+	noa nvarchar(50),
+	custno nvarchar(50),
+	comp nvarchar(100),
+	datea nvarchar(10),
+	addr2 nvarchar(100),
+	carno nvarchar(100),
+	rank int,
+	product nvarchar(100),
+	ucolor nvarchar(30),
+	spec nvarchar(30),
+	size nvarchar(30),
+	lengthb float,
+	mount float,
+	weight float,
+	memo nvarchar(MAX)
+) 
+
+insert @result
+select '0',a.noa,a.custno,a.comp,a.datea,a.addr2,a.carno
+,ROW_NUMBER() over(partition by a.noa order by a.noa,b.size,b.spec,b.lengthb,b.product) 
+,b.product,b.ucolor,b.spec,b.size,b.lengthb,sum(b.mount),sum(b.weight),MAX(b.memo)
+from view_vcc a left join view_vcct  b on a.noa=b.noa
+where a.noa between @t_bxnoa and @t_exnoa and b.noq!=''
+group by a.noa,a.custno,a.comp,a.datea,a.addr2,a.carno,b.product,b.ucolor,b.spec,b.size,b.lengthb
+
+if((select count(*) from @result)>0)
+begin
+	insert @result (gno,rank,noa,custno,comp,datea,addr2,carno,mount,weight)
+	select '1',99999,noa,MAX(custno),MAX(comp),MAX(datea),MAX(addr2),MAX(carno) ,sum(mount),sum(weight)
+	from @result group by noa
+end
+
+
+select 
+dbo.getComma(mount,0)mount
+,dbo.getComma(weight,0)weight
+,dbo.getComma(lengthb,-1)lengthb
+,* 
+from @result 
+order by noa,gno,rank
+;

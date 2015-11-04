@@ -1034,6 +1034,18 @@
 								var tmp=$(this).val();
 								tmp=tmp.match(/\d{1,}\.{0,1}\d{0,}/);
 								$(this).val(tmp);
+								
+								var objnamea=$(this).attr('id').split('_')[0];
+		                        var n=$(this).attr('id').split('_')[1];
+								//1104填入支數時，重量可以運算出理論重量
+		                        if(objnamea=='textXcount'){
+		                        	var t_1mount=dec($('#cucs_1mount'+n).text());
+		                        	var t_xcount=dec($(this).val());
+		                        	if(t_1mount>0 && t_xcount>0){
+		                        		var t_weight=dec($('#cucs_weight'+n).text());
+		                        		$('#textXweight_'+n).val(round(q_mul(q_div(t_weight,t_1mount),t_xcount),0));
+		                        	}
+		                        }
 							});
 						});
 						

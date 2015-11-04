@@ -80,9 +80,12 @@
                 //q_cmbParse("cmbTypea", q_getPara('cub.typea'));
                 //q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
                 //q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'t');
-                q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
-                q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
-				
+                //q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+                //q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
+                
+                var t_where = "where=^^ 1=1 ^^";
+				q_gt('ucc', t_where, 0, 0, 0, "");
+                
 				$('#btnOrdes_vu').hide();
                 $('#btnOrdes_vu').click(function() {
                     var t_bdate = trim($('#txtBdate').val());
@@ -159,6 +162,15 @@
 
             function q_gtPost(t_name) {
                 switch (t_name) {
+                	case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						q_cmbParse("combProduct", t_ucc,'t');
+						break;
                 	case 'cucs_vu':
                 		var as = _q_appendData("view_cuc", "", true);
                 		for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {

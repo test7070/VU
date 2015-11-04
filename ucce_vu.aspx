@@ -63,7 +63,11 @@
 								, ['txtEmount2', 9, q_getPara('rc2.mountPrecision'), 1], ['txtEweight2', 9, q_getPara('rc2.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
 				
 				q_cmbParse("cmbKind", q_getPara('ucce.kind'));
-				q_cmbParse("combProduct", q_getPara('rc2s_vu.product'),'s');
+				//q_cmbParse("combProduct", q_getPara('rc2s_vu.product'),'s');
+				
+				var t_where = "where=^^ 1=1 ^^";
+				q_gt('ucc', t_where, 0, 0, 0, "");
+				
 				$('#cmbKind').change(function() {
 					for (var j = 0; j < q_bbsCount; j++) {
 						btnMinus('btnMinus_' + j);
@@ -88,6 +92,14 @@
 
 			function q_gtPost(t_name) {
 				switch (t_name) {
+					case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						break;
 					case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';

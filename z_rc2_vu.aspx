@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" >
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title></title>
+		<title> </title>
 		<script src="../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -18,11 +18,9 @@
 		
 			$(document).ready(function() {
 				q_getId();
-				var t_year='';
-						
-				q_gf('', 'z_rc2_vu');
+				q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
 			});
-			
+			var xuccItem ='';
 			var t_qno='';
 			
 			function q_gfPost() {
@@ -59,7 +57,7 @@
 					}, {
 						type : '5', //[12]
 						name : 'xstype',
-						value : [].concat(trim(q_getPara('vccs_vu.product')).split(','))
+						value : xuccItem.split(',')
 					}, {
                         type : '0', //[13] //判斷顯示小數點與其他判斷
                         name : 'acomp',
@@ -160,6 +158,15 @@
 							}
 							t_qno='';
                 		break;
+                	case 'ucc':
+						xuccItem = " @全部";
+                		var as = _q_appendData("ucc", "", true);
+						for ( i = 0; i < as.length; i++) {
+							xuccItem+=","+as[i].product;
+						}
+						
+						q_gf('', 'z_rc2_vu');
+						break;  
                 	default:
                         break;
                 }

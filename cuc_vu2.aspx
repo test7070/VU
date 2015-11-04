@@ -58,7 +58,10 @@
                 bbmMask = [['txtDatea', r_picd]];
                 bbsMask = [];
                 q_mask(bbmMask);
-				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				
+				var t_where = "where=^^ 1=1 ^^";
+				q_gt('ucc', t_where, 0, 0, 0, "");
                 
                 $('#lblNoa').text('案號'); 
                 $('#lblCust').text('客戶名稱');
@@ -86,6 +89,14 @@
 
             function q_gtPost(t_name) {
                 switch (t_name) {
+                	case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						break;
                 	case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';

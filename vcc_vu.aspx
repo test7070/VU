@@ -116,8 +116,11 @@
 				q_cmbParse("combPay", q_getPara('vcc.paytype'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
 				//q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
-				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
-				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
+				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
+				
+				var t_where = "where=^^ 1=1 ^^";
+				q_gt('ucc', t_where, 0, 0, 0, "");
 				
 				$('#lblPaydate').text('入廠時間');
 				$('#lblAddr2').text('工地名稱');
@@ -354,6 +357,15 @@
 			function q_gtPost(t_name) {
 				var as;
 				switch (t_name) {
+					case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						q_cmbParse("combProduct", t_ucc,'t');
+						break;
 					case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';

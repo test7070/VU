@@ -82,7 +82,10 @@
 				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
 				//q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
-				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				
+				var t_where = "where=^^ 1=1 ^^";
+				q_gt('ucc', t_where, 0, 0, 0, "");
 				
 				$('#lblNoa').text('合約號碼');
 				$('#lblDatea').text('訂約日期');
@@ -123,6 +126,14 @@
 			var z_cno = r_cno, z_acomp = r_comp, z_nick = r_comp.substr(0, 2);
 			function q_gtPost(t_name) {
 				switch (t_name) {
+					case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						break;
 					case 'checkQuatno_btnOk':
 						var as = _q_appendData("view_quat", "", true);
                         if (as[0] != undefined) {

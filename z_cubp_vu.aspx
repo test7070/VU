@@ -61,7 +61,7 @@
 					},{//[12]
 						type : '5',
 						name : 'xtype',
-						value :['','未結案','已結案']
+						value :('#non@全部,0@未結案,1@已結案').split(',')
 					}, {
                         type : '6',
                         name : 'xproduct' //[13]

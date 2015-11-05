@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
-		<title></title>
+		<title> </title>
 		<script src="../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -14,7 +14,7 @@
             function onPageError(error) {
                 alert("An error occurred:\r\n" + error.Message);
             }
-
+			q_desc=1;
             q_tables = 's';
             var q_name = "cuc";
             var q_readonly = ['txtNoa', 'txtWorker', 'txtWorker2'];
@@ -62,11 +62,21 @@
 				
 				var t_where = "where=^^ 1=1 ^^";
 				q_gt('ucc', t_where, 0, 0, 0, "");
+				
+				$('#checkGen').click(function() {
+					if(q_cur==1 || q_cur==2){
+						if($('#checkGen').prop('checked'))
+							$('#txtGen').val(1);
+						else
+							$('#txtGen').val(0);
+					}
+				});
                 
                 $('#lblNoa').text('案號'); 
                 $('#lblCust').text('客戶名稱');
                 $('#lblMemo').text('備註');
                 $('#lblDatea').text('日期'); 
+                $('#lblGen').text('結案'); 
             }
 
             function q_popPost(s1) {
@@ -316,7 +326,6 @@
             function readonly(t_para, empty) {
                 _readonly(t_para, empty);
                 change_check();
-                
             }
 
             function btnMinus(id) {
@@ -371,7 +380,18 @@
                 _btnCancel();
             }
             
-            function change_check() {				
+            function change_check() {
+            	if(q_cur==1 || q_cur==2){
+            		$('#checkGen').removeAttr('disabled');
+            	}else{
+            		$('#checkGen').attr('disabled', 'disabled');
+            	}
+            	if($('#txtGen').val()==0){
+					$('#checkGen').prop('checked',false);
+				}else{
+					$('#checkGen').prop('checked',true);
+				}
+            	
 				for (var i = 0; i < q_bbsCount; i++) {
 					if(q_cur==1 || q_cur==2){
 						$('#checkMins_'+i).removeAttr('disabled');
@@ -541,7 +561,7 @@
 						<td><input id="txtCustno"  type="text" class="txt c1"/></td>
 						<td colspan="2"><input id="txtCust"  type="text" class="txt c1"/> </td>
 						<td> </td>
-						<td> </td>
+						<td>	</td>
 						<td> </td>
 					</tr>
 					<tr>
@@ -556,6 +576,13 @@
 						<td><input id="txtWorker" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
 						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblGen" class="lbl"> </a></td>
+						<td>
+							<input id="checkGen" type="checkbox"/>
+							<input id="txtGen" type="hidden"/>
+						</td>
 					</tr>
 				</table>
 			</div>

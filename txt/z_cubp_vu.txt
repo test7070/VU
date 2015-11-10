@@ -204,15 +204,18 @@ SET QUOTED_IDENTIFIER OFF
 declare @t_bmon nvarchar(10) 
 declare @t_emon nvarchar(10)
 declare @t_type nvarchar(10) ----@t_type=0 未結案	@t_type=1 已結案
+declare @t_order nvarchar(10)
 
 set @t_bmon = case when '#non'=[10] then '' else [10] end 
 set @t_emon = case when '#non'=[11] then char(255) else [11] end 
 set @t_type = case when '#non'=[12] then '' else [12] end 
+set @t_order = case when '#non'=[17] then 'noa' else [17] end 
 
 declare @result table(
 	gno nvarchar(1),
 	comp nvarchar(max),
 	noa  nvarchar(40),
+	bdate nvarchar(20),
 	ordeno float ,
 	done float,
 	stand float,
@@ -224,7 +227,7 @@ declare @result table(
 )
 
 insert @result
-select '0',left(a.cust,4),a.noa
+select '0',left(a.cust,4),a.noa,a.bdate
 		,isnull(SUM(b.weight),0)
 		,isnull(SUM(c.bweight),0)
 		,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) 
@@ -236,7 +239,7 @@ from view_cuc a left join view_cucs b on a.noa=b.noa
 outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c
 outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d
 where left(a.datea,7) between @t_bmon and @t_emon
-group by a.cust,a.noa,a.memo,a.gen
+group by a.cust,a.noa,a.bdate,a.memo,a.gen
 
 delete @result where len(@t_type)>0 and isnull(gen,0)!=cast(@t_type as float)
 
@@ -252,10 +255,12 @@ dbo.getComma(ordeno,0) ordeno,
 dbo.getComma(done,0) done,
 dbo.getComma(stand,0) stand,
 dbo.getComma(undone,0) undone,
-dbo.getComma(unfinal,0) unfinal
-,ROW_NUMBER() over (order by gno,noa) recno,*
+dbo.getComma(unfinal,0) unfinal,
+ROW_NUMBER() over (order by gno,noa) recno,
+dbo.charbr(memo,20) memo,
+*
 from @result
-order by gno,noa
+order by gno,case when @t_order='comp' then isnull(comp,'') when @t_order='bdate' then isnull(bdate,'') else noa end
 ;
 --********************************************************************************************
 z_cubp_vu05:--z_cubp_vu05

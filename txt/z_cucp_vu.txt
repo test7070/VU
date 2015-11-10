@@ -12,6 +12,7 @@ declare @result table(
 	memo nvarchar(MAX),
 	datea nvarchar(20),
 	odatea nvarchar(MAX),
+	mech nvarchar(MAX),
 	
 	no2 nvarchar(20),
 	size nvarchar(max),
@@ -31,7 +32,8 @@ declare @result table(
 )
 
 insert @result
-select '0',a.noa,a.cust,a.memo,a.datea,stuff((select ','+datea from view_orde where noa=b.ordeno group by datea FOR XML PATH('')),1,1,'')
+select '0',a.noa,a.cust,a.memo,a.datea,a.bdate,a.mech
+--,stuff((select ','+datea from view_orde where noa=b.ordeno group by datea FOR XML PATH('')),1,1,'')
 ,b.no2,b.size,b.spec,b.lengthb,isnull(b.mount,0),isnull(b.mount1,0),isnull(b.weight,0),isnull(c.bm,0),isnull(c.bh,0),isnull(c.bw,0)
 ,(case when isnull(b.mins,0)=0 and isnull(b.weight,0)-isnull(c.bw,0)>0  then '' else 'V' end )
 ,isnull(d.vm,0),isnull(d.vh,0),isnull(d.vw,0),b.memo

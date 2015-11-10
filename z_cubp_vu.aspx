@@ -76,6 +76,10 @@
 						type : '5',
 						name : 'xshowget',
 						value :('Y@含領料,N@不含領料').split(',')
+					},{//[17]
+						type : '5',
+						name : 'xorder',
+						value :('noa@案號,comp@客戶,bdate@預交日').split(',')
 					}]
 				});
                 q_popAssign();
@@ -152,8 +156,13 @@
 					$('#txtXspec').val($('#combSpec').find("option:selected").text());
 				});
  				
+ 				if(window.parent.q_name=='cuc'){
+ 					$('#q_report .report div').eq(3).click();
+ 					$('#btnOk').click();
+ 				}	
  				
 			}
+			
             function q_boxClose(s2) {
             }
             

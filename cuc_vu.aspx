@@ -42,7 +42,7 @@
 			}
 			
 			var t_spec='@',t_ucolor='@',t_class='@',t_mech='@';
-			var bbtaddcount=2;//bbt每次新增五筆
+			var bbtaddcount=1;//bbt每次新增五筆
 			var isclear=false;
 			var stkupdate=0;
 			function q_gfPost() {
@@ -1042,6 +1042,7 @@
 	                    
 	                    $('#cucs .num').unbind('blur');
 	                    $('#cucs .num').unbind('keyup');
+	                    $('#cucs .num').unbind('focus');
 	                    $('#cucs .num').each(function() {
 	                    	$(this).blur(function() {
 	                    		var objnamea=$(this).attr('id').split('_')[0];
@@ -1058,6 +1059,13 @@
 		                        	 	break;
 									}
 								}
+							});
+							
+							$(this).focus(function() {
+	                    		var objnamea=$(this).attr('id').split('_')[0];
+		                        var n=$(this).attr('id').split('_')[1];
+		                        if(objnamea=='textXcount')
+		                        	$(this).select();
 							});
 							
 							$(this).keyup(function(e) {
@@ -2206,8 +2214,8 @@
 		<a style="color: red;">※機台鎖定時間超過15分鐘將自動解除鎖定</a>
 		<div id="cucs" style="float:left;width:100%;height:500px;overflow:auto;position: relative;"> </div> 
 		<!--<div id="cucs_control" style="width:100%;"> </div>--> 
-		<div id="cuct" style="float:left;width:100%;height:110px;overflow:auto;position: relative;"> </div>
-		<div id="cucu" style="float:left;width:100%;height:110px;overflow:auto;position: relative;"> </div>
+		<div id="cuct" style="float:left;width:100%;height:80px;overflow:auto;position: relative;"> </div>
+		<div id="cucu" style="float:left;width:100%;height:80px;overflow:auto;position: relative;"> </div>
 		<div id="div_nouno" style="position:absolute; top:70px; left:840px; display:none; width:400px; background-color: #CDFFCE; border: 1px solid gray;">
 			<table id="table_nouno" style="width:100%;" border="1" cellpadding='2'  cellspacing='0'>
 				<tr>

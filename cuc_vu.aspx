@@ -35,7 +35,7 @@
 						if(!emp($('#cucs_noa'+i).text()) && new_where.indexOf($('#cucs_noa'+i).text()+$('#cucs_noq'+i).text())==-1)
 							new_where=new_where+" or (a.noa+'-'+b.noq='"+$('#cucs_noa'+i).text()+"-"+$('#cucs_noq'+i).text()+"' )";
 					}
-					var t_where = "where=^^ 1=1 and ("+new_where+") and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
+					var t_where = "where=^^ 1=1 and ("+new_where+") and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);
 					Lock();
 				}
@@ -57,7 +57,7 @@
                 document.title='現場加工作業';
 				
 				//載入案號 資料
-                var t_where = "where=^^ 1=1 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
+                var t_where = "where=^^ 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
 				q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
 				
 				q_cmbParse("combSize", ',#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16');
@@ -74,7 +74,7 @@
 				});
 				
 				$('#lblCucnoa').click(function() {
-					q_box("cuc_vu_b.aspx?"+ r_userno + ";" + r_name + ";" + q_id +";exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ;" + r_accy, 'cuc_vu_b', "95%", "95%", '加工單');
+					q_box("cuc_vu_b.aspx?"+ r_userno + ";" + r_name + ";" + q_id +";1=1 and isnull(gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ;" + r_accy, 'cuc_vu_b', "95%", "95%", '加工單');
 				});
 				
 				//匯入
@@ -88,7 +88,7 @@
 							return;
 						}
                 		
-	                    var t_where = " 1=1 and isnull(b.mins,0)=0 ";
+	                    var t_where = " 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 ";
 	                    t_where += q_sqlPara2("a.noa", t_cucno);
 	                    t_where += q_sqlPara2("b.size", t_size);
 	                    
@@ -115,7 +115,7 @@
 						$(this).click();
                     });
                 	//初始化cucs
-                	var t_where = "where=^^ 1=1 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq^^";
+                	var t_where = "where=^^ 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
                 });
                 
@@ -166,13 +166,13 @@
 						}else{
 							if(t_err.length>0){
 								if(confirm(t_err)){
-									var t_where = "where=^^ 1=1 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
+									var t_where = "where=^^ 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
 									q_gt('cucs_vu', t_where, 0, 0, 0,'tocub', r_accy);
 									Lock();
 								}
 							}else{
 								if(confirm("確定是否要入庫?")){//確定轉至加工單
-									var t_where = "where=^^ 1=1 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
+									var t_where = "where=^^ 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
 									q_gt('cucs_vu', t_where, 0, 0, 0,'tocub', r_accy);
 									Lock();
 								}
@@ -182,7 +182,7 @@
                 });
                 
                 //--cuct內容&事件---------------------------------------
-				var string = "<table id='cuct_table' style='width:1230px;word-break:break-all;'>";
+				var string = "<table id='cuct_table' style='width:1240px;word-break:break-all;'>";
 				string+='<tr id="cuct_header">';
 				string+='<td id="cuct_plut" align="center" style="width:40px; color:black;"><input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>';
 				string+='<td id="cuct_product" align="center" style="width:110px; color:black;">品名</td>';
@@ -400,7 +400,7 @@
 				
 				//浮動表頭
 				var string = "<div id='cuct_float' style='position:absolute;display:block;left:0px; top:0px;'>";
-				string+="<table id='cuct_table2' style='width:1230px;border-bottom: none;'>";
+				string+="<table id='cuct_table2' style='width:1240px;border-bottom: none;'>";
 				string+='<tr id="cuct_header">';
 				string+='<td id="cuct_plut" align="center" style="width:40px; color:black;"><input id="btnPlut2" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>';
 				string+='<td id="cuct_product" align="center" style="width:110px; color:black;">品名</td>';
@@ -461,7 +461,7 @@
 				});
 				
 				//--cucu內容&事件---------------------------------------
-				var string = "<table id='cucu_table' style='width:1230px;word-break:break-all;'>";
+				var string = "<table id='cucu_table' style='width:1240px;word-break:break-all;'>";
 				string+='<tr id="cucu_header">';
 				string+='<td id="cucu_plut" align="center" style="width:40px; color:black;"><input id="btnPluu" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>';
 				string+='<td id="cucu_product" align="center" style="width:110px; color:black;">品名</td>';
@@ -644,7 +644,7 @@
 				
 				//浮動表頭
 				var string = "<div id='cucu_float' style='position:absolute;display:block;left:0px; top:0px;'>";
-				string+="<table id='cucu_table2' style='width:1230px;border-bottom: none;'>";
+				string+="<table id='cucu_table2' style='width:1240px;border-bottom: none;'>";
 				string+='<tr id="cucu_header">';
 				string+='<td id="cucu_plut" align="center" style="width:40px; color:black;"><input id="btnPluu2" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>';
 				string+='<td id="cucu_product" align="center" style="width:110px; color:black;">品名</td>';
@@ -694,7 +694,7 @@
 				switch (t_name) {
 					case 'init':
 						//載入bbs表頭
-						var string = "<table id='cucs_table' style='width:1230px;word-break:break-all;'>";
+						var string = "<table id='cucs_table' style='width:1240px;word-break:break-all;'>";
 						string+='<tr id="cucs_header">';
 						string+='<td id="cucs_chk" align="center" style="width:30px; color:black;">鎖定</td>';
 						string+='<td id="cucs_cubno" align="center" style="width:20px; color:black;display:none;">鎖定人</td>'
@@ -715,6 +715,7 @@
 						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;" class="co3">件數</td>';
 						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;" class="co3">支數<BR><input id="btnAutoxcount" type="button" style="font-size: medium; font-weight: bold;" value="代入"></td>';
 						string+='<td id="cucs_xweight" title="重量" align="center" style="width:60px; color:black;" class="co3">重量<BR><a class="total_xweight"></a></td>';
+						string+='<td id="cucs_class" title="廠牌" align="center" style="width:50px; color:black;">廠牌</td>';
 						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:110px; color:black;">備註(標籤)</td>';
 						string+='<td id="cucs_work" title="工令" align="center" style="width:100px; color:black;">工令</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:75px; color:black;display:none;">客戶編號</td>';
@@ -728,7 +729,7 @@
 						
 						//浮動表頭
 						var string = "<div id='cucs_float' style='position:absolute;display:block;left:0px; top:0px;'>";
-						string+="<table id='cucs_table2' style='width:1230px;border-bottom: none;'>";
+						string+="<table id='cucs_table2' style='width:1240px;border-bottom: none;'>";
 						string+='<tr id="cucs_header">';
 						string+='<td id="cucs_chk" align="center" style="width:30px; color:black;">鎖定</td>';
 						string+='<td id="cucs_cubno" align="center" style="width:20px; color:black;display:none;">鎖定人</td>'
@@ -749,6 +750,7 @@
 						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;" class="co3">件數</td>';
 						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;" class="co3">支數<BR><input id="btnAutoxcount2" type="button" style="font-size: medium; font-weight: bold;" value="代入"></td>';
 						string+='<td id="cucs_xweight" title="重量" align="center" style="width:60px; color:black;" class="co3">重量<BR><a class="total_xweight"></a></td>';
+						string+='<td id="cucs_class" title="廠牌" align="center" style="width:50px; color:black;">廠牌</td>';
 						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:110px; color:black;">備註(標籤)</td>';
 						string+='<td id="cucs_work" title="工令" align="center" style="width:100px; color:black;">工令</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:75px; color:black;display:none;">客戶編號</td>';
@@ -884,6 +886,7 @@
 										$('#cucs_emount'+j).text(round(as[i].emount,3));
 										$('#cucs_eweight'+j).text(round(as[i].eweight,3));
 										$('#cucs_ehmount'+j).text(round(as[i].ehmount,3));
+										$('#cucs_class'+j).text(as[i].class);
 										$('#cucs_memo'+j).text(as[i].memo);
 										$('#cucs_work'+j).text(as[i].size2);
 										$('#cucs_custno'+j).text(as[i].acustno);
@@ -924,6 +927,7 @@
 									$('#cucs_emount'+j).text('');
 									$('#cucs_eweight'+j).text('');
 									$('#cucs_ehmount'+j).text('');
+									$('#cucs_class'+j).text('');
 									$('#cucs_memo'+j).text('');
 									$('#cucs_work'+j).text('');
 									$('#cucs_custno'+j).text('');
@@ -962,6 +966,7 @@
 								string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
+								string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
@@ -993,6 +998,7 @@
 							string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXmount_'+(i+bbsrow)+'"  type="text" class="xmount txt c1 num" disabled="disabled" /></td>';
 							string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXcount_'+(i+bbsrow)+'"  type="text" class="xcount txt c1 num" disabled="disabled"/></td>';
 							string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXweight_'+(i+bbsrow)+'"  type="text" class="xweight txt c1 num" disabled="disabled"/></td>';
+							string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].class+'</td>';
 							string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].memo+'</td>';
 							string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].size2+'</td>';
 							string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acustno+'</td>';
@@ -1031,7 +1037,7 @@
 				                }
 							}
 							//Lock();
-							var t_where="where=^^  1=1 and a.noa='"+$('#cucs_noa'+n).text()+"' and b.noq='"+$('#cucs_noq'+n).text()+"' and isnull(b.mins,0)=0 ^^";
+							var t_where="where=^^  1=1 and a.noa='"+$('#cucs_noa'+n).text()+"' and b.noq='"+$('#cucs_noq'+n).text()+"' and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 ^^";
 							//判斷是否能被鎖定或解除
 							if($(this).prop('checked')){
 								q_gt('cucs_vu', t_where, 0, 0, 0,'getcanlock_'+n, r_accy);
@@ -1080,7 +1086,7 @@
 		                        if(objnamea=='textXcount'){
 		                        	var t_1mount=dec($('#cucs_1mount'+n).text());
 		                        	var t_xcount=dec($(this).val());
-		                        	if(t_1mount>0 && t_xcount>0){
+		                        	if(t_1mount>0){
 		                        		var t_weight=dec($('#cucs_weight'+n).text());
 		                        		$('#textXweight_'+n).val(round(q_mul(q_div(t_weight,t_1mount),t_xcount),0));
 		                        		$('#textXweight_'+n).blur();
@@ -1111,7 +1117,7 @@
 								if($('#cucs_noa'+i).text()==imp_cucno && !$('#cucs_chk'+i).prop('checked')
 								&& !$('#cucs_chk'+i).prop('disabled')){ //沒有被核取過的資料 且目前沒被鎖定過
 									$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
-									var t_where="where=^^ 1=1 and a.noa='"+$('#cucs_noa'+i).text()+"' and b.noq='"+$('#cucs_noq'+i).text()+"' and isnull(b.mins,0)=0 ^^";
+									var t_where="where=^^ 1=1 and a.noa='"+$('#cucs_noa'+i).text()+"' and b.noq='"+$('#cucs_noq'+i).text()+"' and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 ^^";
 									q_gt('cucs_vu', t_where, 0, 0, 0,'getcanlock_'+i, r_accy);
 									//$('#cucs_chk'+i).click();
 									//$('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');

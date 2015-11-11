@@ -30,7 +30,7 @@
             brwKey = 'Noa';
             brwCount2 = 6;
             aPop = new Array(
-            	['txtCustno', 'lblCust', 'cust', 'noa,comp', 'txtCustno,txtCust', 'cust_b.aspx']
+            	['txtCustno', 'lblCust', 'cust', 'noa,nick', 'txtCustno,txtCust', 'cust_b.aspx']
             );
 
             $(document).ready(function() {

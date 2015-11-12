@@ -160,6 +160,9 @@
                 		alert('請先輸入'+q_getMsg('lblCust')+'!!');
                 		return;
                 	}
+                	//11/12 拿掉月份判斷
+                	t_mon=r_picd;
+                	
                 	q_gt('umm_import',"where=^^['"+t_noa+"','"+t_custno+"','"+t_custno2+"','"+t_mon+"','VU#"+t_payc+"#"+q_getPara('sys.d4taxtype')+"')^^", 0, 0, 0, "umm_import");
                 	
                 });

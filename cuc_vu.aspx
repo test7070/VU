@@ -886,7 +886,7 @@
 										$('#cucs_emount'+j).text(round(as[i].emount,3));
 										$('#cucs_eweight'+j).text(round(as[i].eweight,3));
 										$('#cucs_ehmount'+j).text(round(as[i].ehmount,3));
-										$('#cucs_class'+j).text(as[i].class);
+										$('#lblCucs_class'+j).text(as[i].class);
 										$('#cucs_memo'+j).text(as[i].memo);
 										$('#cucs_work'+j).text(as[i].size2);
 										$('#cucs_custno'+j).text(as[i].acustno);
@@ -927,7 +927,8 @@
 									$('#cucs_emount'+j).text('');
 									$('#cucs_eweight'+j).text('');
 									$('#cucs_ehmount'+j).text('');
-									$('#cucs_class'+j).text('');
+									$('#lblCucs_class'+j).text('');
+									$('#combXclass_'+j).remove();
 									$('#cucs_memo'+j).text('');
 									$('#cucs_work'+j).text('');
 									$('#cucs_custno'+j).text('');
@@ -966,7 +967,7 @@
 								string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
-								string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
+								string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_class'+(i+bbsrow)+'"></a></td>';
 								string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
@@ -998,7 +999,7 @@
 							string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXmount_'+(i+bbsrow)+'"  type="text" class="xmount txt c1 num" disabled="disabled" /></td>';
 							string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXcount_'+(i+bbsrow)+'"  type="text" class="xcount txt c1 num" disabled="disabled"/></td>';
 							string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXweight_'+(i+bbsrow)+'"  type="text" class="xweight txt c1 num" disabled="disabled"/></td>';
-							string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].class+'</td>';
+							string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_class'+(i+bbsrow)+'">'+as[i].class+'</a><select id="combXclass_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
 							string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].memo+'</td>';
 							string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].size2+'</td>';
 							string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acustno+'</td>';
@@ -1013,6 +1014,20 @@
 						
 						$('#cucs_table').append(string);
 						cucs_refresh();
+						
+						$('#cucs_table .comb').unbind("change");
+                    	$('#cucs_table .comb').each(function(index) {
+                    		$(this).text('');
+                    		var n=$(this).attr('id').split('_')[1];
+                    		q_cmbParse("combXclass_"+n, t_class);
+                    		$('#combXclass_'+n).val($('#lblCucs_class'+n).text());
+                    		
+                    		$(this).change(function() {
+                    			//1113 更新廠牌到cucs
+                    			q_func('qtxt.query.cucs_class_update', 'cuc_vu.txt,updateclass,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name+';'+$(this).val());
+                    			$('#lblCucs_class'+n).text($(this).val());
+							});
+                    	})
 						
 						//事件更新
 						$('#cucs .cucs_chk').unbind('click');
@@ -1434,6 +1449,7 @@
                         	$('#textXmount_'+n).val('').attr('disabled', 'disabled');
                             $('#textXcount_'+n).val('').attr('disabled', 'disabled');
                             $('#textXweight_'+n).val('').attr('disabled', 'disabled');
+                            $('#combXclass_'+n).val('').attr('disabled', 'disabled');
 						}else{//未鎖定資料
 							$('#cucs_chk'+n).prop("checked",true).parent().parent().find('td').css('background', 'darkturquoise');
 							//鎖定資料
@@ -1460,6 +1476,7 @@
 							$('#textXcount_'+n).removeAttr('disabled');
 							$('#textXweight_'+n).removeAttr('disabled');
 							$('#textXmount_'+n).val(1).blur();
+							$('#combXclass_'+n).removeAttr('disabled');
 						}
 					}else{
 						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');
@@ -1516,6 +1533,7 @@
 					$('#textXmount_'+n).val('').attr('disabled', 'disabled');
 					$('#textXcount_'+n).val('').attr('disabled', 'disabled');
 					$('#textXweight_'+n).val('').attr('disabled', 'disabled');
+					$('#combXclass_'+n).attr('disabled', 'disabled');
 					
 					var cucsno=$('#cucs_noa' + n).text();
 					var eweight=dec($('#cucs_eweight' + n).text());
@@ -1888,6 +1906,7 @@
 					$('#textXmount_'+i).val('').attr('disabled', 'disabled');
 					$('#textXcount_'+i).val('').attr('disabled', 'disabled');
 					$('#textXweight_'+i).val('').attr('disabled', 'disabled');
+					$('#combXclass_'+i).attr('disabled', 'disabled');
 					if(cubno!=''){
 						var lock_time=cubno.split('##')[3]!=undefined?cubno.split('##')[3]:'';
 						var islock=false;
@@ -1928,6 +1947,7 @@
 		                            $('#textXmount_'+i).val(chk_cucs[j].xmount).removeAttr('disabled');
 									$('#textXcount_'+i).val(chk_cucs[j].xcount).removeAttr('disabled');
 									$('#textXweight_'+i).val(chk_cucs[j].xweight).removeAttr('disabled');
+									$('#combXclass_'+i).removeAttr('disabled');
 									break;
 								}
 							}

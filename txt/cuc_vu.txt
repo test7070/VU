@@ -63,6 +63,35 @@ unlockall:--unlockall 使用者unlock全部的cucs
 	deallocate cursor_table 
 ;
 -------------------------------------------------------------------------------------------------------------------------------
+updateclass:--updateclass
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	declare @class nvarchar(max) = [6]
+	declare @o_class nvarchar(max) = ''
+	
+	--鎖定時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=CONVERT (VARCHAR(20), GETDATE(),20 )
+	select @now_datetime
+	
+	set @accy=isnull((select accy from view_cucs where noa=@noa and noq=@noq),@accy)
+	set @o_class=isnull((select class from view_cucs where noa=@noa and noq=@noq),'')
+		
+	EXEC("
+		update cucs"+@accy+" set class='"+@class+"' where noa='"+@noa+"' and noq='"+@noq+"'
+	")
+	
+	insert drun (datea,timea,usera,action,tablea,memo)
+	select replace(left(@now_datetime,10),' ',''),replace(left(right(@now_datetime,8),5),' ','')
+	,@userno,'update','cuc','class:'+@o_class+'=#>'+@class	
+	
+;
+-------------------------------------------------------------------------------------------------------------------------------
 cucstocub:--cucstocub
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max) = ''

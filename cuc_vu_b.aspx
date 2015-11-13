@@ -45,6 +45,7 @@
 				$('#lblMech').text('工地');
 				$('#lblBdate').text('預交日');
 				$('#lblSweight').text('訂單總重KG');
+				$('#lblBweight').text('已完成重量KG');
                 $('#lblMemo').text('備註');
             }
 
@@ -80,6 +81,7 @@
 					<td align="center"><a id='lblMech'> </a></td>
 					<td align="center"><a id='lblBdate'> </a></td>
 					<td align="center"><a id='lblSweight'> </a></td>
+					<td align="center"><a id='lblBweight'> </a></td>
 					<td align="center"><a id='lblMemo'> </a></td>
 				</tr>
 				<tr  style='background:#cad3ff;'>
@@ -89,6 +91,7 @@
 					<td style="width:20%;"><input class="txt" id="txtMech.*" type="text" style="width:98%;" /></td>
 					<td style="width:10%;"><input class="txt" id="txtBdate.*" type="text" style="width:98%;" /></td>
 					<td style="width:10%;"><input class="txt" id="txtSweight.*" type="text" style="width:98%;text-align:right;" /></td>
+					<td style="width:10%;"><input class="txt" id="txtBweight.*" type="text" style="width:98%;text-align:right;" /></td>
 					<td>
 						<input class="txt" id="txtMemo.*" type="text" style="width:98%;"/>
 						<input id="recno.*" type="hidden" />

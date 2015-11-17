@@ -30,8 +30,8 @@ create table #tmp(
 	a02 decimal(18, 1),--天數
 	a03 decimal(18, 0),--日薪
 	a04 decimal(18, 0),--獎金
-	a05 decimal(18, 0),--基數
-	a06 decimal(18, 0),--噸數
+	a05 decimal(18, 2),--基數
+	a06 decimal(18, 2),--噸數
 	a07 decimal(18, 0),--加班費
 	a08 decimal(18, 1),--時數
 	a09 decimal(18, 0),--全勤

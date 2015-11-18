@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" >
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title></title>
+		<title> </title>
 		<script src="/../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -16,19 +16,12 @@
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
             var gfrun = false;
-            var uccgaItem = '',uccgbItem = '',uccgcItem = '';
-            var partItem = '';
-            var sss_state = false;
-            var issale = '0';
-            var job = '';
-            var sgroup = '';
-            var isinvosystem = '';
-            var xproductItem ='';
             var xucolorItem ='';
             var xspecItem ='';
             var t_qno='';
             var xlengthbItem ='';
-            var xclassItem =''
+            var xclassItem ='';
+            var xuccItem ='';
 
             if (location.href.indexOf('?') < 0) {
                 location.href = location.href + "?;;;;100";
@@ -36,50 +29,10 @@
             
             $(document).ready(function() {
                 q_getId();
-                if (isinvosystem.length == 0) {
-                    q_gt('ucca', 'stop=1 ', 0, 0, 0, "ucca_invo");
-                }
-                if (uccgaItem.length == 0) {
-                    q_gt('uccga', '', 0, 0, 0, "");
-                }
-                if (uccgbItem.length == 0) {
-                    q_gt('uccgb', '', 0, 0, 0, "");
-                }
-                if (uccgcItem.length == 0) {
-                    q_gt('uccgc', '', 0, 0, 0, "");
-                }
-                if (partItem.length == 0) {
-                    q_gt('part', '', 0, 0, 0, "");
-                }
-                if (!sss_state) {
-                    q_gt('sss', "where=^^noa='" + r_userno + "'^^", 0, 0, 0, "");
-                }
-                
-                $('#q_report').click(function(e) {
-					if(isinvosystem=='2'){//沒有發票系統
-	                	$('#Xshowinvono').hide();
-	                }
-	                if(!(q_getPara('sys.comp').indexOf('英特瑞') > -1 || q_getPara('sys.comp').indexOf('安美得') > -1)){
-						$('#Xgroupbno').hide();
-						$('#Xgroupcno').hide();
-	                }
-				});
-				_q_boxClose();
-                q_getId();
                 q_gt('spec', '1=1 ', 0, 0, 0, "spec");
             });
             
             function q_gfPost() {
-            	var ucctype=q_getPara('ucc.typea') + ',' + q_getPara('uca.typea');
-	            /*if(q_getPara('sys.comp').indexOf('英特瑞') > -1 || q_getPara('sys.comp').indexOf('安美得') > -1)
-	            {
-	            	ucctype= q_getPara('ucc.typea_it');
-	            }*/
-	            var vccstype=q_getPara('vcc.stype');
-	            /*if(q_getPara('sys.comp').indexOf('永勝') > -1){
-	            	vccstype=q_getPara('vcc.stype_uu');
-	            }*/
-            
                 $('#q_report').q_report({
                     fileName : 'z_vcc_vu',
                     options : [{
@@ -113,7 +66,7 @@
                     }, {
                         type : '5',
                         name : 'xproduct', //[11]
-                        value :q_getPara('vccs_vu.product').split(',')
+                        value :xuccItem.split(',')
                     }, {
                         type : '5',
                         name : 'xspec' ,//[12]
@@ -121,7 +74,7 @@
                     }, {
                         type : '5',
                         name : 'xsize', //[13]
-                        value:(',#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16').split(',')
+                        value:(' @全部,#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16').split(',')
                     }, {
                         type : '5',
                         name : 'xclass',//[14]
@@ -211,12 +164,13 @@
 								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
 					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");               
                  });
+                 
                  $('#combQno').click(function() {
-                 	
                  	var t_where="where=^^datea between '"+$('#txtDate1').val()+"' and '"+$('#txtDate2').val()+
 								"'^^ and custno between '"+$('#txtCust1a').val()+"' and case when isnull('"+$('#txtCust2a').val()+"','')='' then char(255) else '"+$('#txtCust2a').val()+"' end "
 					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
                  });
+                 
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
 				});
@@ -225,67 +179,11 @@
             function q_boxClose(s2) {
             }
             
-			//交換div位置
-			var exchange = function(a,b){
-				try{
-					var tmpTop = a.offset().top;
-					var tmpLeft = a.offset().left;
-					a.offset({top:b.offset().top,left:b.offset().left});
-					b.offset({top:tmpTop,left:tmpLeft});
-				}catch(e){
-				}
-			};
-			
             function q_gtPost(t_name) {
-                switch (t_name) {               	              	
-                   case 'sss':
-                        var as = _q_appendData("sss", "", true);
-                        if (as[0] != undefined) {
-                            issale = as[0].issales;
-                            job = as[0].job;
-                            sgroup = as[0].salesgroup;
-                        }
-                        sss_state = true;
-                        break;
-					case 'ucca_invo':
-						var as = _q_appendData("ucca", "", true);
-						if (as[0] != undefined) {
-							isinvosystem = '1';
-						} else {
-							isinvosystem = '2';
-						}
-						break;
-                    case 'uccga':
-                        var as = _q_appendData("uccga", "", true);
-                        uccgaItem = " @全部";
-                        for ( i = 0; i < as.length; i++) {
-                            uccgaItem = uccgaItem + (uccgaItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa + ' . ' + as[i].namea;
-                        }
-                        break;
-					case 'uccgb':
-                        var as = _q_appendData("uccgb", "", true);
-                        uccgbItem = " @全部";
-                        for ( i = 0; i < as.length; i++) {
-                            uccgbItem = uccgbItem + (uccgbItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa + ' . ' + as[i].namea;
-                        }
-                        break;
-					case 'uccgc':
-                        var as = _q_appendData("uccgc", "", true);
-                        uccgcItem = " @全部";
-                        for ( i = 0; i < as.length; i++) {
-                            uccgcItem = uccgcItem + (uccgcItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa + ' . ' + as[i].namea;
-                        }
-                        break;
-                     case 'part':
-                        var as = _q_appendData("part", "", true);
-                        partItem = " @全部";
-                        for ( i = 0; i < as.length; i++) {
-                            partItem = partItem + (partItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa + ' . ' + as[i].part;
-                        }
-                        break;   
-                        
+                switch (t_name) { 
                     case 'spec':
                 		var as = _q_appendData("spec", "", true);
+                		xspecItem = " @全部";
 						for ( i = 0; i < as.length; i++) {
 							xspecItem+=","+as[i].noa;
 						}
@@ -293,6 +191,7 @@
                 		break;
                 	case 'color':
                 		var as = _q_appendData("color", "", true);
+                		xucolorItem = " @全部";
 						for ( i = 0; i < as.length; i++) {
 							xucolorItem+=","+as[i].color;
 						}
@@ -300,11 +199,19 @@
                 		break;
                 	case 'class':
                 		var as = _q_appendData("class", "", true);
+                		xclassItem = " @全部";
 						for ( i = 0; i < as.length; i++) {
 							xclassItem+=","+as[i].noa;
 						}
-					
-						break;   
+						q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
+						break;
+					case 'ucc':
+						xuccItem = " @全部";
+                		var as = _q_appendData("ucc", "", true);
+						for ( i = 0; i < as.length; i++) {
+							xuccItem+=","+as[i].product;
+						}
+						break;  
 					case 'view_quat':
                 		var as = _q_appendData("view_quat", "", true);
                 		if(as != undefined){
@@ -320,7 +227,7 @@
                 		break;
                 	               			
                 }
-                if (isinvosystem.length > 0 && uccgaItem.length > 0 &&uccgbItem.length > 0 &&uccgcItem.length > 0 && partItem.length > 0 && sss_state && !gfrun) {
+                if (xuccItem.length>0 && !gfrun) {
                     gfrun = true;
                     q_gf('', 'z_vcc_vu');
                 }

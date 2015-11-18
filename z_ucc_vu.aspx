@@ -121,7 +121,8 @@
                 selectbox.id="combProduct";
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
-                q_cmbParse("combProduct", q_getPara('vccs_vu.product')); 
+                //q_cmbParse("combProduct", q_getPara('vccs_vu.product')); 
+                q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
                 
                 $('#combProduct').change(function() {
 					$('#txtXproduct').val($('#combProduct').find("option:selected").text());
@@ -196,6 +197,14 @@
 						}
                 		q_gf('', 'z_ucc_vu');
                 		break;
+                	case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc);
+						break;
                     default:
                         break;
                 }

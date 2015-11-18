@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
-		<title></title>
+		<title> </title>
 		<script src="../script/jquery.min.js" type="text/javascript"></script>
 		<script src='../script/qj2.js' type="text/javascript"></script>
 		<script src='qset.js' type="text/javascript"></script>
@@ -14,10 +14,10 @@
             function onPageError(error) {
                 alert("An error occurred:\r\n" + error.Message);
             }
-
+			q_desc=1;
             q_tables = 's';
             var q_name = "cuc";
-            var q_readonly = ['txtNoa', 'txtWorker', 'txtWorker2'];
+            var q_readonly = ['txtWorker', 'txtWorker2','textWeight'];
             var q_readonlys = [];
             var bbmNum = [];
             var bbsNum = [];
@@ -30,7 +30,7 @@
             brwKey = 'Noa';
             brwCount2 = 6;
             aPop = new Array(
-            	['txtCustno', 'lblCust', 'cust', 'noa,comp', 'txtCustno,txtCust', 'cust_b.aspx']
+            	['txtCustno', 'lblCust', 'cust', 'noa,nick', 'txtCustno,txtCust', 'cust_b.aspx']
             );
 
             $(document).ready(function() {
@@ -55,15 +55,51 @@
             function mainPost() {
             	bbsNum = [ ['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtMount1', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 10, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];//['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1],
                 q_getFormat();
-                bbmMask = [['txtDatea', r_picd]];
+                bbmMask = [['txtDatea', r_picd],['txtBdate', r_picd]];
                 bbsMask = [];
                 q_mask(bbmMask);
-				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				
+				var t_where = "where=^^ 1=1 ^^";
+				q_gt('ucc', t_where, 0, 0, 0, "");
+				
+				$('#txtNoa').change(function() {
+                    if ($(this).val().length > 0) {
+                        t_where = "where=^^ noa='" + $(this).val() + "'^^";
+                        q_gt('view_cuc', t_where, 0, 0, 0, "checkCucno_change", r_accy);
+                    }
+                });
+				
+				$('#checkGen').click(function() {
+					if(q_cur==1 || q_cur==2){
+						if($('#checkGen').prop('checked'))
+							$('#txtGen').val(1);
+						else
+							$('#txtGen').val(0);
+					}
+				});
+				
+				$('#txtCustno').change(function() {
+					if(!emp($('#txtCustno').val())){
+						q_gt('custms', "where=^^noa='"+$('#txtCustno').val()+"'^^ ", 0, 0, 0, "custms");
+					}else{
+						$('#combAccount').text('');
+					}
+				});
+				
+				$('#combAccount').change(function() {
+					if(q_cur==1 || q_cur==2)
+						$('#txtMech').val($('#combAccount').find("option:selected").text());
+				});
                 
                 $('#lblNoa').text('案號'); 
                 $('#lblCust').text('客戶名稱');
                 $('#lblMemo').text('備註');
                 $('#lblDatea').text('日期'); 
+                $('#lblGen').text('結案'); 
+                $('#lblBdate').text('預交日');
+                $('#lblMech').text('工地名稱');
+                $('#lblWeight').text('料單總重量');
             }
 
             function q_popPost(s1) {
@@ -86,6 +122,39 @@
 
             function q_gtPost(t_name) {
                 switch (t_name) {
+                	case 'checkCucno_change':
+						var as = _q_appendData("view_cuc", "", true);
+                        if (as[0] != undefined) {
+                            alert('案號【'+as[0].noa+'】已存在!!!');
+                        }
+                        break;
+                	case 'checkCucno_btnOk':
+                		var as = _q_appendData("view_cuc", "", true);
+                        if (as[0] != undefined) {
+                            alert('案號【'+as[0].noa+'】已存在!!!');
+                            return;
+                        } else {
+                            wrServer($('#txtNoa').val());
+                        }
+                        break;
+                	case 'custms':
+                		var as = _q_appendData("custms", "", true);
+                		var t_account='@';
+                		for ( i = 0; i < as.length; i++) {
+                			if(as[i].account!='')
+                				t_account+=","+as[i].account;
+                		}
+                		$('#combAccount').text('');
+                		q_cmbParse("combAccount", t_account);
+                		break;
+                	case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						break;
                 	case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';
@@ -118,23 +187,32 @@
             }
 
             function btnOk() {
-                t_err = q_chkEmpField([['txtNoa', q_getMsg('lblNoa')], ['txtDatea', q_getMsg('lblDatea')]]);
+                var t_err = q_chkEmpField([['txtNoa', q_getMsg('lblNoa')], ['txtDatea', q_getMsg('lblDatea')]]);
                 if (t_err.length > 0) {
                     alert(t_err);
                     return;
                 }
-
-                if (q_cur == 1)
+				
+				var t_noa = trim($('#txtNoa').val());
+				
+                if (q_cur == 1){
                     $('#txtWorker').val(r_name);
-                else
+                 	t_where = "where=^^ noa='" + t_noa + "'^^";
+                    q_gt('view_cuc', t_where, 0, 0, 0, "checkCucno_btnOk", r_accy);   
+                }else{
                     $('#txtWorker2').val(r_name);
+                    wrServer(t_noa);
+				}
 
-                var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
+                /*
+                 11/10 不設定auto手動輸入
+                 var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
                 var t_date = trim($('#txtDatea').val());
                 if (s1.length == 0 || s1 == "AUTO")
                     q_gtnoa(q_name, replaceAll(q_getPara('sys.key_cuc') + (t_date.length == 0 ? q_date() : t_date), '/', ''));
                 else
                     wrServer(s1);
+                */
             }
 
             function _btnSeek() {
@@ -188,6 +266,10 @@
 							bbsweight(b_seq);
 						});
 						
+						$('#txtWeight_'+j).change(function() {
+							weighttotal();
+						});
+						
 						$('#combClass_' + j).change(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
@@ -214,6 +296,7 @@
 								else
 									$('#txtMins_'+b_seq).val(0);
 							}
+							weighttotal();
 						});
                     }
                 }
@@ -230,10 +313,96 @@
                 $('#lblMount1_s').text('支數');
                 $('#lblMount_s').text('件數');
                 $('#lblWeight_s').text('重量(KG)');
-                $('#lblMemo_s').text('備註');
+                $('#lblMemo_s').text('備註 (標籤)');
                 $('#lblMins_s').text('完工');
                 $('#vewNoa').text('案號');
                 $('#vewCust').text('客戶');
+                $('#lblSize2_s').text('工令');
+                
+                //1117複製功能
+                $('#btnProductCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtProduct_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtProduct_'+i).val())){
+	                				$('#txtProduct_'+i).val($('#txtProduct_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnUcolorCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtUcolor_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtUcolor_'+i).val())){
+	                				$('#txtUcolor_'+i).val($('#txtUcolor_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnSpecCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtSpec_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtSpec_'+i).val())){
+	                				$('#txtSpec_'+i).val($('#txtSpec_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnSizeCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtSize_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtSize_'+i).val())){
+	                				$('#txtSize_'+i).val($('#txtSize_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnClassCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtClass_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtClass_'+i).val())){
+	                				$('#txtClass_'+i).val($('#txtClass_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnMemoCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtMemo_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtMemo_'+i).val())){
+	                				$('#txtMemo_'+i).val($('#txtMemo_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnSize2Copy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtSize2_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtSize2_'+i).val())){
+	                				$('#txtSize2_'+i).val($('#txtSize2_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
             }
             
             function bbsweight(n) {
@@ -259,18 +428,32 @@
             	var t_mount1=dec($('#txtMount1_'+n).val());
             	
             	$('#txtWeight_'+n).val(round(q_mul(q_mul(t_weight,t_lengthb),t_mount1),0));
+            	weighttotal()
             }
-
+            
+            function weighttotal() {
+            	var t_weight=0;
+            	for (var j = 0; j < q_bbsCount; j++) {
+            		t_weight=q_add(t_weight,dec($('#txtWeight_'+j).val()));
+            	}
+            	$('#textWeight').val(FormatNumber(t_weight));
+			}
+			
             function btnIns() {
                 _btnIns();
-                $('#txtNoa').val('AUTO');
+                //$('#txtNoa').val('AUTO');
                 $('#txtDatea').val(q_date()).focus();
+                refreshBbm();
             }
 
             function btnModi() {
                 if (emp($('#txtNoa').val()))
                     return;
                 _btnModi();
+                refreshBbm();
+                if(!emp($('#txtCustno').val())){
+					q_gt('custms', "where=^^noa='"+$('#txtCustno').val()+"'^^ ", 0, 0, 0, "custms");	
+				}
             }
 
             function btnPrint() {
@@ -300,12 +483,25 @@
             function refresh(recno) {
                 _refresh(recno);
                 change_check();
+                weighttotal();
+                refreshBbm();
+                
+                if(!emp($('#txtCustno').val())){
+					q_gt('custms', "where=^^noa='"+$('#txtCustno').val()+"'^^ ", 0, 0, 0, "custms");
+				}
             }
 
             function readonly(t_para, empty) {
                 _readonly(t_para, empty);
                 change_check();
-                
+            }
+            
+            function refreshBbm() {
+                if (q_cur == 1) {
+                    $('#txtNoa').css('color', 'black').css('background', 'white').removeAttr('readonly');
+                } else {
+                    $('#txtNoa').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+                }
             }
 
             function btnMinus(id) {
@@ -360,7 +556,18 @@
                 _btnCancel();
             }
             
-            function change_check() {				
+            function change_check() {
+            	if(q_cur==1 || q_cur==2){
+            		$('#checkGen').removeAttr('disabled');
+            	}else{
+            		$('#checkGen').attr('disabled', 'disabled');
+            	}
+            	if($('#txtGen').val()==0){
+					$('#checkGen').prop('checked',false);
+				}else{
+					$('#checkGen').prop('checked',true);
+				}
+            	
 				for (var i = 0; i < q_bbsCount; i++) {
 					if(q_cur==1 || q_cur==2){
 						$('#checkMins_'+i).removeAttr('disabled');
@@ -373,6 +580,18 @@
 						$('#checkMins_'+i).prop('checked',true);
 					}
 				}
+			}
+			
+			function FormatNumber(n) {
+				var xx = "";
+				if (n < 0) {
+					n = Math.abs(n);
+					xx = "-";
+				}
+				n += "";
+				var arr = n.split(".");
+				var re = /(\d{1,3})(?=(\d{3})+$)/g;
+				return xx + arr[0].replace(re, "$1,") + (arr.length == 2 ? "." + arr[1] : "");
 			}
 		</script>
 		<style type="text/css">
@@ -506,9 +725,7 @@
 						<td align="center" style="width:25%"><a id='vewCust'> </a></td>
 					</tr>
 					<tr>
-						<td>
-						<input id="chkBrow.*" type="checkbox" style=' '/>
-						</td>
+						<td><input id="chkBrow.*" type="checkbox" style=' '/></td>
 						<td align="center" id='noa'>~noa</td>
 						<td align="center" id='cust'>~cust</td>
 					</tr>
@@ -521,17 +738,19 @@
 						<td><input id="txtNoa"  type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblDatea" class="lbl"> </a></td>
 						<td><input id="txtDatea"  type="text" class="txt c1"/></td>
-						<td> </td>
-						<td> </td>
+						<td><span> </span><a id="lblBdate" class="lbl"> </a></td>
+						<td><input id="txtBdate"  type="text" class="txt c1"/></td>
 						<td> </td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblCust" class="lbl"> </a></td>
+						<td><span> </span><a id="lblCust" class="lbl btn"> </a></td>
 						<td><input id="txtCustno"  type="text" class="txt c1"/></td>
 						<td colspan="2"><input id="txtCust"  type="text" class="txt c1"/> </td>
-						<td> </td>
-						<td> </td>
-						<td> </td>
+						<td><span> </span><a id="lblMech" class="lbl"> </a></td>
+						<td colspan="2">
+							<input id="txtMech"  type="text" class="txt c1" style="width: 90%;"/>
+							<select id="combAccount" class="txt" style="width: 20px;"> </select>
+						</td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl"> </a></td>
@@ -546,24 +765,34 @@
 						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
 						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
 					</tr>
+					<tr>
+						<td><span> </span><a id="lblGen" class="lbl"> </a></td>
+						<td>
+							<input id="checkGen" type="checkbox"/>
+							<input id="txtGen" type="hidden"/>
+						</td>
+						<td><span> </span><a id="lblWeight" class="lbl"> </a></td>
+						<td><input id="textWeight" type="text" class="txt num c1"/></td>
+					</tr>
 				</table>
 			</div>
 			<div class='dbbs' >
 				<table id="tbbs" class='tbbs'  border="1"  cellpadding='2' cellspacing='1'  >
 					<tr style='color:White; background:#003366;'>
 						<td align="center" style="width: 1%;"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  /></td>
-						<td align="center" style="width: 130px;"><a id='lblOrdeno_s'> </a></td>
-						<td style="width:150px;"><a id='lblProduct_s'> </a></td>
-						<td style="width:150px;"><a id='lblUcolor_s'> </a></td>
-						<td style="width:150px;"><a id='lblSpec_s'> </a></td>
-						<td style="width:85px;"><a id='lblSize_s'> </a></td>
+						<td align="center" style="width: 150px;"><a id='lblOrdeno_s'> </a></td>
+						<td style="width:150px;"><a id='lblProduct_s'> </a><input class="btn"  id="btnProductCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:150px;"><a id='lblUcolor_s'> </a><input class="btn"  id="btnUcolorCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:150px;"><a id='lblSpec_s'> </a><input class="btn"  id="btnSpecCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:85px;"><a id='lblSize_s'> </a><input class="btn"  id="btnSizeCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:85px;"><a id='lblLengthb_s'> </a></td>
-						<td style="width:150px;"><a id='lblClass_s'> </a></td>
+						<td style="width:120px;"><a id='lblClass_s'> </a><input class="btn"  id="btnClassCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<!--<td style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 						<td style="width:85px;"><a id='lblMount1_s'> </a></td>
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
-						<td style="width:150px;"><a id='lblMemo_s'> </a></td>
+						<td style="width:150px;"><a id='lblMemo_s'> </a><input class="btn"  id="btnMemoCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:150px;"><a id='lblSize2_s'> </a><input class="btn"  id="btnSize2Copy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:40px;"><a id='lblMins_s'> </a></td>
 					</tr>
 					<tr  style='background:#cad3ff;'>
@@ -596,6 +825,7 @@
 						<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
+						<td><input id="txtSize2.*" type="text" class="txt c1"/></td>
 						<td>
 							<input id="checkMins.*" type="checkbox"/>
 							<input id="txtMins.*" type="hidden"/>

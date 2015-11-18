@@ -12,6 +12,7 @@ declare @result table(
 	memo nvarchar(MAX),
 	datea nvarchar(20),
 	odatea nvarchar(MAX),
+	mech nvarchar(MAX),
 	
 	no2 nvarchar(20),
 	size nvarchar(max),
@@ -31,9 +32,11 @@ declare @result table(
 )
 
 insert @result
-select '0',a.noa,a.cust,a.memo,a.datea,stuff((select ','+datea from view_orde where noa=b.ordeno group by datea FOR XML PATH('')),1,1,'')
+select '0',a.noa,a.cust,a.memo,a.datea,a.bdate,a.mech
+--,stuff((select ','+datea from view_orde where noa=b.ordeno group by datea FOR XML PATH('')),1,1,'')
 ,b.no2,b.size,b.spec,b.lengthb,isnull(b.mount,0),isnull(b.mount1,0),isnull(b.weight,0),isnull(c.bm,0),isnull(c.bh,0),isnull(c.bw,0)
-,(case when isnull(b.mins,0)=0 and isnull(b.weight,0)-isnull(c.bw,0)>0  then '' else 'V' end )
+--,(case when isnull(b.mins,0)=0 and isnull(b.weight,0)-isnull(c.bw,0)>0  then '' else 'V' end )
+,(case when isnull(b.mins,0)>0 then 'V' else '' end ) 
 ,isnull(d.vm,0),isnull(d.vh,0),isnull(d.vw,0),b.memo
 from view_cuc a left join view_cucs b on a.noa=b.noa
 outer apply (select SUM(mount) bm,SUM(hmount) bh,SUM(weight) bw from view_cubs where productno2=a.noa and product2=b.noq)c
@@ -93,6 +96,7 @@ set @t_eordeno=case when '#non' = [15] then char(255)  else [15] end
 declare @result table(
 	gno nvarchar(1),
 	rank int,
+	comp  nvarchar(100),
 	product nvarchar(100),
 	ucolor nvarchar(30),
 	spec nvarchar(30),
@@ -105,7 +109,7 @@ declare @result table(
 
 ) 
 insert @result 
-select '0',ROW_NUMBER() over(order by product,uno) 
+select '0',ROW_NUMBER() over(order by product,uno) ,a.comp
 ,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,a.uno,a.mount,a.weight  
 from view_cubs a outer apply (select * from view_orde where noa=a.ordeno) b
 where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and a.date2 <= @t_edate 

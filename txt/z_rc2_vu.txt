@@ -246,7 +246,8 @@ declare @result table(
 	datea nvarchar(10), 
 	tggno nvarchar(20), 
 	comp nvarchar(40), 
-	addr_invo nvarchar(90), 
+	addr_invo nvarchar(90),
+	addr2 nvarchar(90),  
 	tel nvarchar(90), 
 	productno nvarchar(30), 
 	xproduct nvarchar(max), 
@@ -266,7 +267,7 @@ declare @result table(
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono, a.datea
-		,a.tggno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,''), b.productno
+		,a.tggno, isnull(c.comp,''), isnull(c.addr_invo,''),a.addr2, isnull(c.tel,''), b.productno
 		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
 		,(case when a.typea='2' then -1 else 1 end)*b.mount,(case when a.typea='2' then -1 else 1 end)*b.weight 
 		,b.price	,(case when a.typea='2' then -1 else 1 end)*b.total
@@ -292,7 +293,7 @@ from @result a group by tggno,comp
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
 
 select 
-gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,productno,xproduct,unit 
+gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,productno,xproduct,unit,addr2
 ,reverse(substring(reverse(convert(nvarchar(30),mount,0)),0,30)) mount 
 ,dbo.getComma(weight,0) weight 
 ,dbo.getComma(price,-1) price 

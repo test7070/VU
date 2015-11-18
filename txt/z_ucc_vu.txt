@@ -442,7 +442,7 @@ begin
 	if(@x_product!='~!@#$%^&*' and (@x_storeno!=@storeno or @x_product!=@product or @x_size!=@size or @x_spec!=@spec or @x_lengthb!=@lengthb or @x_class!=@class))
 	begin
 		insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-		select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,@storeno,@t_mount,@t_weight,@t_money,@avgweight,@aprice
+		select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,@x_storeno,@t_mount,@t_weight,@t_money,@avgweight,@aprice
 	
 		set @t_mount=0
 		set @t_weight=0
@@ -482,7 +482,7 @@ deallocate cursor_table
 
 --最後一筆
 insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,@storeno,@t_mount,@t_weight,@t_money,@avgweight,@aprice
+select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,@x_storeno,@t_mount,@t_weight,@t_money,@avgweight,@aprice
 
 delete #tmp where mount=0 or weight=0 or gno!='2'
 

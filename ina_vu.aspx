@@ -86,7 +86,11 @@
 				q_cmbParse("cmbItype", q_getPara('ina.typea'));
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
 				//q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
-				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				
+				var t_where = "where=^^ 1=1 ^^";
+				q_gt('ucc', t_where, 0, 0, 0, "");
+				
                 /* 若非本會計年度則無法存檔 */
                 /*$('#txtDatea').focusout(function() {
                     if ($(this).val().substr(0, 3) != r_accy) {
@@ -133,6 +137,14 @@
 			var thisCarSpecno = '';
             function q_gtPost(t_name) {
                 switch (t_name) {
+                	case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						break;
                 	case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';

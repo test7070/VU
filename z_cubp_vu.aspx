@@ -61,7 +61,7 @@
 					},{//[12]
 						type : '5',
 						name : 'xtype',
-						value :['','未結案','已結案']
+						value :('#non@全部,0@未結案,1@已結案').split(',')
 					}, {
                         type : '6',
                         name : 'xproduct' //[13]
@@ -76,6 +76,10 @@
 						type : '5',
 						name : 'xshowget',
 						value :('Y@含領料,N@不含領料').split(',')
+					},{//[17]
+						type : '5',
+						name : 'xorder',
+						value :('noa@案號,comp@客戶,bdate@預交日').split(',')
 					}]
 				});
                 q_popAssign();
@@ -135,7 +139,8 @@
                 selectbox.id="combProduct";
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
-                q_cmbParse("combProduct", q_getPara('vccs_vu.product')); 
+                //q_cmbParse("combProduct", q_getPara('vccs_vu.product'));
+                q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
                 
                 $('#combProduct').change(function() {
 					$('#txtXproduct').val($('#combProduct').find("option:selected").text());
@@ -151,8 +156,13 @@
 					$('#txtXspec').val($('#combSpec').find("option:selected").text());
 				});
  				
+ 				if(window.parent.q_name=='cuc'){
+ 					$('#q_report .report div').eq(3).click();
+ 					$('#btnOk').click();
+ 				}	
  				
 			}
+			
             function q_boxClose(s2) {
             }
             
@@ -166,6 +176,14 @@
 						}
 						q_cmbParse("combSpec", t_spec); 
                 		break;
+                	case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc);
+						break;
                     default:
                         break;
                 }

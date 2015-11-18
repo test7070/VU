@@ -108,7 +108,10 @@
 				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
 				//q_cmbParse("cmbTaxtype", q_getPara('sys.taxtype'));
 				//q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
-				q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				
+				var t_where = "where=^^ 1=1 ^^";
+				q_gt('ucc', t_where, 0, 0, 0, "");
 				
 				$('#lblAddr2').text('工地名稱');
 				$('#lblTranadd').text('車空重');
@@ -259,6 +262,14 @@
 			var z_cno = r_cno, z_acomp = r_comp, z_nick = r_comp.substr(0, 2);
 			function q_gtPost(t_name) {
 				switch (t_name) {
+					case 'ucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						break;
 					case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';

@@ -204,14 +204,14 @@ cucstocub:--cucstocub
 		--bbm
 		exec("
 			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
-			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"','"+@now_datetime+"'
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','','"+@namea+"','"+@now_datetime+"'
 		")
 		--bbs
 		exec("
 			insert cubs"+@accy+" (noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
 			,hmount,mount,weight,need,memo,date2,ordeno,no2,datea,productno2,product2,uno)
 			select '"+@cubno+"',right('000'+cast(ROW_NUMBER() over(order by a.noa,a.noq) as nvarchar(50)),3)
-			,b.custno,b.cust,c.product,c.ucolor,c.spec,c.size,c.lengthb,c.class,a.xcount,a.xmount,a.xweight,'','','"+@datea+"',c.ordeno,c.no2,d.datea,a.noa,a.noq
+			,b.custno,b.cust,c.product,c.ucolor,c.spec,c.size,c.lengthb,c.class,a.xcount,a.xmount,a.xweight,'','"+@memo+"','"+@datea+"',c.ordeno,c.no2,d.datea,a.noa,a.noq
 			,isnull(c.ordeno,'')+'-'+'"+@mechno+"'+
 			(right('000'+cast(1+cast(right(isnull((select MAX(uno) from view_cubs where uno like isnull(c.ordeno,'')+'-'+'"+@mechno+"'+'%'),'000'),3) as int) as nvarchar(10)),3))
 			from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq left join view_orde d on d.noa=c.ordeno

@@ -318,6 +318,91 @@
                 $('#vewNoa').text('案號');
                 $('#vewCust').text('客戶');
                 $('#lblSize2_s').text('工令');
+                
+                //1117複製功能
+                $('#btnProductCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtProduct_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtProduct_'+i).val())){
+	                				$('#txtProduct_'+i).val($('#txtProduct_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnUcolorCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtUcolor_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtUcolor_'+i).val())){
+	                				$('#txtUcolor_'+i).val($('#txtUcolor_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnSpecCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtSpec_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtSpec_'+i).val())){
+	                				$('#txtSpec_'+i).val($('#txtSpec_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnSizeCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtSize_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtSize_'+i).val())){
+	                				$('#txtSize_'+i).val($('#txtSize_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnClassCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtClass_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtClass_'+i).val())){
+	                				$('#txtClass_'+i).val($('#txtClass_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnMemoCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtMemo_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtMemo_'+i).val())){
+	                				$('#txtMemo_'+i).val($('#txtMemo_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnSize2Copy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtSize2_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtSize2_'+i).val())){
+	                				$('#txtSize2_'+i).val($('#txtSize2_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
             }
             
             function bbsweight(n) {
@@ -640,9 +725,7 @@
 						<td align="center" style="width:25%"><a id='vewCust'> </a></td>
 					</tr>
 					<tr>
-						<td>
-						<input id="chkBrow.*" type="checkbox" style=' '/>
-						</td>
+						<td><input id="chkBrow.*" type="checkbox" style=' '/></td>
 						<td align="center" id='noa'>~noa</td>
 						<td align="center" id='cust'>~cust</td>
 					</tr>
@@ -660,7 +743,7 @@
 						<td> </td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblCust" class="lbl"> </a></td>
+						<td><span> </span><a id="lblCust" class="lbl btn"> </a></td>
 						<td><input id="txtCustno"  type="text" class="txt c1"/></td>
 						<td colspan="2"><input id="txtCust"  type="text" class="txt c1"/> </td>
 						<td><span> </span><a id="lblMech" class="lbl"> </a></td>
@@ -697,19 +780,19 @@
 				<table id="tbbs" class='tbbs'  border="1"  cellpadding='2' cellspacing='1'  >
 					<tr style='color:White; background:#003366;'>
 						<td align="center" style="width: 1%;"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  /></td>
-						<td align="center" style="width: 130px;"><a id='lblOrdeno_s'> </a></td>
-						<td style="width:150px;"><a id='lblProduct_s'> </a></td>
-						<td style="width:150px;"><a id='lblUcolor_s'> </a></td>
-						<td style="width:150px;"><a id='lblSpec_s'> </a></td>
-						<td style="width:85px;"><a id='lblSize_s'> </a></td>
+						<td align="center" style="width: 150px;"><a id='lblOrdeno_s'> </a></td>
+						<td style="width:150px;"><a id='lblProduct_s'> </a><input class="btn"  id="btnProductCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:150px;"><a id='lblUcolor_s'> </a><input class="btn"  id="btnUcolorCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:150px;"><a id='lblSpec_s'> </a><input class="btn"  id="btnSpecCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:85px;"><a id='lblSize_s'> </a><input class="btn"  id="btnSizeCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:85px;"><a id='lblLengthb_s'> </a></td>
-						<td style="width:120px;"><a id='lblClass_s'> </a></td>
+						<td style="width:120px;"><a id='lblClass_s'> </a><input class="btn"  id="btnClassCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<!--<td style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 						<td style="width:85px;"><a id='lblMount1_s'> </a></td>
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
-						<td style="width:150px;"><a id='lblMemo_s'> </a></td>
-						<td style="width:150px;"><a id='lblSize2_s'> </a></td>
+						<td style="width:150px;"><a id='lblMemo_s'> </a><input class="btn"  id="btnMemoCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:150px;"><a id='lblSize2_s'> </a><input class="btn"  id="btnSize2Copy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:40px;"><a id='lblMins_s'> </a></td>
 					</tr>
 					<tr  style='background:#cad3ff;'>

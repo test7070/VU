@@ -1571,6 +1571,7 @@
 						//更新畫面
 						chk_cucs=[];
 						cucsupdata();
+						$('#textMemo').val('');//1117 欄位要清空
 						//並重新啟動刷新
 						intervalupdate=setInterval("cucsupdata()",1000*60);
 						break;

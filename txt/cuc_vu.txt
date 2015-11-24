@@ -231,21 +231,21 @@ cucstocub:--cucstocub
 	end
 	
 	--解除該使用者鎖定
-	declare cursor_table cursor for 
-	select accy from view_cucs where left(cubno,len(@userno))=@userno group by accy
-	open cursor_table 
-	fetch next from cursor_table 
-	into @accy
-	while(@@FETCH_STATUS <> -1) 
-	begin 
+	--declare cursor_table cursor for 
+	--select accy from view_cucs where left(cubno,len(@userno))=@userno group by accy
+	--open cursor_table 
+	--fetch next from cursor_table 
+	--into @accy
+	--while(@@FETCH_STATUS <> -1) 
+	--begin 
 		
-		EXEC(" update cucs"+@accy+" set cubno='' where left(cubno,len('"+@userno+"'))='"+@userno+"' ")	
+	--	EXEC(" update cucs"+@accy+" set cubno='' where left(cubno,len('"+@userno+"'))='"+@userno+"' ")	
 	
-		fetch next from cursor_table 
-		into @accy
-	end 
-	close cursor_table 
-	deallocate cursor_table 
+	--	fetch next from cursor_table 
+	--	into @accy
+	--end 
+	--close cursor_table 
+	--deallocate cursor_table 
 	
 	select @cubno cubno
 	

@@ -61,6 +61,11 @@
 				q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
 				
 				q_cmbParse("combSize", ',#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16');
+				q_cmbParse("combOrder",' @ ,memo@備註(標籤)');
+				
+				$('#logout').click(function() {
+					q_logout(q_idr);
+				});
 				
 				//庫存
 				$('#btnStk').click(function() {
@@ -81,6 +86,7 @@
                 $('#btnImport').click(function(e) {
                 	var t_cucno = $('#combCucno').val();
                 	var t_size = $('#combSize').val();
+                	var tx_spec = $('#combSpec').val();
                 	if(t_cucno.length>0){
                 		var t_err = q_chkEmpField([['combMechno', '機台']]);
 						if (t_err.length > 0) {
@@ -91,11 +97,18 @@
 	                    var t_where = " 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 ";
 	                    t_where += q_sqlPara2("a.noa", t_cucno);
 	                    t_where += q_sqlPara2("b.size", t_size);
+	                    t_where += q_sqlPara2("b.spec", tx_spec);
 	                    
-	                    t_where="where=^^"+t_where+" order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
+	                    if($('#combOrder').val()=='memo')
+	                    	t_where="where=^^"+t_where+" order by isnull(b.memo,''),b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
+	                    else
+	                    	t_where="where=^^"+t_where+" order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
+	                    
 	                    Lock();
 	                    isupdate=false;
 						q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);
+						if(chk_cucs.length==0)
+							intervalupdate=setInterval("cucsupdata()",1000*60);
 					}
                 });
                 
@@ -107,13 +120,13 @@
                 
                 //完工 清除所有資料
                 $('#btnClear').click(function(e) {
-                	clearInterval(intervalupdate);
+                	//clearInterval(intervalupdate);
                 	isclear=true;
                 	//目前鎖定資料清空
                 	chk_cucs=new Array();
-                	$('#cuct_table .minut').each(function() {
+                	/*$('#cuct_table .minut').each(function() {
 						$(this).click();
-                    });
+                    });*/
                 	//初始化cucs
                 	var t_where = "where=^^ 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
@@ -208,7 +221,7 @@
 	    				string+='<tr id="cuct_tr'+i+'">';
 	    				string+='<td style="text-align: center;"><input id="btnMinut_'+i+'" class="minut" type="button" style="font-size: medium; font-weight: bold;" value="－"/></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textProduct_'+i+'"  type="text" class="txt c3" value="鋼筋" /><select id="combProduct_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
-	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor_'+i+'"  type="text" class="txt c3" /><select id="combUcolor_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
+	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor_'+i+'"  type="text" class="txt c3" value="板料" /><select id="combUcolor_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSpec_'+i+'"  type="text" class="txt c3" /><select id="combSpec_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSize_'+i+'"  type="text" class="txt c3 sizea" style="width:50%;" /><select id="combSize_'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textLengthb_'+i+'"  type="text" class="txt num c1" /></td>';
@@ -233,7 +246,7 @@
 							q_cmbParse("combProduct_"+n, ',鋼筋,鐵線');
 						}
 						if(objname=='combUcolor'){
-							q_cmbParse("combUcolor_"+n, t_ucolor);
+							q_cmbParse("combUcolor_"+n, ',板料');
 						}
 						if(objname=='combSpec'){
 							q_cmbParse("combSpec_"+n, t_spec);
@@ -487,7 +500,7 @@
 	    				string+='<tr id="cucu_tr'+i+'">';
 	    				string+='<td style="text-align: center;"><input id="btnMinut__'+i+'" class="minut" type="button" style="font-size: medium; font-weight: bold;" value="－"/></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textProduct__'+i+'"  type="text" class="txt c3" value="鋼筋"/><select id="combProduct__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
-	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor__'+i+'"  type="text" class="txt c3" /><select id="combUcolor__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
+	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor__'+i+'"  type="text" class="txt c3" value="定尺" /><select id="combUcolor__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSpec__'+i+'"  type="text" class="txt c3" /><select id="combSpec__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSize__'+i+'"  type="text" class="txt c3 sizea" style="width:50%;" /><select id="combSize__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textLengthb__'+i+'"  type="text" class="txt num c1" /></td>';
@@ -512,7 +525,7 @@
 							q_cmbParse("combProduct__"+n, q_getPara('vccs_vu.product'));
 						}
 						if(objname=='combUcolor'){
-							q_cmbParse("combUcolor__"+n, t_ucolor);
+							q_cmbParse("combUcolor__"+n, ',定尺,板料,亂尺');
 						}
 						if(objname=='combSpec'){
 							q_cmbParse("combSpec__"+n, t_spec);
@@ -783,7 +796,7 @@
 							q_func('qtxt.query.unlockall', 'cuc_vu.txt,unlockall,'+r_userno+';'+r_name);
                         }
                         
-                        intervalupdate=setInterval("cucsupdata()",1000*60);
+                        //intervalupdate=setInterval("cucsupdata()",1000*60);
                         
                         $('#btnAutoxcount').click(function() {
                         	bbsrow=document.getElementById("cucs_table").rows.length-1;//重新取得最新的bbsrow
@@ -941,8 +954,6 @@
 							table_noa=$('#cucs_noa'+(bbsrow-1)).text();
 						}
 						
-						isupdate=false;
-						
 						t_color = ['DarkBlue','DarkRed'];
 						var string='';
 						for(var i=0;i<as.length;i++){
@@ -1014,6 +1025,11 @@
 						
 						$('#cucs_table').append(string);
 						cucs_refresh();
+						tot_xweight_refresh();
+						if(chk_cucs.length>0)
+							clearInterval(intervalupdate);
+						
+						isupdate=false;
 						
 						$('#cucs_table .comb').unbind("change");
                     	$('#cucs_table .comb').each(function(index) {
@@ -1273,7 +1289,7 @@
 	                    			+r_accy+';'+t_datea+';'+t_mechno+';'+t_memo+';'
 	                    			+r_userno+';'+r_name+';'+t_noa+';'+t_noq+';'+t_xmount+';'+t_xcount+';'+t_xweight+';'+ts_bbt);
 	                    			//取消刷新
-	                    			clearInterval(intervalupdate);
+	                    			//clearInterval(intervalupdate);
 								}
 							}
                     	}else{
@@ -1287,6 +1303,8 @@
 						for ( i = 0; i < as.length; i++) {
 							t_spec+=","+as[i].noa;
 						}
+						q_cmbParse("combSpec", t_spec);
+						
 						$('#cuct_table .comb').each(function(index) {
 							//帶入選項值
 							var n=$(this).attr('id').split('_')[1];
@@ -1318,7 +1336,7 @@
 							var objname=$(this).attr('id').split('_')[0];
 							if(objname=='combUcolor'){
 								$(this).text(''); //清空資料
-								q_cmbParse("combUcolor_"+n, t_ucolor);
+								q_cmbParse("combUcolor_"+n, ',板料');
 							}
 						});
 						$('#cucu_table .comb').each(function(index) {
@@ -1327,7 +1345,7 @@
 							var objname=$(this).attr('id').split('__')[0];
 							if(objname=='combUcolor'){
 								$(this).text(''); //清空資料
-								q_cmbParse("combUcolor__"+n, t_ucolor);
+								q_cmbParse("combUcolor__"+n, ',定尺,板料,亂尺');
 							}
 						});
 						break;
@@ -1487,6 +1505,10 @@
 					}
 					//Unlock();
 					tot_xweight_refresh();
+					if(chk_cucs.length==0)
+						intervalupdate=setInterval("cucsupdata()",1000*60);
+					else
+						clearInterval(intervalupdate);
 				}
 				if(t_name.indexOf("getcanunlock_")>-1){
 					var n=t_name.split('_')[1];
@@ -1541,7 +1563,12 @@
 						$('#cucs_tr'+n).find('td').css('background', 'lightgrey');
 					}
 					//Unlock();
-					tot_xweight_refresh();	
+					tot_xweight_refresh();
+					
+					if(chk_cucs.length==0)
+						intervalupdate=setInterval("cucsupdata()",1000*60);
+					else
+						clearInterval(intervalupdate);
 				}
 			}
 			
@@ -1568,12 +1595,18 @@
                 		break;
 					case 'cub_post.post':
 						alert('加工單產生完畢!!');
+						//1123 保持鎖定狀態，故chk_cucs資料不清空,入庫資料清空
+						//chk_cucs=[];
+						for (var i=0;i<chk_cucs.length;i++){
+                    		chk_cucs[i].xmount=0;
+							chk_cucs[i].xcount=0;
+							chk_cucs[i].xweight=0;
+                    	}
 						//更新畫面
-						chk_cucs=[];
 						cucsupdata();
 						$('#textMemo').val('');//1117 欄位要清空
 						//並重新啟動刷新
-						intervalupdate=setInterval("cucsupdata()",1000*60);
+						//intervalupdate=setInterval("cucsupdata()",1000*60);
 						break;
 					case 'qtxt.query.cucttocubt':
 						var as = _q_appendData("tmp0", "", true, true);
@@ -1865,7 +1898,7 @@
 	                    +r_accy+';'+t_datea+';'+t_mechno+';'+t_memo+';'
 	                    +r_userno+';'+r_name+';'+t_noa+';'+t_noq+';'+t_xmount+';'+t_xcount+';'+t_xweight+';'+ts_bbt);
 	                    //取消刷新
-	                    clearInterval(intervalupdate);
+	                    //clearInterval(intervalupdate);
 					}
                 }
 			}
@@ -2219,6 +2252,7 @@
 		<div id='q_acDiv'> </div>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<input type='button' id='btnAuthority' name='btnAuthority' style='font-size:16px;' value='權限'/>
+		<a id='logout' class="lbl" style="color: coral;cursor: pointer;font-weight: bolder;float: right;">登出</a>
 		<BR>
 		<a class="lbl">加工日</a>&nbsp;<input id="textDatea"  type="text" class="txt" style="width: 100px;"/>&nbsp;
 		<a class="lbl">機　台</a>&nbsp;
@@ -2236,6 +2270,10 @@
 		<select id="combCucno" class="txt" style="font-size: medium;"> </select>
 		&nbsp;<a class="lbl">號　數</a>&nbsp;
 		<select id="combSize" class="txt" style="font-size: medium;"> </select>
+		&nbsp;<a class="lbl">材　質</a>&nbsp;
+		<select id="combSpec" class="txt" style="font-size: medium;"> </select>
+		&nbsp;<a class="lbl">排　序</a>&nbsp;
+		<select id="combOrder" class="txt" style="font-size: medium;"> </select>
 		<input type='button' id='btnImport' style='font-size:16px;' value="匯入"/>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<a style="color: red;">※機台鎖定時間超過15分鐘將自動解除鎖定</a>

@@ -253,7 +253,7 @@ select ROW_NUMBER() over (partition by product,spec,size order by product,spec,s
 ,@today today
 ,@totpage totpage
 ,* 
-from #tmp order by page,product,spec,size,cast(gno as int),lengthb,class,idno
+from #tmp order by page,product,size,spec,cast(gno as int),lengthb,class,idno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

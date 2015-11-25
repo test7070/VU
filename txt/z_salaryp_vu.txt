@@ -269,8 +269,8 @@ create table #tmp(
 insert #tmp
 select b.sno,b.namea,isnull(b.money/2,0)+isnull(b.mtotal,0),b.mi_total
 ,b.day,b.daymoney,isnull(b.money/2,0)+isnull(b.mtotal,0)-ISNULL(b.mi_total,0)
-,b.bo_admin,b.bo_traffic,b.addh2_1,b.addmoney,b.bo_oth,b.bo_special,b.bo_full
-,ISNULL(b.bo_admin,0)+ISNULL(b.bo_traffic,0)+ISNULL(b.addmoney,0)+ISNULL(b.bo_oth,0)+ISNULL(b.bo_special,0)+ISNULL(b.bo_full,0)
+,b.bo_admin,b.bo_traffic,b.addh2_1,b.addmoney,ISNULL(b.bo_oth,0)+ISNULL(b.plus,0),b.bo_special,b.bo_full
+,ISNULL(b.bo_admin,0)+ISNULL(b.bo_traffic,0)+ISNULL(b.addmoney,0)+ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.bo_special,0)+ISNULL(b.bo_full,0)
 ,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
 ,case when b.memo2!='' then b.memo2 else c.typea end
 from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa

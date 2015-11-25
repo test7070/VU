@@ -62,6 +62,7 @@
 				
 				q_cmbParse("combSize", ',#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16');
 				q_cmbParse("combOrder",' @ ,memo@備註(標籤)');
+				$('#combOrder').val('memo');//1124預設
 				
 				$('#logout').click(function() {
 					q_logout(q_idr);

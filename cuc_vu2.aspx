@@ -268,6 +268,8 @@
 						
 						$('#txtWeight_'+j).change(function() {
 							weighttotal();
+						}).focusin(function() {
+							$(this).select();
 						});
 						
 						$('#combClass_' + j).change(function() {
@@ -399,6 +401,28 @@
 	                			if(emp($('#txtSize2_'+i).val())){
 	                				$('#txtSize2_'+i).val($('#txtSize2_0').val());
 	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				//1124 新增
+				$('#btnOrdeCopy').click(function() {
+					if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtOrdeno_0').val())){
+                			var t_no2='000';
+	                		for (var i = 0; i < q_bbsCount; i++) {
+	                			if(emp($('#txtOrdeno_'+i).val())){
+	                				$('#txtOrdeno_'+i).val($('#txtOrdeno_0').val());
+	                			}
+	                			if($('#txtOrdeno_'+i).val()==$('#txtOrdeno_0').val() && !emp($('#txtNo2_'+i).val())){
+	                				if(dec(t_no2)<dec($('#txtNo2_'+i).val()))
+	                					t_no2=$('#txtNo2_'+i).val();
+	                			}else if($('#txtOrdeno_'+i).val()==$('#txtOrdeno_0').val() && emp($('#txtNo2_'+i).val())){
+	                				$('#txtNo2_'+i).val(('000'+(dec(t_no2)+1)).slice(-3));
+	                				t_no2=$('#txtNo2_'+i).val();
+	                			}
+	                			
 	                		}
                 		}
                 	}
@@ -780,17 +804,17 @@
 				<table id="tbbs" class='tbbs'  border="1"  cellpadding='2' cellspacing='1'  >
 					<tr style='color:White; background:#003366;'>
 						<td align="center" style="width: 1%;"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  /></td>
-						<td align="center" style="width: 150px;"><a id='lblOrdeno_s'> </a></td>
+						<td align="center" style="width: 150px;"><a id='lblOrdeno_s'> </a><input class="btn"  id="btnOrdeCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblProduct_s'> </a><input class="btn"  id="btnProductCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblUcolor_s'> </a><input class="btn"  id="btnUcolorCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblSpec_s'> </a><input class="btn"  id="btnSpecCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:85px;"><a id='lblSize_s'> </a><input class="btn"  id="btnSizeCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:85px;"><a id='lblLengthb_s'> </a></td>
-						<td style="width:120px;"><a id='lblClass_s'> </a><input class="btn"  id="btnClassCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<!--<td style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 						<td style="width:85px;"><a id='lblMount1_s'> </a></td>
 						<td style="width:85px;"><a id='lblMount_s'> </a></td>
 						<td style="width:85px;"><a id='lblWeight_s'> </a></td>
+						<td style="width:120px;"><a id='lblClass_s'> </a><input class="btn"  id="btnClassCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblMemo_s'> </a><input class="btn"  id="btnMemoCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblSize2_s'> </a><input class="btn"  id="btnSize2Copy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:40px;"><a id='lblMins_s'> </a></td>
@@ -816,14 +840,14 @@
 						</td>
 						<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 						<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
-						<td>
-							<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
-							<select id="combClass.*" class="txt" style="width: 20px;"> </select>
-						</td>
 						<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
 						<td><input id="txtMount1.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
+						<td>
+							<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
+							<select id="combClass.*" class="txt" style="width: 20px;"> </select>
+						</td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
 						<td><input id="txtSize2.*" type="text" class="txt c1"/></td>
 						<td>

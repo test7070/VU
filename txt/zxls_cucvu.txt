@@ -13,23 +13,26 @@ create table #z_cucvu(
 	accy nvarchar(10),
 	noa nvarchar(30),	
 	
-	place nvarchar(200),--工地名稱	暫存memo
+	memo nvarchar(200),--工地名稱	暫存memo
 	datea nvarchar(10),
+	bdate nvarchar(10),
 	
 	noq nvarchar(3), 
 	ordeno nvarchar(40),
 	no2 nvarchar(10),
+	custno nvarchar(100),
 	cust nvarchar(100),
 	product nvarchar(100),
 	ucolor nvarchar(30),
 	class nvarchar(30),
 	size nvarchar(90),
+	size2 nvarchar(90),
 	spec nvarchar(90),
 	lengthb float,
 	mount1 float,
 	mount float,
 	[weight] float,
-	memo nvarchar(200)
+	bmemo nvarchar(200)
 )
 declare @a nvarchar(max)
 declare @b nvarchar(max)
@@ -40,59 +43,75 @@ declare @f nvarchar(max)
 declare @g nvarchar(max)
 declare @h nvarchar(max)
 declare @i nvarchar(max)
+declare @j nvarchar(max)
 
-declare	@isexist int
+declare	@isexist int=0
 declare	@accy nvarchar(10)
 declare	@noa nvarchar(30)
-declare	@place nvarchar(200)--工地名稱	暫存memo
+declare	@memo nvarchar(200)
 declare	@datea nvarchar(10)
+declare	@bdate nvarchar(10)
 declare @noq nvarchar(3)
 declare	@ordeno nvarchar(40)
 declare	@no2 nvarchar(10)
+declare	@custno nvarchar(100)
 declare	@cust nvarchar(100)
 declare	@product nvarchar(100)
 declare	@ucolor nvarchar(30)
 declare	@class nvarchar(30)
 declare	@size nvarchar(90)
+declare	@size2 nvarchar(90)
 declare	@spec nvarchar(90)
 declare	@lengthb float
 declare	@mount1 float
 declare	@mount float
 declare	@weight float
-declare	@memo nvarchar(200)
+declare	@bmemo nvarchar(200)
 declare @no int = 0
 
+set @noa = (select c from ztmpxls where CAST(noa as int) = 2)
+set @cust = (select c from ztmpxls where CAST(noa as int) = 3)
+set @memo = (select c from ztmpxls where CAST(noa as int) = 4)
+set @datea = (select c from ztmpxls where CAST(noa as int) = 5)
+set @bdate = (select h from ztmpxls where CAST(noa as int) = 5)
+set @accy = CAST(LEFT((select c from ztmpxls where CAST(noa as int) = 5),4)-1911 as nvarchar(5))
+set @custno=isnull((select top 1 noa from cust where comp like '%'+@cust+'%'),'')
+if(LEN(@custno)='')
+	set @custno=isnull((select custno from view_orde where noa=@noa),'')
+
+if(len(@datea)=8)
+	set @datea=left(@datea,4)+'/'+left(right(@datea,4),2)+'/'+right(@datea,2)
+else
+	set @datea=left(@datea,4)+'/'+right(left(@datea,6),2)+'/'+right(left(@datea,8),2)
+	
+if(len(@bdate)=8)
+	set @bdate=left(@bdate,4)+'/'+left(right(@bdate,4),2)+'/'+right(@bdate,2)
+else
+	set @bdate=left(@bdate,4)+'/'+right(left(@bdate,6),2)+'/'+right(left(@bdate,8),2)
+
 declare cursor_table cursor for
-select noa,a,b,c,d,e,f,g,h,i from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
+select a,b,c,d,e,f,g,h,i,j from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
 open cursor_table
 fetch next from cursor_table
-into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i
+into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j
 while(@@FETCH_STATUS <> -1)
 begin
-	set @noa = (select c from ztmpxls where CAST(noa as int) = 2)
-	
-	set @place = (select c from ztmpxls where CAST(noa as int) = 4)
-	set @datea = (select c from ztmpxls where CAST(noa as int) = 5)
-	if(len(@datea)=8)
-		set @datea=left(@datea,4)+'/'+left(right(@datea,4),2)+'/'+right(@datea,2)
-	else
-		set @datea=left(@datea,4)+'/'+right(left(@datea,6),2)+'/'+right(left(@datea,8),2)
 		
 	set @no = @no + 1
 	set @noq = REPLICATE('0',3-LEN(CAST(@no as varchar(3))))+CAST(@no as varchar(3))
-	set @ordeno = @a
-	set @no2 = right('000'+@b,3)
-	set @cust = (select c from ztmpxls where CAST(noa as int) = 3)
+	set @ordeno = @noa
+	set @no2 = right('000'+@a,3)
 	set @product = (select product from view_ordes where noa = @ordeno and no2 = @no2)
 	set @ucolor = (select ucolor from view_ordes where noa = @ordeno and no2 = @no2)
-	set @class = (select class from view_ordes where noa = @ordeno and no2 = @no2)
-	set @size = '#'+@c
-	set @spec = @d
-	set @lengthb = CAST(replace(@e,',','') as float) 
-	set @mount1 = CAST(replace(@f,',','') as float) 
-	set @mount = CAST(replace(@g,',','') as float)
+	set @class = @h
+	set @size = case when len(@c)>0 then '#'+@c else '' end
+	set @spec = @b
+	set @lengthb = CAST(replace(@d,',','') as float) 
+	set @mount1 = CAST(replace(@e,',','') as float) 
+	set @mount = CAST(replace(@f,',','') as float)
+	set @weight = CAST(replace(@g,',','') as float)
 	
-	if(LEN(@h)=0 and LEN(@c)>0 and LEN(@e)>0 and LEN(@f)>0)
+	if(@weight=0 and LEN(@size)>0 and @lengthb>0 and LEN(@mount1)>0)
 	begin
 		set @weight = case when @c = '3'  then ROUND(0.560*@lengthb*@mount1,0)
 						   when @c = '4'  then ROUND(0.994*@lengthb*@mount1,0)
@@ -108,23 +127,20 @@ begin
 						   when @c = '16' then ROUND(15.50*@lengthb*@mount1,0)
 						   when @c = '18' then ROUND(20.20*@lengthb*@mount1,0) end
 	end
-	else
-	begin
-		set @weight = CAST(replace(@h,',','') as float)
-	end
 	
-	set @memo = @i
+	set @bmemo = @i
+	set @size2 = @j
 	
-	set @accy = CAST(LEFT((select c from ztmpxls where CAST(noa as int) = 5),4)-1911 as nvarchar(5))
-	set @isexist = case when (LEN(ISNULL((select noa from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 ),''))=0) then 0 else 1 end
-	if(@isexist=1)
-		set @noq = (select top 1 noq from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 )
+	
+	--set @isexist = case when (LEN(ISNULL((select noa from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 ),''))=0) then 0 else 1 end
+	--if(@isexist=1)
+	--	set @noq = (select top 1 noq from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 )
 	
 	insert into #z_cucvu
-	select @isexist,@accy,@noa,@place,@datea,@noq,@ordeno,@no2,@cust,@product,@ucolor,@class,@size,@spec,@lengthb,@mount1,@mount,@weight,@memo
+	select @isexist,@accy,@noa,@memo,@datea,@bdate,@noq,@ordeno,@no2,@custno,@cust,@product,@ucolor,@class,@size,@size2,@spec,@lengthb,@mount1,@mount,@weight,@bmemo
 
 	fetch next from cursor_table
-	into @noa,@a,@b,@c,@d,@e,@f,@g,@h,@i
+	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j
 end
 close cursor_table
 deallocate cursor_table
@@ -142,14 +158,14 @@ deallocate cursor_table
 --無資料
 if((select count(*) from view_cuc where noa=@noa)=0)
 begin
-	--將資料存入資料庫
-	set @cmd = 'insert into cuc'+@accy+'(noa,cust,memo,datea)
-				select MAX(noa),MAX(cust),MAX(place),MAX(datea)
+	--將資料存入資料庫 
+	set @cmd = 'insert into cuc'+@accy+'(noa,custno,cust,memo,datea,bdate)
+				select MAX(noa),MAX(custno),MAX(cust),MAX(memo),MAX(datea),MAX(bdate)
 				from #z_cucvu'
 	execute sp_executesql @cmd
 	
-	set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo)
-				select noa,noq,ordeno,right("000"+no2,3),product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo
+	set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2)
+				select noa,noq,ordeno,right("000"+no2,3)no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2
 				from #z_cucvu'
 	execute sp_executesql @cmd
 end
@@ -162,7 +178,7 @@ begin
 	EXEC("
 	update a
 	set product=b.product,ucolor=b.ucolor,spec=b.spec,size=b.size,lengthb=b.lengthb,class=b.class
-	,mount1=b.mount1,mount=b.mount,weight=b.weight,memo=b.memo
+	,mount1=b.mount1,mount=b.mount,weight=b.weight,memo=b.bmemo,size2=b.size2
 	from cucs"+@accy+" a left join #z_cucvu b on a.ordeno=b.ordeno and a.no2=b.no2
 	where a.noa='"+@noa+"' and isnull(b.noa,'')!=''")
 		
@@ -170,9 +186,9 @@ begin
 	
 	--插入未存在的表身
 	EXEC(" 
-		insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo) 
+		insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2) 
 		select noa,right('000'+cast(ROW_NUMBER() over (order by noq,ordeno,no2)+cast(isnull((select MAX(noq) from view_cucs where noa='"+@noa+"'),0) as int) as nvarchar(50)),3) 
-		,ordeno,right('000'+no2,3),product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo 
+		,ordeno,right('000'+no2,3),product,ucolor,class,size,spec,lengthb,mount1,mount,weight,bmemo,size2
 		from #z_cucvu a where not exists(select * from view_cucs where noa='"+@noa+"' and ordeno=a.ordeno and no2=a.no2) 
 	") 
 end

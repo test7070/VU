@@ -1617,12 +1617,12 @@
                 		break;
 					case 'cub_post.post':
 						alert('加工單產生完畢!!');
-						//1123 保持鎖定狀態，故chk_cucs資料不清空,入庫資料清空
+						//1123 保持鎖定狀態，故chk_cucs資料不清空,入庫資料清空//1125完工後件數仍預設帶入1件
 						//chk_cucs=[];
 						for (var i=0;i<chk_cucs.length;i++){
-                    		chk_cucs[i].xmount=0;
-							chk_cucs[i].xcount=0;
-							chk_cucs[i].xweight=0;
+                    		chk_cucs[i].xmount=1;
+							chk_cucs[i].xcount='';
+							chk_cucs[i].xweight='';
                     	}
 						//更新畫面
 						cucsupdata();

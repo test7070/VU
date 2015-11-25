@@ -45,6 +45,7 @@
 			var bbtaddcount=1;//bbt每次新增五筆
 			var isclear=false;
 			var stkupdate=0;
+			var t_endanoa='',t_endanoq='';
 			function q_gfPost() {
 				chk_cucs=new Array();
 				
@@ -723,9 +724,12 @@
 						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:50px; color:black;" class="co1">訂單件數</td>';
 						string+='<td id="cucs_1mount" title="訂單支數" align="center" style="width:50px; color:black;" class="co1">訂單支數</td>';
 						string+='<td id="cucs_weight" title="訂單重量" align="center" style="width:50px; color:black;" class="co1">訂單重量</td>';
-						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;" class="co2">未完工件數</td>';
-						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:60px; color:black;" class="co2">未完工支數</td>';
-						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:60px; color:black;" class="co2">未完工重量</td>';
+						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;display:none;" class="co2">未完工件數</td>';
+						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:60px; color:black;display:none;" class="co2">未完工支數</td>';
+						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:60px; color:black;display:none;" class="co2">未完工重量</td>';
+						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:60px; color:black;" class="co2">已完工件數</td>';
+						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:60px; color:black;" class="co2">已完工支數</td>';
+						string+='<td id="cucs_cubweight" title="已完工重量" align="center" style="width:60px; color:black;" class="co2">已完工重量</td>';
 						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;" class="co3">件數</td>';
 						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;" class="co3">支數<BR><input id="btnAutoxcount" type="button" style="font-size: medium; font-weight: bold;" value="代入"></td>';
 						string+='<td id="cucs_xweight" title="重量" align="center" style="width:60px; color:black;" class="co3">重量<BR><a class="total_xweight" style="color: forestgreen;font-weight: bold;"></a></td>';
@@ -758,9 +762,12 @@
 						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:50px; color:black;" class="co1" >訂單件數</td>';
 						string+='<td id="cucs_1mount" title="訂單支數" align="center" style="width:50px; color:black;" class="co1">訂單支數</td>';
 						string+='<td id="cucs_weight" title="訂單重量" align="center" style="width:50px; color:black;" class="co1">訂單重量</td>';
-						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;" class="co2">未完工件數</td>';
-						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:60px; color:black;" class="co2">未完工支數</td>';
-						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:60px; color:black;" class="co2">未完工重量</td>';
+						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;display:none;" class="co2">未完工件數</td>';
+						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:60px; color:black;display:none;" class="co2">未完工支數</td>';
+						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:60px; color:black;display:none;" class="co2">未完工重量</td>';
+						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:60px; color:black;" class="co2">已完工件數</td>';
+						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:60px; color:black;" class="co2">已完工支數</td>';
+						string+='<td id="cucs_cubweight" title="已完工重量" align="center" style="width:60px; color:black;" class="co2">已完工重量</td>';
 						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;" class="co3">件數</td>';
 						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;" class="co3">支數<BR><input id="btnAutoxcount2" type="button" style="font-size: medium; font-weight: bold;" value="代入"></td>';
 						string+='<td id="cucs_xweight" title="重量" align="center" style="width:60px; color:black;" class="co3">重量<BR><a class="total_xweight" style="color: forestgreen;font-weight: bold;"></a></td>';
@@ -900,6 +907,9 @@
 										$('#cucs_emount'+j).text(round(as[i].emount,3));
 										$('#cucs_eweight'+j).text(round(as[i].eweight,3));
 										$('#cucs_ehmount'+j).text(round(as[i].ehmount,3));
+										$('#cucs_cubmount'+j).text(round(dec(as[i].cubmount),3));
+										$('#cucs_cubweight'+j).text(round(dec(as[i].cubweight),3));
+										$('#cucs_cubhmount'+j).text(round(dec(as[i].cubhmount),3));
 										$('#lblCucs_class'+j).text(as[i].class);
 										$('#cucs_memo'+j).text(as[i].memo);
 										$('#cucs_work'+j).text(as[i].size2);
@@ -941,6 +951,9 @@
 									$('#cucs_emount'+j).text('');
 									$('#cucs_eweight'+j).text('');
 									$('#cucs_ehmount'+j).text('');
+									$('#cucs_cubmount'+j).text('');
+									$('#cucs_cubweight'+j).text('');
+									$('#cucs_cubhmount'+j).text('');
 									$('#lblCucs_class'+j).text('');
 									$('#combXclass_'+j).remove();
 									$('#cucs_memo'+j).text('');
@@ -973,9 +986,12 @@
 								string+='<td id="cucs_mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1"></td>';
 								string+='<td id="cucs_1mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1"></td>';
 								string+='<td id="cucs_weight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1"></td>';
-								string+='<td id="cucs_emount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
-								string+='<td id="cucs_ehmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
-								string+='<td id="cucs_eweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_emount'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_ehmount'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_eweight'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_cubmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_cubhmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
+								string+='<td id="cucs_cubweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2"></td>';
 								string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
@@ -1005,9 +1021,12 @@
 							string+='<td id="cucs_mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1">'+as[i].mount+'</td>';
 							string+='<td id="cucs_1mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1">'+as[i].mount1+'</td>';
 							string+='<td id="cucs_weight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co1">'+as[i].weight+'</td>';
-							string+='<td id="cucs_emount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].emount,3)+'</td>';
-							string+='<td id="cucs_ehmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].ehmount,3)+'</td>';
-							string+='<td id="cucs_eweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].eweight,3)+'</td>';
+							string+='<td id="cucs_emount'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].emount,3)+'</td>';
+							string+='<td id="cucs_ehmount'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].ehmount,3)+'</td>';
+							string+='<td id="cucs_eweight'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(as[i].eweight,3)+'</td>';
+							string+='<td id="cucs_cubmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(dec(as[i].cubmount),3)+'</td>';
+							string+='<td id="cucs_cubhmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(dec(as[i].cubhmount),3)+'</td>';
+							string+='<td id="cucs_cubweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co2">'+round(dec(as[i].cubweight),3)+'</td>';
 							string+='<td id="cucs_xmount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXmount_'+(i+bbsrow)+'"  type="text" class="xmount txt c1 num" disabled="disabled" /></td>';
 							string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXcount_'+(i+bbsrow)+'"  type="text" class="xcount txt c1 num" disabled="disabled"/></td>';
 							string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXweight_'+(i+bbsrow)+'"  type="text" class="xweight txt c1 num" disabled="disabled"/></td>';
@@ -1135,6 +1154,8 @@
 							if($(this).prop('checked')){
 								if(confirm("確認要完工?")){
 									var n=$(this).attr('id').replace('cucs_mins','')
+									t_endanoa=$('#cucs_noa'+n).text();
+									t_endanoq=$('#cucs_noq'+n).text();
 									q_func('qtxt.query.enda', 'cuc_vu.txt,enda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
 								}else{
 									$(this).prop('checked',false);
@@ -1625,6 +1646,16 @@
 	                    });
 						break;
 					case 'qtxt.query.enda':
+						//刪除核取的資料
+						for(var j=0;j<chk_cucs.length;j++){
+		                    if(t_endanoa==chk_cucs[j]['noa'] && t_endanoq==chk_cucs[j]['noq']){
+		                    	chk_cucs.splice(j, 1);
+		                    	j--;
+		                    	t_endanoa='';
+		                    	t_endanoq='';
+                        		break;
+		                    }
+						}
 						//更新畫面
 						cucsupdata();
 						break;

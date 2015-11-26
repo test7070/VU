@@ -1080,7 +1080,9 @@
 		                            
 		                            var cucsno=$('#cucs_noa' + n).text();
 									var eweight=dec($('#cucs_eweight' + n).text());
-									if(cucsno!='' && eweight<=0){
+									var erate=q_div(dec($('#cucs_eweight' + n).text()),dec($('#cucs_weight' + n).text()));
+									//1126 完工達到97% 呈現灰色
+									if(cucsno!='' && erate<=0.03){
 										$('#cucs_tr'+n).find('td').css('background', 'lightgrey');
 									}
 		                            
@@ -1581,7 +1583,9 @@
 					
 					var cucsno=$('#cucs_noa' + n).text();
 					var eweight=dec($('#cucs_eweight' + n).text());
-					if(cucsno!='' && eweight<=0){
+					var erate=q_div(dec($('#cucs_eweight' + n).text()),dec($('#cucs_weight' + n).text()));
+					//1126 完工達到97% 呈現灰色
+					if(cucsno!='' && erate<=0.03){
 						$('#cucs_tr'+n).find('td').css('background', 'lightgrey');
 					}
 					//Unlock();
@@ -1616,19 +1620,19 @@
                 		}
                 		break;
 					case 'cub_post.post':
-						alert('加工單產生完畢!!');
-						//1123 保持鎖定狀態，故chk_cucs資料不清空,入庫資料清空//1125完工後件數仍預設帶入1件
-						//chk_cucs=[];
-						for (var i=0;i<chk_cucs.length;i++){
+						//alert('加工單產生完畢!!'); 1126拿掉提示
+						//1123 保持鎖定狀態，故chk_cucs資料不清空,入庫資料清空//1125完工後件數仍預設帶入1件// 1126取消
+						chk_cucs=[];
+						/*for (var i=0;i<chk_cucs.length;i++){
                     		chk_cucs[i].xmount=1;
 							chk_cucs[i].xcount='';
 							chk_cucs[i].xweight='';
-                    	}
+                    	}*/
 						//更新畫面
 						cucsupdata();
 						$('#textMemo').val('');//1117 欄位要清空
 						//並重新啟動刷新
-						//intervalupdate=setInterval("cucsupdata()",1000*60);
+						intervalupdate=setInterval("cucsupdata()",1000*60);
 						break;
 					case 'qtxt.query.cucttocubt':
 						var as = _q_appendData("tmp0", "", true, true);
@@ -2036,7 +2040,9 @@
 						$('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
 					}
 					
-					if(cucsno!='' && eweight<=0){
+					var erate=q_div(dec($('#cucs_eweight' + i).text()),dec($('#cucs_weight' + i).text()));
+					//1126 完工達到97% 呈現灰色
+					if(cucsno!='' && erate<=0.03){
 						$('#cucs_tr'+i).find('td').css('background', 'lightgrey');
 					}
 				}

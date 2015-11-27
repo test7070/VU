@@ -83,6 +83,8 @@
                 //q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
                 //q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
                 
+                q_cmbParse("combMechno2",'1剪,2剪,3剪,7辦公室');
+                
                 var t_where = "where=^^ 1=1 ^^";
 				q_gt('ucc', t_where, 0, 0, 0, "");
                 
@@ -151,13 +153,15 @@
 				
 				$('#btnUnoprint').click(function() {
 					if(!emp($('#txtNoa').val())){
-						q_func( 'barvu.gen1', $('#txtNoa').val());
+						q_func( 'barvu.gen1', $('#txtNoa').val()+','+$('#combMechno2').val());
 					}
 				});
 
                 document.title = '加工單';
                 $('#lblDatea').text('加工日');
                 $('#lblBdate').text('排程日');
+                $('#lblMechno').text('人員組別');
+                $('#lblMechno2').text('機台');
             }
 
             function q_gtPost(t_name) {
@@ -1000,19 +1004,21 @@
 					<tr>
 						<td><span> </span><a id="lblDatea" class="lbl"> </a></td>
 						<td><input id="txtDatea" type="text" class="txt c1"/></td>
+						<td> </td>
 						<td><span> </span><a id="lblNoa" class="lbl"> </a></td>
 						<td><input id="txtNoa" type="text" class="txt c1"/></td>
-						<td> </td>
 						<td><input type="button" id="btnCub_nouno" value="條碼領料" style="width:120px;"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMechno" class="lbl"> </a></td>
 						<td><input id="txtMechno" type="text" class="txt c1"/></td>
 						<td><input id="txtMech" type="text" class="txt c1"/></td>
-						<td colspan="2">
+						<td><span> </span><a id="lblMechno2" class="lbl"> </a></td>
+						<td>
 							<!--<input type="button" id="btnCuc_vu" value="排程匯入" style="width:120px;"/>-->
 							<!--<input type="button" id="btnOrdes_vu" value="訂單匯入" style="width:120px;"/>
 							<input type="button" id="btnCubu_vu" value="入庫" style="width:120px;"/>-->
+							<select id="combMechno2" class="txt c1"> </select>
 						</td>
 						<td><input type="button" id="btnUnoprint" value="條碼列印" style="width:120px;"/></td>
 					</tr>

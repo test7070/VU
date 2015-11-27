@@ -91,7 +91,7 @@
                 	var t_size = $('#combSize').val();
                 	var tx_spec = $('#combSpec').val();
                 	if(t_cucno.length>0){
-                		var t_err = q_chkEmpField([['combMechno', '機台']]);
+                		var t_err = q_chkEmpField([['combMechno', '人員組別']]);
 						if (t_err.length > 0) {
 				        	alert(t_err);
 							return;
@@ -137,7 +137,7 @@
                 
                 //加工
                 $('#btnCub').click(function(e) {
-                	var t_err = q_chkEmpField([['textDatea', '加工日'],['combMechno', '機台']]);
+                	var t_err = q_chkEmpField([['textDatea', '加工日'],['combMechno', '人員組別']]);
 	                if (t_err.length > 0) {
 	                    alert(t_err);
 	                    return;
@@ -379,7 +379,7 @@
 				});
 				
 				$('#btnCubt').click(function() {
-					var t_err = q_chkEmpField([['textDatea', '加工日'],['combMechno', '機台']]);
+					var t_err = q_chkEmpField([['textDatea', '加工日'],['combMechno', '人員組別']]);
 	                if (t_err.length > 0) {
 	                    alert(t_err);
 	                    return;
@@ -449,7 +449,7 @@
                 	q_msg($(this),'多批號領料請用,隔開');
 				});
 				$('#btnOk_div_nouno').click(function() {
-					var t_err = q_chkEmpField([['combMechno', '機台']]);
+					var t_err = q_chkEmpField([['combMechno', '人員組別']]);
 	                if (t_err.length > 0) {
 	                    alert(t_err);
 	                    return;
@@ -580,6 +580,31 @@
 								if ($(this).val().substr(0, 1) != '#' &&!emp($(this).val()))
                         		$(this).val('#' + $(this).val());
 							}
+							
+							if(objname=='textIhmount' || objname=='textSize' || objname=='textLengthb'){
+								var t_siez=replaceAll($('#textSize__'+n).val(),'#','');
+				            	var t_weight=0;
+				            	switch(t_siez){
+				            		case '3': t_weight=0.560; break;
+				            		case '4': t_weight=0.994; break;
+				            		case '5': t_weight=1.560; break;
+				            		case '6': t_weight=2.250; break;
+				            		case '7': t_weight=3.040; break;
+				            		case '8': t_weight=3.980; break;
+				            		case '9': t_weight=5.080; break;
+				            		case '10': t_weight=6.390; break;
+				            		case '11': t_weight=7.900; break;
+				            		case '12': t_weight=9.570; break;
+				            		case '14': t_weight=11.40; break;
+				            		case '16': t_weight=15.50; break;
+				            		case '18': t_weight=20.20; break;
+				            	}
+				            	
+				            	var t_lengthb=dec($('#textLengthb__'+n).val());
+				            	var t_mount1=dec($('#textIhmount__'+n).val());
+				            	
+				            	$('#textIweight__'+n).val(round(q_mul(q_mul(t_weight,t_lengthb),t_mount1),0));
+							}
 						});
 						
 					});
@@ -601,7 +626,7 @@
 				});
 				
 				$('#btnCubs').click(function() {
-					var t_err = q_chkEmpField([['textDatea', '加工日'],['combMechno', '機台']]);
+					var t_err = q_chkEmpField([['textDatea', '加工日'],['combMechno', '人員組別']]);
 	                if (t_err.length > 0) {
 	                    alert(t_err);
 	                    return;
@@ -1071,7 +1096,7 @@
 						$('#cucs .cucs_chk').click(function(e) {
 							var n=$(this).attr('id').replace('cucs_chk','')
 							if($(this).prop('checked')){
-								var t_err = q_chkEmpField([['combMechno', '機台']]);
+								var t_err = q_chkEmpField([['combMechno', '人員組別']]);
 				                if (t_err.length > 0) {
 				                    alert(t_err);
 				                    $(this).prop("checked",false).parent().parent().find('td').css('background', 'lavender');
@@ -1613,7 +1638,7 @@
                         	func_cubno=as[0].cubno;
                         	if(func_cubno.length>0){
 	                        	q_func('cub_post.post', r_accy + ',' + encodeURI(func_cubno) + ',1');
-	                        	q_func( 'barvu.gen1', func_cubno);
+	                        	q_func( 'barvu.gen1', func_cubno+','+$('#combMechno2').val());
 	                        	func_cubno='';
                         	}else{
                         		alert('加工單產生失敗!!');
@@ -1671,7 +1696,7 @@
                         	func_cubno=as[0].cubno;
                         	if(func_cubno.length>0){
 	                        	q_func('cub_post.post.2', r_accy + ',' + encodeURI(func_cubno) + ',1');
-	                        	q_func( 'barvu.gen1', func_cubno);
+	                        	q_func( 'barvu.gen1', func_cubno+','+$('#combMechno2').val());
 	                        	func_cubno='';
                         	}else{
                         		alert('入庫失敗!!');

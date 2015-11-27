@@ -221,7 +221,7 @@ update a
 set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
 from #tmp a
 outer apply (select * from (
-	select ROW_NUMBER() over (order by product,spec,size,gno,lengthb,class)rr,* from #tmp
+	select ROW_NUMBER() over (order by product,spec,cast(dbo.get_num(size) as int),gno,lengthb,class)rr,* from #tmp
 	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
 ) b
 
@@ -253,7 +253,7 @@ select ROW_NUMBER() over (partition by product,spec,size order by product,spec,s
 ,@today today
 ,@totpage totpage
 ,* 
-from #tmp order by page,product,size,spec,cast(gno as int),lengthb,class,idno
+from #tmp order by page,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class,idno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -506,7 +506,7 @@ update a
 set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
 from #tmp a
 outer apply (select * from (
-	select ROW_NUMBER() over (partition by storeno order by storeno,product,spec,size,gno,lengthb,class)rr,* from #tmp
+	select ROW_NUMBER() over (partition by storeno order by storeno,product,spec,cast(dbo.get_num(size) as int),gno,lengthb,class)rr,* from #tmp
 	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
 ) b
 
@@ -540,7 +540,7 @@ select ROW_NUMBER() over (partition by storeno,product,spec,size order by storen
 ,isnull((select top 1 store from store where noa=a.storeno),'') store
 ,* 
 from #tmp a
-order by storeno,page,product,spec,size,cast(gno as int),lengthb,class,idno
+order by storeno,page,product,spec,cast(dbo.get_num(size) as int),cast(gno as int),lengthb,class,idno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -637,7 +637,7 @@ select dbo.getComma(lengthb,-1)lengthb
 ,dbo.getComma(weight,[3])weight
 ,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
 ,* 
-from #tmp order by gno,size,spec,lengthb,class,uno
+from #tmp order by gno,cast(dbo.get_num(size) as int),spec,lengthb,class,uno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

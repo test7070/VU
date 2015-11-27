@@ -63,6 +63,7 @@
 				
 				q_cmbParse("combSize", ',#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16');
 				q_cmbParse("combOrder",' @ ,memo@備註(標籤)');
+				q_cmbParse("combMechno2",'1剪,2剪,3剪,7辦公室');
 				$('#combOrder').val('memo');//1124預設
 				
 				$('#logout').click(function() {
@@ -2293,11 +2294,13 @@
 		<a id='logout' class="lbl" style="color: coral;cursor: pointer;font-weight: bolder;float: right;">登出</a>
 		<BR>
 		<a class="lbl">加工日</a>&nbsp;<input id="textDatea"  type="text" class="txt" style="width: 100px;"/>&nbsp;
-		<a class="lbl">機　台</a>&nbsp;
+		<a class="lbl">人員組別</a>&nbsp;
 			<select id="combMechno" class="txt" style="font-size: medium;"> </select>
 			<!--<input id="textMechno"  type="text" class="txt " style="width: 100px;"/>
 			<input id="textMech"  type="text" class="txt" style="width: 100px;" disabled="disabled"/>-->
-		<a class="lbl">生產記錄備註</a>&nbsp;<input id="textMemo"  type="text" class="txt" style="width: 400px;"/>
+		<a class="lbl">機　台</a>&nbsp;
+			<select id="combMechno2" class="txt" style="font-size: medium;"> </select>
+		<a class="lbl">生產記錄備註</a>&nbsp;<input id="textMemo"  type="text" class="txt" style="width: 300px;"/>
 		<input type='button' id='btnCub' style='font-size:16px;' value="入庫"/>
 		<input type='button' id='btnCancels' style='font-size:16px;' value="取消鎖定"/>
 		<input type='button' id='btnClear' style='font-size:16px;' value="畫面刷新"/>

@@ -447,7 +447,10 @@
 				});
 				$('#textNouno').click(function() {
                 	q_msg($(this),'多批號領料請用,隔開');
+				}).focus(function() {
+					$(this).val('');
 				});
+				
 				$('#btnOk_div_nouno').click(function() {
 					var t_err = q_chkEmpField([['combMechno', '人員組別']]);
 	                if (t_err.length > 0) {
@@ -1721,6 +1724,7 @@
 						break;
 					case 'cub_post.post.nouno':
 						$('#div_nouno').hide();
+						$('#textNouno').val();
 						alert("批號領料完成!!");
 						break;
                 }

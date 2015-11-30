@@ -83,7 +83,7 @@
                 //q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
                 //q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'t');
                 
-                q_cmbParse("combMechno2",'1剪,2剪,3剪,7辦公室');
+                q_cmbParse("combMechno2",'1@1剪,2@2剪,3@3剪,7@7辦公室');
                 
                 var t_where = "where=^^ 1=1 ^^";
 				q_gt('ucc', t_where, 0, 0, 0, "");

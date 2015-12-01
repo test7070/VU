@@ -675,3 +675,287 @@ cucutocubs:--cucutocubs
 		EXECUTE sp_executesql @cmd
 	END
 ;
+-------------------------------------------------------------------------------------------------------------------------
+gettostore:--gettostore --條碼領料轉庫存
+SET QUOTED_IDENTIFIER OFF
+declare @accy nvarchar(MAX) = [1]
+declare @noa nvarchar(MAX) = [2]
+declare @userno nvarchar(max) = [3]
+declare @namea nvarchar(max) = [4]
+declare @cmd nvarchar(max) = ''
+
+IF OBJECT_ID('tempdb..#bbm')is not null
+BEGIN
+	set @cmd = 'drop table #bbm'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#bbs')is not null
+BEGIN
+	set @cmd = 'drop table #bbs'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #bbm(
+	noa nvarchar(50),
+	datea nvarchar(50),
+	mechno nvarchar(50),
+	mech nvarchar(50),
+	memo nvarchar(MAX)
+)
+
+insert #bbm
+select  noa,datea,mechno,mech,memo
+from view_cub a where noa=@noa
+
+create table #bbs(
+	uno nvarchar(50),
+	noa nvarchar(50),
+	noq nvarchar(50),
+	custno nvarchar(50),
+	comp nvarchar(100),
+	product nvarchar(50),
+	ucolor nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	hmount decimal(18, 2),
+	mount decimal(18, 2),
+	weight decimal(18, 2),
+	ordeno nvarchar(50),
+	no2 nvarchar(50)
+)
+
+insert #bbs
+select  uno,noa,noq,custno,comp,product,ucolor,spec,size,lengthb
+,class,hmount,mount,weight,ordeno,no2
+from view_cubs a where noa=@noa and (mount>=0 or weight>=0)
+
+--更新剩餘數量和重量
+update a
+set mount=isnull(b.mount,0)-ISNULL(c.mount,0)
+,weight=isnull(b.weight,0)-ISNULL(c.weight,0)
+from #bbs a
+outer apply (select SUM(mount)mount,SUM(weight)weight from view_cubs where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)b
+outer apply (select SUM(mount)mount,SUM(weight)weight from view_vcct where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)c
+
+--刪除已領料完畢的批號
+delete #bbs where mount<=0 and weight<=0 
+
+declare @xaccy nvarchar(MAX)
+declare @xuno nvarchar(MAX)
+declare @xnoa nvarchar(MAX)
+declare @nowdate nvarchar(30) --原加工單日期
+set @nowdate=replace(CONVERT (VARCHAR(20), GETDATE(),20 ),'-','/')
+
+--104/10/14 改為 新增加工單做領料(負數)
+declare @datea nvarchar(30)
+set @datea=(select top 1 datea from #bbm)
+declare @cubno nvarchar(100) --新領料加工單號
+set @cubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
+set @cubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@cubno,3) as int) +1 as nvarchar(50)),3)
+declare @scubno nvarchar(100) --新庫存加工單號
+
+--產生cub
+if((select count(*) from #bbs )>0)
+begin
+	--領料
+	--bbm
+	exec("
+		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
+		select '"+@cubno+"',datea,mechno,mech,'條碼領料轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"'
+		from #bbm 
+	")
+		
+	--bbs
+	exec("
+		insert cubs"+@accy+" (noa,noq,productno2,product2,custno,comp,product,ucolor,spec,size,lengthb,class
+		,hmount,mount,weight,uno,date2,ordeno,no2)
+		select '"+@cubno+"',right('000'+cast(ROW_NUMBER()over (order by uno,noa,noq) as nvarchar(10)),3)
+		,noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
+		,case when hmount>0 then -1*hmount else 0 end,case when mount>0 then -1*mount else 0 end ,case when weight>0 then -1*weight else 0 end
+		,uno,'"+@datea+"',ordeno,no2
+		from #bbs 
+	")
+	
+	insert dno (tablea,noa,usera)
+	select 'cub',@cubno,@userno
+	
+	--轉存貨
+	set @scubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
+	set @scubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@scubno,3) as int) +1 as nvarchar(50)),3)
+	
+	--bbm
+	exec("
+		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
+		select '"+@scubno+"',datea,mechno,mech,'條碼領料轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"'
+		from #bbm 
+	")
+		
+	--bbs
+	exec("
+		insert cubs"+@accy+" (noa,noq,productno2,product2,custno,comp,product,ucolor,spec,size,lengthb,class
+		,hmount,mount,weight,uno,date2,ordeno,no2)
+		select '"+@scubno+"',right('000'+cast(ROW_NUMBER()over (order by uno,noa,noq) as nvarchar(10)),3)
+		,'','','','',product,ucolor,spec,size,lengthb,class,hmount,mount,weight
+		,'"+@scubno+"','"+@datea+"','',''
+		from #bbs 
+	")
+	
+	insert dno (tablea,noa,usera)
+	select 'cub',@scubno,@userno
+	
+end
+else
+begin
+	set @cubno=''
+	set @scubno=''
+end
+
+select @cubno cubno,@scubno scubno
+
+IF OBJECT_ID('tempdb..#bbm')is not null
+BEGIN
+	set @cmd = 'drop table #bbm'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#bbs')is not null
+BEGIN
+	set @cmd = 'drop table #bbs'
+	EXECUTE sp_executesql @cmd
+END
+;
+-------------------------------------------------------------------------------------------------------------------------
+deltostore:--deltostore --條碼刪除轉庫存
+SET QUOTED_IDENTIFIER OFF
+declare @accy nvarchar(MAX) = [1]
+declare @noa nvarchar(MAX) = [2]
+declare @userno nvarchar(max) = [3]
+declare @namea nvarchar(max) = [4]
+declare @cmd nvarchar(max) = ''
+
+IF OBJECT_ID('tempdb..#bbm')is not null
+BEGIN
+	set @cmd = 'drop table #bbm'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#bbs')is not null
+BEGIN
+	set @cmd = 'drop table #bbs'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #bbm(
+	noa nvarchar(50),
+	datea nvarchar(50),
+	mechno nvarchar(50),
+	mech nvarchar(50),
+	memo nvarchar(MAX)
+)
+
+insert #bbm
+select  noa,datea,mechno,mech,memo
+from view_cub a where noa=@noa
+
+create table #bbs(
+	uno nvarchar(50),
+	noa nvarchar(50),
+	noq nvarchar(50),
+	custno nvarchar(50),
+	comp nvarchar(100),
+	product nvarchar(50),
+	ucolor nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	hmount decimal(18, 2),
+	mount decimal(18, 2),
+	weight decimal(18, 2),
+	ordeno nvarchar(50),
+	no2 nvarchar(50)
+)
+
+insert #bbs
+select  uno,noa,noq,custno,comp,product,ucolor,spec,size,lengthb
+,class,hmount,mount,weight,ordeno,no2
+from view_cubs a where noa=@noa
+
+declare @xaccy nvarchar(MAX)
+declare @xuno nvarchar(MAX)
+declare @xnoa nvarchar(MAX)
+declare @nowdate nvarchar(30) --原加工單日期
+set @nowdate=replace(CONVERT (VARCHAR(20), GETDATE(),20 ),'-','/')
+
+--104/10/14 改為 新增加工單做領料(負數)
+declare @datea nvarchar(30)
+set @datea=(select top 1 datea from #bbm)
+declare @cubno nvarchar(100) --新庫存加工單號
+set @cubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
+set @cubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@cubno,3) as int) +1 as nvarchar(50)),3)
+
+--產生cub
+if((select count(*) from #bbs )>0)
+begin
+	--轉存貨
+	--bbm
+	exec("
+		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
+		select '"+@cubno+"',datea,mechno,mech,'"+@noa+"條碼刪除轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"'
+		from #bbm 
+	")
+		
+	--bbs
+	exec("
+		insert cubs"+@accy+" (noa,noq,productno2,product2,custno,comp,product,ucolor,spec,size,lengthb,class
+		,hmount,mount,weight,uno,date2,ordeno,no2)
+		select '"+@cubno+"',right('000'+cast(ROW_NUMBER()over (order by uno,noa,noq) as nvarchar(10)),3)
+		,'','','','',product,ucolor,spec,size,lengthb,class,hmount,mount,weight
+		,'"+@cubno+"','"+@datea+"','',''
+		from #bbs 
+	")
+	
+	insert dno (tablea,noa,usera)
+	select 'cub',@cubno,@userno
+	
+	--刪除條碼
+	set @accy=isnull((select accy from view_cub where noa=@noa),@accy)
+	--bbm
+	exec("delete cub"+@accy+" where noa='"+@noa+"'")
+	--bbs
+	exec("delete cubs"+@accy+" where noa='"+@noa+"'")
+	
+end
+else
+begin
+	set @cubno=''
+end
+
+select @cubno cubno,@noa noa
+
+IF OBJECT_ID('tempdb..#bbm')is not null
+BEGIN
+	set @cmd = 'drop table #bbm'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#bbs')is not null
+BEGIN
+	set @cmd = 'drop table #bbs'
+	EXECUTE sp_executesql @cmd
+END
+;
+-------------------------------------------------------------------------------------------------------------------------
+cubdate:--cubdate --讀取批號出貨領料資訊
+declare @noa nvarchar(MAX) = [1]
+
+select a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,a.mount,a.weight,a.hmount
+,b.mount bmount ,b.weight bweight,isnull(c.mount,0) vmount,isnull(c.weight,0) vweight
+from view_cubs a 
+outer apply (select SUM(mount)mount,SUM(weight)weight from view_cubs where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)b
+outer apply (select SUM(mount)mount,SUM(weight)weight from view_vcct where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)c
+where noa=@noa
+;

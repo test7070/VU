@@ -14,7 +14,7 @@
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
 		<script type="text/javascript">
             var q_name = "cub_s";
-			aPop = new Array();
+			aPop = new Array(['txtMechno', '', 'mech', 'noa,mech', 'txtMechno,txtMech', 'mech_b.aspx']);
             $(document).ready(function() {
                 main();
             });
@@ -30,7 +30,9 @@
                 bbmMask = [['txtBdate', r_picd], ['txtEdate', r_picd]];
                 q_mask(bbmMask);
                 $('#txtNoa').focus();
+                $('#lblMech').text('人員組別');
             }
+            
             function q_seekStr() {
                 t_noa = $.trim($('#txtNoa').val());
                 t_bdate = $('#txtBdate').val();
@@ -39,10 +41,12 @@
 		        t_ordeno = $.trim($('#txtOrdeno').val());
 		        t_no2 = $.trim($('#txtNo2').val());
 		        t_uno = $.trim($('#txtUno').val());
+		        t_mechno = $.trim($('#txtMechno').val());
 
 		        var t_where = " 1=1 " 
 		        + q_sqlPara2("noa", t_noa) 
-		        + q_sqlPara2("datea", t_bdate, t_edate);
+		        + q_sqlPara2("datea", t_bdate, t_edate)
+		        + q_sqlPara2("mechno", t_mechno) ;
 		        
 				if (t_ordeno.length>0)
 					t_where += " and exists(select noa from view_cubs"+r_accy+" where view_cubs"+r_accy+".noa=view_cub"+r_accy+".noa and view_cubs"+r_accy+".ordeno='"+t_ordeno+"')";
@@ -96,6 +100,14 @@
 				<tr class='seek_tr'>
 					<td class='seek'  style="width:20%;"><a id='lblUno'> </a></td>
 					<td><input class="txt" id="txtUno" type="text" style="width:215px; font-size:medium;" /></td>
+				</tr>
+				<tr class='seek_tr'>
+					<td class='seek'  style="width:20%;"><a id='lblMech'> </a></td>
+					<td>
+						<input class="txt" id="txtMechno" type="text" style="width:90px; font-size:medium;" />
+						&nbsp;
+						<input class="txt" id="txtMech" type="text" style="width:115px;font-size:medium;" />
+					</td>
 				</tr>
 			</table>
 			<!--#include file="../inc/seek_ctrl.inc"-->

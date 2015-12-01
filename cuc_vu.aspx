@@ -45,7 +45,7 @@
 			var bbtaddcount=1;//bbt每次新增五筆
 			var isclear=false;
 			var stkupdate=0;
-			var t_endanoa='',t_endanoq='';
+			var t_endanoa='',t_endanoq='',t_mins_count=0;
 			function q_gfPost() {
 				chk_cucs=new Array();
 				
@@ -66,6 +66,17 @@
 				q_cmbParse("combMechno2",'1@1剪,2@2剪,3@3剪,7@7辦公室');
 				$('#combOrder').val('memo');//1124預設
 				
+				if(r_userno=='B01'){
+					$('#combMechno2').val('1');
+				}else if(r_userno=='B02'){
+					$('#combMechno2').val('2');
+				}else if(r_userno=='B03'){
+					$('#combMechno2').val('3');
+				}else{
+					$('#combMechno2').val('7');
+				}
+				
+				//登出
 				$('#logout').click(function() {
 					q_logout(q_idr);
 				});
@@ -134,6 +145,33 @@
                 	var t_where = "where=^^ 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq^^";
 					q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
                 });
+                
+                //完工
+                $('#btnMins').click(function() {
+                	t_mins_count=0;
+                	$('#cucs .cucs_mins').each(function(index) {
+						if($(this).prop('checked')){
+							t_mins_count++;
+						}
+					});
+					
+					if(t_mins_count>0){
+						if(confirm("確認要完工?")){
+							$('#cucs .cucs_mins').each(function(index) {
+								if($(this).prop('checked')){
+									var n=$(this).attr('id').replace('cucs_mins','')
+									t_endanoa=$('#cucs_noa'+n).text();
+									t_endanoq=$('#cucs_noq'+n).text();
+									q_func('qtxt.query.enda', 'cuc_vu.txt,enda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
+								}
+							});
+						}else{
+							t_mins_count=0;
+						}
+					}else{
+						alert('無核取完工資料!');
+					}
+				});
                 
                 //加工
                 $('#btnCub').click(function(e) {
@@ -1179,8 +1217,8 @@
 							});
 						});
 						
-						//完工
-						$('#cucs .cucs_mins').unbind('click');
+						//完工 //1130 改成多選完工
+						/*$('#cucs .cucs_mins').unbind('click');
 						$('#cucs .cucs_mins').click(function(e) {
 							if($(this).prop('checked')){
 								if(confirm("確認要完工?")){
@@ -1192,7 +1230,7 @@
 									$(this).prop('checked',false);
 								}
 							}							
-						});
+						});*/
 						
 						//第一次匯入就先核取
 						bbsrow=document.getElementById("cucs_table").rows.length-1;//重新取得最新的bbsrow
@@ -1689,8 +1727,10 @@
                         		break;
 		                    }
 						}
+						t_mins_count--;
 						//更新畫面
-						cucsupdata();
+						if(t_mins_count<=0)
+							cucsupdata();
 						break;
 					case 'qtxt.query.cucutocubs':
 						//入庫
@@ -2347,6 +2387,7 @@
 		<input type='button' id='btnImport' style='font-size:16px;' value="匯入"/>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<a style="color: red;">※機台鎖定時間超過15分鐘將自動解除鎖定</a>
+		<input type='button' id='btnMins' style='font-size:16px;' value="完工"/>
 		<div id="cucs" style="float:left;width:100%;height:500px;overflow:auto;position: relative;"> </div> 
 		<!--<div id="cucs_control" style="width:100%;"> </div>--> 
 		<div id="cuct" style="float:left;width:100%;height:80px;overflow:auto;position: relative;"> </div>

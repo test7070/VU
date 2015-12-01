@@ -85,6 +85,16 @@
                 
                 q_cmbParse("combMechno2",'1@1剪,2@2剪,3@3剪,7@7辦公室');
                 
+                if(r_userno=='B01'){
+					$('#combMechno2').val('1');
+				}else if(r_userno=='B02'){
+					$('#combMechno2').val('2');
+				}else if(r_userno=='B03'){
+					$('#combMechno2').val('3');
+				}else{
+					$('#combMechno2').val('7');
+				}
+                
                 var t_where = "where=^^ 1=1 ^^";
 				q_gt('ucc', t_where, 0, 0, 0, "");
                 
@@ -154,6 +164,22 @@
 				$('#btnUnoprint').click(function() {
 					if(!emp($('#txtNoa').val())){
 						q_func( 'barvu.gen1', $('#txtNoa').val()+','+$('#combMechno2').val());
+					}
+				});
+				
+				$('#btnGettostore').click(function() {
+					if(!emp($('#txtNoa').val())){
+						if(confirm("確認要條碼領料轉庫存?")){
+							q_func('qtxt.query.getcubdate', 'cuc_vu.txt,cubdate,' + encodeURI($('#txtNoa').val()));
+						}
+					}
+				});
+				
+				$('#btnDeltostore').click(function() {
+					if(!emp($('#txtNoa').val())){
+						if(confirm("確認要條碼刪除轉庫存?")){
+							q_func('qtxt.query.delcubdate', 'cuc_vu.txt,cubdate,' + encodeURI($('#txtNoa').val()));
+						}
 					}
 				});
 
@@ -342,6 +368,85 @@
             var nouno_noa=[];
             function q_funcPost(t_func, result) {
 				switch(t_func) {
+					case 'qtxt.query.getcubdate':
+						var as = _q_appendData("tmp0", "", true, true);
+						var t_err='';
+						for (var i=0; i<as.length; i++){
+							if(as[0].mount !=as[0].bmount || as[0].weight !=as[0].bweight){
+								t_err="加工單條碼已領料!!";
+								break;
+							}
+							if(dec(as[0].vmount) >0 || dec(as[0].vweight) >0){
+								t_err="加工單條碼已出貨!!";
+								break;
+							}
+						}
+						if(as.length==0){
+							alert('加工單條碼不存在!!');
+						}else if(t_err.length>0){
+							alert(t_err);
+						}else{
+							//條碼領料轉庫存
+							q_func('qtxt.query.gettostore', 'cuc_vu.txt,gettostore,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name));
+						}
+						break;
+					case 'qtxt.query.gettostore':
+						var as = _q_appendData("tmp0", "", true, true);
+						if (as[0] != undefined) {
+							var t_cubno=as[0].cubno;
+							var t_scubno=as[0].scubno;
+							q_func('cub_post.post.get1', r_accy + ',' + encodeURI(t_cubno) + ',1');
+							q_func('cub_post.post.get2', r_accy + ',' + encodeURI(t_scubno) + ',1');
+						}
+						break;
+					case 'cub_post.post.get2':
+						alert("條碼領料轉庫存已完成!!");
+						
+						var s2=[];
+						s2[0]=q_name + '_s';
+						s2[1]="where=^^ 1=1 or 1=0 ^^"
+						q_boxClose2(s2);
+						break;
+					case 'qtxt.query.delcubdate':
+						var as = _q_appendData("tmp0", "", true, true);
+						var t_err='';
+						for (var i=0; i<as.length; i++){
+							if(as[0].mount !=as[0].bmount || as[0].weight !=as[0].bweight){
+								t_err="加工單條碼已領料!!";
+								break;
+							}
+							if(dec(as[0].vmount) >0 || dec(as[0].vweight) >0){
+								t_err="加工單條碼已出貨!!";
+								break;
+							}
+						}
+						if(as.length==0){
+							alert('加工單條碼不存在!!');
+						}else if(t_err.length>0){
+							alert(t_err);
+						}else{
+							//條碼刪除轉庫存
+							q_func('cub_post.post.del1', r_accy + ',' + encodeURI($('#txtNoa').val()) + ',0');
+						}
+						break;	
+					case 'cub_post.post.del1':
+						q_func('qtxt.query.deltostore', 'cuc_vu.txt,deltostore,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name));
+						break;
+					case 'qtxt.query.deltostore':
+						var as = _q_appendData("tmp0", "", true, true);
+						if (as[0] != undefined) {
+							var t_cubno=as[0].cubno;
+							q_func('cub_post.post.del2', r_accy + ',' + encodeURI(t_cubno) + ',1');
+						}
+						break;
+					case 'cub_post.post.del2':
+						alert("條碼刪除轉庫存已完成!!");
+						
+						var s2=[];
+						s2[0]=q_name + '_s';
+						s2[1]="where=^^ 1=1 or 1=0 ^^"
+						q_boxClose2(s2);
+						break;
 					case 'qtxt.query.cubnouno':
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
@@ -352,6 +457,11 @@
 					case 'cub_post.post':
 						$('#div_nouno').hide();
 						alert("批號領料完成!!");
+						
+						var s2=[];
+						s2[0]=q_name + '_s';
+						s2[1]="where=^^ 1=1 or 1=0 ^^"
+						q_boxClose2(s2);
 						break;
 				}
 			}
@@ -839,7 +949,7 @@
             }
             .dbbm {
                 float: left;
-                width: 70%;
+                width: 75%;
                 /*margin: -1px;
                  border: 1px black solid;*/
                 border-radius: 5px;
@@ -1035,6 +1145,8 @@
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl" > </a></td>
 						<td colspan="4"><input id="txtMemo" type="text" class="txt c1"/></td>
+						<td><input type="button" id="btnGettostore" value="條碼領料轉庫存" style="width:130px;"/></td>
+						<td><input type="button" id="btnDeltostore" value="條碼刪除轉庫存" style="width:130px;"/></td>
 					</tr>
 				</table>
 			</div>

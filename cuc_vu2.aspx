@@ -96,7 +96,7 @@
                 $('#lblCust').text('客戶名稱');
                 $('#lblMemo').text('備註');
                 $('#lblDatea').text('日期'); 
-                $('#lblGen').text('結案'); 
+                $('#lblGen').text('取消'); 
                 $('#lblBdate').text('預交日');
                 $('#lblMech').text('工地名稱');
                 $('#lblWeight').text('料單總重量');
@@ -109,8 +109,7 @@
             }
 
             function q_boxClose(s2) {///   q_boxClose 2/4
-                var
-                ret;
+                var ret;
                 switch (b_pop) {
                     case q_name + '_s':
                         q_boxClose2(s2);
@@ -218,7 +217,7 @@
             function _btnSeek() {
                 if (q_cur > 0 && q_cur < 4)// 1-3
                     return;
-                //q_box('*.aspx', q_name + '_s', "500px", "310px", q_getMsg("popSeek"));
+                q_box('cuc_vu_s.aspx', q_name + '_s', "500px", "310px", q_getMsg("popSeek"));
             }
 
             function combPay_chg() {

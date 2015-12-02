@@ -99,7 +99,7 @@
 	             $('#txtXmon1').mask(r_picm);
 	             $('#txtXmon2').mask(r_picm);
            
-                 var t_date, t_year, t_month, t_day;
+                /*var t_date, t_year, t_month, t_day;
                 t_date = new Date();
                 t_date.setDate(1);
                 t_year = t_date.getUTCFullYear() - r_1911;
@@ -109,7 +109,6 @@
                 t_day = t_date.getUTCDate();
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
                 $('#txtXdate1').val(t_year + '/' + t_month + '/' + t_day);
-				$('#txtXmon1').val(t_year + '/0' + (t_month-3) );
 				
                 t_date = new Date();
                 t_date.setDate(35);
@@ -120,15 +119,20 @@
                 t_month = t_month > 9 ? t_month + '' : '0' + t_month;
                 t_day = t_date.getUTCDate();
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-                $('#txtXdate2').val(t_year + '/' + t_month + '/' + t_day);
-                $('#txtXmon2').val(t_year + '/' + t_month );
+                $('#txtXdate2').val(t_year + '/' + t_month + '/' + t_day);*/
+               //1201 日期預設 當天
+                $('#txtXdate1').val(q_date());
+                $('#txtXdate2').val(q_date());
+                
+                $('#txtXmon1').val(q_cdn(q_date().substring(0,r_lenm)+'/01',-70).substring(0,r_lenm));
+                $('#txtXmon2').val(q_date().substring(0,r_lenm));
  				
  				$('#txtXmon1').change(function(){			
- 					if($('#txtXmon2').val().substring(4,7)-$('#txtXmon1').val().substring(r_len+1,7) > 3)
+ 					if(dec($('#txtXmon2').val().substring(r_len+1,r_lenm))-($('#txtXmon1').val().substring(r_len+1,r_lenm)) > 3)
  						alert("月份間距最多選擇3個月");
  				});
  				$('#txtXmon2').change(function(){
- 					if($('#txtXmon2').val().substring(4,7)-$('#txtXmon1').val().substring(r_len+1,7) > 3)
+ 					if(dec($('#txtXmon2').val().substring(r_len+1,r_lenm))-dec($('#txtXmon1').val().substring(r_len+1,r_lenm)) > 3)
  						alert("月份間距最多選擇3個月");
  				});
  				

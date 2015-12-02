@@ -45,7 +45,7 @@
 			var bbtaddcount=1;//bbt每次新增五筆
 			var isclear=false;
 			var stkupdate=0;
-			var t_endanoa='',t_endanoq='';
+			var t_endanoa='',t_endanoq='',t_mins_count=0;
 			function q_gfPost() {
 				chk_cucs=new Array();
 				
@@ -63,9 +63,20 @@
 				
 				q_cmbParse("combSize", ',#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16');
 				q_cmbParse("combOrder",' @ ,memo@備註(標籤)');
-				q_cmbParse("combMechno2",'1剪,2剪,3剪,7辦公室');
+				q_cmbParse("combMechno2",'1@1剪,2@2剪,3@3剪,7@7辦公室');
 				$('#combOrder').val('memo');//1124預設
 				
+				if(r_userno=='B01'){
+					$('#combMechno2').val('1');
+				}else if(r_userno=='B02'){
+					$('#combMechno2').val('2');
+				}else if(r_userno=='B03'){
+					$('#combMechno2').val('3');
+				}else{
+					$('#combMechno2').val('7');
+				}
+				
+				//登出
 				$('#logout').click(function() {
 					q_logout(q_idr);
 				});
@@ -447,7 +458,10 @@
 				});
 				$('#textNouno').click(function() {
                 	q_msg($(this),'多批號領料請用,隔開');
+				}).focus(function() {
+					$(this).val('');
 				});
+				
 				$('#btnOk_div_nouno').click(function() {
 					var t_err = q_chkEmpField([['combMechno', '人員組別']]);
 	                if (t_err.length > 0) {
@@ -766,7 +780,8 @@
 						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
-						string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
+						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
+						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins' style='font-size:16px;width: 30px;height: 45px;' value='完&#010;工'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs').html(string);
@@ -804,7 +819,8 @@
 						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
-						string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
+						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
+						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins2' style='font-size:16px;width: 30px;height: 45px;' value='完&#010;工'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs_float').remove();
@@ -846,6 +862,37 @@
                         
                         $('#btnAutoxcount2').click(function() {
                         	$('#btnAutoxcount').click();
+						});
+						
+						//完工
+		                $('#btnMins').click(function() {
+		                	t_mins_count=0;
+		                	$('#cucs .cucs_mins').each(function(index) {
+								if($(this).prop('checked')){
+									t_mins_count++;
+								}
+							});
+							
+							if(t_mins_count>0){
+								if(confirm("確認要完工?")){
+									$('#cucs .cucs_mins').each(function(index) {
+										if($(this).prop('checked')){
+											var n=$(this).attr('id').replace('cucs_mins','')
+											t_endanoa=$('#cucs_noa'+n).text();
+											t_endanoq=$('#cucs_noq'+n).text();
+											q_func('qtxt.query.enda', 'cuc_vu.txt,enda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
+										}
+									});
+								}else{
+									t_mins_count=0;
+								}
+							}else{
+								alert('無核取完工資料!');
+							}
+						});
+						
+						$('#btnMins2').click(function() {
+                        	$('#btnMins').click();
 						});
                         break;
 					case 'importcucs':
@@ -1176,8 +1223,8 @@
 							});
 						});
 						
-						//完工
-						$('#cucs .cucs_mins').unbind('click');
+						//完工 //1130 改成多選完工
+						/*$('#cucs .cucs_mins').unbind('click');
 						$('#cucs .cucs_mins').click(function(e) {
 							if($(this).prop('checked')){
 								if(confirm("確認要完工?")){
@@ -1189,7 +1236,7 @@
 									$(this).prop('checked',false);
 								}
 							}							
-						});
+						});*/
 						
 						//第一次匯入就先核取
 						bbsrow=document.getElementById("cucs_table").rows.length-1;//重新取得最新的bbsrow
@@ -1672,7 +1719,10 @@
 					case 'cub_post.post.cubt':
 						//將領料資料清空
 						$('#cuct_table .minut').each(function() {
+							var n=$(this).attr('id').split('_')[1];
 							$(this).click();
+							$('#textProduct_'+n).val('鋼筋');
+							$('#textUcolor_'+n).val('板料');
 	                    });
 						break;
 					case 'qtxt.query.enda':
@@ -1686,8 +1736,10 @@
                         		break;
 		                    }
 						}
+						t_mins_count--;
 						//更新畫面
-						cucsupdata();
+						if(t_mins_count<=0)
+							cucsupdata();
 						break;
 					case 'qtxt.query.cucutocubs':
 						//入庫
@@ -1708,6 +1760,10 @@
                         alert('入庫完成!!');
                         $('#cucu_table .minut').each(function() {
 							$(this).click();
+							var n=$(this).attr('id').split('__')[1];
+							$(this).click();
+							$('#textProduct__'+n).val('鋼筋');
+							$('#textUcolor__'+n).val('定尺');
 	                    });
 						//更新畫面
 						cucsupdata();
@@ -1721,6 +1777,7 @@
 						break;
 					case 'cub_post.post.nouno':
 						$('#div_nouno').hide();
+						$('#textNouno').val();
 						alert("批號領料完成!!");
 						break;
                 }

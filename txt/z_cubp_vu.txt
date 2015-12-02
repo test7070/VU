@@ -244,6 +244,12 @@ outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and
 where left(a.datea,7) between @t_bmon and @t_emon
 group by a.cust,a.noa,a.bdate,a.memo,a.gen
 
+update a
+set undone=0,unfinal=stand
+from @result a 
+outer apply(select sum(case when mins=0 then 1 else 0 end) mins from view_cucs where noa=a.noa) b 
+where b.mins=0
+
 --依cuc的gen
 --delete @result where len(@t_type)>0 and isnull(gen,0)!=cast(@t_type as float)
 
@@ -452,7 +458,7 @@ deallocate cursor_table
 
 create table #result(
 	xidno int identity(1,1),
-	gno nvarchar(1),
+	gno nvarchar(2),
 	noa nvarchar(50), 
 	noq nvarchar(50), 
 	datea nvarchar(50), 

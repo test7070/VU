@@ -146,33 +146,6 @@
 					q_gt('cucs_vu', t_where, 0, 0, 0,'init', r_accy);
                 });
                 
-                //完工
-                $('#btnMins').click(function() {
-                	t_mins_count=0;
-                	$('#cucs .cucs_mins').each(function(index) {
-						if($(this).prop('checked')){
-							t_mins_count++;
-						}
-					});
-					
-					if(t_mins_count>0){
-						if(confirm("確認要完工?")){
-							$('#cucs .cucs_mins').each(function(index) {
-								if($(this).prop('checked')){
-									var n=$(this).attr('id').replace('cucs_mins','')
-									t_endanoa=$('#cucs_noa'+n).text();
-									t_endanoq=$('#cucs_noq'+n).text();
-									q_func('qtxt.query.enda', 'cuc_vu.txt,enda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
-								}
-							});
-						}else{
-							t_mins_count=0;
-						}
-					}else{
-						alert('無核取完工資料!');
-					}
-				});
-                
                 //加工
                 $('#btnCub').click(function(e) {
                 	var t_err = q_chkEmpField([['textDatea', '加工日'],['combMechno', '人員組別']]);
@@ -807,7 +780,8 @@
 						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
-						string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
+						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
+						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins' style='font-size:16px;width: 30px;height: 45px;' value='完&#010;工'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs').html(string);
@@ -845,7 +819,8 @@
 						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
-						string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
+						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
+						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins2' style='font-size:16px;width: 30px;height: 45px;' value='完&#010;工'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs_float').remove();
@@ -887,6 +862,37 @@
                         
                         $('#btnAutoxcount2').click(function() {
                         	$('#btnAutoxcount').click();
+						});
+						
+						//完工
+		                $('#btnMins').click(function() {
+		                	t_mins_count=0;
+		                	$('#cucs .cucs_mins').each(function(index) {
+								if($(this).prop('checked')){
+									t_mins_count++;
+								}
+							});
+							
+							if(t_mins_count>0){
+								if(confirm("確認要完工?")){
+									$('#cucs .cucs_mins').each(function(index) {
+										if($(this).prop('checked')){
+											var n=$(this).attr('id').replace('cucs_mins','')
+											t_endanoa=$('#cucs_noa'+n).text();
+											t_endanoq=$('#cucs_noq'+n).text();
+											q_func('qtxt.query.enda', 'cuc_vu.txt,enda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno+';'+r_name);
+										}
+									});
+								}else{
+									t_mins_count=0;
+								}
+							}else{
+								alert('無核取完工資料!');
+							}
+						});
+						
+						$('#btnMins2').click(function() {
+                        	$('#btnMins').click();
 						});
                         break;
 					case 'importcucs':
@@ -1713,7 +1719,10 @@
 					case 'cub_post.post.cubt':
 						//將領料資料清空
 						$('#cuct_table .minut').each(function() {
+							var n=$(this).attr('id').split('_')[1];
 							$(this).click();
+							$('#textProduct_'+n).val('鋼筋');
+							$('#textUcolor_'+n).val('板料');
 	                    });
 						break;
 					case 'qtxt.query.enda':
@@ -1751,6 +1760,10 @@
                         alert('入庫完成!!');
                         $('#cucu_table .minut').each(function() {
 							$(this).click();
+							var n=$(this).attr('id').split('__')[1];
+							$(this).click();
+							$('#textProduct__'+n).val('鋼筋');
+							$('#textUcolor__'+n).val('定尺');
 	                    });
 						//更新畫面
 						cucsupdata();
@@ -2387,7 +2400,6 @@
 		<input type='button' id='btnImport' style='font-size:16px;' value="匯入"/>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<a style="color: red;">※機台鎖定時間超過15分鐘將自動解除鎖定</a>
-		<input type='button' id='btnMins' style='font-size:16px;' value="完工"/>
 		<div id="cucs" style="float:left;width:100%;height:500px;overflow:auto;position: relative;"> </div> 
 		<!--<div id="cucs_control" style="width:100%;"> </div>--> 
 		<div id="cuct" style="float:left;width:100%;height:80px;overflow:auto;position: relative;"> </div>

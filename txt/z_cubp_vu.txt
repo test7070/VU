@@ -231,8 +231,11 @@ select '0',left(a.cust,4),a.noa,a.bdate
 		,isnull(SUM(b.weight),0)
 		,isnull(SUM(c.bweight),0)
 		,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) 
-		,isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) 
-		,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0))+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)) 
+		--,isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) 
+		,case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end
+		,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0))
+		--+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0))
+		+(case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end)
 		,a.memo,a.gen
 		,"z_cucp_vu?report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' and "+a.noa+"=$noa"
 from view_cuc a left join view_cucs b on a.noa=b.noa
@@ -241,7 +244,13 @@ outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and
 where left(a.datea,7) between @t_bmon and @t_emon
 group by a.cust,a.noa,a.bdate,a.memo,a.gen
 
-delete @result where len(@t_type)>0 and isnull(gen,0)!=cast(@t_type as float)
+--依cuc的gen
+--delete @result where len(@t_type)>0 and isnull(gen,0)!=cast(@t_type as float)
+
+if(@t_type='0')--未結案
+	delete @result where unfinal<=0
+if(@t_type='1')--已結案
+	delete @result where unfinal>0
 
 if((select count(*) from @result)>0)
 begin

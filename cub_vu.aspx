@@ -136,7 +136,9 @@
                 });
                 
                 $('#btnCub_nouno').click(function() {
+                	$('#textNouno').val('');
                 	$('#div_nouno').show();
+                	$('#textNouno').focus();
 				});
 				
 				$('#textNouno').click(function() {

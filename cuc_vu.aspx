@@ -121,8 +121,13 @@
 	                    Lock();
 	                    isupdate=false;
 						q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);
-						if(chk_cucs.length==0)
+						if(chk_cucs.length==0){
+							intervalupdate = setInterval(";");
+							for (var i = 0 ; i < intervalupdate ; i++) {
+							    clearInterval(i); 
+							}
 							intervalupdate=setInterval("cucsupdata()",1000*60);
+						}
 					}
                 });
                 
@@ -130,6 +135,11 @@
                 $('#btnCancels').click(function(e) {
                 	chk_cucs=new Array();
 					q_func('qtxt.query.unlockall', 'cuc_vu.txt,unlockall,'+r_userno+';'+r_name);
+					intervalupdate = setInterval(";");
+					for (var i = 0 ; i < intervalupdate ; i++) {
+					    clearInterval(i); 
+					}
+                	intervalupdate=setInterval("cucsupdata()",1000*60);
                 });
                 
                 //完工 清除所有資料
@@ -1119,8 +1129,13 @@
 						$('#cucs_table').append(string);
 						cucs_refresh();
 						tot_xweight_refresh();
-						if(chk_cucs.length>0)
-							clearInterval(intervalupdate);
+						if(chk_cucs.length>0){
+							//clearInterval(intervalupdate);
+							intervalupdate = setInterval(";");
+							for (var i = 0 ; i < intervalupdate ; i++) {
+							    clearInterval(i); 
+							}
+						}
 						
 						isupdate=false;
 						
@@ -1602,10 +1617,18 @@
 					}
 					//Unlock();
 					tot_xweight_refresh();
-					if(chk_cucs.length==0)
+					if(chk_cucs.length==0){
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
-					else
-						clearInterval(intervalupdate);
+					}else{
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
+					}
 				}
 				if(t_name.indexOf("getcanunlock_")>-1){
 					var n=t_name.split('_')[1];
@@ -1664,10 +1687,19 @@
 					//Unlock();
 					tot_xweight_refresh();
 					
-					if(chk_cucs.length==0)
+					if(chk_cucs.length==0){
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
-					else
-						clearInterval(intervalupdate);
+					}else{
+						//clearInterval(intervalupdate);
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
+					}
 				}
 			}
 			
@@ -1705,6 +1737,10 @@
 						cucsupdata();
 						$('#textMemo').val('');//1117 欄位要清空
 						//並重新啟動刷新
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
 						break;
 					case 'qtxt.query.cucttocubt':

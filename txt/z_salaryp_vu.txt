@@ -270,7 +270,7 @@ create table #tmp(
 insert #tmp
 select b.sno,b.namea,isnull(b.money/2,0)+isnull(b.mtotal,0)-case when a.person='本國' then 0 else (ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)) end
 ,b.mi_total
-,b.day,b.daymoney,isnull(b.money/2,0)+isnull(b.mtotal,0)-ISNULL(b.mi_total,0)
+,b.day,b.daymoney,isnull(b.money/2,0)+isnull(b.mtotal,0)-case when a.person='本國' then 0 else (ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)) end-ISNULL(b.mi_total,0)
 ,b.bo_admin,b.bo_traffic,b.addh2_1,b.addmoney,ISNULL(b.bo_oth,0)+ISNULL(b.plus,0),b.bo_special,b.bo_full
 ,ISNULL(b.bo_admin,0)+ISNULL(b.bo_traffic,0)+ISNULL(b.addmoney,0)+ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.bo_special,0)+ISNULL(b.bo_full,0)
 ,0,b.ch_labor,b.ch_health,b.minus,0,b.memo

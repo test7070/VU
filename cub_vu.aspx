@@ -17,7 +17,7 @@
             this.errorHandler = null;
             q_tables = 't';
             var q_name = "cub";
-            var q_readonly = ['txtNoa'];
+            var q_readonly = ['txtNoa','txtWorker','txtWorker2'];
             var q_readonlys = ['txtOrdeno', 'txtNo2','txtProductno2','txtProduct2'];
             var q_readonlyt = [];
             var bbmNum = [];
@@ -635,7 +635,12 @@
                 }*/
                 
                 sum();
-                $('#txtWorker').val(r_name);
+                
+                if(q_cur==1){
+                	$('#txtWorker').val(r_name);
+                }else{
+                	$('#txtWorker2').val(r_name);
+                }
                 
                 //入庫日沒打預設今天
 				for (var i = 0; i < q_bbsCount; i++) {
@@ -1146,9 +1151,16 @@
 					<td><select id="cmbTypea" class="txt c1"> </select></td>-->
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl" > </a></td>
-						<td colspan="4"><input id="txtMemo" type="text" class="txt c1"/></td>
+						<td colspan="4"><input id="txtMemo" type="text" class="txt c1" style="width: 99%;"/></td>
 						<td><input type="button" id="btnGettostore" value="條碼領料轉庫存" style="width:130px;"/></td>
 						<td><input type="button" id="btnDeltostore" value="條碼刪除轉庫存" style="width:130px;"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
+						<td><input id="txtWorker" type="text" class="txt c1"/></td>
+						<td> </td>
+						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
+						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
 					</tr>
 				</table>
 			</div>

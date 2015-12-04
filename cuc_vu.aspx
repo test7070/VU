@@ -66,11 +66,11 @@
 				q_cmbParse("combMechno2",'1@1剪,2@2剪,3@3剪,7@7辦公室');
 				$('#combOrder').val('memo');//1124預設
 				
-				if(r_userno=='B01'){
+				if(r_userno.toUpperCase()=='B01'){
 					$('#combMechno2').val('1');
-				}else if(r_userno=='B02'){
+				}else if(r_userno.toUpperCase()=='B02'){
 					$('#combMechno2').val('2');
-				}else if(r_userno=='B03'){
+				}else if(r_userno.toUpperCase()=='B03'){
 					$('#combMechno2').val('3');
 				}else{
 					$('#combMechno2').val('7');

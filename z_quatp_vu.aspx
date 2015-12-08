@@ -15,14 +15,14 @@
 		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
-			/*aPop = new Array(['txtXcarno', 'lblXcarno', 'car2', 'a.noa,driverno,driver', 'txtXcarno', 'car2_b.aspx']
-			,['txtXcarplateno', 'lblXcarplate', 'carplate', 'noa,carplate,driver', 'txtXcarplateno', 'carplate_b.aspx']
-			,['txtXproductno', 'lblXproductno', 'fixucc', 'noa,namea', 'txtXproductno', 'fixucc_b.aspx']);*/
+			var custtypeItem = '';
+			var xuccItem ='';
 			$(document).ready(function() {
 				_q_boxClose();
 				q_getId();
-				q_gf('', 'z_quatp_vu');
+				q_gt('custtype', '', 0, 0, 0, "");
 			});  
+			
             function q_gfPost() {
                 $('#q_report').q_report({
                     fileName : 'z_quatp_vu',
@@ -34,36 +34,51 @@
                         type : '0',
                         name : 'xname',
                         value : r_name 
-                    }, {/*1-1[3][4]*/
-                        type : '2',
-                        name : 'cust',
-                        dbf  : 'cust',
-                        index: 'noa,comp',
-                        src  : 'cust_b.aspx'
-                    }, {/*1-2 [5][6]*/
-                        type : '1',
-                        name : 'date'
-                    }, {/*1-3 [7]*/
-                        type : '8',
-                        name : 'xoption01',
-                        value : q_getMsg('toption01').split('&')
                     },{
-						type : '0',//[8]
+						type : '0',//[3]
 						name : 'projectname',
 						value : q_getPara('sys.project').toUpperCase()
 					}, {
-                        type : '0', //[9]
+                        type : '0', //[4]
                         name : 'mountprecision',
                         value : q_getPara('vcc.mountPrecision')
                     }, {
-                        type : '0', //[10]
+                        type : '0', //[5]
                         name : 'weightprecision',
                         value : q_getPara('vcc.weightPrecision')
                     }, {
-                        type : '0', //[11]
+                        type : '0', //[6]
                         name : 'priceprecision',
                         value : q_getPara('vcc.pricePrecision')
-                    }]
+                    }, {/*1-1 [7][8]*/
+                        type : '1',
+                        name : 'date'
+                    }, {/*1-2[9][10]*/
+                        type : '2',
+                        name : 'xcust',
+                        dbf  : 'cust',
+                        index: 'noa,comp',
+                        src  : 'cust_b.aspx'
+                    }, {/*1-3 [11]*/
+                        type : '8',
+                        name : 'xoption01',
+                        value : q_getMsg('toption01').split('&')
+                    }, {/*1-4[12]*/
+                        type : '5',
+                        name : 'xproduct',
+                        value : xuccItem.split(',')
+                    }, {/*2-1[13]*/
+                        type : '5', 
+                        name : 'custtype',
+                        value : custtypeItem.split(',')
+					}, {/*2-2[14]*/
+						type : '6',
+						name : 'lostday'
+					}, {/*2-3[15]*/
+                        type : '5', 
+                        name : 'lostorder',
+                        value : "0@最後交易日,1@客戶編號".split(',')
+					}]
                 });
                 q_popAssign();
 				q_getFormat();
@@ -71,6 +86,8 @@
 
 				$('#txtDate1').mask(r_picd);
                 $('#txtDate2').mask(r_picd);
+                $('#Xproduct select').val('鋼筋');
+                $('#txtLostday').val(100);
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();
@@ -98,7 +115,25 @@
 			function q_boxClose(s2) {
 			}
 
-			function q_gtPost(s2) {
+			function q_gtPost(t_name) {
+				switch (t_name) {
+					case 'custtype':
+                        var as = _q_appendData("custtype", "", true);
+                        custtypeItem = " @全部";
+                        for ( i = 0; i < as.length; i++) {
+                            custtypeItem = custtypeItem + (custtypeItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa +' . '+as[i].namea;
+                        }
+                        q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
+						break;
+					case 'ucc':
+						xuccItem = " @全部";
+                		var as = _q_appendData("ucc", "", true);
+						for ( i = 0; i < as.length; i++) {
+							xuccItem+=","+as[i].product;
+						}
+						q_gf('', 'z_quatp_vu');
+						break;  
+				}
 			}
 		</script>
 	</head>

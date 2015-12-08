@@ -330,13 +330,13 @@ create table #tmp(
 	aprice  decimal(20,2),
 )
 
-insert #tmp (gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
-select '11','ucce',a.datea,MAX(a.noa),b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,sum(b.mount),sum(b.weight),sum(b.total),0
+insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
+select '11','ucce',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0
 from view_ucce a left join view_ucces b on a.noa=b.noa 
 where a.datea<=@t_edate and b.storeno='7000'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-group by a.datea,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
+--group by a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
 
 --取起始日之前最後一次盤點並刪除此盤點時間之前的資料
 delete a
@@ -409,7 +409,7 @@ set @aprice=0
 
 declare cursor_table cursor for
 select noa,noq,tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp 
-order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa
+order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa,noq
 open cursor_table
 fetch next from cursor_table
 into @noa,@noq,@tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
@@ -424,7 +424,16 @@ begin
 		set @aprice=0
 	end
 	
-	if(@tablea in ('ucce','rc2s','inas'))
+	if(@tablea='ucce')
+	begin
+		set @t_mount=@mount
+		set @t_weight=@weight
+		set @t_money=@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+		update #tmp set aweight=@avgweight,aprice=@aprice where noa=@noa and noq=@noq
+	end
+	else if(@tablea in ('rc2s','inas'))
 	begin
 		set @t_mount=@t_mount+@mount
 		set @t_weight=@t_weight+@weight

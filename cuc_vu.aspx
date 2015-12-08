@@ -464,7 +464,9 @@
 				$('#btnCub_nouno').click(function(e) {
 					$('#div_nouno').css('top',($('#btnCub_nouno').offset().top-$('#div_nouno').height())+'px');
 					$('#div_nouno').css('left',($('#btnCub_nouno').offset().left-$('#div_nouno').width())+'px');
+					$('#textNouno').val('');
 					$('#div_nouno').show();
+					$('#textNouno').focus();
 				});
 				$('#textNouno').click(function() {
                 	q_msg($(this),'多批號領料請用,隔開');
@@ -1159,8 +1161,11 @@
 							var n=$(this).attr('id').replace('cucs_chk','')
 							if($(this).prop('checked')){
 								var t_err = q_chkEmpField([['combMechno', '人員組別']]);
-				                if (t_err.length > 0) {
-				                    alert(t_err);
+				                if (t_err.length > 0 || chk_cucs.length>=8) {
+				                	if(t_err.length>0)
+				                    	alert(t_err);
+				                    else 
+				                    	alert('加工項目超過8筆!!');
 				                    $(this).prop("checked",false).parent().parent().find('td').css('background', 'lavender');
 				                    $('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
 		                            $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
@@ -1173,7 +1178,6 @@
 									if(cucsno!='' && erate<=0.03){
 										$('#cucs_tr'+n).find('td').css('background', 'lightgrey');
 									}
-		                            
 				                    return;
 				                }
 							}

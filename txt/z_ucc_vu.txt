@@ -594,6 +594,7 @@ create table #tmp(
 	noa nvarchar(50),
 	pno nvarchar(50),
 	product nvarchar(100),
+	ucolor nvarchar(50),
 	spec nvarchar(50),
 	size nvarchar(50),
 	lengthb float,
@@ -607,7 +608,7 @@ create table #tmp(
 )
 
 insert #tmp
-select '0',b.datea,a.noa,b.productno,b.product,b.spec,b.size,b.lengthb,b.class
+select '0',b.datea,a.noa,b.productno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,'<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+a.noa+''+CHAR(59)+'104'',''95%'',''95%'',''104'')">'+b.uno+'</a>'
 ,b.mount,b.hmount,b.weight,b.memo,b.comp
 from view_cub a left join view_cubs b on a.noa=b.noa

@@ -95,12 +95,13 @@ declare @result table(
 	uno nvarchar(50),
 	dno int,
 	mech nvarchar(30),
-	isget int
+	isget int,
+	qhref nvarchar(MAX)
 )
 insert @result 
 select '0' gno,a.kind,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
 		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
-		,a.mech,0
+		,a.mech,0,'cuc_vu2?noa=$ordeno?'+a.accy 
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.mechno between @t_bmechno and @t_emechno
       and  a.datea between @t_bdate and @t_edate
@@ -111,7 +112,7 @@ begin
 	insert @result 
 	select '0' gno,a.kind,a.mechno,b.comp,b.product+isnull(' '+b.spec,'')+isnull(' '+b.size,'')+case when convert(nvarchar,b.lengthb)='0' then '' else ' '+convert(nvarchar,b.lengthb) end
 			+isnull(' '+b.ucolor,''),b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
-			,a.mech,1
+			,a.mech,1,''
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 	where a.mechno between @t_bmechno and @t_emechno
 	      and  a.datea between @t_bdate and @t_edate
@@ -145,7 +146,7 @@ select gno
 ,case when isget>0 then '<font color="red">'+dbo.getComma(hmount,[2]) +'</font>' else dbo.getComma(hmount,[2])  end hmount
 ,case when isget>0 then '<font color="red">'+dbo.getComma(mount,[2])+'</font>' else dbo.getComma(mount,[2]) end mount
 ,case when isget>0 then '<font color="red">'+dbo.getComma(weight,[3])+'</font>' else dbo.getComma(weight,[3]) end weight
-,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,mech,dno,mechno xmech,datea xdatea
+,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,mech,dno,mechno xmech,datea xdatea,qhref
 from @result
 order by xmech,xdatea,gno,dno
 ; 
@@ -488,13 +489,15 @@ create table #result(
 	money float,
 	memo nvarchar(MAX),
 	page int,
-	idno int
+	idno int,
+	ghref nvarchar(MAX)
 ) 
 
 insert #result 
 select '2',a.noa,b.noq,a.kind,a.mechno,a.mech,ROW_NUMBER() over(partition by a.mechno order by a.mechno,a.datea) seq 
 ,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class 
 ,b.gmount,b.gweight,case when gmount>0 then round(b.gweight/b.gmount,0) else 0 end,b.storeno,c.aprice,isnull(c.money,0),b.memo,0,0
+,'cub_vu?noa=$noa?'+a.accy 
 from view_cubt b left join view_cub a on a.noa=b.noa 
 outer apply (select * from #tmp where noa=b.noa and noq=b.noq and tablea='cubt') c
 where a.datea between @t_bdate and @t_edate	and a.mechno between @t_bmechno and @t_emechno 

@@ -658,6 +658,7 @@
 	                    return;
 	                }
 	                //入庫
+	                t_err='';
 	                var ts_bbu='';
 	                var bburow=document.getElementById("cucu_table").rows.length-1;
 					var hasbbu=false;
@@ -678,6 +679,10 @@
 																
 						if(!emp(ts_product) || !emp(ts_ucolor) || !emp(ts_spec) || !emp(ts_size) || !emp(ts_lengthb) || !emp(ts_class)){
 							hasbbu=true; //有資料
+							if((ts_ucolor=='定尺' || ts_ucolor=='板料') && dec(ts_lengthb)==0){
+								t_err=t_err+(t_err.length>0?'\n':'')+('第'+(j+1)+'項 '+ts_product+' '+ts_ucolor+' 米數為0');
+							}
+							
 							if (dec(ts_imount)>0 && dec(ts_iweight)>0){ //件數重量>0
 								ts_bbu=ts_bbu
 								+ts_product+"^@^"
@@ -694,7 +699,9 @@
 		                   	}
 						}
 					}
-					if(!hasbbu){
+					if(t_err.length>0){
+						alert(t_err);
+					}else if(!hasbbu){
 						alert('無入庫資料');
 					}else if(ts_bbu.length==0){
 	                   	alert('入庫件數或重量等於零。');

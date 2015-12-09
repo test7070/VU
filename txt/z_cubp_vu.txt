@@ -63,6 +63,7 @@ from @result
 ;
 ---------------------------------------------------------------------------------------------------------------------------------
 z_cubp_vu02:--z_cubp_vu02
+SET QUOTED_IDENTIFIER OFF 
 declare @t_bdate nvarchar(30)
 declare @t_edate nvarchar(30)
 declare @t_bmechno nvarchar(30)
@@ -96,12 +97,14 @@ declare @result table(
 	dno int,
 	mech nvarchar(30),
 	isget int,
-	qhref nvarchar(MAX)
+	qhrefa nvarchar(MAX),
+	qhrefb nvarchar(MAX)
 )
 insert @result 
 select '0' gno,a.kind,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
 		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
-		,a.mech,0,'cuc_vu2?noa=$ordeno?'+a.accy 
+		,a.mech,0,'cuc_vu2?noa=$ordeno?'+a.accy
+		,"cub_vu?noa=\'"+a.noa+"\' -- noa=$uno?"+a.accy 
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.mechno between @t_bmechno and @t_emechno
       and  a.datea between @t_bdate and @t_edate
@@ -112,7 +115,7 @@ begin
 	insert @result 
 	select '0' gno,a.kind,a.mechno,b.comp,b.product+isnull(' '+b.spec,'')+isnull(' '+b.size,'')+case when convert(nvarchar,b.lengthb)='0' then '' else ' '+convert(nvarchar,b.lengthb) end
 			+isnull(' '+b.ucolor,''),b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
-			,a.mech,1,''
+			,a.mech,1,'',''
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 	where a.mechno between @t_bmechno and @t_emechno
 	      and  a.datea between @t_bdate and @t_edate
@@ -146,7 +149,8 @@ select gno
 ,case when isget>0 then '<font color="red">'+dbo.getComma(hmount,[2]) +'</font>' else dbo.getComma(hmount,[2])  end hmount
 ,case when isget>0 then '<font color="red">'+dbo.getComma(mount,[2])+'</font>' else dbo.getComma(mount,[2]) end mount
 ,case when isget>0 then '<font color="red">'+dbo.getComma(weight,[3])+'</font>' else dbo.getComma(weight,[3]) end weight
-,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,mech,dno,mechno xmech,datea xdatea,qhref
+,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,mech,dno,mechno xmech,datea xdatea
+,qhrefa,qhrefb
 from @result
 order by xmech,xdatea,gno,dno
 ; 

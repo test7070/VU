@@ -452,7 +452,10 @@ begin
 		update #tmp set aweight=@avgweight,aprice=@aprice,money=round((@weight*@aprice),0) where noa=@noa and noq=@noq
 		set @t_mount=@t_mount-@mount
 		set @t_weight=@t_weight-@weight
-		set @t_money=@t_money-round((@weight*@aprice),0)
+		if(@t_weight<0)
+			set @t_money=0
+		else
+			set @t_money=@t_money-round((@weight*@aprice),0)
 		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
 		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
 	end

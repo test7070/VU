@@ -165,7 +165,15 @@ begin
 		set @aprice=0
 	end
 	
-	if(@tablea in ('ucce','rc2s','inas'))
+	if(@tablea='ucce')
+	begin
+		set @t_mount=@mount
+		set @t_weight=@weight
+		set @t_money=@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+	end
+	else if(@tablea in ('rc2s','inas'))
 	begin
 		set @t_mount=@t_mount+@mount
 		set @t_weight=@t_weight+@weight
@@ -177,7 +185,10 @@ begin
 	begin
 		set @t_mount=@t_mount-@mount
 		set @t_weight=@t_weight-@weight
-		set @t_money=@t_money-round((@weight*@aprice),0)
+		if(@t_weight<0)
+			set @t_money=0
+		else
+			set @t_money=@t_money-round((@weight*@aprice),0)
 		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
 		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
 	end
@@ -221,7 +232,7 @@ update a
 set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
 from #tmp a
 outer apply (select * from (
-	select ROW_NUMBER() over (order by product,spec,cast(dbo.get_num(size) as int),gno,lengthb,class)rr,* from #tmp
+	select ROW_NUMBER() over (order by product,cast(dbo.get_num(size) as int),spec,gno,lengthb,class)rr,* from #tmp
 	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
 ) b
 
@@ -244,7 +255,7 @@ end
 declare @totpage int= isnull((select MAX(page) from #tmp),0)
 declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')
 
-select ROW_NUMBER() over (partition by product,spec,size order by product,spec,size,cast(gno as int),lengthb,class) rr
+select ROW_NUMBER() over (partition by product,spec,size order by product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class) rr
 ,dbo.getComma(mount,[2])mount
 ,dbo.getComma(weight,[3])weight
 ,dbo.getComma(avgweight,[3])avgweight
@@ -253,7 +264,8 @@ select ROW_NUMBER() over (partition by product,spec,size order by product,spec,s
 ,@today today
 ,@totpage totpage
 ,* 
-from #tmp order by page,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class,idno
+from #tmp order by page,case when tablea='Paging' then 3 when tablea='title' then 1 else 2 end
+,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class,idno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -422,7 +434,7 @@ declare @t_money float
 declare @t_mount decimal(18, 4)
 declare @t_weight decimal(18, 4)
 declare @avgweight decimal(18, 4)
-declare @aprice decimal(18, 4)
+declare @aprice decimal(25, 4)
 declare @stktype float
 set @t_mount=0
 set @t_weight=0
@@ -450,7 +462,15 @@ begin
 		set @aprice=0
 	end
 	
-	if(@tablea in ('ucce','rc2s','inas'))
+	if(@tablea='ucce')
+	begin
+		set @t_mount=@mount
+		set @t_weight=@weight
+		set @t_money=@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+	end
+	else if(@tablea in ('rc2s','inas'))
 	begin
 		set @t_mount=@t_mount+@mount
 		set @t_weight=@t_weight+@weight
@@ -462,7 +482,10 @@ begin
 	begin
 		set @t_mount=@t_mount-@mount
 		set @t_weight=@t_weight-@weight
-		set @t_money=@t_money-round((@weight*@aprice),0)
+		if(@t_weight<0)
+			set @t_money=0
+		else
+			set @t_money=@t_money-round((@weight*@aprice),0)
 		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
 		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
 	end
@@ -502,13 +525,16 @@ begin
 end
 
 --更新目前的順序,頁數
-update a
-set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
-from #tmp a
-outer apply (select * from (
-	select ROW_NUMBER() over (partition by storeno order by storeno,product,spec,cast(dbo.get_num(size) as int),gno,lengthb,class)rr,* from #tmp
-	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
-) b
+--update a
+--set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
+--from #tmp a
+--outer apply (select * from (
+--	select ROW_NUMBER() over (partition by storeno order by storeno,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class)rr,* from #tmp
+--	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
+--) b
+update tmp
+set idno=rr,page=CEILING(cast(rr as float)/@pageline)
+from (select idno,page,ROW_NUMBER() over (partition by storeno order by storeno,product,cast(dbo.get_num(size) as int),spec,gno,lengthb,class)rr from #tmp )tmp 
 
 --表頭
 insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice,page,idno)
@@ -529,7 +555,7 @@ end
 declare @totpage int= isnull((select MAX(page) from #tmp),0)
 declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')
 
-select ROW_NUMBER() over (partition by storeno,product,spec,size order by storeno,product,spec,size,cast(gno as int),lengthb,class) rr
+select ROW_NUMBER() over (partition by storeno,product,spec,size,gno order by storeno,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class) rr
 ,dbo.getComma(mount,[2])mount
 ,dbo.getComma(weight,[3])weight
 ,dbo.getComma(avgweight,[3])avgweight
@@ -540,7 +566,9 @@ select ROW_NUMBER() over (partition by storeno,product,spec,size order by storen
 ,isnull((select top 1 store from store where noa=a.storeno),'') store
 ,* 
 from #tmp a
-order by storeno,page,product,spec,cast(dbo.get_num(size) as int),cast(gno as int),lengthb,class,idno
+order by storeno,page
+,case when tablea='Paging' then 3 when tablea='title' then 1 else 2 end
+,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class,idno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

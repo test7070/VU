@@ -341,6 +341,7 @@ from view_ucce a left join view_ucces b on a.noa=b.noa
 where a.datea<=@t_edate and b.storeno='7000'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 --group by a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
 
 --取起始日之前最後一次盤點並刪除此盤點時間之前的資料
@@ -356,6 +357,7 @@ outer apply(select datea from #tmp where product=b.product and spec=b.spec and s
 where a.datea between isnull(c.datea,'') and @t_edate
 and b.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
 select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0
@@ -364,6 +366,7 @@ outer apply(select datea from #tmp where product=b.product and spec=b.spec and s
 where a.datea between isnull(c.datea,'') and @t_edate
 and a.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
 select '14','cubt',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0
@@ -372,6 +375,7 @@ outer apply(select datea from #tmp where product=b.product and spec=b.spec and s
 where a.datea between isnull(c.datea,'') and @t_edate
 and b.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
 select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0
@@ -380,6 +384,7 @@ outer apply(select datea from #tmp where product=b.product and spec=b.spec and s
 where a.datea between isnull(c.datea,'') and @t_edate
 and a.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 
 --計算 成本單價
 declare @noa nvarchar(100)

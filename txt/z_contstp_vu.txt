@@ -12,8 +12,21 @@ set @t_edate = case when '#non'=[6] then char(255) else [6] end
 set @t_option01 = case when '#non'=[7] then '' else [7] end
 --sel1含明細表--sel2含合約終止
 ---------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max)
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
 
-declare @tmp table(
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	set @cmd = 'drop table #tmpa'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #tmp(
 	gno nvarchar(2),
 	recno nvarchar(10),
 	datea nvarchar(50),
@@ -33,9 +46,10 @@ declare @tmp table(
 	rmoney float,
 	enddate nvarchar(50),
 	memo nvarchar(MAX)
-)	
+)
+CREATE INDEX tmp_index ON #tmp (noa)
 
-insert @tmp
+insert #tmp
 select '0',row_number() over(order by a.tggno,a.datea,a.noa),a.datea,a.noa
 ,a.cno,a.acomp,a.tggno,case when isnull(d.nick,'')!='' then d.nick else a.nick end,'','','',isnull(b.price,0),a.ordeweight,a.eweight,isnull(b.price,0)*a.eweight
 ,isnull(c.opay,0),0,a.econtdate,a.memo
@@ -48,14 +62,49 @@ and (a.datea between @t_bdate and @t_edate)
 
 --處理應收比例
 declare @noa nvarchar(50)
-declare @qweight nvarchar(MAX)
+declare @transtart nvarchar(MAX)
+declare @qno1 nvarchar(MAX)
+declare @qweight1 nvarchar(MAX)
+declare @qno2 nvarchar(MAX)
+declare @qweight2 nvarchar(MAX)
 declare @tweight float
 declare @weight float
 declare @total float
 declare @ttotal float
+declare @tt_bdate nvarchar(10)
+
+--先處理減少cursor的計算量
+create table #tmpa(
+	noa nvarchar(50),
+	transtart nvarchar(MAX),
+	total float,
+	qno1 nvarchar(50),
+	qweight1 float,
+	qno2 nvarchar(50),
+	qweight2 float
+)
+CREATE INDEX tmpa_index ON #tmpa (noa)
+
+if(LEN(@t_bdate)>0)
+	set @tt_bdate=dbo.q_cdn(@t_bdate,-31)
+	
+insert #tmpa
+select noa,transtart,total
+,left(transtart,charindex('@',transtart)-1)
+,cast(SUBSTRING(transtart,charindex('@',transtart)+1,charindex('##',transtart)-charindex('@',transtart)-1) as float)
+,left(SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)),CHARINDEX('@',SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)))-1)
+,cast(SUBSTRING(SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)),charindex('@',SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)))+1,len(SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart))))as float)
+--使用函數會跑較慢
+--,dbo.split(dbo.split(transtart,'##',0),'@',0)
+--,dbo.split(dbo.split(transtart,'##',0),'@',1)
+--,dbo.split(dbo.split(transtart,'##',1),'@',0)
+--,dbo.split(dbo.split(transtart,'##',1),'@',1) 
+from view_rc2 where len(transtart)>0
+and (tggno between @t_btggno and @t_etggno ) --出貨與合約客戶會一樣
+and datea>= @tt_bdate --會先有合約才會出貨 --避免提早出貨多抓取前1個月的出貨
 
 declare cursor_table cursor for
-select noa from @tmp
+select noa from #tmp
 open cursor_table
 fetch next from cursor_table
 into @noa
@@ -64,41 +113,39 @@ begin
 	set @ttotal=0
 	
 	declare cursor_table2 cursor for
-	select transtart,total from view_rc2 where CHARINDEX(@noa,transtart)>0
+	select transtart,qno1,qweight1,qno2,qweight2,total from #tmpa where qno1=@noa or qno2=@noa
 	open cursor_table2
 	fetch next from cursor_table2
-	into @qweight,@total
+	into @transtart,@qno1,@qweight1,@qno2,@qweight2,@total
 	while(@@FETCH_STATUS <> -1)
 	begin
 		set @weight=0
 		set @tweight=0
 		
-		if(len(@qweight)>0)
+		if(len(@qno1)>0 and @qno1=@noa)
 		begin
-			if(dbo.split(dbo.split(@qweight,'##',0),'@',0)=@noa)
-			begin
-				set @weight=cast(dbo.split(dbo.split(@qweight,'##',0),'@',1) as float)
-			end
-			
-			set @tweight=@tweight+cast(dbo.split(dbo.split(@qweight,'##',0),'@',1) as float)
-			
-			if(dbo.split(dbo.split(@qweight,'##',1),'@',0)=@noa)
-			begin
-				set @weight=cast(dbo.split(dbo.split(@qweight,'##',1),'@',1) as float)
-			end
-			set @tweight=@tweight+cast(dbo.split(dbo.split(@qweight,'##',1),'@',1) as float)
+			set @weight=@qweight1
 		end
+		
+		set @tweight=@tweight+@qweight1
+		
+		if(len(@qno2)>0 and @qno2=@noa)
+		begin
+			set @weight=@qweight2
+		end
+		
+		set @tweight=@tweight+@qweight2
 		
 		--set @ttotal=@ttotal+(@total*@weight/@tweight)
 		set @ttotal = case when @tweight > 0 then @ttotal+(@total*@weight/@tweight) else 0 end
 		
 		fetch next from cursor_table2
-		into @qweight,@total
+		into @transtart,@qno1,@qweight1,@qno2,@qweight2,@total
 	end
 	close cursor_table2
 	deallocate cursor_table2
 	
-	update @tmp
+	update #tmp
 	set rmoney=@ttotal
 	where noa=@noa
 	
@@ -110,31 +157,29 @@ deallocate cursor_table
 
 if(CHARINDEX('sel1',@t_option01)>0)
 begin
-		insert into @tmp (gno,recno,tggno,datea,noa,pno,product,spec,price,eweight)
+		insert into #tmp (gno,recno,tggno,datea,noa,pno,product,spec,price,eweight)
 		select '2',row_number() over(partition by a.noa order by a.noa,a.noq),b.tggno,b.datea,a.noa,a.productno,isnull(a.product,'')+' '+isnull(a.size,''),a.spec,a.price,a.eweight
 		from conts a left join cont b on a.noa=b.noa
 		where (isnull(b.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
 		and (b.tggno between @t_btggno and @t_etggno ) 
 		and (b.datea between @t_bdate and @t_edate)
-		and exists (select * from @tmp where noa=a.noa)
+		and exists (select * from #tmp where noa=a.noa)
 end
 
-if((select count(*) from @tmp )>0)
+if((select count(*) from #tmp )>0)
 begin
-	insert into @tmp(gno,tggno,noa,datea,weight,eweight)
+	insert into #tmp(gno,tggno,noa,datea,weight,eweight)
 	select '1',tggno,char(255),char(255),sum(weight),sum(eweight) 
-	from @tmp where gno = '0' group by tggno
+	from #tmp where gno = '0' group by tggno
 		
-	insert into @tmp(gno,tggno,datea,weight,eweight,price)
+	insert into #tmp(gno,tggno,datea,weight,eweight,price)
 	select '3',char(255),char(255),sum(weight),sum(eweight) ,case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
-	from @tmp where gno = '0'
+	from #tmp where gno = '0'
 	
-
-	--insert @tmp (gno,noa,memo,custno,datea) 
-	--select '4',noa,memo,custno,datea from @tmp where gno = '0' group by noa,memo,custno,datea
-	insert @tmp (gno,noa,memo,tggno,datea) 
-	select '4',noa,memo,tggno,datea from @tmp where gno = '0' group by noa,memo,tggno,datea
-
+	--insert #tmp (gno,noa,memo,custno,datea) 
+	--select '4',noa,memo,custno,datea from #tmp where gno = '0' group by noa,memo,custno,datea
+	insert #tmp (gno,noa,memo,tggno,datea) 
+	select '4',noa,memo,tggno,datea from #tmp where gno = '0' group by noa,memo,tggno,datea
 end
 
 select 
@@ -144,9 +189,18 @@ dbo.getComma(emoney,0)emoney,
 dbo.getComma(opay,0)mopay,
 dbo.getComma(rmoney,0)rmoney,
 'contst_vu?noa=$noa?' qhref, 
-* from @tmp
+* from #tmp
 order by tggno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
 
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	set @cmd = 'drop table #tmpa'
+	EXECUTE sp_executesql @cmd
+END
 ;
-
-

@@ -453,7 +453,11 @@
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
 							var t_cubno=as[0].cubno;
-							q_func('cub_post.post', r_accy + ',' + encodeURI(t_cubno) + ',1');
+							var t_err=as[0].err;
+							if(t_cubno!='')
+								q_func('cub_post.post', r_accy + ',' + encodeURI(t_cubno) + ',1');
+							if(t_err.length>0)
+								alert(t_err.replace("\\n","\n"));
 						}
 						break;
 					case 'cub_post.post':

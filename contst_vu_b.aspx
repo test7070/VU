@@ -69,12 +69,12 @@
 				</tr>
 				<tr>
 					<td style="width:2%;"><input name="sel"  id="radSel.*" type="radio" /></td>
-					<td style="width:25%;"><input class="txt" id="txtNoa.*" type="text" style="width:98%;"  readonly="readonly" /></td>
+					<td style="width:23%;"><input class="txt" id="txtNoa.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<!--<td style="width:45%;"><input class="txt" id="txtComp.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<td style="width:20%;"><input class="txt" id="txtDatea.*" type="text" style="width:98%;"  readonly="readonly" /></td>-->
-					<td style="width:20%;"><input class="txt" id="txtEarnest.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
-					<td style="width:25%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
-					<td style="width:30%;"><input class="txt" id="txtMemo.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
+					<td style="width:15%;"><input class="txt" id="txtEarnest.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
+					<td style="width:20%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
+					<td style="width:40%;"><input class="txt" id="txtMemo.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
 				</tr>
 			</table>
 			<!--#include file="../inc/brow_ctrl.inc"-->

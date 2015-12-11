@@ -26,7 +26,7 @@
 			var bbsMask = [];
 			q_sqlCount = 6;
 			brwCount = 6;
-			brwCount2 = 8;
+			brwCount2 = 10;
 			brwList = [];
 			brwNowPage = 0;
 			brwKey = 'Datea';
@@ -710,6 +710,10 @@
 						<td><input id="txtWorker" type="text" class="txt c1" /></td>
 						<td><span> </span><a id='lblWorker2' class="lbl"> </a></td>
 						<td><input id="txtWorker2" type="text" class="txt c1" /></td>
+					</tr>
+					<tr>
+						<td> </td>
+						<td colspan="3" style="color:red ;" >合約基價品項請設定在項序001</td>
 					</tr>
 				</table>
 			</div>

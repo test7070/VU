@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
 		<title> </title>
@@ -1036,7 +1036,7 @@
 								$('#txtProduct__'+b_seq).val($('#combProduct__'+b_seq).find("option:selected").text());
 						});
 						
-						$('#txtProduct__'+i).focusin(function() {
+						/*$('#txtProduct__'+i).focusin(function(e) {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
@@ -1046,9 +1046,10 @@
 								if(t_b_seq>=q_bbtCount){
 									$('#btnPlut').click();
 								}
+								
 								$('#txtUno__'+t_b_seq).focus();
 							}
-						});
+						});*/
                     }
                 }
                 $('#btnVccttoOrde').click(function() {
@@ -1110,7 +1111,24 @@
                 	}
                 });
                 _bbtAssign();
-                
+                for (var i = 0; i < q_bbtCount; i++) {
+                	//$('#txtProduct__' + i).unbind('focus');
+                	$('#txtUno__' + i).unbind('keydown');
+                	$('#txtUno__'+i).keydown(function(e) {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							
+							if((q_cur==1 || q_cur==2) && (e.which==13)){
+								var t_b_seq=dec(b_seq)+1;
+								if(t_b_seq>=q_bbtCount){
+									$('#btnPlut').click();
+								}
+								
+								$('#txtUno__'+t_b_seq).focus();
+							}
+						});
+                }
                 $('#lblUno_t').text('領料批號');
                 $('#lblProductno_t').text('品號');
                 $('#lblProduct_t').text('品名');

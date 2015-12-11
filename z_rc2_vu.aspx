@@ -65,7 +65,16 @@
                     },{
                         type : '6', //[14] //判斷顯示小數點與其他判斷
                         name : 'qno',
-                      
+                    }, {
+						type : '2', //[15][16]
+						name : 'xstore',
+						dbf : 'store',
+						index : 'noa,store',
+						src : 'store_b.aspx'
+					}, {
+                        type : '0', //[17] //判斷顯示小數點與其他判斷
+                        name : 'lenm',
+                        value : r_lenm
                     }]
 				});
 				q_popAssign();

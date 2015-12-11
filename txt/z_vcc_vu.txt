@@ -100,12 +100,17 @@ from @result group by datea
 insert into @result(gno,datea,noa,mount,price,total,money,weight) 
 select '94',left(datea,7)+'z','ZZZZZZZZZZZZ',sum(mount),sum(price),sum(total),sum(money),sum(weight) 
 from @result a where gno='93' group by left(datea,7) 
+
+insert into @result(gno,datea,noa,mount,total,money,weight) 
+select '95',char(255),char(255),sum(mount),sum(total),sum(money),sum(weight) 
+from @result a where gno='91'
 --*************************************************************************	
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 update @result set gno='0' where gno='91' 
 update @result set gno='1' where gno='92' 
 update @result set gno='2' where gno='93' 
-update @result set gno='3' where gno='94' 
+update @result set gno='3' where gno='94'
+update @result set gno='4' where gno='95' 
 
 update @result 
 set mount=mount*-1,total=total*-1 ,weight=weight*-1,itax=itax*-1,money=money*-1

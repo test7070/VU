@@ -37,6 +37,7 @@
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
 				['txtPost2', 'lblAddr2', 'cust', 'noa,comp', 'txtPost2,txtAddr2', 'cust_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
+				['0txtCarno', 'lblCarno', 'cardeals', 'a.carno,a.noa,a.comp', 'txtCarno,txtCardealno,txtCardeal', 'cardeals_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp,addr', 'txtCno,txtAcomp,txtAddr2', 'acomp_b.aspx']
 				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
 				//['txtCarno', 'lblCar', 'cardeal', 'noa', '0txtCarno', 'cardeal_b.aspx']
@@ -233,6 +234,12 @@
 						$('#txtTax').css('color', 'black').css('background', 'white').removeAttr('readonly');  
                 }else{
                 	$('#txtTax').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+                }
+                
+                if (q_cur == 1) {
+                    $('#txtNoa').css('color', 'black').css('background', 'white').removeAttr('readonly');
+                } else {
+                    $('#txtNoa').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
                 }
             }
             
@@ -578,6 +585,14 @@
 						check_startdate=true;
 						btnOk();
 						break;
+					case 'checkRc2no_btnOk':
+						var as = _q_appendData("view_rc2", "", true);
+                        if (as[0] != undefined) {
+                            alert('進貨單號已存在!!!');
+                        } else {
+                            wrServer($('#txtNoa').val());
+                        }
+						break;
 					case q_name:
 						if (q_cur == 4)
 							q_Seek_gtPost();
@@ -689,8 +704,14 @@
 				var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
 				if (s1.length == 0 || s1 == "AUTO")
 					q_gtnoa(q_name, replaceAll(q_getPara('sys.key_rc2') + $('#txtDatea').val(), '/', ''));
-				else
-					wrServer(s1);
+				else{
+					if (q_cur == 1){
+						t_where = "where=^^ noa='" + $('#txtNoa').val() + "'^^";
+                    	q_gt('view_rc2', t_where, 0, 0, 0, "checkRc2no_btnOk", r_accy);
+					}else{		
+						wrServer(s1);
+					}
+				}
 			}
 
 			function _btnSeek() {
@@ -1232,7 +1253,7 @@
 						<td><span> </span><a id='lblCardeal' class="lbl btn"> </a></td>
 						<td><input id="txtCardealno" type="text" class="txt c1"/></td>
 						<td><input id="txtCardeal" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lblCarno' class="lbl"> </a></td>
+						<td><span> </span><a id='lblCarno' class="lbl btn"> </a></td>
 						<td>
 							<input id="txtCarno" type="text" class="txt" style="width:75%;"/>
 							<select id="combCarno" style="width: 20%;"> </select>

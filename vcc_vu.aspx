@@ -1712,12 +1712,12 @@
 						</td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblQno1" class="lbl btn">合約1號碼</a></td>
+						<td><span> </span><a id="lblQno1" class="lbl btn">合約號碼</a></td>
 						<td colspan='2'><input id="textQno1" type="text" class="txt c1"/></td>
-						<td><span> </span><a id="lblQweight1" class="lbl">合約1重量</a></td>
+						<td><span> </span><a id="lblQweight1" class="lbl">合約重量</a></td>
 						<td colspan='2'><input id="textQweight1" type="text" class="txt num c1"/></td>
 					</tr>
-					<tr>
+					<tr style="display: none;">
 						<td><span> </span><a id="lblQno2" class="lbl btn">合約2號碼</a></td>
 						<td colspan='2'><input id="textQno2" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblQweight2" class="lbl">合約2重量</a></td>

@@ -115,21 +115,21 @@
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
                 
-				 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+				 	var t_where="where=^^left(datea,7) between '"+$('#txtMon1').val()+"' and '"+$('#txtMon2').val()+
 								"' and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end order by datea desc,noa desc  --^^ stop=999 "
 					q_gt('cont',t_where, 0, 0, 0, "cont"); 
 				 
                  $('.c3.text').change(function(){
-                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+                 	var t_where="where=^^left(datea,7) between '"+$('#txtMon1').val()+"' and '"+$('#txtMon2').val()+
 								"' and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end order by datea desc,noa desc  --^^ stop=999 "
 					q_gt('cont',t_where, 0, 0, 0, "cont");               
                  });
                  $('c2.text').change(function(){
-                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+                 	var t_where="where=^^left(datea,7) between '"+$('#txtMon1').val()+"' and '"+$('#txtMon2').val()+
                  				"' and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end order by datea desc,noa desc  --^^ stop=999 "
                  });
                  $('#combQno').click(function() {       	
-                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
+                 	var t_where="where=^^left(datea,7) between '"+$('#txtMon1').val()+"' and '"+$('#txtMon2').val()+
 								"' and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end order by datea desc,noa desc  --^^ stop=999 "
 					q_gt('cont',t_where, 0, 0, 0, "cont");
                  });

@@ -37,7 +37,7 @@
 				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick,tel,fax,zip_home,addr_home,paytype,trantype,salesno,sales', 'txtCustno,txtComp,txtNick,txtTel,txtFax,txtPost,txtAddr,txtPaytype,cmbTrantype,txtSalesno,txtSales', 'cust_b.aspx'],
 				['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
-				['0txtCarno', 'lblCarno', 'cardeals', 'a.carno,a.noa,a.comp', 'txtCarno,txtCardealno,txtCardeal', 'cardeals_b.aspx'],
+				['txtCarno', 'lblCarno', 'cardeals', 'a.carno,a.noa,a.comp', '0txtCarno,txtCardealno,txtCardeal', 'cardeals_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
 				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx']
 				//['txtPost', 'lblAddr', 'addr', 'post,addr', 'txtPost,txtAddr', 'addr_b.aspx'],
@@ -242,11 +242,25 @@
 					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat1_b', "600px", "700px", '出貨合約');
 				});
 				
+				$('#textQno1').change(function() {
+					if(!emp($('#textQno1').val())){
+						var t_where="where=^^noa='"+$('#textQno1').val()+"'^^ ";
+						q_gt('view_quat', t_where, 0, 0, 0, "qno1_chage", r_accy);
+					}
+				});
+				
 				$('#lblQno2').click(function() {
 					var t_where="custno='"+$('#txtCustno').val()+"' and eweight>0 and isnull(enda,0)=0 ";
 					if(q_cur==1 || q_cur==2)
 						t_where=t_where+" and noa!='"+$('#textQno1').val()+"'";
 					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat2_b', "600px", "700px", '出貨合約');
+				});
+				
+				$('#textQno2').change(function() {
+					if(!emp($('#textQno2').val())){
+						var t_where="where=^^noa='"+$('#textQno2').val()+"'^^ ";
+						q_gt('view_quat', t_where, 0, 0, 0, "qno2_chage", r_accy);
+					}
 				});
 				
 				$('#txtPaydate').focusin(function() {
@@ -311,6 +325,13 @@
 							if (!b_ret || b_ret.length == 0 || b_ret[0]==undefined)
 								return;
 							$('#textQno1').val(b_ret[0].noa);
+							if(b_ret[0].atax=="true"){
+								$('#chkAtax').prop('checked',true);
+							}else{
+								$('#chkAtax').prop('checked',false);	
+							}
+							refreshBbm();
+							sum();
 						}
 						break;
 					case 'quat2_b':
@@ -319,6 +340,13 @@
 							if (!b_ret || b_ret.length == 0 || b_ret[0]==undefined)
 								return;
 							$('#textQno2').val(b_ret[0].noa);
+							if(b_ret[0].atax=="true"){
+								$('#chkAtax').prop('checked',true);
+							}else{
+								$('#chkAtax').prop('checked',false);	
+							}
+							refreshBbm();
+							sum();
 						}
 						break;
 					case 'ordes':
@@ -682,6 +710,50 @@
                         } else {
                             wrServer($('#txtNoa').val());
                         }
+						break;
+					case 'qno1_chage':
+						var as = _q_appendData("view_quat", "", true);
+						if (as[0] != undefined) {
+							if((as[0].enda)=="true"){
+								alert($('#textQno1').val()+'合約已結案!');
+							}else if(dec(as[0].eweight)<=0){
+								alert($('#textQno1').val()+'合約已出貨完畢!');
+							}else if(!emp($('#txtCustno').val()) && $('#txtCustno').val()!=as[0].custno){
+								alert('合約客戶與出貨客戶不同!!');
+							}else{
+								if(as[0].atax=="true"){
+									$('#chkAtax').prop('checked',true);
+								}else{
+									$('#chkAtax').prop('checked',false);	
+								}
+								refreshBbm();
+								sum();
+							}
+						}else{
+							alert($('#textQno1').val()+'合約不存在!!!');
+						}
+						break;
+					case 'qno2_chage':
+						var as = _q_appendData("view_quat", "", true);
+						if (as[0] != undefined) {
+							if((as[0].enda)=="true"){
+								alert($('#textQno2').val()+'合約已結案!');
+							}else if(dec(as[0].eweight)<=0){
+								alert($('#textQno2').val()+'合約已出貨完畢!');
+							}else if(!emp($('#txtCustno').val()) && $('#txtCustno').val()!=as[0].custno){
+								alert('合約客戶與出貨客戶不同!!');
+							}else{
+							if(as[0].atax=="true"){
+								$('#chkAtax').prop('checked',true);
+								}else{
+									$('#chkAtax').prop('checked',false);	
+								}
+								refreshBbm();
+								sum();
+							}
+						}else{
+							alert($('#textQno2').val()+'合約不存在!!!');
+						}
 						break;
 				}
 				if(t_name.substring(0,10)=='getunovcct'){

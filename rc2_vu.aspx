@@ -37,7 +37,7 @@
 				['txtPost', 'lblAddr', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
 				['txtPost2', 'lblAddr2', 'cust', 'noa,comp', 'txtPost2,txtAddr2', 'cust_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx'],
-				['0txtCarno', 'lblCarno', 'cardeals', 'a.carno,a.noa,a.comp', 'txtCarno,txtCardealno,txtCardeal', 'cardeals_b.aspx'],
+				['txtCarno', 'lblCarno', 'cardeals', 'a.carno,a.noa,a.comp', '0txtCarno,txtCardealno,txtCardeal', 'cardeals_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp,addr', 'txtCno,txtAcomp,txtAddr2', 'acomp_b.aspx']
 				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx'],
 				//['txtCarno', 'lblCar', 'cardeal', 'noa', '0txtCarno', 'cardeal_b.aspx']
@@ -217,11 +217,25 @@
 					q_box("contst_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'cont1_b', "600px", "700px", '進貨合約');
 				});
 				
+				$('#textQno1').change(function() {
+					if(!emp($('#textQno1').val())){
+						var t_where="where=^^noa='"+$('#textQno1').val()+"'^^ ";
+						q_gt('cont', t_where, 0, 0, 0, "qno1_chage", r_accy);
+					}
+				});
+				
 				$('#lblQno2').click(function() {
 					var t_where="tggno='"+$('#txtTggno').val()+"' and eweight>0 and isnull(enda,0)=0 ";
 					if(q_cur==1 || q_cur==2)
 						t_where=t_where+" and noa!='"+$('#textQno1').val()+"'";
 					q_box("contst_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'cont2_b', "600px", "700px",  '進貨合約');
+				});
+				
+				$('#textQno2').change(function() {
+					if(!emp($('#textQno2').val())){
+						var t_where="where=^^noa='"+$('#textQno2').val()+"'^^ ";
+						q_gt('cont', t_where, 0, 0, 0, "qno2_chage", r_accy);
+					}
 				});
 				
 			}
@@ -280,6 +294,13 @@
 							if (!b_ret || b_ret.length == 0 || b_ret[0]==undefined)
 								return;
 							$('#textQno1').val(b_ret[0].noa);
+							if(b_ret[0].atax=="true"){
+								$('#chkAtax').prop('checked',true);
+							}else{
+								$('#chkAtax').prop('checked',false);	
+							}
+							refreshBbm();
+							sum();
 						}
 						break;
 					case 'cont2_b':
@@ -288,6 +309,13 @@
 							if (!b_ret || b_ret.length == 0 || b_ret[0]==undefined)
 								return;
 							$('#textQno2').val(b_ret[0].noa);
+							if(b_ret[0].atax=="true"){
+								$('#chkAtax').prop('checked',true);
+							}else{
+								$('#chkAtax').prop('checked',false);	
+							}
+							refreshBbm();
+							sum();
 						}
 						break;
 					case q_name + '_s':
@@ -592,6 +620,50 @@
                         } else {
                             wrServer($('#txtNoa').val());
                         }
+						break;
+					case 'qno1_chage':
+						var as = _q_appendData("cont", "", true);
+						if (as[0] != undefined) {
+							if((as[0].enda)=="true"){
+								alert($('#textQno1').val()+'合約已結案!');
+							}else if(dec(as[0].eweight)<=0){
+								alert($('#textQno1').val()+'合約已進貨完畢!');
+							}else if(!emp($('#txtTggno').val()) && $('#txtTggno').val()!=as[0].tggno){
+								alert('合約廠商與進貨廠商不同!!');
+							}else{
+								if(as[0].atax=="true"){
+									$('#chkAtax').prop('checked',true);
+								}else{
+									$('#chkAtax').prop('checked',false);	
+								}
+								refreshBbm();
+								sum();
+							}
+						}else{
+							alert($('#textQno1').val()+'合約不存在!!!');
+						}
+						break;
+					case 'qno2_chage':
+						var as = _q_appendData("cont", "", true);
+						if (as[0] != undefined) {
+							if((as[0].enda)=="true"){
+								alert($('#textQno2').val()+'合約已結案!');
+							}else if(dec(as[0].eweight)<=0){
+								alert($('#textQno2').val()+'合約已進貨完畢!');
+							}else if(!emp($('#txtTggno').val()) && $('#txtTggno').val()!=as[0].tggno){
+								alert('合約廠商與進貨廠商不同!!');
+							}else{
+							if(as[0].atax=="true"){
+								$('#chkAtax').prop('checked',true);
+								}else{
+									$('#chkAtax').prop('checked',false);	
+								}
+								refreshBbm();
+								sum();
+							}
+						}else{
+							alert($('#textQno2').val()+'合約不存在!!!');
+						}
 						break;
 					case q_name:
 						if (q_cur == 4)

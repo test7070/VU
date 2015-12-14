@@ -18,7 +18,7 @@
 			q_tables = 't';
 			var q_name = "vcc";
 			var q_readonly = ['txtNoa', 'txtAccno', 'txtComp','txtCardeal','txtSales', 'txtAcomp', 'txtMoney', 'txtTotal', 'txtWorker', 'txtWorker2'];
-			var q_readonlys = ['txtTotal', 'txtOrdeno', 'txtNo2','txtNoq'];
+			var q_readonlys = ['txtOrdeno', 'txtNo2','txtNoq'];
 			var q_readonlyt = ['txtMount','txtWeight'];
 			var bbmNum = [];
 			var bbsNum = [];
@@ -73,18 +73,6 @@
 			function sum() {
 				var t1 = 0, t_unit, t_mount, t_weight = 0,t_money=0, t_tax = 0, t_total = 0;
 				for (var j = 0; j < q_bbsCount; j++) {
-					t_unit = trim($('#txtUnit_' + j).val());
-					if (t_unit.length == 0 || t_unit == 'KG' || t_unit == 'M2' || t_unit == 'M' || t_unit == '批' || t_unit == '公斤' || t_unit == '噸' || t_unit == '頓' || t_unit == 'T') {
-						t_mount = $('#txtWeight_' + j).val();
-					}else{
-						t_mount = $('#txtMount_' + j).val();
-					}
-					t_weight=+q_float('txtMount_' + j);
-					
-					if($('#txtProduct_'+j).val().indexOf('費')==-1){
-						$('#txtTotal_' + j).val(round(q_mul(q_float('txtPrice_' + j), dec(t_mount)), 0));
-					}
-					
 					t_money = q_add(t_money, dec(q_float('txtTotal_' + j)));
 				}
 				if($('#chkAtax').prop('checked')){
@@ -231,10 +219,6 @@
 					}
 				});
 				
-				$('#btnClose_div_stk').click(function() {
-					$('#div_stk').hide();
-				});
-				
 				$('#lblQno1').click(function() {
 					var t_where="custno='"+$('#txtCustno').val()+"' and eweight>0 and isnull(enda,0)=0 ";
 					if(q_cur==1 || q_cur==2)
@@ -270,16 +254,16 @@
 				});
 			}
 			
-			function totalreadonly() {
+			function totalreadonly() { //1214小計開放修改
 				for (var i = 0; i < q_bbsCount; i++) {
-	                if (q_cur == 1 || q_cur==2) {
+	                /*if (q_cur == 1 || q_cur==2) {
 						if($('#txtProduct_'+i).val().indexOf('費')>-1)
 							$('#txtTotal_'+i).css('color', 'black').css('background', 'white').removeAttr('readonly');  
 						else
 							$('#txtTotal_'+i).css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
 	                }else{
 	                	$('#txtTotal_'+i).css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
-	                }
+	                }*/
                 }
             }
 			
@@ -937,7 +921,7 @@
 			function bbsAssign() {
 				for (var i = 0; i < q_bbsCount; i++) {
 					if (!$('#btnMinus_' + i).hasClass('isAssign')) {
-						$('#combOrdelist_'+i).change(function(){
+						/*$('#combOrdelist_'+i).change(function(){
 							var n = $(this).attr('id').split('_')[$(this).attr('id').split('_').length-1];
 							var thisVal = $.trim($(this).val());
 							var ValArray = thisVal.split('-');
@@ -946,30 +930,48 @@
 								$('#txtNo2_' + n).val(ValArray[1]);
 							}
 							$(this).val('');
-						});
-						$('#txtUnit_' + i).focusout(function() {
-							if (q_cur == 1 || q_cur == 2)
+						});*/
+						
+						$('#txtPrice_' + i).change(function() {
+							if (q_cur == 1 || q_cur == 2){
+								t_IdSeq = -1;
+								q_bodyId($(this).attr('id'));
+								b_seq = t_IdSeq;
+								if($('#txtProduct_'+b_seq).val().indexOf('費')>-1)
+									$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), q_float('txtMount_' + b_seq)), 0));
+								else
+									$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), q_float('txtWeight_' + b_seq)), 0));
 								sum();
+							}
 						});
-						$('#txtPrice_' + i).focusout(function() {
-							if (q_cur == 1 || q_cur == 2)
-								sum();
-						});
-						$('#txtTotal_' + i).focusout(function() {
+						$('#txtTotal_' + i).change(function() {
 							if (q_cur == 1 || q_cur == 2)
 								sum();
 						});
 						
-						$('#txtMount_' + i).focusout(function() {
+						$('#txtMount_' + i).change(function() {
 							if (q_cur == 1 || q_cur == 2){
+								t_IdSeq = -1;
+								q_bodyId($(this).attr('id'));
+								b_seq = t_IdSeq;
+								if($('#txtProduct_'+b_seq).val().indexOf('費')>-1)
+									$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), q_float('txtMount_' + b_seq)), 0));
+								else
+									$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), q_float('txtWeight_' + b_seq)), 0));
 								sum();
 								bbssum();
 							}
-								$('#btnClose_div_stk').click();
 						});
 						
-						$('#txtWeight_' + i).focusout(function() {
+						$('#txtWeight_' + i).change(function() {
 							if (q_cur == 1 || q_cur == 2){
+								t_IdSeq = -1;
+								q_bodyId($(this).attr('id'));
+								b_seq = t_IdSeq;
+								if($('#txtProduct_'+b_seq).val().indexOf('費')>-1)
+									$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), q_float('txtMount_' + b_seq)), 0));
+								else
+									$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), q_float('txtWeight_' + b_seq)), 0));
 								sum();
 								bbssum();
 							}
@@ -1031,6 +1033,7 @@
 						
 						$('#btnMinus_' + i).click(function() {
 							setTimeout(bbssum,10);
+							sum();
 						});
 					}
 				}
@@ -1067,9 +1070,11 @@
 					$('#lblSot_mount').text(FormatNumber(sot_mount));
 				else
 					$('#lblSot_mount').text('');
-				if(sot_weight!=0)
+				if(sot_weight!=0){
 					$('#lblSot_weight').text(FormatNumber(sot_weight));
-				else
+					if(q_cur==1 || q_cur==2)
+						$('#textQweight1').val(FormatNumber(sot_weight));
+				}else
 					$('#lblSot_weight').text('');
             }
 			

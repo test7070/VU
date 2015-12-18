@@ -79,7 +79,7 @@
 				if(t_ordeno.length>0)
                 	t_where += " and (noa in (select noa from view_vccs where ordeno='"+t_ordeno+"') or noa in (select noa from view_vcc where ordeno='"+t_ordeno+"'))";
                 if(t_quatno.length>0)
-                	t_where += " and (noa in (select noa from view_vccs where itemno='"+t_quatno+"') or noa in (select noa from view_vcc where zipcode='"+t_quatno+"'))";	
+                	t_where += "and (dbo.split(dbo.split(apvmemo,'##',0),'@',0)='"+t_quatno+"' or dbo.split(dbo.split(apvmemo,'##',1),'@',0)='"+t_quatno+"')";	
                 	
                 	
 				t_where = ' where=^^ ' + t_where + ' ^^ ';

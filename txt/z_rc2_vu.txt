@@ -3,14 +3,16 @@ SET QUOTED_IDENTIFIER OFF
 declare @t_accy nvarchar(10) 
 declare @t_bdate nvarchar(10) 
 declare @t_edate nvarchar(10) 
-declare @t_bmon nvarchar(7) 
-declare @t_emon nvarchar(7) 
+declare @t_bmon nvarchar(10) 
+declare @t_emon nvarchar(10) 
 declare @t_btggno nvarchar(20) 
 declare @t_etggno nvarchar(20) 
 --declare @t_bsalesno nvarchar(20) 
 --declare @t_esalesno nvarchar(20) 
 declare @t_bproductno nvarchar(30) 
 declare @t_eproductno nvarchar(30) 
+declare @t_bstoreno nvarchar(20) 
+declare @t_estoreno nvarchar(20) 
 declare @t_stype nvarchar(50) 
 declare @t_acomp nvarchar(MAX)='[13]'
 declare @t_qno nvarchar(max)
@@ -29,6 +31,8 @@ set @t_bproductno = case when '#non'=[10] then '' else [10] end
 set @t_eproductno = case when '#non'=[11] then char(255) else [11] end 
 set @t_stype = case when '#non'=[12] then '' else [12] end 
 set @t_qno = case when '#non'=[14] then '' else [14] end 
+set @t_bstoreno = case when '#non'=[15] then '' else [15] end 
+set @t_estoreno = case when '#non'=[16] then char(255) else [16] end
 --------------------------------------------------------------------------------------------------------------  
 set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
@@ -58,7 +62,8 @@ declare @result table(
 	carno nvarchar(30),
 	qhref nvarchar(max),
 	rtotal float,
-	btotal float
+	btotal float,
+	store nvarchar(max) 
 ) 
 
 insert into @result 
@@ -71,15 +76,16 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 	,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
 	,a.memo,a.addr2,b.ucolor,b.spec,b.size,b.lengthb,a.carno,'rc2'+b.accy
 	,(case when a.typea='2' then 0 else b.total end)
-	,(case when a.typea='2' then b.total else 0 end)
+	,(case when a.typea='2' then b.total else 0 end),b.store
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+((case when a.mon='' then left(a.datea,[17]) else a.mon end) between @t_bmon and @t_emon) and 
 (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
-(b.productno between @t_bproductno and @t_eproductno) and 
+(b.productno between @t_bproductno and @t_eproductno) and
+(isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and 
 (len(@t_stype)=0 or a.stype=@t_stype) and
-(len(@t_qno)=0 or a.transtart like @t_qno+'%')
+(len(@t_qno)=0 or dbo.split(dbo.split(a.transtart,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.transtart,'##',1),'@',0) = @t_qno)
 order by b.productno,gno,a.datea,a.noa 
 
 if((select count(*) from @result)>0)
@@ -108,8 +114,8 @@ SET QUOTED_IDENTIFIER OFF
 declare @t_accy nvarchar(10) 
 declare @t_bdate nvarchar(10) 
 declare @t_edate nvarchar(10) 
-declare @t_bmon nvarchar(7) 
-declare @t_emon nvarchar(7) 
+declare @t_bmon nvarchar(10) 
+declare @t_emon nvarchar(10) 
 declare @t_btggno nvarchar(20) 
 declare @t_etggno nvarchar(20) 
 --declare @t_bsalesno nvarchar(20) 
@@ -172,12 +178,12 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.datea
 		,'rc2'+b.accy,a.memo,b.ucolor,b.spec,b.size,b.lengthb
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-	  ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+	  ((case when a.mon='' then left(a.datea,[17]) else a.mon end) between @t_bmon and @t_emon) and 
 	  (a.tggno between @t_btggno and @t_etggno) and 
 	--(a.salesno between @t_bsalesno and @t_esalesno) and 
 		(b.productno between @t_bproductno and @t_eproductno) and 
 		(len(@t_stype)=0 or a.stype=@t_stype) and
-		(len(@t_qno)=0 or a.transtart like @t_qno+'%') 
+		(len(@t_qno)=0 or dbo.split(dbo.split(a.transtart,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.transtart,'##',1),'@',0) = @t_qno)
 order by b.productno,gno,a.datea,a.noa 
 
 insert into @result(gno,xproduct,mount,weight,money,tax,total) 
@@ -209,14 +215,16 @@ SET QUOTED_IDENTIFIER OFF
 declare @t_accy nvarchar(10) 
 declare @t_bdate nvarchar(10) 
 declare @t_edate nvarchar(10) 
-declare @t_bmon nvarchar(7) 
-declare @t_emon nvarchar(7) 
+declare @t_bmon nvarchar(10) 
+declare @t_emon nvarchar(10) 
 declare @t_btggno nvarchar(20) 
 declare @t_etggno nvarchar(20) 
 --declare @t_bsalesno nvarchar(20) 
 --declare @t_esalesno nvarchar(20) 
 declare @t_bproductno nvarchar(30) 
 declare @t_eproductno nvarchar(30) 
+declare @t_bstoreno nvarchar(20) 
+declare @t_estoreno nvarchar(20) 
 declare @t_stype nvarchar(50) 
 declare @t_acomp nvarchar(MAX)='[13]'
 declare @t_qno nvarchar(max)
@@ -235,6 +243,8 @@ set @t_bproductno = case when '#non'=[10] then '' else [10] end
 set @t_eproductno = case when '#non'=[11] then char(255) else [11] end 
 set @t_stype = case when '#non'=[12] then '' else [12] end 
 set @t_qno = case when '#non'=[14] then '' else [14] end 
+set @t_bstoreno = case when '#non'=[15] then '' else [15] end 
+set @t_estoreno = case when '#non'=[16] then char(255) else [16] end
 -----------------------------------------------------------
 set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
@@ -276,12 +286,13 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-	  ((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+	  ((case when a.mon='' then left(a.datea,[17]) else a.mon end) between @t_bmon and @t_emon) and 
 	  (a.tggno between @t_btggno and @t_etggno) and 
 -- (a.salesno between @t_bsalesno and @t_esalesno) and 
 	  (b.productno between @t_bproductno and @t_eproductno) and 
+	  (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and 
 	  (len(@t_stype)=0 or a.stype=@t_stype)  and
-	  (len(@t_qno)=0 or a.transtart like @t_qno+'%')
+	  (len(@t_qno)=0 or dbo.split(dbo.split(a.transtart,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.transtart,'##',1),'@',0) = @t_qno)
 order by a.tggno,a.datea,a.noa 
 
 insert into @result(gno,tggno,comp,pcount,mount,total,tax,weight,money) 
@@ -374,12 +385,12 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 		,'rc2'+b.accy,a.memo,b.ucolor,b.spec,b.size,b.lengthb
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
-((case when a.mon='' then left(a.datea,6) else a.mon end) between @t_bmon and @t_emon) and 
+((case when a.mon='' then left(a.datea,[17]) else a.mon end) between @t_bmon and @t_emon) and 
 (a.tggno between @t_btggno and @t_etggno) and 
 --(a.salesno between @t_bsalesno and @t_esalesno) and 
 (b.productno between @t_bproductno and @t_eproductno) and 
 (len(@t_stype)=0 or a.stype=@t_stype) and   
-(len(@t_qno)=0 or a.transtart like @t_qno+'%')
+(len(@t_qno)=0 or dbo.split(dbo.split(a.transtart,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.transtart,'##',1),'@',0) = @t_qno)
 order by gno,a.datea,a.noa
  
 insert @result (gno,tggno,xproduct,mount,weight,money,total)

@@ -64,14 +64,14 @@
 		        
 		        $('#lblPayc').click(function() {
 		        	if(!emp($('#txtPayc').val())){
-		        		q_box('quat_vu.aspx' + "?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + trim($('#txtPayc').val())+"';" + r_accy , '', "95%", "95%", "出貨合約");
+		        		q_box('quat_vu.aspx' + "?" + r_userno + ";" + r_name + ";" + q_time + ";charindex(','+noa+',','," + $('#txtPayc').val() + ",')>0 ;" + r_accy , '', "95%", "95%", "出貨合約");
 		        	}
 				});
 				
 				$('#txtPayc').change(function() {
 					if(!emp($('#txtPayc').val())){
-						var t_where = "where=^^ noa='" + $('#txtPayc').val() + "' ^^";
-	                	q_gt("view_quat", t_where, 1, 1, 0, 'get_quat', r_accy);
+						var t_where = "where=^^ charindex(','+noa+',','," + $('#txtPayc').val() + ",')>0 ^^";
+	                	q_gt("view_quat", t_where, 0, 0, 0, 'get_quat', r_accy);
 	                }else{
 	                	getOpay();
 	                }
@@ -304,6 +304,26 @@
                 			$('#txtCustno').val(as[0].custno);
                 			$('#txtComp').val(as[0].nick);
                 			$('#cmbCno').val(as[0].cno);
+                			
+                			var t_payc=$('#txtPayc').val().split(',');
+                			if(t_payc.length!=as.length){
+                				for (var i = 0; i < t_payc.length; i++) {
+                					for (var j = 0; j < as.length; j++) {
+                						if(t_payc[i]==as[j].noa){
+                							t_payc.splice(i, 1);
+                							i--;
+                							break;
+                						}
+                					}
+                				}
+                				var t_err='';
+                				for (var i = 0; i < t_payc.length; i++) {
+                					t_err=t_err+(t_err.length>0?',':'')+t_payc[i];
+                				}
+                				
+                				alert('【'+t_err+'】無合約號碼!!');
+                			}
+                			
                 		}else{
                 			alert('無此合約號碼!!');
                 			$('#txtPayc').val('');

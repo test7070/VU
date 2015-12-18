@@ -49,7 +49,7 @@ create table #tmp(
 insert #tmp
 select '0',case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
 ,dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,c.partno,c.typea
-,(isnull(b.money,0)/2)+isnull(b.mtotal,0),b.day,isnull(b.daymoney,0),isnull(b.bo_admin,0)+isnull(b.bo_traffic,0),b.money1,b.money2
+,(isnull(b.money,0)/2),b.day,isnull(b.daymoney,0),isnull(b.bo_admin,0)+isnull(b.bo_traffic,0),b.money1,b.money2
 ,isnull(b.addmoney,0),isnull(b.addh2_1,0)+isnull(b.addh100,0),isnull(b.bo_full,0),ISNULL(b.bo_special,0)
 ,isnull(b.bo_full,0)+ISNULL(b.bo_special,0)
 ,ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.meals,0)+ISNULL(b.tax_other,0)+ISNULL(b.tax_other2,0)
@@ -65,8 +65,8 @@ and (len(@t_part)=0 or b.partno=@t_part)
 --日薪
 insert #tmp
 select '0',case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
-,dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,c.partno,c.typea
-,(isnull(b.money,0)/2)+isnull(b.mtotal,0),b.day,isnull(b.daymoney,0),isnull(b.bo_admin,0)+isnull(b.bo_traffic,0),b.money1,b.money2
+,dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,c.partno,c.typea,isnull(b.mtotal,0)
+,b.day,isnull(b.daymoney,0),isnull(b.bo_admin,0)+isnull(b.bo_traffic,0),b.money1,b.money2
 ,isnull(b.addmoney,0),isnull(b.addh2_1,0)+isnull(b.addh100,0),isnull(b.bo_full,0),ISNULL(b.bo_special,0)
 ,isnull(b.bo_full,0)+ISNULL(b.bo_special,0)
 ,ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.meals,0)+ISNULL(b.tax_other,0)+ISNULL(b.tax_other2,0)
@@ -85,7 +85,6 @@ begin
 	select '1',typea,CHAR(255)
 	from #tmp where gno='0' group by typea
 	having typea != (select MAX(typea) from #tmp where gno='0') --最後一個分頁排除
-	
 
 	insert #tmp(gno,typea,datea,sssno,a01,a04,a07,a11,a12,a13,a14,a15,a16)
 	select '2','9',MAX(datea),CHAR(255)
@@ -111,6 +110,7 @@ dbo.getComma(a01,0) a01
 ,case when a15<=0 then null else dbo.getComma(a15,0) end a15
 ,dbo.getComma(a16,0) a16
 ,LEFT(datea,3)+'年'+LEFT(RIGHT(datea,5),2)+'月'+RIGHT(datea,2)+'日' datea
+,RIGHT(@t_xmon,2)+'月 '+@t_xkind period
 ,gno,sssno,namea,memo,partno,stype,typea
 from #tmp 
 order by typea,gno,sssno

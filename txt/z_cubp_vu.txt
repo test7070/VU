@@ -63,6 +63,7 @@ from @result
 ;
 ---------------------------------------------------------------------------------------------------------------------------------
 z_cubp_vu02:--z_cubp_vu02
+SET QUOTED_IDENTIFIER OFF 
 declare @t_bdate nvarchar(30)
 declare @t_edate nvarchar(30)
 declare @t_bmechno nvarchar(30)
@@ -95,12 +96,15 @@ declare @result table(
 	uno nvarchar(50),
 	dno int,
 	mech nvarchar(30),
-	isget int
+	isget int,
+	qhrefa nvarchar(MAX),
+	qhrefb nvarchar(MAX)
 )
 insert @result 
 select '0' gno,a.kind,a.mechno,b.comp,b.product+' '+b.spec+' '+b.size+' '+convert(nvarchar,b.lengthb)
 		+' '+b.ucolor,b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
-		,a.mech,0
+		,a.mech,0,'cuc_vu2?noa=$ordeno?'+a.accy
+		,"cub_vu?noa=\'"+a.noa+"\' -- noa=$uno?"+a.accy 
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.mechno between @t_bmechno and @t_emechno
       and  a.datea between @t_bdate and @t_edate
@@ -111,7 +115,7 @@ begin
 	insert @result 
 	select '0' gno,a.kind,a.mechno,b.comp,b.product+isnull(' '+b.spec,'')+isnull(' '+b.size,'')+case when convert(nvarchar,b.lengthb)='0' then '' else ' '+convert(nvarchar,b.lengthb) end
 			+isnull(' '+b.ucolor,''),b.class,b.hmount,b.weight,b.mount,b.need,b.memo,b.date2,b.ordeno,b.no2,b.datea,b.uno,0
-			,a.mech,1
+			,a.mech,1,'',''
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 	where a.mechno between @t_bmechno and @t_emechno
 	      and  a.datea between @t_bdate and @t_edate
@@ -146,6 +150,7 @@ select gno
 ,case when isget>0 then '<font color="red">'+dbo.getComma(mount,[2])+'</font>' else dbo.getComma(mount,[2]) end mount
 ,case when isget>0 then '<font color="red">'+dbo.getComma(weight,[3])+'</font>' else dbo.getComma(weight,[3]) end weight
 ,@t_bdate date1,@t_edate date2,@t_bmechno bmechno,@t_emechno emechno,mech,dno,mechno xmech,datea xdatea
+,qhrefa,qhrefb
 from @result
 order by xmech,xdatea,gno,dno
 ; 
@@ -244,6 +249,12 @@ outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and
 where left(a.datea,7) between @t_bmon and @t_emon
 group by a.cust,a.noa,a.bdate,a.memo,a.gen
 
+update a
+set undone=0,unfinal=stand
+from @result a 
+outer apply(select sum(case when mins=0 then 1 else 0 end) mins from view_cucs where noa=a.noa) b 
+where b.mins=0
+
 --依cuc的gen
 --delete @result where len(@t_type)>0 and isnull(gen,0)!=cast(@t_type as float)
 
@@ -324,13 +335,14 @@ create table #tmp(
 	aprice  decimal(20,2),
 )
 
-insert #tmp (gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
-select '11','ucce',a.datea,MAX(a.noa),b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,sum(b.mount),sum(b.weight),sum(b.total),0
+insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
+select '11','ucce',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0
 from view_ucce a left join view_ucces b on a.noa=b.noa 
 where a.datea<=@t_edate and b.storeno='7000'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-group by a.datea,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
+and isnull(b.productno,'')=''
+--group by a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
 
 --取起始日之前最後一次盤點並刪除此盤點時間之前的資料
 delete a
@@ -345,6 +357,7 @@ outer apply(select datea from #tmp where product=b.product and spec=b.spec and s
 where a.datea between isnull(c.datea,'') and @t_edate
 and b.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
 select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0
@@ -353,6 +366,7 @@ outer apply(select datea from #tmp where product=b.product and spec=b.spec and s
 where a.datea between isnull(c.datea,'') and @t_edate
 and a.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
 select '14','cubt',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0
@@ -361,6 +375,7 @@ outer apply(select datea from #tmp where product=b.product and spec=b.spec and s
 where a.datea between isnull(c.datea,'') and @t_edate
 and b.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
 select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0
@@ -369,6 +384,7 @@ outer apply(select datea from #tmp where product=b.product and spec=b.spec and s
 where a.datea between isnull(c.datea,'') and @t_edate
 and a.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and isnull(b.productno,'')=''
 
 --計算 成本單價
 declare @noa nvarchar(100)
@@ -403,7 +419,7 @@ set @aprice=0
 
 declare cursor_table cursor for
 select noa,noq,tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp 
-order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa
+order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa,noq
 open cursor_table
 fetch next from cursor_table
 into @noa,@noq,@tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
@@ -418,7 +434,16 @@ begin
 		set @aprice=0
 	end
 	
-	if(@tablea in ('ucce','rc2s','inas'))
+	if(@tablea='ucce')
+	begin
+		set @t_mount=@mount
+		set @t_weight=@weight
+		set @t_money=@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+		update #tmp set aweight=@avgweight,aprice=@aprice where noa=@noa and noq=@noq
+	end
+	else if(@tablea in ('rc2s','inas'))
 	begin
 		set @t_mount=@t_mount+@mount
 		set @t_weight=@t_weight+@weight
@@ -432,7 +457,10 @@ begin
 		update #tmp set aweight=@avgweight,aprice=@aprice,money=round((@weight*@aprice),0) where noa=@noa and noq=@noq
 		set @t_mount=@t_mount-@mount
 		set @t_weight=@t_weight-@weight
-		set @t_money=@t_money-round((@weight*@aprice),0)
+		if(@t_weight<0)
+			set @t_money=0
+		else
+			set @t_money=@t_money-round((@weight*@aprice),0)
 		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
 		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
 	end
@@ -452,7 +480,7 @@ deallocate cursor_table
 
 create table #result(
 	xidno int identity(1,1),
-	gno nvarchar(1),
+	gno nvarchar(2),
 	noa nvarchar(50), 
 	noq nvarchar(50), 
 	datea nvarchar(50), 
@@ -473,13 +501,15 @@ create table #result(
 	money float,
 	memo nvarchar(MAX),
 	page int,
-	idno int
+	idno int,
+	ghref nvarchar(MAX)
 ) 
 
 insert #result 
 select '2',a.noa,b.noq,a.kind,a.mechno,a.mech,ROW_NUMBER() over(partition by a.mechno order by a.mechno,a.datea) seq 
 ,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class 
 ,b.gmount,b.gweight,case when gmount>0 then round(b.gweight/b.gmount,0) else 0 end,b.storeno,c.aprice,isnull(c.money,0),b.memo,0,0
+,'cub_vu?noa=$noa?'+a.accy 
 from view_cubt b left join view_cub a on a.noa=b.noa 
 outer apply (select * from #tmp where noa=b.noa and noq=b.noq and tablea='cubt') c
 where a.datea between @t_bdate and @t_edate	and a.mechno between @t_bmechno and @t_emechno 

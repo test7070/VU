@@ -223,7 +223,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
-	  and (len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+	  and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
@@ -329,7 +329,7 @@ declare @result table(
 	(len(@t_size)=0 or @t_size like b.size) and
 	(len(@t_class)=0 or @t_class like b.class) and
 	(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
-	and (len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+	and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 	order by custno,productno,gno,datea,noa,noq 
 
 --*********************************************************************** 
@@ -411,8 +411,8 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
-(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) and 
-(len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
@@ -516,7 +516,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
-and (len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 order by custno,gno,mon,datea,noa,noq 
 
 insert into @result(gno,custno,pcount,mount,total,totax,weight) 
@@ -604,7 +604,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
-and (len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 group by a.custno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end
 
 insert into @tmp(gno,custno,custs,mon,mount,total,tax,totax,weight) 
@@ -700,8 +700,8 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
-(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) and 
-(len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 order by gno,datea,noa,noq 
 
 insert into @result (gno,xproduct,mount,weight,money,tax,total)
@@ -784,8 +784,8 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
-(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) and 
-(len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 group by b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')  
 ,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end 
 		
@@ -883,7 +883,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)  
-	  and (len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+	  and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 order by a.salesno,a.datea 
 
 insert into @tmp(gno,salesno,salesname,mount,total,tax,totax,weight) 
@@ -973,7 +973,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
-	  and (len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
+	  and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 group by a.salesno,s.namea,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end 
 
 insert into @tmp(gno,salesno,salesname,mon,mount,total,tax,totax,weight) 

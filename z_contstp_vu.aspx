@@ -74,7 +74,7 @@
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();
-				t_date.setMonth(-8);
+				t_date.setMonth(-6);
 				t_date.setDate(1);
 				t_year = t_date.getUTCFullYear();
 				t_month = t_date.getUTCMonth() + 1;

@@ -17,7 +17,7 @@
             this.errorHandler = null;
             q_tables = 't';
             var q_name = "cub";
-            var q_readonly = ['txtNoa'];
+            var q_readonly = ['txtNoa','txtWorker','txtWorker2'];
             var q_readonlys = ['txtOrdeno', 'txtNo2','txtProductno2','txtProduct2'];
             var q_readonlyt = [];
             var bbmNum = [];
@@ -85,11 +85,11 @@
                 
                 q_cmbParse("combMechno2",'1@1剪,2@2剪,3@3剪,7@7辦公室');
                 
-                if(r_userno=='B01'){
+                if(r_userno.toUpperCase()=='B01'){
 					$('#combMechno2').val('1');
-				}else if(r_userno=='B02'){
+				}else if(r_userno.toUpperCase()=='B02'){
 					$('#combMechno2').val('2');
-				}else if(r_userno=='B03'){
+				}else if(r_userno.toUpperCase()=='B03'){
 					$('#combMechno2').val('3');
 				}else{
 					$('#combMechno2').val('7');
@@ -453,7 +453,11 @@
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
 							var t_cubno=as[0].cubno;
-							q_func('cub_post.post', r_accy + ',' + encodeURI(t_cubno) + ',1');
+							var t_err=as[0].err;
+							if(t_cubno!='')
+								q_func('cub_post.post', r_accy + ',' + encodeURI(t_cubno) + ',1');
+							if(t_err.length>0)
+								alert(t_err.replace("\\n","\n"));
 						}
 						break;
 					case 'cub_post.post':
@@ -635,7 +639,12 @@
                 }*/
                 
                 sum();
-                $('#txtWorker').val(r_name);
+                
+                if(q_cur==1){
+                	$('#txtWorker').val(r_name);
+                }else{
+                	$('#txtWorker2').val(r_name);
+                }
                 
                 //入庫日沒打預設今天
 				for (var i = 0; i < q_bbsCount; i++) {
@@ -1146,9 +1155,16 @@
 					<td><select id="cmbTypea" class="txt c1"> </select></td>-->
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl" > </a></td>
-						<td colspan="4"><input id="txtMemo" type="text" class="txt c1"/></td>
+						<td colspan="4"><input id="txtMemo" type="text" class="txt c1" style="width: 99%;"/></td>
 						<td><input type="button" id="btnGettostore" value="條碼領料轉庫存" style="width:130px;"/></td>
 						<td><input type="button" id="btnDeltostore" value="條碼刪除轉庫存" style="width:130px;"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
+						<td><input id="txtWorker" type="text" class="txt c1"/></td>
+						<td> </td>
+						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
+						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
 					</tr>
 				</table>
 			</div>

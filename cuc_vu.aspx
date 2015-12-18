@@ -66,11 +66,11 @@
 				q_cmbParse("combMechno2",'1@1剪,2@2剪,3@3剪,7@7辦公室');
 				$('#combOrder').val('memo');//1124預設
 				
-				if(r_userno=='B01'){
+				if(r_userno.toUpperCase()=='B01'){
 					$('#combMechno2').val('1');
-				}else if(r_userno=='B02'){
+				}else if(r_userno.toUpperCase()=='B02'){
 					$('#combMechno2').val('2');
-				}else if(r_userno=='B03'){
+				}else if(r_userno.toUpperCase()=='B03'){
 					$('#combMechno2').val('3');
 				}else{
 					$('#combMechno2').val('7');
@@ -121,8 +121,13 @@
 	                    Lock();
 	                    isupdate=false;
 						q_gt('cucs_vu', t_where, 0, 0, 0,'importcucs', r_accy);
-						if(chk_cucs.length==0)
+						if(chk_cucs.length==0){
+							intervalupdate = setInterval(";");
+							for (var i = 0 ; i < intervalupdate ; i++) {
+							    clearInterval(i); 
+							}
 							intervalupdate=setInterval("cucsupdata()",1000*60);
+						}
 					}
                 });
                 
@@ -130,6 +135,11 @@
                 $('#btnCancels').click(function(e) {
                 	chk_cucs=new Array();
 					q_func('qtxt.query.unlockall', 'cuc_vu.txt,unlockall,'+r_userno+';'+r_name);
+					intervalupdate = setInterval(";");
+					for (var i = 0 ; i < intervalupdate ; i++) {
+					    clearInterval(i); 
+					}
+                	intervalupdate=setInterval("cucsupdata()",1000*60);
                 });
                 
                 //完工 清除所有資料
@@ -454,7 +464,9 @@
 				$('#btnCub_nouno').click(function(e) {
 					$('#div_nouno').css('top',($('#btnCub_nouno').offset().top-$('#div_nouno').height())+'px');
 					$('#div_nouno').css('left',($('#btnCub_nouno').offset().left-$('#div_nouno').width())+'px');
+					$('#textNouno').val('');
 					$('#div_nouno').show();
+					$('#textNouno').focus();
 				});
 				$('#textNouno').click(function() {
                 	q_msg($(this),'多批號領料請用,隔開');
@@ -646,6 +658,7 @@
 	                    return;
 	                }
 	                //入庫
+	                t_err='';
 	                var ts_bbu='';
 	                var bburow=document.getElementById("cucu_table").rows.length-1;
 					var hasbbu=false;
@@ -666,6 +679,10 @@
 																
 						if(!emp(ts_product) || !emp(ts_ucolor) || !emp(ts_spec) || !emp(ts_size) || !emp(ts_lengthb) || !emp(ts_class)){
 							hasbbu=true; //有資料
+							if((ts_ucolor=='定尺' || ts_ucolor=='板料') && dec(ts_lengthb)==0){
+								t_err=t_err+(t_err.length>0?'\n':'')+('第'+(j+1)+'項 '+ts_product+' '+ts_ucolor+' 米數為0');
+							}
+							
 							if (dec(ts_imount)>0 && dec(ts_iweight)>0){ //件數重量>0
 								ts_bbu=ts_bbu
 								+ts_product+"^@^"
@@ -682,7 +699,9 @@
 		                   	}
 						}
 					}
-					if(!hasbbu){
+					if(t_err.length>0){
+						alert(t_err);
+					}else if(!hasbbu){
 						alert('無入庫資料');
 					}else if(ts_bbu.length==0){
 	                   	alert('入庫件數或重量等於零。');
@@ -1119,8 +1138,13 @@
 						$('#cucs_table').append(string);
 						cucs_refresh();
 						tot_xweight_refresh();
-						if(chk_cucs.length>0)
-							clearInterval(intervalupdate);
+						if(chk_cucs.length>0){
+							//clearInterval(intervalupdate);
+							intervalupdate = setInterval(";");
+							for (var i = 0 ; i < intervalupdate ; i++) {
+							    clearInterval(i); 
+							}
+						}
 						
 						isupdate=false;
 						
@@ -1144,8 +1168,11 @@
 							var n=$(this).attr('id').replace('cucs_chk','')
 							if($(this).prop('checked')){
 								var t_err = q_chkEmpField([['combMechno', '人員組別']]);
-				                if (t_err.length > 0) {
-				                    alert(t_err);
+				                if (t_err.length > 0 || chk_cucs.length>=8) {
+				                	if(t_err.length>0)
+				                    	alert(t_err);
+				                    else 
+				                    	alert('加工項目超過8筆!!');
 				                    $(this).prop("checked",false).parent().parent().find('td').css('background', 'lavender');
 				                    $('#cucs_tr'+n+' .co1').css('background-color', 'antiquewhite');
 		                            $('#cucs_tr'+n+' .co2').css('background-color', 'lightpink');
@@ -1158,7 +1185,6 @@
 									if(cucsno!='' && erate<=0.03){
 										$('#cucs_tr'+n).find('td').css('background', 'lightgrey');
 									}
-		                            
 				                    return;
 				                }
 							}
@@ -1602,10 +1628,18 @@
 					}
 					//Unlock();
 					tot_xweight_refresh();
-					if(chk_cucs.length==0)
+					if(chk_cucs.length==0){
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
-					else
-						clearInterval(intervalupdate);
+					}else{
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
+					}
 				}
 				if(t_name.indexOf("getcanunlock_")>-1){
 					var n=t_name.split('_')[1];
@@ -1664,10 +1698,19 @@
 					//Unlock();
 					tot_xweight_refresh();
 					
-					if(chk_cucs.length==0)
+					if(chk_cucs.length==0){
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
-					else
-						clearInterval(intervalupdate);
+					}else{
+						//clearInterval(intervalupdate);
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
+					}
 				}
 			}
 			
@@ -1705,6 +1748,10 @@
 						cucsupdata();
 						$('#textMemo').val('');//1117 欄位要清空
 						//並重新啟動刷新
+						intervalupdate = setInterval(";");
+						for (var i = 0 ; i < intervalupdate ; i++) {
+						    clearInterval(i); 
+						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
 						break;
 					case 'qtxt.query.cucttocubt':
@@ -1772,7 +1819,11 @@
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
 							var t_cubno=as[0].cubno;
-							q_func('cub_post.post.nouno', r_accy + ',' + encodeURI(t_cubno) + ',1');
+							var t_err=as[0].err;
+							if(t_cubno!='')
+								q_func('cub_post.post.nouno', r_accy + ',' + encodeURI(t_cubno) + ',1');
+							if(t_err.length>0)
+								alert(t_err.replace("\\n","\n"));
 						}
 						break;
 					case 'cub_post.post.nouno':

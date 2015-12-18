@@ -65,7 +65,16 @@
                     },{
                         type : '6', //[14] //判斷顯示小數點與其他判斷
                         name : 'qno',
-                      
+                    }, {
+						type : '2', //[15][16]
+						name : 'xstore',
+						dbf : 'store',
+						index : 'noa,store',
+						src : 'store_b.aspx'
+					}, {
+                        type : '0', //[17] //判斷顯示小數點與其他判斷
+                        name : 'lenm',
+                        value : r_lenm
                     }]
 				});
 				q_popAssign();
@@ -115,22 +124,22 @@
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
                 
-				 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
-								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
+				 	var t_where="where=^^left(datea,7) between '"+$('#txtMon1').val()+"' and '"+$('#txtMon2').val()+
+								"' and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end order by datea desc,noa desc  --^^ stop=999 "
 					q_gt('cont',t_where, 0, 0, 0, "cont"); 
 				 
                  $('.c3.text').change(function(){
-                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
-								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
+                 	var t_where="where=^^left(datea,7) between '"+$('#txtMon1').val()+"' and '"+$('#txtMon2').val()+
+								"' and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end order by datea desc,noa desc  --^^ stop=999 "
 					q_gt('cont',t_where, 0, 0, 0, "cont");               
                  });
                  $('c2.text').change(function(){
-                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
-                 				"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
+                 	var t_where="where=^^left(datea,7) between '"+$('#txtMon1').val()+"' and '"+$('#txtMon2').val()+
+                 				"' and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end order by datea desc,noa desc  --^^ stop=999 "
                  });
                  $('#combQno').click(function() {       	
-                 	var t_where="where=^^datea between '"+$('#txtMon1').val()+"/01' and '"+$('#txtMon2').val()+
-								"'^^ and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end "
+                 	var t_where="where=^^left(datea,7) between '"+$('#txtMon1').val()+"' and '"+$('#txtMon2').val()+
+								"' and tggno between '"+$('#txtTgg1a').val()+"' and case when isnull('"+$('#txtTgg2a').val()+"','')='' then char(255) else '"+$('#txtTgg2a').val()+"' end order by datea desc,noa desc  --^^ stop=999 "
 					q_gt('cont',t_where, 0, 0, 0, "cont");
                  });
                 $('#combQno').change(function() {

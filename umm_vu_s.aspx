@@ -76,8 +76,10 @@
                 + q_sqlPara2("datea", t_bdate, t_edate) 
                 + q_sqlPara2("accno", t_accno) 
                 + q_sqlPara2("noa", t_noa) 
-				+ q_sqlPara2("cno", t_cno)
-				+ q_sqlPara2("payc", t_payc);
+				+ q_sqlPara2("cno", t_cno);
+				
+				if(t_payc.length>0)
+					t_where += " and charindex('" + t_payc + "',payc)>0";
 				if (t_cust.length>0)
                     t_where += " and charindex('" + t_cust + "',comp)>0";
                 if ($('#cmbPart').val().length>0)

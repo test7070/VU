@@ -124,17 +124,21 @@
                 $('#txtXdate1').val(q_date());
                 $('#txtXdate2').val(q_date());
                 
-                $('#txtXmon1').val(q_cdn(q_date().substring(0,r_lenm)+'/01',-70).substring(0,r_lenm));
+                //1204 預設兩個月 與類別預設顯示 未結案
+                $('#txtXmon1').val(q_cdn(q_date().substring(0,r_lenm)+'/01',-25).substring(0,r_lenm));
                 $('#txtXmon2').val(q_date().substring(0,r_lenm));
+                $('#Xtype select').val('0');
  				
- 				$('#txtXmon1').change(function(){			
- 					if(dec($('#txtXmon2').val().substring(r_len+1,r_lenm))-($('#txtXmon1').val().substring(r_len+1,r_lenm)) > 3)
- 						alert("月份間距最多選擇3個月");
+ 				/*$('#txtXmon1').blur(function(){
+ 					if((dec($('#txtXmon2').val().substring(0,r_len))+dec($('#txtXmon2').val().substring(r_len+1,r_lenm)))
+ 					-(dec($('#txtXmon1').val().substring(0,r_len))+dec($('#txtXmon1').val().substring(r_len+1,r_lenm))) >= 2)
+ 						alert("月份間距最多選擇2個月");
  				});
- 				$('#txtXmon2').change(function(){
- 					if(dec($('#txtXmon2').val().substring(r_len+1,r_lenm))-dec($('#txtXmon1').val().substring(r_len+1,r_lenm)) > 3)
- 						alert("月份間距最多選擇3個月");
- 				});
+ 				$('#txtXmon2').blur(function(){
+ 					if((dec($('#txtXmon2').val().substring(0,r_len))+dec($('#txtXmon2').val().substring(r_len+1,r_lenm)))
+ 					-(dec($('#txtXmon1').val().substring(0,r_len))+dec($('#txtXmon1').val().substring(r_len+1,r_lenm))) >= 2)
+ 						alert("月份間距最多選擇2個月");
+ 				});*/
  				
  				q_gt('spec', '1=1 ', 0, 0, 0, "spec");
  				

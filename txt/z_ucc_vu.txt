@@ -118,6 +118,19 @@ and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and a.storeno='7000' and isnull(b.productno,'')=''
 
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '2','cubs',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,null,null,null
+from view_cub a left join view_cubs b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+--and b.storeno='7000' 
+and isnull(b.productno,'')='' and isnull(b.productno2,'')='' and isnull(b.product,'')!=''
+
 declare @tablea nvarchar(100)
 declare @storeno nvarchar(100)
 declare @x_storeno nvarchar(100)
@@ -148,7 +161,7 @@ set @aprice=0
 
 --板料倉庫在7000
 declare cursor_table cursor for
-select tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp 
+select tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp where tablea!='cubs' 
 order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa,noq
 open cursor_table
 fetch next from cursor_table
@@ -217,9 +230,12 @@ delete #tmp where mount=0 or weight=0 or gno!='2'
 if((select count(*) from #tmp)>0)
 begin
 	insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-	select '3','datea','','',product,spec,size,0,'','',sum(mount),SUM(weight),SUM(money)
-	,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
-	,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
+	select '3','datea','','',product,spec,size,0,'',''
+	,SUM(case when tablea='cubs' then 0 else mount end)
+	,SUM(case when tablea='cubs' then 0 else weight end)
+	,SUM(case when tablea='cubs' then 0 else money end)
+	,case when SUM(case when tablea='cubs' then 0 else mount end)=0 then 0 else SUM(case when tablea='cubs' then 0 else weight end)/SUM(case when tablea='cubs' then 0 else mount end) end
+	,case when SUM(case when tablea='cubs' then 0 else weight end)=0 then 0 else SUM(case when tablea='cubs' then 0 else money end)/SUM(case when tablea='cubs' then 0 else weight end) end
 	from #tmp group by product,spec,size
 	
 	insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -234,7 +250,7 @@ update a
 set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
 from #tmp a
 outer apply (select * from (
-	select ROW_NUMBER() over (order by product,cast(dbo.get_num(size) as int),spec,gno,lengthb,class)rr,* from #tmp
+	select ROW_NUMBER() over (order by product,cast(dbo.get_num(size) as int),spec,cast(gno as int),tablea desc,lengthb,class)rr,* from #tmp
 	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
 ) b
 
@@ -257,7 +273,7 @@ end
 declare @totpage int= isnull((select MAX(page) from #tmp),0)
 declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')
 
-select ROW_NUMBER() over (partition by product,spec,size,gno order by product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class) rr
+select ROW_NUMBER() over (partition by product,spec,size,gno order by page,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),tablea desc,lengthb,class) rr
 ,dbo.getComma(mount,[2])mount
 ,dbo.getComma(weight,[3])weight
 ,dbo.getComma(avgweight,[3])avgweight
@@ -265,9 +281,10 @@ select ROW_NUMBER() over (partition by product,spec,size,gno order by product,ca
 ,dbo.getComma(money,0)money
 ,@today today
 ,@totpage totpage
-,* 
+,case when tablea='cubs' then 'cub_vu?noa=$noa' else '' end ghref
+,*
 from #tmp order by page,case when tablea='Paging' then 3 when tablea='title' then 1 else 2 end
-,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),lengthb,class,idno
+,product,cast(dbo.get_num(size) as int),spec,cast(gno as int),tablea desc,lengthb,class,idno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

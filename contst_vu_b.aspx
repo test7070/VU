@@ -74,7 +74,9 @@
 					<td style="width:20%;"><input class="txt" id="txtDatea.*" type="text" style="width:98%;"  readonly="readonly" /></td>-->
 					<td style="width:15%;"><input class="txt" id="txtEarnest.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
 					<td style="width:20%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
-					<td style="width:40%;"><input class="txt" id="txtMemo.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
+					<td style="width:40%;">
+						<textarea class="txt" id="txtMemo.*" cols="10" rows="2" style="width:98%;text-align: left;"  readonly="readonly" > </textarea>
+					</td>
 				</tr>
 			</table>
 			<!--#include file="../inc/brow_ctrl.inc"-->

@@ -68,7 +68,7 @@ declare @result table(
 	money float
 ) 
 insert into @result 
-select '91' gno,ROW_NUMBER()over(order by a.datea,a.noa,b.noq), a.noa noa, b.noq noq, a.typea typea, a.datea datea, (case when a.mon='' then left(a.datea,7) else a.mon end), a.custno, a.comp 
+select '91' gno,ROW_NUMBER()over(order by a.datea,a.custno,a.noa,b.noq), a.noa noa, b.noq noq, a.typea typea, a.datea datea, (case when a.mon='' then left(a.datea,7) else a.mon end), a.custno, a.comp 
 		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+ case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end  + isnull(b.ucolor,'')
 		,b.unit, b.mount, b.weight, b.price, b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 		,a.invono,v.datea,v.money
@@ -89,8 +89,8 @@ where (a.datea between @t_bdate and @t_edate) and
 	  and (len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
 order by a.datea,gno,noa,noq 
 
-insert into @result(gno,rec,datea,noa,noq,mount,price,total,money,weight) 
-select '92',MAX(rec),datea,noa,'999',
+insert into @result(gno,rec,datea,noa,noq,custno,mount,price,total,money,weight) 
+select '92',MAX(rec),datea,noa,'999',MAX(custno),
 	   sum((case typea when '1' then mount else (-1)*mount end)), 
 	   sum((case typea when '1' then price else (-1)*price end)), 
 	   sum((case typea when '1' then total else (-1)*total end)),
@@ -107,8 +107,8 @@ select '93',MAX(rec),datea,custno,MAX(noa),'999',
 	   sum((case typea when '1' then weight else (-1)*weight end)) 
 from @result where gno='91' group by datea,custno 
 
-insert into @result(gno,rec,datea,noa,noq,mount,price,total,money,weight) 
-select '94',MAX(rec),datea,MAX(noa),'999',
+insert into @result(gno,rec,datea,noa,noq,custno,mount,price,total,money,weight) 
+select '94',MAX(rec),datea,MAX(noa),'999',MAX(custno),
 	   sum((case typea when '1' then mount else (-1)*mount end)), 
 	   sum((case typea when '1' then price else (-1)*price end)), 
 	   sum((case typea when '1' then total else (-1)*total end)),
@@ -116,12 +116,12 @@ select '94',MAX(rec),datea,MAX(noa),'999',
 	   sum((case typea when '1' then weight else (-1)*weight end)) 
 from @result where gno='91' group by datea 
 
-insert into @result(gno,rec,datea,noa,noq,mount,price,total,money,weight) 
-select '95',MAX(rec),MAX(datea),MAX(noa),'999',sum(mount),sum(price),sum(total),sum(money),sum(weight) 
+insert into @result(gno,rec,datea,noa,noq,custno,mount,price,total,money,weight) 
+select '95',MAX(rec),MAX(datea),MAX(noa),'999',MAX(custno),sum(mount),sum(price),sum(total),sum(money),sum(weight) 
 from @result a where gno='93' group by left(datea,7) 
 
-insert into @result(gno,rec,datea,noa,noq) 
-select '96',MAX(rec),datea,MAX(noa),'999'
+insert into @result(gno,rec,datea,noa,noq,custno) 
+select '96',MAX(rec),datea,MAX(noa),'999',MAX(custno)
 from @result where gno='91' group by datea
 
 insert into @result(gno,rec,datea,custno,noa,noq) 
@@ -129,7 +129,14 @@ select '97',MIN(rec)-1,MIN(datea),custno,MIN(noa),'000'
 from @result where gno='91' group by datea,custno 
 --*************************************************************************	
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
-update @result set datea = '',noa='',typea='' where noq!='001' and gno='91'
+
+update @result set datea = '',noa='',typea=''
+from @result a
+left join(
+	select noa,MIN(noq)noq from @result where gno ='91' group by noa
+)b on a.noa=b.noa
+where a.noa=b.noa and a.noq!=b.noq and a.gno='91'
+
 update @result set gno='0' where gno='91' 
 update @result set gno='1' where gno='92' 
 update @result set gno='2' where gno='93'

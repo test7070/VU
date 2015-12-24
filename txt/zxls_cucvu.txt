@@ -165,7 +165,7 @@ begin
 	execute sp_executesql @cmd
 	
 	set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2)
-				select noa,noq,ordeno,right("000"+no2,3)no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2
+				select noa,noq,ordeno,right("000"+no2,3)no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,bmemo,size2
 				from #z_cucvu'
 	execute sp_executesql @cmd
 end

@@ -14,6 +14,7 @@
 			aPop = new Array();
 			var intervalupdate;
 			var chk_cucs=[]; //儲存要加工的cucs資料
+			var dialog_rep=false;
 			
 			$(document).ready(function() {
 				_q_boxClose();
@@ -23,7 +24,20 @@
                 q_gt('color', '1=1 ', 0, 0, 0, "");
 				q_gt('class', '1=1 ', 0, 0, 0, "");
 				q_gt('mech', '1=1 ', 0, 0, 0, "");
+				
+				setInterval("dialog_show()",1000*5);
 			});
+			
+			function dialog_show() {
+				var t_time=padL(new Date().getHours(), '0', 2)+':'+padL(new Date().getMinutes(),'0',2);
+				if(t_time=='17:00' && !dialog_rep){
+					$('#dialog').show();
+					dialog_rep=true;
+				}
+				if(t_time!='17:00'){
+					dialog_rep=false;
+				}
+			}
 			
 			var isupdate=false; //表示更新資料
 			function cucsupdata() {
@@ -76,6 +90,11 @@
 					$('#combMechno2').val('7');
 				}
 				
+				//關閉彈出視窗
+				$('#btnDialog_close').click(function() {
+					$('#dialog').hide();
+				});
+				
 				//登出
 				$('#logout').click(function() {
 					q_logout(q_idr);
@@ -127,6 +146,7 @@
 							    clearInterval(i); 
 							}
 							intervalupdate=setInterval("cucsupdata()",1000*60);
+							setInterval("dialog_show()",1000*5);
 						}
 					}
                 });
@@ -140,6 +160,7 @@
 					    clearInterval(i); 
 					}
                 	intervalupdate=setInterval("cucsupdata()",1000*60);
+                	setInterval("dialog_show()",1000*5);
                 });
                 
                 //完工 清除所有資料
@@ -1144,6 +1165,7 @@
 							for (var i = 0 ; i < intervalupdate ; i++) {
 							    clearInterval(i); 
 							}
+							setInterval("dialog_show()",1000*5);
 						}
 						
 						isupdate=false;
@@ -1634,11 +1656,13 @@
 						    clearInterval(i); 
 						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
+						setInterval("dialog_show()",1000*5);
 					}else{
 						intervalupdate = setInterval(";");
 						for (var i = 0 ; i < intervalupdate ; i++) {
 						    clearInterval(i); 
 						}
+						setInterval("dialog_show()",1000*5);
 					}
 				}
 				if(t_name.indexOf("getcanunlock_")>-1){
@@ -1704,12 +1728,14 @@
 						    clearInterval(i); 
 						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
+						setInterval("dialog_show()",1000*5);
 					}else{
 						//clearInterval(intervalupdate);
 						intervalupdate = setInterval(";");
 						for (var i = 0 ; i < intervalupdate ; i++) {
 						    clearInterval(i); 
 						}
+						setInterval("dialog_show()",1000*5);
 					}
 				}
 			}
@@ -1753,6 +1779,7 @@
 						    clearInterval(i); 
 						}
 						intervalupdate=setInterval("cucsupdata()",1000*60);
+						setInterval("dialog_show()",1000*5);
 						break;
 					case 'qtxt.query.cucttocubt':
 						var as = _q_appendData("tmp0", "", true, true);
@@ -2466,6 +2493,23 @@
 						<input id="btnOk_div_nouno" type="button" value="領料">
 						<input id="btnClose_div_nouno" type="button" value="取消">
 					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="dialog" style="position:absolute; top:200px; left:350px;font-size: 30px;color: red;font-weight: bold;">
+			<table style="border: 2px solid gray;padding: 50px;background-color: cornsilk;">
+				<tr>
+					<td>注意事項：</td>
+				</tr>
+				<tr> 
+					<td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1.請務必輸入正確組別</td>
+				</tr>
+				<tr>
+					<td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2.確認所在機台是否正確</td>
+				</tr>
+				<tr><td> </td></tr>
+				<tr style="text-align: center;">
+					<td><BR><input type='button' id='btnDialog_close' style='font-size:20px;' value="關閉"/></td>
 				</tr>
 			</table>
 		</div>

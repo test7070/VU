@@ -119,7 +119,7 @@ and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and a.storeno='7000' and isnull(b.productno,'')=''
 
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '2','cubs','',b.uno,'',b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
+select '2','cubs','',b.uno,'',b.product,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
 where b.ucolor='板料' and a.datea<=@t_edate 
@@ -130,7 +130,7 @@ and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 --and b.storeno='7000' 
 and isnull(b.productno,'')='' and isnull(b.productno2,'')='' and isnull(b.product,'')!=''
-group by b.uno,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,c.umount,c.uweight
+group by b.uno,b.product,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
 
 declare @tablea nvarchar(100)
 declare @storeno nvarchar(100)

@@ -129,7 +129,7 @@ and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 --and b.storeno='7000' 
-and isnull(b.productno,'')='' and isnull(b.productno2,'')='' and isnull(b.product,'')!=''
+and isnull(b.productno,'')='' and isnull(b.product,'')!='' --and isnull(b.productno2,'')=''
 group by b.uno,b.product,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
 
 declare @tablea nvarchar(100)

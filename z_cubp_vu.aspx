@@ -80,6 +80,13 @@
 						type : '5',
 						name : 'xorder',
 						value :('noa@案號,comp@客戶,bdate@預交日').split(',')
+					}, {//[18][19]
+						type : '1',
+						name : 'xtime'
+					},{//[20]
+						type : '5',
+						name : 'xsheet',
+						value :('Y@含板料,N@不含板料').split(',')
 					}]
 				});
                 q_popAssign();
@@ -98,6 +105,8 @@
 	             $('#txtXdate2').mask(r_picd);
 	             $('#txtXmon1').mask(r_picm);
 	             $('#txtXmon2').mask(r_picm);
+	             $('#txtXtime1').mask('99:99');
+	             $('#txtXtime2').mask('99:99');
            
                 /*var t_date, t_year, t_month, t_day;
                 t_date = new Date();

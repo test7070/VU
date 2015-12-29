@@ -161,12 +161,18 @@ declare @t_edate nvarchar(30)
 declare @t_bmechno nvarchar(30)
 declare @t_emechno nvarchar(30)
 declare @t_showget nvarchar(30)
+declare @t_btime nvarchar(30)
+declare @t_etime nvarchar(30)
+declare @t_sheet nvarchar(30)
 
 set @t_bdate = case when '#non'=[6] then '' else [6] end 
 set @t_edate = case when '#non'=[7] then char(255) else [7] end 
 set @t_bmechno = case when '#non'=[8] then '' else [8] end 
 set @t_emechno = case when '#non'=[9] then char(255) else [9] end
 set @t_showget = case when '#non'=[16] then 'N' else [16] end
+set @t_btime = case when '#non'=[18] then '' else [18] end 
+set @t_etime = case when '#non'=[19] then char(255) else [19] end 
+set @t_sheet = case when '#non'=[20] then 'N' else [20] end 
 -----------------------------------------------------------------------------------------------------
 declare @result table(
 	gno nvarchar(1),
@@ -178,14 +184,14 @@ declare @result table(
 )
 
 insert @result 
-select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6)
- 	   end ,a.mechno,a.mech,sum(b.mount),SUM(b.weight)
+select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end ,a.mechno,a.mech,sum(b.mount),SUM(b.weight)
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
-	  and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
-	  and (@t_showget='Y' or  (b.mount>=0 or b.weight>=0) )
-group by case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6)
- 		 end,a.mechno,a.mech
+	and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
+	and (@t_showget='Y' or  (b.mount>=0 or b.weight>=0) )
+	and ISNULL(left(right(a.kind,8),5),'') between @t_btime and @t_etime
+	and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
+group by case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end,a.mechno,a.mech
 
 insert @result (gno,mon,mount,weight)
 select '1',mon,SUM(mount),sum(weight)
@@ -595,6 +601,7 @@ declare @t_emechno nvarchar(30)
 declare @t_pno nvarchar(50)
 declare @t_spec nvarchar(50)
 declare @t_size nvarchar(50)
+declare @t_sheet nvarchar(30)
 
 set @t_rank = case when '#non'='[5]' then '' else '[5]' end
 set @t_bdate = case when '#non'=[6] then '' else [6] end 
@@ -604,6 +611,7 @@ set @t_emechno = case when '#non'=[9] then char(255) else [9] end
 set @t_pno = case when '#non'=[13] then '' else [13] end
 set @t_spec = case when '#non'=[14] then '' else [14] end
 set @t_size = case when '#non'=[15] then '' else [15] end
+set @t_sheet = case when '#non'=[20] then 'N' else [20] end 
  -----------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -642,6 +650,7 @@ from view_cub a left join view_cubs b on a.noa=b.noa
 where a.datea between @t_bdate and @t_edate
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and isnull(b.uno,'')!='' and (b.mount<=0 or b.weight<=0) 
+and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
 and exists( select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) 
 
 if((select count(*) from #tmp)>0)

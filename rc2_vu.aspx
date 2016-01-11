@@ -1331,8 +1331,8 @@
 						<td><select id="combPaytype" class="txt c1" onchange='cmbPaytype_chg()'> </select></td>
 						<td><span> </span><a id='lblTrantype' class="lbl"> </a></td>
 						<td colspan="2"><select id="cmbTrantype" class="txt c1"> </select></td>
-						<td><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
-						<td><input id="txtAccno" type="text" class="txt c1"/></td>
+						<td style="display: none;"><span> </span><a id='lblAccc' class="lbl btn"> </a></td>
+						<td style="display: none;"><input id="txtAccno" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblCardeal' class="lbl btn"> </a></td>

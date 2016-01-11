@@ -89,7 +89,11 @@
                     }, {
                         type : '1', //[20][21]
                         name : 'xordeno'
-                    }]
+                    },{//[22]
+						type : '5',
+						name : 'xsheet',
+						value :('Y@含板料,N@不含板料').split(',')
+					}]
                 });
                 q_popAssign();
                 q_getFormat();

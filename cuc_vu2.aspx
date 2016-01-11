@@ -248,7 +248,7 @@
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2)
 								$('#txtSpec_'+b_seq).val($('#combSpec_'+b_seq).find("option:selected").text());
-							bbsweight(b_seq);
+							//bbsweight(b_seq);
 						});
 						
 						$('#txtLengthb_'+j).change(function() {

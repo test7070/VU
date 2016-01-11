@@ -615,6 +615,7 @@ declare @t_bcustno nvarchar(50)
 declare @t_ecustno nvarchar(50)
 declare @t_bordeno nvarchar(50)
 declare @t_eordeno nvarchar(50)
+declare @t_sheet nvarchar(30)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -630,6 +631,7 @@ set @t_bcustno=case when '#non' = [18] then '' else [18] end
 set @t_ecustno=case when '#non' = [19] then char(255)  else [19] end
 set @t_bordeno=case when '#non' = [20] then '' else [20] end
 set @t_eordeno=case when '#non' = [21] then char(255)  else [21] end
+set @t_sheet = case when '#non'=[22] then 'N' else [22] end 
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -675,6 +677,7 @@ and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
 and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
 and isnull(c.custno,'') between @t_bcustno and @t_ecustno
 and isnull(b.ordeno,'') between @t_bordeno and @t_eordeno
+and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
 
 if((select count(*) from #tmp)>0)
 begin

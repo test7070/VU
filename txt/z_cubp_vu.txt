@@ -534,7 +534,7 @@ begin
 	,case when SUM(gweight)=0 then 0 else round(sum(money)/SUM(gweight),0) end,sum(money) 
 	from #result where gno='3' 
 
-	declare @pageline int =30
+	declare @pageline int =25
 
 	--更新目前的順序,頁數
 	update a

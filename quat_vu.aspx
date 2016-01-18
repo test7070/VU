@@ -318,7 +318,7 @@
 				if ($('#checkCopy').is(':checked'))
 					curData.paste();
 				
-				$('#chkIsproj').attr('checked', true);
+				$('#chkIsproj').attr('checked', false);
 				
 				$('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val('AUTO');
 				//104/08/24開放可以修改

@@ -99,7 +99,13 @@
 						type : '5',
 						name : 'xsheet',
 						value :('Y@含板料,N@不含板料').split(',')
-					}]
+					},{//[21][22]
+                        type : '2',
+                        name : 'xcust',
+                        dbf : 'cust',
+                        index : 'noa,comp',
+                        src : 'cust_b.aspx'
+                    }]
 				});
                 q_popAssign();
 				q_getFormat();

@@ -1900,12 +1900,20 @@
 						}
 						$('#lblMount_'+n).text(t_mount);
 						$('#lblWeight_'+n).text(t_weight);
-						$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
+						if(t_mount==0){
+							$('#textAvgweight_'+n).val(0);
+						}else{
+							$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
+						}
 						
 						if(dec($('#textGmount_'+n).val())>t_mount){
 							alert('領料件數大於庫存件數!!');
 							$('#textGmount_'+n).val(0);
 							$('#textMemo_'+n).focus();
+						}
+						
+						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount && dec($('#textGweight_'+n).val())!=t_weight){
+							$('#textGweight_'+n).val(t_weight);
 						}
 						
 						if(dec($('#textGweight_'+n).val())>t_weight){
@@ -1914,7 +1922,11 @@
 							$('#textMemo_'+n).focus();
 						}
 						
-						$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount){
+							$('#textGweight_'+n).val(t_weight);
+						}else{
+							$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+						}
 					}else{
 						alert('無此物品!!');
 						$('#textMemo_'+n).focus();
@@ -1941,11 +1953,20 @@
 						if(dec($('#textGmount_'+n).val())>t_mount){
 							$('#textGmount_'+n).val(0);
 						}
+						
+						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount && dec($('#textGweight_'+n).val())!=t_weight){
+							$('#textGweight_'+n).val(t_weight);
+						}
+						
 						if(dec($('#textGweight_'+n).val())>t_weight){
 							$('#textGmount_'+n).val(0);
 						}
 						
-						$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount ){
+							$('#textGweight_'+n).val(t_weight);
+						}else{
+							$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+						}
 					}else{
 						$('#textAvgweight_'+n).val(0);
 						$('#textGweight_'+n).val(0);
@@ -2022,13 +2043,22 @@
 							$('#textGmount_'+n).val(0);
 							stkupdate=-1;
 						}
+						
+						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount && dec($('#textGweight_'+n).val())!=t_weight){
+							$('#textGweight_'+n).val(t_weight);
+						}
+						
 						if(dec($('#textGweight_'+n).val())>t_weight){
 							alert('領料重量大於庫存重量!!');
 							$('#textGmount_'+n).val(0);
+							$('#textGweight_'+n).val(0);
 							stkupdate=-1;
 						}
-						
-						$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount){
+							$('#textGweight_'+n).val(t_weight);
+						}else{
+							$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+						}
 					}else{
 						$('#textAvgweight_'+n).val(0);
 						$('#textGweight_'+n).val(0);

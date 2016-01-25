@@ -444,30 +444,42 @@
 						}else if(qcust1 && qcust1!=trim($('#txtCustno').val()) || qcust2 && qcust2!=trim($('#txtCustno').val())){
 							alert('合約客戶與出貨客戶不同!!');
 						}else{
-							var t_where = "where=^^ (1=0 "+(!emp($('#textQno1').val())?" or charindex('"+$('#textQno1').val()+"',apvmemo)>0 ":'')+(!emp($('#textQno2').val())?" or charindex('"+$('#textQno2').val()+"',apvmemo)>0 ":'')+ ") and noa!='"+$('#txtNoa').val()+"' ^^";
+							var t_where = "where=^^ (1=0 "+(!emp($('#textQno1').val())?" or charindex('"+$('#textQno1').val()+"',apvmemo)>0 ":'')+(!emp($('#textQno2').val())?" or charindex('"+$('#textQno2').val()+"',apvmemo)>0 ":'')+ ")  ^^"; //and noa!='"+$('#txtNoa').val()+"'
 							q_gt('view_vcc', t_where, 0, 0, 0, "quat_view_vcc", r_accy);
 						}
 						break;
 					case 'quat_view_vcc':
 						var as = _q_appendData("view_vcc", "", true);
 						for ( i = 0; i < as.length; i++) {
-							var t_quat=as[i].apvmemo.split('##');
-							if(t_quat[0]!=undefined){
-								var r_quat=t_quat[0].split('@');
-								if(r_quat[0]==$('#textQno1').val()){
-									q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+							if(as[i].noa!=$('#txtNoa').val()){
+								var t_quat=as[i].apvmemo.split('##');
+								if(t_quat[0]!=undefined){
+									var r_quat=t_quat[0].split('@');
+									if(r_quat[0]==$('#textQno1').val()){
+										q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+									}
+									if(r_quat[0]==$('#textQno2').val()){
+										q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+									}
 								}
-								if(r_quat[0]==$('#textQno2').val()){
-									q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+								if(t_quat[1]!=undefined){
+									var r_quat=t_quat[1].split('@');
+									if(r_quat[0]==$('#textQno1').val()){
+										q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+									}
+									if(r_quat[0]==$('#textQno2').val()){
+										q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+									}
 								}
-							}
-							if(t_quat[1]!=undefined){
-								var r_quat=t_quat[1].split('@');
-								if(r_quat[0]==$('#textQno1').val()){
-									q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+							}else{
+								var t_quat=as[i].apvmemo.split('##');
+								if(t_quat[0]!=undefined){
+									var r_quat=t_quat[0].split('@');
+									t_cont1=r_quat[0];
 								}
-								if(r_quat[0]==$('#textQno2').val()){
-									q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+								if(t_quat[1]!=undefined){
+									var r_quat=t_quat[1].split('@');
+									t_cont2=r_quat[0];
 								}
 							}
 						}

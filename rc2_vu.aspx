@@ -387,30 +387,42 @@
 						}else if((!emp($('#textQno1').val()) && qtgg1!=trim($('#txtTggno').val())) || (!emp($('#textQno2').val()) && qtgg2!=trim($('#txtTggno').val()))){
 							alert('合約廠商與進貨廠商不同!!');
 						}else{
-							var t_where = "where=^^ (1=0 "+(!emp($('#textQno1').val())?" or charindex('"+$('#textQno1').val()+"',transtart)>0 ":'')+(!emp($('#textQno2').val())?" or charindex('"+$('#textQno2').val()+"',transtart)>0 ":'')+ ") and noa!='"+$('#txtNoa').val()+"' ^^";
+							var t_where = "where=^^ (1=0 "+(!emp($('#textQno1').val())?" or charindex('"+$('#textQno1').val()+"',transtart)>0 ":'')+(!emp($('#textQno2').val())?" or charindex('"+$('#textQno2').val()+"',transtart)>0 ":'')+ ") ^^"; //and noa!='"+$('#txtNoa').val()+"'
 							q_gt('view_rc2', t_where, 0, 0, 0, "cont_view_rc2", r_accy);
 						}
 						break;
 					case 'cont_view_rc2':
 						var as = _q_appendData("view_rc2", "", true);
 						for ( i = 0; i < as.length; i++) {
-							var t_quat=as[i].transtart.split('##');
-							if(t_quat[0]!=undefined){
-								var r_quat=t_quat[0].split('@');
-								if(r_quat[0]==$('#textQno1').val()){
-									q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+							if(as[i].noa!=$('#txtNoa').val()){
+								var t_quat=as[i].transtart.split('##');
+								if(t_quat[0]!=undefined){
+									var r_quat=t_quat[0].split('@');
+									if(r_quat[0]==$('#textQno1').val()){
+										q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+									}
+									if(r_quat[0]==$('#textQno2').val()){
+										q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+									}
 								}
-								if(r_quat[0]==$('#textQno2').val()){
-									q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+								if(t_quat[1]!=undefined){
+									var r_quat=t_quat[1].split('@');
+									if(r_quat[0]==$('#textQno1').val()){
+										q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+									}
+									if(r_quat[0]==$('#textQno2').val()){
+										q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+									}
 								}
-							}
-							if(t_quat[1]!=undefined){
-								var r_quat=t_quat[1].split('@');
-								if(r_quat[0]==$('#textQno1').val()){
-									q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+							}else{
+								var t_quat=as[i].transtart.split('##');
+								if(t_quat[0]!=undefined){
+									var r_quat=t_quat[0].split('@');
+									t_cont1=r_quat[0];
 								}
-								if(r_quat[0]==$('#textQno2').val()){
-									q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+								if(t_quat[1]!=undefined){
+									var r_quat=t_quat[1].split('@');
+									t_cont2=r_quat[0];
 								}
 							}
 						}

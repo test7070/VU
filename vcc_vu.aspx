@@ -1073,6 +1073,20 @@
 				$('#lblMemo_s').text('備註');
 				$('#lblStore_s').text('出貨倉庫');
 				bbssum();
+				
+				//1050126
+				$('#btnStoreCopy').click(function() {
+					if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtStoreno_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtStoreno_'+i).val())){
+	                				$('#txtStoreno_'+i).val($('#txtStoreno_0').val());
+	                				$('#txtStore_'+i).val($('#txtStore_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
 			}
 			
 			function bbssum() {
@@ -1850,7 +1864,7 @@
 					</td>
 					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
-					<td align="center" style="width:150px;"><a id='lblStore_s'> </a></td>
+					<td align="center" style="width:150px;"><a id='lblStore_s'> </a><input class="btn"  id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>

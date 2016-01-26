@@ -64,6 +64,7 @@
 				q_gt('ucc', t_where, 0, 0, 0, "");
 				
 				$('#txtNoa').change(function() {
+					$('#txtNoa').val(trim($('#txtNoa').val()));
                     if ($(this).val().length > 0) {
                         t_where = "where=^^ noa='" + $(this).val() + "'^^";
                         q_gt('view_cuc', t_where, 0, 0, 0, "checkCucno_change", r_accy);
@@ -192,6 +193,7 @@
                     return;
                 }
 				
+				$('#txtNoa').val(trim($('#txtNoa').val()));
 				var t_noa = trim($('#txtNoa').val());
 				
                 if (q_cur == 1){
@@ -226,6 +228,13 @@
             function bbsAssign() {
                 for (var j = 0; j < q_bbsCount; j++) {
                     if (!$('#btnMinus_' + j).hasClass('isAssign')) {
+                    	$('#txtOrdeno_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							$(this).val(trim($(this).val()));
+						});
+						
                     	$('#combUcolor_' + j).change(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));

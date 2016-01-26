@@ -84,27 +84,31 @@
 						dbf : 'store',
 						index : 'noa,store',
 						src : 'store_b.aspx'
-					}, {
-                        type : '5',
-                        name : 'xorde', //[16]
-                        value:("1@含訂單,0@不含訂單").split(',')
-                    },{
-                        type : '0', //[17]
+					},{
+                        type : '0', //[16]
                         name : 'xrank',
                         value : r_rank
                     }, {
                         type : '2',
-                        name : 'xcust', //[18][19]
+                        name : 'xcust', //[17][18]
                         dbf : 'cust',
                         index : 'noa,comp',
                         src : 'cust_b.aspx'
                     }, {
-                        type : '1', //[20][21]
+                        type : '1', //[19][20]
                         name : 'xordeno'
+                    }, {
+                        type : '5',
+                        name : 'xorde', //[21]
+                        value:("0@不含訂單,1@含訂單").split(',')
                     },{//[22]
 						type : '5',
 						name : 'xsheet',
-						value :('Y@含板料,N@不含板料').split(',')
+						value :('N@不含板料,Y@含板料').split(',')
+					},{//[23]
+						type : '5',
+						name : 'xcubssheet',
+						value :('Y@含散把,N@不含散把').split(',')
 					}]
                 });
                 q_popAssign();

@@ -682,13 +682,15 @@ END
 ;
 --********************************************************************************************
 z_cubp_vu07:--z_cubp_vu07
+declare @t_order nvarchar(10)
 declare @t_bcustno nvarchar(30)
 declare @t_ecustno nvarchar(30)
 
+set @t_order = case when '#non'=[17] then 'noa' else [17] end 
 set @t_bcustno = case when '#non'=[21] then '' else [21] end  
 set @t_ecustno = case when '#non'=[22] then char(255) else [22] end
 -----------------------------------------------------------------------------------
- SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
 
 IF OBJECT_ID('tempdb..#tmp')is not null
@@ -749,8 +751,9 @@ begin
 			begin
 				set @cmd = 
 					"update #tmp set w"+CAST(@i as nvarchar)+CAST(@j as nvarchar)+" = 
-						(select ISNULL(SUM(weight),0) from view_cucs where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"') 
-					 where noa='"+@noa+"'"
+						(select ISNULL(SUM(weight),0) from view_cucs where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"')-
+					    (select ISNULL(SUM(weight),0) from view_cubs a where exists(select noa,noq from view_cucs where noa=a.productno2 and noq=a.product2 and mins=0)and productno2='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"') 
+					 where noa='"+@noa+"'"					
 				execute sp_executesql @cmd 
 				set @j = @j+1
 			end
@@ -759,7 +762,8 @@ begin
 		begin
 			set @cmd = 
 				"update #tmp set w"+CAST(@i as nvarchar)+"1 = 
-					(select ISNULL(SUM(weight),0) from view_cucs where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='SD420W' and size='#"+CAST(@i as nvarchar)+"') 
+					(select ISNULL(SUM(weight),0) from view_cucs where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='SD420W' and size='#"+CAST(@i as nvarchar)+"')-
+					(select ISNULL(SUM(weight),0) from view_cubs a where exists(select noa,noq from view_cucs where noa=a.productno2 and noq=a.product2 and mins=0)and productno2='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"') 
 				 where noa='"+@noa+"'"
 			execute sp_executesql @cmd
 		end
@@ -771,18 +775,49 @@ end
 close cursor_table 
 deallocate cursor_table 
 
+update #tmp set w31 = case when w31<0 then 0 else w31 end
+update #tmp set w32 = case when w32<0 then 0 else w32 end
+update #tmp set w33 = case when w33<0 then 0 else w33 end
+update #tmp set w41 = case when w41<0 then 0 else w41 end
+update #tmp set w42 = case when w42<0 then 0 else w42 end
+update #tmp set w43 = case when w43<0 then 0 else w43 end
+update #tmp set w51 = case when w51<0 then 0 else w51 end
+update #tmp set w52 = case when w52<0 then 0 else w52 end
+update #tmp set w53 = case when w53<0 then 0 else w53 end
+update #tmp set w61 = case when w61<0 then 0 else w61 end
+update #tmp set w71 = case when w71<0 then 0 else w71 end
+update #tmp set w81 = case when w81<0 then 0 else w81 end
+update #tmp set w91 = case when w91<0 then 0 else w91 end
+update #tmp set w101 = case when w101<0 then 0 else w101 end
+update #tmp set w111 = case when w111<0 then 0 else w111 end
+
 insert into #tmp(gno,w31,w32,w33,w41,w42,w43,w51,w52,w53,w61,w71,w81,w91,w101,w111)
-select '1',SUM(w31),SUM(w32),SUM(w33),SUM(w41),SUM(w42),SUM(w43),SUM(w51),SUM(w52),SUM(w53),SUM(w61),SUM(w71),SUM(w81),SUM(w91),SUM(w101),SUM(w111) from #tmp
+select '3',SUM(w31),SUM(w32),SUM(w33),SUM(w41),SUM(w42),SUM(w43),SUM(w51),SUM(w52),SUM(w53),SUM(w61),SUM(w71),SUM(w81),SUM(w91),SUM(w101),SUM(w111) from #tmp
 
 update #tmp set total = w31+w32+w33+w41+w42+w43+w51+w52+w53+w61+w71+w81+w91+w101+w111
 
 select 
-	gno,nick,noa,
+	gno,nick,a.noa,'' mech,'' bdate,
 	dbo.getComma(w31,0)w31,dbo.getComma(w32,0)w32,dbo.getComma(w33,0)w33,
 	dbo.getComma(w41,0)w41,dbo.getComma(w42,0)w42,dbo.getComma(w43,0)w43,
 	dbo.getComma(w51,0)w51,dbo.getComma(w52,0)w52,dbo.getComma(w53,0)w53,
 	dbo.getComma(w61,0)w61,dbo.getComma(w71,0)w71,dbo.getComma(w81,0)w81,
-	dbo.getComma(w91,0)w91,dbo.getComma(w101,0)w101,dbo.getComma(w111,0)w111,dbo.getComma(total,0)total,qhrefa
-from #tmp order by noa
-			 
+	dbo.getComma(w91,0)w91,dbo.getComma(w101,0)w101,dbo.getComma(w111,0)w111,dbo.getComma(total,0)total,qhrefa,
+	'' href
+from #tmp a
+where gno = '3'
+union all
+select 
+	case when ROW_NUMBER()over(order by case when @t_order='comp' then isnull(nick,'') when @t_order='bdate' then isnull(bdate,'') else a.noa end)%2!=0 then '1' else '2' end gno,
+	nick,a.noa,b.mech,b.bdate,
+	dbo.getComma(w31,0)w31,dbo.getComma(w32,0)w32,dbo.getComma(w33,0)w33,
+	dbo.getComma(w41,0)w41,dbo.getComma(w42,0)w42,dbo.getComma(w43,0)w43,
+	dbo.getComma(w51,0)w51,dbo.getComma(w52,0)w52,dbo.getComma(w53,0)w53,
+	dbo.getComma(w61,0)w61,dbo.getComma(w71,0)w71,dbo.getComma(w81,0)w81,
+	dbo.getComma(w91,0)w91,dbo.getComma(w101,0)w101,dbo.getComma(w111,0)w111,dbo.getComma(total,0)total,qhrefa,
+	"<a href="+CHAR(34)+"JavaScript:q_box('z_cucp_vu.aspx',' "+CHAR(59)+"report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' and "+a.noa+"="+a.noa+"','95%','95%','')"+CHAR(34)+">"+a.noa+"</a>"
+from #tmp a
+left join view_cuc b on a.noa=b.noa
+where gno = '0'
+		 
 drop table #tmp;

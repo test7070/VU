@@ -9,6 +9,7 @@ declare @t_class nvarchar(50)
 declare @t_uno nvarchar(50)
 declare @t_edate nvarchar(20)
 declare @t_rank nvarchar(20)
+declare @t_cubssheet nvarchar(30)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -19,9 +20,10 @@ set @t_elengthb = case when '#non'=[10] then '999' else [10] end
 set @t_class = case when '#non'=[11] then '' else [11] end
 set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
-set @t_rank = case when '#non'='[17]' then '' else '[17]' end
+set @t_rank = case when '#non'='[16]' then '' else '[16]' end
+set @t_cubssheet = case when '#non'=[23] then 'N' else [23] end 
 
-declare @pageline int =25
+declare @pageline int =20
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -43,6 +45,7 @@ create table #tmp(
 	lengthb float,
 	class nvarchar(50),
 	storeno nvarchar(50),
+	hmount decimal(20,2),
 	mount decimal(20,2),
 	weight decimal(20,2),
 	money float,
@@ -118,8 +121,8 @@ and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and a.storeno='7000' and isnull(b.productno,'')=''
 
-insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '2','cubs','',b.uno,'',b.product,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
+select '2','cubs','',b.uno,'',b.product,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
 where b.ucolor='板料' and a.datea<=@t_edate 
@@ -130,6 +133,8 @@ and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 --and b.storeno='7000' 
 and isnull(b.productno,'')='' and isnull(b.product,'')!='' --and isnull(b.productno2,'')=''
+and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
+and @t_cubssheet='Y'
 group by b.uno,b.product,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
 
 declare @tablea nvarchar(100)
@@ -239,21 +244,37 @@ begin
 	,case when SUM(case when tablea='cubs' then 0 else weight end)=0 then 0 else SUM(case when tablea='cubs' then 0 else money end)/SUM(case when tablea='cubs' then 0 else weight end) end
 	from #tmp group by product,spec,size
 	
+	insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
+	select '4','datea','','',product,spec,size,0,'',''
+	,SUM(hmount)
+	,SUM(case when tablea='cubs' then mount else 0 end)
+	,SUM(case when tablea='cubs' then weight else 0 end)
+	,SUM(case when tablea='cubs' then money else 0 end)
+	,case when SUM(case when tablea='cubs' then mount else 0 end)=0 then 0 else SUM(case when tablea='cubs' then weight else 0 end)/SUM(case when tablea='cubs' then mount else 0 end) end
+	,case when SUM(case when tablea='cubs' then weight else 0 end)=0 then 0 else SUM(case when tablea='cubs' then money else 0 end)/SUM(case when tablea='cubs' then weight else 0 end) end
+	from #tmp where @t_cubssheet='Y' 
+	group by product,spec,size having SUM(case when tablea='cubs' then weight else 0 end)!=0
+	
 	insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-	select '4','datea','','',char(255),char(255),char(255),999,'ZZZ','',sum(mount),SUM(weight),SUM(money)
+	select '5','datea','','',char(255),char(255),char(255),999,'ZZZ','',sum(mount),SUM(weight),SUM(money)
 	,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
 	,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
 	from #tmp where gno='3' 
+	
+	if((select count(*) from #tmp where gno='4')>0)
+	begin
+		insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
+		select '6','datea','','',char(255),char(255),char(255),999,'ZZZ','',SUM(hmount),sum(mount),SUM(weight),SUM(money)
+		,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
+		,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
+		from #tmp where gno='4' and @t_cubssheet='Y'
+	end
 end
 
 --更新目前的順序,頁數
 update a
-set idno=b.rr,page=CEILING(cast(b.rr as float)/@pageline)
-from #tmp a
-outer apply (select * from (
-	select ROW_NUMBER() over (order by product,cast(dbo.get_num(size) as int),spec,cast(gno as int),tablea desc,lengthb,class)rr,* from #tmp
-	)tmp where product=a.product and spec=a.spec and size=a.size and gno=a.gno and lengthb=a.lengthb and class=a.class
-) b
+set idno=rr,page=CEILING(cast(rr as float)/@pageline)
+from (select ROW_NUMBER() over (order by product,cast(dbo.get_num(size) as int),spec,cast(gno as int),tablea desc,lengthb,class)rr,* from #tmp )a
 
 --表頭
 insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice,page,idno)
@@ -262,13 +283,13 @@ from #tmp where gno!='1' and gno!='5' group by page
 
 --分頁
 insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice,page,idno)
-select '5','Paging','','',MAX(product),MAX(spec),MAX(size),MAX(lengthb),MAX(class),MAX(storeno),0,0,0,0,0,page,MAX(idno)+1
+select '7','Paging','','',MAX(product),MAX(spec),MAX(size),MAX(lengthb),MAX(class),MAX(storeno),0,0,0,0,0,page,MAX(idno)+1
 from #tmp where gno!='1' and gno!='5' group by page
 
 if(@t_rank<'8')
 begin
 	update #tmp
-	set gno=CAST(CAST(gno as int)+5 as nvarchar(10))
+	set gno=CAST(CAST(gno as int)+7 as nvarchar(10))
 end
 
 declare @totpage int= isnull((select MAX(page) from #tmp),0)
@@ -280,6 +301,7 @@ select ROW_NUMBER() over (partition by product,spec,size,gno order by page,produ
 ,dbo.getComma(avgweight,[3])avgweight
 ,dbo.getComma(aprice,[4])aprice
 ,dbo.getComma(money,0)money
+,dbo.getComma(hmount,-1)hmount
 ,@today today
 ,@totpage totpage
 ,case when tablea='cubs' then 'cub_vu?noa=$noa' else '' end ghref
@@ -319,7 +341,7 @@ set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
 set @t_bstoreno = case when '#non'=[14] then '' else [14] end
 set @t_estoreno = case when '#non'=[15] then char(255) else [15] end
-set @t_rank = case when '#non'='[17]' then '' else '[17]' end
+set @t_rank = case when '#non'='[16]' then '' else '[16]' end
 
 declare @pageline int =25
 ---------------------------------------------------------------------------------
@@ -626,11 +648,11 @@ set @t_elengthb = case when '#non'=[10] then '999' else [10] end
 set @t_class = case when '#non'=[11] then '' else [11] end
 set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
-set @t_ordeshow = case when '#non'=[16] then '1' else [16] end
-set @t_bcustno=case when '#non' = [18] then '' else [18] end
-set @t_ecustno=case when '#non' = [19] then char(255)  else [19] end
-set @t_bordeno=case when '#non' = [20] then '' else [20] end
-set @t_eordeno=case when '#non' = [21] then char(255)  else [21] end
+set @t_bcustno=case when '#non' = [17] then '' else [17] end
+set @t_ecustno=case when '#non' = [18] then char(255)  else [18] end
+set @t_bordeno=case when '#non' = [19] then '' else [19] end
+set @t_eordeno=case when '#non' = [20] then char(255)  else [20] end
+set @t_ordeshow = case when '#non'=[21] then '1' else [21] end
 set @t_sheet = case when '#non'=[22] then 'N' else [22] end 
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF

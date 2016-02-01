@@ -89,23 +89,23 @@
                         name : 'xrank',
                         value : r_rank
                     }, {
+                        type : '6', //[17]
+                        name : 'xordeno'
+                    }, {
                         type : '2',
-                        name : 'xcust', //[17][18]
+                        name : 'xcust', //[18][19]
                         dbf : 'cust',
                         index : 'noa,comp',
                         src : 'cust_b.aspx'
                     }, {
-                        type : '1', //[19][20]
-                        name : 'xordeno'
-                    }, {
                         type : '5',
-                        name : 'xorde', //[21]
+                        name : 'xorde', //[20]
                         value:("0@不含訂單,1@含訂單").split(',')
-                    },{//[22]
+                    },{//[21]
 						type : '5',
 						name : 'xsheet',
 						value :('N@不含板料,Y@含板料').split(',')
-					},{//[23]
+					},{//[22]
 						type : '5',
 						name : 'xcubssheet',
 						value :('Y@含散把,N@不含散把').split(',')

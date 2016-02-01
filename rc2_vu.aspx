@@ -923,6 +923,19 @@
 				$('#lblMount_s').text('數量(件)');
 				$('#lblWeight_s').text('重量(KG)');
 				
+				//105/02/01
+				$('#btnStoreCopy').click(function() {
+					if(q_cur==1 || q_cur==2){
+                		if(!emp($('#txtStoreno_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#txtStoreno_'+i).val())){
+	                				$('#txtStoreno_'+i).val($('#txtStoreno_0').val());
+	                				$('#txtStore_'+i).val($('#txtStore_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
 			}
 
 			function btnIns() {
@@ -1420,7 +1433,10 @@
 					<td align="center" style="width:90px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
-					<td align="center" style="width:180px;"><a id='lblStore_s'> </a></td>
+					<td align="center" style="width:180px;">
+						<a id='lblStore_s'> </a>
+						<input class="btn"  id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;"  />
+					</td>
 					<td align="center" style="width:180px;"><a id='lblMemo_s'> </a></td>
 					<!--<td align="center" style="width:60px;"><a id='lblRecord_s'> </a></td>-->
 				</tr>

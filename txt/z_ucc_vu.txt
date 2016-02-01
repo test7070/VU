@@ -21,7 +21,7 @@ set @t_class = case when '#non'=[11] then '' else [11] end
 set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
 set @t_rank = case when '#non'='[16]' then '' else '[16]' end
-set @t_cubssheet = case when '#non'=[23] then 'N' else [23] end 
+set @t_cubssheet = case when '#non'=[22] then 'N' else [22] end 
 
 declare @pageline int =20
 ---------------------------------------------------------------------------------
@@ -635,8 +635,7 @@ declare @t_edate nvarchar(20)
 declare @t_ordeshow nvarchar(20)
 declare @t_bcustno nvarchar(50)
 declare @t_ecustno nvarchar(50)
-declare @t_bordeno nvarchar(50)
-declare @t_eordeno nvarchar(50)
+declare @t_xordeno nvarchar(50)
 declare @t_sheet nvarchar(30)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
@@ -648,12 +647,11 @@ set @t_elengthb = case when '#non'=[10] then '999' else [10] end
 set @t_class = case when '#non'=[11] then '' else [11] end
 set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
-set @t_bcustno=case when '#non' = [17] then '' else [17] end
-set @t_ecustno=case when '#non' = [18] then char(255)  else [18] end
-set @t_bordeno=case when '#non' = [19] then '' else [19] end
-set @t_eordeno=case when '#non' = [20] then char(255)  else [20] end
-set @t_ordeshow = case when '#non'=[21] then '1' else [21] end
-set @t_sheet = case when '#non'=[22] then 'N' else [22] end 
+set @t_bcustno=case when '#non' = [18] then '' else [18] end
+set @t_ecustno=case when '#non' = [19] then char(255)  else [19] end
+set @t_xordeno=case when '#non' = [17] then '' else [17] end
+set @t_ordeshow = case when '#non'=[20] then '1' else [20] end
+set @t_sheet = case when '#non'=[21] then 'N' else [21] end 
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -698,7 +696,7 @@ and (b.mount>0 or b.weight>0)
 and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
 and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
 and isnull(c.custno,'') between @t_bcustno and @t_ecustno
-and isnull(b.ordeno,'') between @t_bordeno and @t_eordeno
+and (isnull(b.ordeno,'') = @t_xordeno or  len(@t_xordeno)=0)
 and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
 
 if((select count(*) from #tmp)>0)

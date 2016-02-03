@@ -173,8 +173,10 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.datea
 		,(case when a.typea='2' then -1 else 1 end)*b.weight 
 		,b.price 
 		,(case when a.typea='2' then -1 else 1 end)*b.total
-		,(case when a.typea='2' then -1 else 1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
-		,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
+		--,(case when a.typea='2' then -1 else 1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
+		,(case when a.typea='2' then -1 else 1 end)*(a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))
+		--,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
+		,(case when a.typea='2' then -1 else 1 end)*((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))+b.total)
 		,'rc2'+b.accy,a.memo,b.ucolor,b.spec,b.size,b.lengthb
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 

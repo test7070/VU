@@ -72,10 +72,12 @@ select '91' gno,ROW_NUMBER()over(order by a.datea,a.custno,a.noa,b.noq), a.noa n
 		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+ case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end  + isnull(b.ucolor,'')
 		,b.unit, b.mount, b.weight, b.price, b.total,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 		,a.invono,v.datea,v.money
-		,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
+		--,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
+		,(a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))
 		,b.total 
 		,b.ucolor,b.spec,b.size,b.lengthb,a.addr,b.memo,a.carno
-		,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
+		--,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
+		,(a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))+b.total
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join sss s on isnull(a.salesno,'')=s.noa 
 				 left join vcca v on a.invono=v.noa 

@@ -51,11 +51,13 @@ CREATE INDEX tmp_index ON #tmp (noa)
 
 insert #tmp
 select '0',row_number() over(order by a.tggno,a.datea,a.noa),a.datea,a.noa
-,a.cno,a.acomp,a.tggno,case when isnull(d.nick,'')!='' then d.nick else a.nick end,'','','',isnull(b.price,0),a.ordeweight,a.eweight,isnull(b.price,0)*a.eweight
+,a.cno,a.acomp,a.tggno,case when isnull(d.nick,'')!='' then d.nick else a.nick end,'','','',isnull(b.price,0),a.ordeweight,a.eweight
+--,isnull(b.price,0)*a.eweight
+,0
 ,isnull(c.opay,0),0,a.econtdate,a.memo
 from cont a left join tgg d on a.tggno=d.noa
 outer apply (select top 1 price from conts where noa=a.noa order by noq )b
-outer apply (select sum(opay) opay from pay where payc=a.noa) c
+outer apply (select sum(opay-unopay) opay from pay where payc=a.noa) c
 where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
 and (a.tggno between @t_btggno and @t_etggno ) 
 and (a.datea between @t_bdate and @t_edate)
@@ -151,7 +153,7 @@ begin
 	deallocate cursor_table2
 	
 	update #tmp
-	set rmoney=@ttotal,opay=opay+@tpayed
+	set rmoney=@ttotal,opay=opay+@tpayed,emoney=@ttotal-(opay+@tpayed)
 	where noa=@noa
 	
 	fetch next from cursor_table

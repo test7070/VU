@@ -334,7 +334,8 @@
                 		var as = _q_appendData(t_name, "", true);
                 		var t_unpay=0;
                 		for (var i = 0; i < as.length; i++) {
-                			as[i].tablea='vcc_vu';
+                			if(as[i].tablea!='vcca')
+                				as[i].tablea='vcc_vu';
                 			t_unpay=q_add(t_unpay,dec(as[i].unpay));
 						}
                 		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtCustno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtVccno,txtMemo2', as.length, as, 'cno,custno,mon,coin,unpay,unpay,tablea,tableaccy,vccno,memo', '', '');

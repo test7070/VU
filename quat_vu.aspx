@@ -701,7 +701,8 @@
 					<tr>
 						<td ><span> </span><a id='lblMemo' class="lbl"> </a></td>
 						<td colspan='5'>
-							<input id="txtMemo" type="text" style="width: 99%;"/>
+							<!--<input id="txtMemo" type="text" style="width: 99%;"/>-->
+							<textarea id="txtMemo"  rows='3' cols='3' style="width: 100%; " > </textarea>
 							<input id="txtPrice" type="hidden"/>
 						</td>
 					</tr>

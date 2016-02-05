@@ -109,7 +109,11 @@
 						type : '5',
 						name : 'xcubssheet',
 						value :('Y@含散把,N@不含散把').split(',')
-					}]
+					},{
+                        type : '0', //[23]
+                        name : 'xuserno',
+                        value : r_userno
+                    }]
                 });
                 q_popAssign();
                 q_getFormat();

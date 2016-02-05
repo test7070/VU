@@ -10,6 +10,7 @@ declare @t_uno nvarchar(50)
 declare @t_edate nvarchar(20)
 declare @t_rank nvarchar(20)
 declare @t_cubssheet nvarchar(30)
+declare @t_ruserno nvarchar(30)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -22,6 +23,7 @@ set @t_uno = case when '#non'=[12] then '' else [12] end
 set @t_edate = case when '#non'=[13] then char(255) else [13] end
 set @t_rank = case when '#non'='[16]' then '' else '[16]' end
 set @t_cubssheet = case when '#non'=[22] then 'N' else [22] end 
+set @t_ruserno = case when '#non'='[23]' then '' else '[23]' end
 
 declare @pageline int =20
 ---------------------------------------------------------------------------------
@@ -286,7 +288,9 @@ insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,w
 select '7','Paging','','',MAX(product),MAX(spec),MAX(size),MAX(lengthb),MAX(class),MAX(storeno),0,0,0,0,0,page,MAX(idno)+1
 from #tmp where gno!='1' and gno!='5' group by page
 
-if(@t_rank<'8')
+--1050205 權限9以下 和 無顯示單價的使用者 單價 取消
+--權限8的限制拿掉
+if not(@t_rank='9' or isnull((select top 1 price_show from authority where noa='z_ucc_vu' and sssno=@t_ruserno),0)=1)
 begin
 	update #tmp
 	set gno=CAST(CAST(gno as int)+7 as nvarchar(10))

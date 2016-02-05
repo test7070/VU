@@ -322,7 +322,7 @@ begin
 	insert #tmp
 	select 'rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
@@ -334,7 +334,7 @@ begin
 	insert #tmp
 	select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_ina a left join view_inas b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
@@ -347,7 +347,7 @@ begin
 	insert #tmp
 	select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.gmount,b.gweight 
 	from view_cub a left join view_cubt b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
@@ -359,7 +359,7 @@ begin
 	insert #tmp
 	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_get a left join view_gets b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
@@ -390,7 +390,7 @@ begin
 	insert #tmp
 	select 'rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product) 
 	and (isnull(b.spec,'')=@t_spec) 
@@ -402,7 +402,7 @@ begin
 	insert #tmp
 	select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_ina a left join view_inas b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product) 
 	and (isnull(b.spec,'')=@t_spec) 
@@ -415,7 +415,7 @@ begin
 	insert #tmp
 	select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.gmount,-1*b.gweight 
 	from view_cub a left join view_cubt b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product) 
 	and (isnull(b.spec,'')=@t_spec) 
@@ -427,7 +427,7 @@ begin
 	insert #tmp
 	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
 	from view_get a left join view_gets b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product) 
 	and (isnull(b.spec,'')=@t_spec) 

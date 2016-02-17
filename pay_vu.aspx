@@ -1147,10 +1147,10 @@
 						<td colspan="2">
 							<input type="button" id="btnVcc" class="txt c1 " style="width: 95px;"/>
 							<input type="button" id="btnMon" class="txt c1 "  style="width: 95px;display: none"/>
-							<span> </span><a id='lblTgg2' class="lbl btn"> </a>
+							<span> </span><a class="lbl">互抵出貨合約號碼</a>
 						</td>
 						<td>
-	                        <input id="txtTggno2" type="text" class="txt c1" title='多廠商使用"逗號"分隔'/>
+	                        <input id="txtPart" type="text" class="txt c1" />
 						</td>
 					</tr>
 					<tr class="tr4">

@@ -797,14 +797,14 @@
 					var n=t_name.split('_')[1];
 					var as = _q_appendData('view_cubs', '', true);
 					if (as[0] != undefined) {
-						$('#btnMinut__'+b_seq).click();
+						$('#btnMinut__'+n).click();
 						q_gridAddRow(bbtHtm, 'tbbt', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtUno,txtMemo,txtOrdeno,txtNo2,txtItemno,txtItem'
 							, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,uno,memo,ordeno,no2,noa,noq', 'txtUno');
 						
 						if(dec(n)+as.length>=q_bbtCount){
 							$('#btnPlut').click();
 						}
-						$('#txtUno__'+(dec(n)+as.length)).focus();
+						$('#txtUno__'+q_add(dec(n),as.length)).focus().select();
 						//檢查批號是否重複 已 cubsnoa和cubsnoq為主
 						var t_repeat=false;
 						for (var i = 0; i < q_bbtCount; i++) {
@@ -819,8 +819,10 @@
 								}
 							}
 						}
-						if(t_repeat)
+						if(t_repeat){
 							alert('該批號重複!!');
+							$('#txtUno__'+(dec(n))).focus();
+						}
 					}else{
 						alert('無此批號!!');
 						$('#btnMinut__'+n).click();

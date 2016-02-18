@@ -175,12 +175,13 @@ end
 
 if((select count(*) from #tmp )>0)
 begin
-	insert into #tmp(gno,tggno,noa,datea,weight,eweight)
-	select '1',tggno,char(255),char(255),sum(weight),sum(eweight) 
+	insert into #tmp(gno,tggno,noa,datea,weight,eweight,emoney,opay,rmoney)
+	select '1',tggno,char(255),char(255),sum(weight),sum(eweight) ,sum(emoney),sum(opay),sum(rmoney)
 	from #tmp where gno = '0' group by tggno
-		
-	insert into #tmp(gno,tggno,datea,weight,eweight,price)
+	
+	insert into #tmp(gno,tggno,datea,weight,eweight,price,emoney,opay,rmoney)
 	select '3',char(255),char(255),sum(weight),sum(eweight) ,case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
+	,sum(emoney),sum(opay),sum(rmoney)
 	from #tmp where gno = '0'
 	
 	--insert #tmp (gno,noa,memo,custno,datea) 

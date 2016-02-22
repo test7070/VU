@@ -682,7 +682,7 @@
 				t_cont1=t_cont1.length==0?'#non':t_cont1;
 				t_cont2=t_cont2.length==0?'#non':t_cont2;
 				if(q_cur==3){
-					if(t_cont1.length>0 || t_cont2.length>0){
+					if(t_cont1 != '#non' || t_cont2 != '#non'){
 						q_func('qtxt.query.changecontgweight', 'rc2.txt,changecont_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_cont1)+ ';' + encodeURI(t_cont2));
 					}
 					t_cont1='#non',t_cont2='#non';
@@ -692,9 +692,9 @@
 				var s1 = xmlString.split(';');
 				abbm[q_recno]['accno'] = s1[0];
 				$('#txtAccno').val(s1[0]);
-				if((!emp($('#textQno1').val()) || !emp($('#textQno2').val())))
+				if((!emp($('#textQno1').val()) || !emp($('#textQno2').val()) || t_cont1 != '#non' || t_cont2 != '#non' ))
 					q_func('qtxt.query.changecontgweight', 'rc2.txt,changecont_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_cont1)+ ';' + encodeURI(t_cont2));
-					t_cont1='#non',t_cont2='#non';
+				t_cont1='#non',t_cont2='#non';
 			}
 			
 			var check_startdate=false;

@@ -725,7 +725,7 @@ select '0',a.noa,c.nick,"z_cucp_vu?report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' a
 from view_cuc a
 left join view_cucs b on a.noa = b.noa
 left join cust c on a.custno = c.noa
-where (ISNULL(b.mins,0)=0) --and (a.custno between @t_bcustno and @t_ecustno)
+where (ISNULL(b.mins,0)=0) and (a.custno between @t_bcustno and @t_ecustno)
 group by a.noa,c.nick
 
 
@@ -749,22 +749,42 @@ begin
 			set @j = 1
 			while(@j <= 3)
 			begin
+				--set @cmd = 
+				--	"update #tmp set w"+CAST(@i as nvarchar)+CAST(@j as nvarchar)+" = 
+				--		(select ISNULL(SUM(weight),0) from view_cucs where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"')-
+				--	    (select ISNULL(SUM(weight),0) from view_cubs a where exists(select noa,noq from view_cucs where noa=a.productno2 and noq=a.product2 and mins=0)and productno2='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"') 
+				--	 where noa='"+@noa+"'"	
+				
+				--1050222 各品項判斷是否未完成，超做則未完成=0
 				set @cmd = 
 					"update #tmp set w"+CAST(@i as nvarchar)+CAST(@j as nvarchar)+" = 
-						(select ISNULL(SUM(weight),0) from view_cucs where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"')-
-					    (select ISNULL(SUM(weight),0) from view_cubs a where exists(select noa,noq from view_cucs where noa=a.productno2 and noq=a.product2 and mins=0)and productno2='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"') 
-					 where noa='"+@noa+"'"					
+						(select ISNULL(SUM(case when isnull(cc.weight,0)-isnull(cb.weight,0)<0 then 0 else isnull(cc.weight,0)-isnull(cb.weight,0) end),0) from view_cucs cc 
+						outer apply (
+							select sum(weight)weight from view_cubs ca where productno2=cc.noa and product2=cc.noq
+							) cb where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"'
+						)
+					 where noa='"+@noa+"'"
 				execute sp_executesql @cmd 
 				set @j = @j+1
 			end
 		end
 		else
 		begin
+			--set @cmd = 
+			--	"update #tmp set w"+CAST(@i as nvarchar)+"1 = 
+			--		(select ISNULL(SUM(weight),0) from view_cucs where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='SD420W' and size='#"+CAST(@i as nvarchar)+"')-
+			--		(select ISNULL(SUM(weight),0) from view_cubs a where exists(select noa,noq from view_cucs where noa=a.productno2 and noq=a.product2 and mins=0)and productno2='"+@noa+"' and ISNULL(mins,0)=0 and spec='SD420W' and size='#"+CAST(@i as nvarchar)+"') 
+			--	 where noa='"+@noa+"'"
+			
 			set @cmd = 
 				"update #tmp set w"+CAST(@i as nvarchar)+"1 = 
-					(select ISNULL(SUM(weight),0) from view_cucs where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='SD420W' and size='#"+CAST(@i as nvarchar)+"')-
-					(select ISNULL(SUM(weight),0) from view_cubs a where exists(select noa,noq from view_cucs where noa=a.productno2 and noq=a.product2 and mins=0)and productno2='"+@noa+"' and ISNULL(mins,0)=0 and spec='"+dbo.split(@str,',',@j)+"' and size='#"+CAST(@i as nvarchar)+"') 
+					(select ISNULL(SUM(case when isnull(cc.weight,0)-isnull(cb.weight,0)<0 then 0 else isnull(cc.weight,0)-isnull(cb.weight,0) end),0) from view_cucs cc 
+					outer apply (
+						select sum(weight)weight from view_cubs ca where productno2=cc.noa and product2=cc.noq
+						) cb where noa='"+@noa+"' and ISNULL(mins,0)=0 and spec='SD420W' and size='#"+CAST(@i as nvarchar)+"'
+					)
 				 where noa='"+@noa+"'"
+			
 			execute sp_executesql @cmd
 		end
 		set @i = @i+1

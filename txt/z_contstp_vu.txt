@@ -192,7 +192,7 @@ end
 
 select 
 dbo.getComma(weight,[10])weight,
-dbo.getComma(eweight,[10])eweight,
+dbo.getComma(eweight,[10])+' KG' eweight,
 dbo.getComma(emoney,0)emoney,
 dbo.getComma(opay,0)mopay,
 dbo.getComma(rmoney,0)rmoney,

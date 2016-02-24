@@ -55,7 +55,7 @@ select '0',row_number() over(order by a.custno,a.datea,a.noa),a.datea,a.noa
 ,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end,'','','',isnull(b.price,0),a.weight,a.eweight
 --,isnull(b.price,0)*a.eweight
 ,0
-,isnull(c.opay,0),0,a.conn,a.memo,a.addr2
+,isnull(c.opay,0),0,a.conn,replace(a.memo,'chr(10)',' '),a.addr2
 from view_quat a left join cust d on a.custno=d.noa
 outer apply (select top 1 price from view_quats where noa=a.noa order by no3 )b
 outer apply (select sum(opay-unopay) opay from umm where payc=a.noa) c

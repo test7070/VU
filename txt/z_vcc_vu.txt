@@ -65,6 +65,7 @@ declare @result table(
 	conn nvarchar(MAX),
 	memo nvarchar(MAX),
 	carno nvarchar(100),
+	quatno nvarchar(100),
 	money float
 ) 
 insert into @result 
@@ -75,7 +76,7 @@ select '91' gno,ROW_NUMBER()over(order by a.datea,a.custno,a.noa,b.noq), a.noa n
 		--,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 		,(a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))
 		,b.total 
-		,b.ucolor,b.spec,b.size,b.lengthb,a.addr,b.memo,a.carno
+		,b.ucolor,b.spec,b.size,b.lengthb,a.addr,b.memo,a.carno,dbo.split(dbo.split(a.apvmemo,'##',0),'@',0)
 		--,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
 		,(a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))+b.total
 from view_vccs b left join view_vcc a on a.noa = b.noa 
@@ -162,7 +163,7 @@ select rec, gno, noa, noq, typea, datea, LEFT(datea,7) xdatea, mon, custno, left
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,itax),1)),@total_decimal,30)) itax 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,itotal),1)),@total_decimal,30)) itotal 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money
-,ucolor,spec,size,lengh,conn cust,memo,carno
+,ucolor,spec,size,lengh,conn cust,memo,carno,quatno
 from @result order by rec,gno;
 --**********************************************************************************************
 z_vcc_vu2:--z_vcc_vu2
@@ -352,7 +353,7 @@ select '2',comp,sum(mount),SUM(weight),SUM(money),SUM(total),char(255)
 from @result where gno='0' group by comp
 
 select gno,xproduct xpdt,datea,noa,dbo.getComma(mount,0) mount,dbo.getComma(weight,0) weight,
-	   dbo.getComma(money,0) money,dbo.getComma(tax,0) tax,dbo.getComma(price,0) price,
+	   dbo.getComma(money,0) money,dbo.getComma(tax,0) tax,dbo.getComma(price,2) price,
 	   dbo.getComma(total,0) total,memo,comp,custno
 from @result
 order by comp,xpdt,gno

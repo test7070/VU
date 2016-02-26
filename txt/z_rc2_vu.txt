@@ -63,7 +63,8 @@ declare @result table(
 	qhref nvarchar(max),
 	rtotal float,
 	btotal float,
-	store nvarchar(max) 
+	store nvarchar(max) ,
+	contno nvarchar(50)
 ) 
 
 insert into @result 
@@ -77,6 +78,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 	,a.memo,a.addr2,b.ucolor,b.spec,b.size,b.lengthb,a.carno,'rc2'+b.accy
 	,(case when a.typea='2' then 0 else b.total end)
 	,(case when a.typea='2' then b.total else 0 end),b.store
+	,dbo.split(dbo.split(a.transtart,'##',0),'@',0)
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 ((case when a.mon='' then left(a.datea,[17]) else a.mon end) between @t_bmon and @t_emon) and 

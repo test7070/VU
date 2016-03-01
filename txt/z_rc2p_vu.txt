@@ -178,7 +178,8 @@ end
 close cursor_table 
 deallocate cursor_table 
 
-select *,
+select 
+	case when typea='1' then '進貨單' else '退貨單' end typea,*,
 	   dbo.getComma(tweight,0) twei,
 	   dbo.getComma(eweight,0) ewei,
 	   dbo.getComma(nweight,0) nwei,
@@ -187,6 +188,5 @@ select *,
 	   dbo.getComma(pweight3,0) pwei3,
 	   dbo.getComma(pweight4,0) pwei4,
 	   dbo.getComma(pweight5,0) pwei5,
-	   dbo.getComma(pweight6,0) pwei6,
-	   case when typea='1' then '進貨單' else '退貨單' end
+	   dbo.getComma(pweight6,0) pwei6
 from @tmp2 order by noa,gno ;

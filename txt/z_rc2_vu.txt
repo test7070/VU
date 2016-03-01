@@ -277,7 +277,8 @@ declare @result table(
 	ucolor nvarchar(30), 
 	spec nvarchar(30), 
 	size nvarchar(30), 
-	lengh decimal(18,2)
+	lengh decimal(18,2),
+	contno nvarchar(50)
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono, a.datea
@@ -287,7 +288,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 		,b.price	,(case when a.typea='2' then -1 else 1 end)*b.total
 		,(case when a.typea='2' then -1 else 1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 		,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
-		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb
+		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb,dbo.split(dbo.split(a.transtart,'##',0),'@',0)
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  ((case when a.mon='' then left(a.datea,[17]) else a.mon end) between @t_bmon and @t_emon) and 
@@ -308,7 +309,7 @@ from @result a group by tggno,comp
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
 
 select 
-gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,productno,xproduct,unit,addr2
+gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,productno,xproduct,unit,addr2,contno
 ,reverse(substring(reverse(convert(nvarchar(30),mount,0)),0,30)) mount 
 ,dbo.getComma(weight,0) weight 
 ,dbo.getComma(price,-1) price 

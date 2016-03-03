@@ -84,6 +84,7 @@ from view_vccs b left join view_vcc a on a.noa = b.noa
 				 left join vcca v on a.invono=v.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea)and
 	  (len(@t_product)=0 or @t_product like isnull(b.product,''))and
 	  (len(@t_spec)=0 or @t_spec like isnull(b.spec,'')) and
 	  (len(@t_size)=0 or @t_size like isnull(b.size,'')) and
@@ -229,6 +230,7 @@ select '9'
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy left join cust c on a.custno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
@@ -335,6 +337,7 @@ declare @result table(
 	left join cust c on a.custno = c.noa left join view_ucaucc d on b.productno = d.noa left join sss s on isnull(a.salesno,'')=s.noa 
 	where (a.datea between @t_bdate and @t_edate) and 
 	(a.custno between @t_bcustno and @t_ecustno) and 
+	(len(@vcctypea)=0 or @vcctypea=a.typea) and
 	(len(@t_product)=0 or @t_product like b.product)and
 	(len(@t_spec)=0 or @t_spec like b.spec) and
 	(len(@t_size)=0 or @t_size like b.size) and
@@ -418,6 +421,7 @@ select '9',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (
 from view_vcc a left join view_vccs b on a.noa = b.noa left join cust c on a.custno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
+(len(@vcctypea)=0 or @vcctypea=a.typea) and
 (len(@t_product)=0 or @t_product like b.product) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
@@ -522,6 +526,7 @@ select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon
 from view_vccs b left join view_vcc a on a.noa = b.noa left join cust c on a.custno = c.noa left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
+(len(@vcctypea)=0 or @vcctypea=a.typea) and
 (len(@t_product)=0 or @t_product like b.product)and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
@@ -610,6 +615,7 @@ case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end
 from view_vcc a left join view_vccs b on a.noa = b.noa left join cust c on a.custno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
+(len(@vcctypea)=0 or @vcctypea=a.typea) and
 (len(@t_product)=0 or @t_product like b.product)and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
@@ -618,11 +624,14 @@ where (a.datea between @t_bdate and @t_edate) and
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 group by a.custno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end
 
-insert into @tmp(gno,custno,custs,mon,mount,total,tax,totax,weight) 
-select '1',custno,custs,'999/99',sum(mount),sum(total),sum(tax),sum(totax),sum(weight) from @tmp group by custno,custs 
-
-insert into @tmp(gno,custno,mount,total,tax,totax,weight) 
-select '2','ZZZZ_ZZZ',sum(mount), sum(total), sum(tax), sum(totax),sum(weight) from @tmp where gno='1' 
+if((select count(*) from @tmp)>0)
+begin
+	insert into @tmp(gno,custno,custs,mon,mount,total,tax,totax,weight) 
+	select '1',custno,custs,'999/99',sum(mount),sum(total),sum(tax),sum(totax),sum(weight) from @tmp group by custno,custs 
+	
+	insert into @tmp(gno,custno,mount,total,tax,totax,weight) 
+	select '2','ZZZZ_ZZZ',sum(mount), sum(total), sum(tax), sum(totax),sum(weight) from @tmp where gno='1' 
+end
 
 select gno,custno cno,left(custs,10) custs,mon 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
@@ -707,6 +716,7 @@ left join view_ucaucc d on b.productno = d.noa
 left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
+(len(@vcctypea)=0 or @vcctypea=a.typea) and
 (len(@t_product)=0 or @t_product like b.product)and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
@@ -792,6 +802,7 @@ from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
 (len(@t_product)=0 or @t_product like b.product)and
+(len(@vcctypea)=0 or @vcctypea=a.typea) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
@@ -800,13 +811,16 @@ and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or d
 group by b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')  
 ,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end 
 		
-insert into @tmp(gno,products,mon,mount,total,tax,totax,weight) 
-select '1',products,'999/99',sum(mount),sum(total),SUM(tax),sum(totax),sum(weight) 
-from @tmp group by products 
-
-insert into @tmp(gno,products,mount,total,totax,weight,mon) 
-select '2',char(255),sum(mount),sum(total),sum(totax),sum(weight),'999/99'
-from @tmp where gno='1' 
+if((select count(*) from @tmp)>0)
+begin
+	insert into @tmp(gno,products,mon,mount,total,tax,totax,weight) 
+	select '1',products,'999/99',sum(mount),sum(total),SUM(tax),sum(totax),sum(weight) 
+	from @tmp group by products 
+	
+	insert into @tmp(gno,products,mount,total,totax,weight,mon) 
+	select '2',char(255),sum(mount),sum(total),sum(totax),sum(weight),'999/99'
+	from @tmp where gno='1' 
+end
 
 select gno,products,mon 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
@@ -889,6 +903,7 @@ from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy
 			    left join cust c on a.custno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
@@ -979,6 +994,7 @@ from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy
 				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
@@ -1073,6 +1089,7 @@ from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy
 				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
@@ -1169,6 +1186,7 @@ from view_vcc a
 	left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
@@ -1272,6 +1290,7 @@ from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy
 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
@@ -1369,6 +1388,7 @@ from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy
 				left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
@@ -1473,6 +1493,7 @@ from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy
 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
@@ -1570,6 +1591,7 @@ from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy
 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
+	  (len(@vcctypea)=0 or @vcctypea=a.typea) and
 	  (len(@t_product)=0 or @t_product like b.product)and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and

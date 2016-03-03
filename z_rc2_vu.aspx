@@ -18,7 +18,7 @@
 		
 			$(document).ready(function() {
 				q_getId();
-				q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
+				q_gt('spec', '1=1 ', 0, 0, 0, "spec");
 				
 				$.datepicker.regional['zh-TW']={
 				   dayNames:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],
@@ -32,8 +32,12 @@
 				//將預設語系設定為中文
 				$.datepicker.setDefaults($.datepicker.regional["zh-TW"]);
 			});
-			var xuccItem ='';
-			var t_qno='';
+			var xucolorItem ='';
+            var xspecItem ='';
+            var t_qno='';
+            var xlengthbItem ='';
+            var xclassItem ='';
+            var xuccItem ='';
 			
 			function q_gfPost() {
 				$('#q_report').q_report({
@@ -43,51 +47,58 @@
 						name : 'accy',
 						value : r_accy
 					}, {
-						type : '1', //[2][3]
+                        type : '0', //[2] //判斷顯示小數點與其他判斷
+                        name : 'lenm',
+                        value : r_lenm
+                    }, {
+                        type : '0', //[3] //判斷顯示小數點與其他判斷
+                        name : 'acomp',
+                        value : q_getPara('sys.comp')
+                    }, {
+						type : '1', //[4][5]
 						name : 'date'
 					}, {
-						type : '1', //[4][5]
+						type : '1', //[6][7]
 						name : 'mon'
 					}, {
-						type : '2', //[6][7]
+						type : '2', //[8][9]
 						name : 'tgg',
 						dbf : 'tgg',
 						index : 'noa,comp',
 						src : 'tgg_b.aspx'
 					}, {
-						type : '2', //[8][9]
-						name : 'sales',
-						dbf : 'sss',
-						index : 'noa,namea',
-						src : 'sss_b.aspx'
-					}, {
-						type : '2', //[10][11]
-						name : 'product',
-						dbf : 'ucc',
-						index : 'noa,product',
-						src : 'ucc_b.aspx'
-					}, {
-						type : '5', //[12]
-						name : 'xstype',
-						value : xuccItem.split(',')
-					}, {
-                        type : '0', //[13] //判斷顯示小數點與其他判斷
-                        name : 'acomp',
-                        value : q_getPara('sys.comp')
+                        type : '5',
+                        name : 'rc2typea', //[10]
+                        value : [q_getPara('report.all')].concat(q_getPara('rc2.typea').split(','))
+                    }, {
+                        type : '5',
+                        name : 'xproduct', //[11]
+                        value :xuccItem.split(',')
+                    }, {
+                        type : '5',
+                        name : 'xspec' ,//[12]
+                        value :xspecItem.split(',')
+                    }, {
+                        type : '5',
+                        name : 'xsize', //[13]
+                        value:(' @全部,#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16').split(',')
+                    }, {
+                        type : '5',
+                        name : 'xclass',//[14]
+                        value : xclassItem.split(',')
                     },{
-                        type : '6', //[14] //判斷顯示小數點與其他判斷
+                        type : '1',
+                        name : 'xlengthb', //[15][16]
+                    },{
+                        type : '6', //[17] //判斷顯示小數點與其他判斷
                         name : 'qno',
                     }, {
-						type : '2', //[15][16]
+						type : '2', //[18][19]
 						name : 'xstore',
 						dbf : 'store',
 						index : 'noa,store',
 						src : 'store_b.aspx'
-					}, {
-                        type : '0', //[17] //判斷顯示小數點與其他判斷
-                        name : 'lenm',
-                        value : r_lenm
-                    }]
+					}]
 				});
 				q_popAssign();
 				q_getFormat();
@@ -131,6 +142,17 @@
                 t_day = t_day > 9 ? t_day + '' : '0' + t_day;
                 $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
                 $('#txtMon2').val(t_year + '/' + t_month);
+                
+                $('#txtXlengthb1').addClass('num').val(0).change(function() {
+                    $(this).val(dec($(this).val()));
+                    if ($(this).val() == 'NaN')
+                    	$(this).val(0);
+                });
+                $('#txtXlengthb2').addClass('num').val(99).change(function() {
+                    $(this).val(dec($(this).val()));
+                    if ($(this).val() == 'NaN')
+                    	$(this).val(99);
+                });
                
                 var tmp = document.getElementById("txtQno");
                 var selectbox = document.createElement("select");
@@ -181,6 +203,30 @@
 							}
 							t_qno='';
                 		break;
+                	case 'spec':
+                		var as = _q_appendData("spec", "", true);
+                		xspecItem = " @全部";
+						for ( i = 0; i < as.length; i++) {
+							xspecItem+=","+as[i].noa;
+						}
+						q_gt('color', '1=1 ', 0, 0, 0, "color");
+                		break;
+                	case 'color':
+                		var as = _q_appendData("color", "", true);
+                		xucolorItem = " @全部";
+						for ( i = 0; i < as.length; i++) {
+							xucolorItem+=","+as[i].color;
+						}
+						q_gt('class', '1=1 ', 0, 0, 0, "class");
+                		break;
+                	case 'class':
+                		var as = _q_appendData("class", "", true);
+                		xclassItem = " @全部";
+						for ( i = 0; i < as.length; i++) {
+							xclassItem+=","+as[i].noa;
+						}
+						q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
+						break;
                 	case 'ucc':
 						xuccItem = " @全部";
                 		var as = _q_appendData("ucc", "", true);
@@ -195,6 +241,19 @@
                 }
             }
 		</script>
+		<style type="text/css">
+            .num {
+                text-align: right;
+                padding-right: 2px;
+            }
+            #q_report select {
+            	font-size: medium;
+    			margin-top: 2px;
+            }
+            select {
+            	font-size: medium;
+            }
+		</style> 
 	</head>
 	<body ondragstart="return false" draggable="false"
 	ondragenter="event.dataTransfer.dropEffect='none'; event.stopPropagation(); event.preventDefault();"

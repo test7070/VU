@@ -456,19 +456,35 @@
 								if(t_quat[0]!=undefined){
 									var r_quat=t_quat[0].split('@');
 									if(r_quat[0]==$('#textQno1').val()){
-										q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+										if(as[i].typea=='2'){
+											q1_weight=q_add(q1_weight,dec(r_quat[1]));
+										}else{
+											q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+										}
 									}
 									if(r_quat[0]==$('#textQno2').val()){
-										q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+										if(as[i].typea=='2'){
+											q2_weight=q_add(q2_weight,dec(r_quat[1]));
+										}else{
+											q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+										}
 									}
 								}
 								if(t_quat[1]!=undefined){
 									var r_quat=t_quat[1].split('@');
 									if(r_quat[0]==$('#textQno1').val()){
-										q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+										if(as[i].typea=='2'){
+											q1_weight=q_add(q1_weight,dec(r_quat[1]));
+										}else{
+											q1_weight=q_sub(q1_weight,dec(r_quat[1]));
+										}
 									}
 									if(r_quat[0]==$('#textQno2').val()){
-										q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+										if(as[i].typea=='2'){
+											q2_weight=q_add(q2_weight,dec(r_quat[1]));
+										}else{
+											q2_weight=q_sub(q2_weight,dec(r_quat[1]));
+										}
 									}
 								}
 							}else{
@@ -483,7 +499,7 @@
 								}
 							}
 						}
-						if(q1_weight>=dec($('#textQweight1').val()) && q2_weight>=dec($('#textQweight2').val()) ){
+						if((q1_weight>=dec($('#textQweight1').val()) && q2_weight>=dec($('#textQweight2').val())) ||  $('#cmbTypea').val()=='2'){
 							check_quat=true;
 							btnOk();
 						}else{
@@ -710,9 +726,9 @@
 					case 'qno1_chage':
 						var as = _q_appendData("view_quat", "", true);
 						if (as[0] != undefined) {
-							if((as[0].enda)=="true"){
+							if((as[0].enda)=="true" && $('#cmbTypea').val()!='2'){
 								alert($('#textQno1').val()+'合約已結案!');
-							}else if(dec(as[0].eweight)<=0){
+							}else if(dec(as[0].eweight)<=0  && $('#cmbTypea').val()!='2'){
 								alert($('#textQno1').val()+'合約已出貨完畢!');
 							}else if(!emp($('#txtCustno').val()) && $('#txtCustno').val()!=as[0].custno){
 								alert('合約客戶與出貨客戶不同!!');
@@ -732,9 +748,9 @@
 					case 'qno2_chage':
 						var as = _q_appendData("view_quat", "", true);
 						if (as[0] != undefined) {
-							if((as[0].enda)=="true"){
+							if((as[0].enda)=="true" && $('#cmbTypea').val()!='2'){
 								alert($('#textQno2').val()+'合約已結案!');
-							}else if(dec(as[0].eweight)<=0){
+							}else if(dec(as[0].eweight)<=0 && $('#cmbTypea').val()!='2'){
 								alert($('#textQno2').val()+'合約已出貨完畢!');
 							}else if(!emp($('#txtCustno').val()) && $('#txtCustno').val()!=as[0].custno){
 								alert('合約客戶與出貨客戶不同!!');

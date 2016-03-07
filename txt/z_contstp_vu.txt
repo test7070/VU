@@ -175,12 +175,13 @@ end
 
 if((select count(*) from #tmp )>0)
 begin
-	insert into #tmp(gno,tggno,noa,datea,weight,eweight,emoney,opay,rmoney)
-	select '1',tggno,char(255),char(255),sum(weight),sum(eweight) ,sum(emoney),sum(opay),sum(rmoney)
+	insert into #tmp(gno,tggno,noa,datea,weight,eweight,price,emoney,opay,rmoney)
+	select '1',tggno,MAX(noa),MAX(datea),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
+	,sum(emoney),sum(opay),sum(rmoney)
 	from #tmp where gno = '0' group by tggno
 	
 	insert into #tmp(gno,tggno,datea,weight,eweight,price,emoney,opay,rmoney)
-	select '3',char(255),char(255),sum(weight),sum(eweight) ,case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
+	select '3',char(255),char(255),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
 	,sum(emoney),sum(opay),sum(rmoney)
 	from #tmp where gno = '0'
 	
@@ -188,6 +189,10 @@ begin
 	--select '4',noa,memo,custno,datea from #tmp where gno = '0' group by noa,memo,custno,datea
 	insert #tmp (gno,noa,memo,tggno,datea) 
 	select '4',noa,memo,tggno,datea from #tmp where gno = '0' group by noa,memo,tggno,datea
+	
+	--1050307 一頁十行
+	insert #tmp(gno,tggno,noa,datea,recno)
+	select '5',tggno,noa,datea,recno from #tmp where gno='0' and recno%10=0 
 end
 
 select 

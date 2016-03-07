@@ -175,8 +175,8 @@ end
 
 if((select count(*) from #tmp )>0)
 begin
-	insert into #tmp(gno,custno,noa,datea,weight,eweight,emoney,opay,vmoney)
-	select '1',custno,char(255),char(255),sum(weight),sum(eweight)
+	insert into #tmp(gno,custno,noa,datea,weight,eweight,price,emoney,opay,vmoney)
+	select '1',custno,MAX(noa),MAX(datea),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
 	,sum(emoney),sum(opay),sum(vmoney) 
 	from #tmp where gno = '0' group by custno
 		
@@ -187,6 +187,10 @@ begin
 	
 	insert #tmp (gno,noa,memo,custno,datea) 
 	select '4',noa,memo,custno,datea from #tmp where gno = '0' group by noa,memo,custno,datea
+	
+	--1050307 一頁十行
+	insert #tmp(gno,custno,noa,datea,recno)
+	select '5',custno,noa,datea,recno from #tmp where gno='0' and recno%10=0 
 end
 	
 select 

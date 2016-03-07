@@ -95,11 +95,11 @@ if(LEN(@t_bdate)>0)
 	set @tt_bdate=dbo.q_cdn(@t_bdate,-31)
 
 insert #tmpa
-select noa,apvmemo,total,payed
+select noa,apvmemo,(case when typea='1' then 1 else -1 end)*total,(case when typea='1' then 1 else -1 end)*payed
 ,left(apvmemo,charindex('@',apvmemo)-1)
-,cast(SUBSTRING(apvmemo,charindex('@',apvmemo)+1,charindex('##',apvmemo)-charindex('@',apvmemo)-1) as float)
+,(case when typea='1' then 1 else -1 end)*cast(SUBSTRING(apvmemo,charindex('@',apvmemo)+1,charindex('##',apvmemo)-charindex('@',apvmemo)-1) as float)
 ,left(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)),CHARINDEX('@',SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)))-1)
-,cast(SUBSTRING(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)),charindex('@',SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)))+1,len(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo))))as float)
+,(case when typea='1' then 1 else -1 end)*cast(SUBSTRING(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)),charindex('@',SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)))+1,len(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo))))as float)
 --使用函數會跑較慢
 --,dbo.split(dbo.split(apvmemo,'##',0),'@',0)
 --,dbo.split(dbo.split(apvmemo,'##',0),'@',1)
@@ -246,16 +246,16 @@ declare @tmp table(
 
 insert @tmp
 select '0' gno,0 recno,a.custno,'' nick
-,sum(case when b.ucolor='板料' then b.weight else 0 end) aweight
-,sum(case when b.ucolor='板料' then b.total else 0 end) atotal
-,case when sum(case when b.ucolor='板料' then b.weight else 0 end)=0 then 0 
-else sum(case when b.ucolor='板料' then b.total else 0 end)/sum(case when b.ucolor='板料' then b.weight else 0 end) end aprice
-,sum(case when b.ucolor!='板料' then b.weight else 0 end) bweight
-,sum(case when b.ucolor!='板料' then b.total else 0 end) btotal
-,case when sum(case when b.ucolor!='板料' then b.weight else 0 end)=0 then 0 
-else sum(case when b.ucolor!='板料' then b.total else 0 end)/sum(case when b.ucolor!='板料' then b.weight else 0 end) end bprice
-,sum(b.weight)weight,sum(b.total)total
-,case when sum(b.weight)=0 then 0 else sum(b.total)/sum(b.weight) end price
+,sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor='板料' then b.weight else 0 end) aweight
+,sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor='板料' then b.total else 0 end) atotal
+,case when sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor='板料' then b.weight else 0 end)=0 then 0 
+else sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor='板料' then b.total else 0 end)/sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor='板料' then b.weight else 0 end) end aprice
+,sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor!='板料' then b.weight else 0 end) bweight
+,sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor!='板料' then b.total else 0 end) btotal
+,case when sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor!='板料' then b.weight else 0 end)=0 then 0 
+else sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor!='板料' then b.total else 0 end)/sum((case when a.typea='1' then 1 else -1 end)*case when b.ucolor!='板料' then b.weight else 0 end) end bprice
+,sum((case when a.typea='1' then 1 else -1 end)*b.weight)weight,sum((case when a.typea='1' then 1 else -1 end)*b.total)total
+,case when sum((case when a.typea='1' then 1 else -1 end)*b.weight)=0 then 0 else sum((case when a.typea='1' then 1 else -1 end)*b.total)/sum((case when a.typea='1' then 1 else -1 end)*b.weight) end price
 from view_vcc a left join view_vccs b on a.noa=b.noa
 left join cust c on a.custno=c.noa
 where b.product=@t_product

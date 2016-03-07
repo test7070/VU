@@ -94,11 +94,11 @@ if(LEN(@t_bdate)>0)
 	set @tt_bdate=dbo.q_cdn(@t_bdate,-31)
 	
 insert #tmpa
-select noa,transtart,total,payed
+select noa,transtart,(case when typea='1' then 1 else -1 end)*total,(case when typea='1' then 1 else -1 end)*payed
 ,left(transtart,charindex('@',transtart)-1)
-,cast(SUBSTRING(transtart,charindex('@',transtart)+1,charindex('##',transtart)-charindex('@',transtart)-1) as float)
+,(case when typea='1' then 1 else -1 end)*cast(SUBSTRING(transtart,charindex('@',transtart)+1,charindex('##',transtart)-charindex('@',transtart)-1) as float)
 ,left(SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)),CHARINDEX('@',SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)))-1)
-,cast(SUBSTRING(SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)),charindex('@',SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)))+1,len(SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart))))as float)
+,(case when typea='1' then 1 else -1 end)*cast(SUBSTRING(SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)),charindex('@',SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart)))+1,len(SUBSTRING(transtart,charindex('##',transtart)+2,len(transtart))))as float)
 --使用函數會跑較慢
 --,dbo.split(dbo.split(transtart,'##',0),'@',0)
 --,dbo.split(dbo.split(transtart,'##',0),'@',1)

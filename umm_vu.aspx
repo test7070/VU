@@ -189,10 +189,24 @@
                 var t_custno = $('#txtCustno').val();
                 var s2 = (q_cur == 2 ? " and noa!='" + $('#txtNoa').val() + "'" : '');
                 
-                if(q_cur==4 ||q_cur==0 )
+                if(q_cur==4 || q_cur==0 ){
                 	var t_where = "where=^^custno='" + t_custno + "' " + s2 + " and datea<='"+$('#txtDatea').val()+"' and payc='" + $('#txtPayc').val() + "' ^^";
-                else
-                	var t_where = "where=^^custno='" + t_custno + "' " + s2 + " and payc='" + $('#txtPayc').val() + "' ^^";
+                }else{
+                	var t_payc=$('#txtPayc').val().split(',');
+                	var t_where = "where=^^custno='" + t_custno + "' " + s2 + " ";
+                	var t_paycwhere="";
+                	for (var i = 0; i < t_payc.length; i++) {
+                		if(t_payc[i]!=''){
+                			t_paycwhere=t_paycwhere+(t_paycwhere.length>0?' or ':'')+" charindex('"+t_payc[i]+",',payc+',')>0 ";
+                		}
+                	}
+                	if(t_paycwhere.length>0){
+                		t_paycwhere=" and ("+t_paycwhere+")"
+                	}
+                	
+                	t_where=t_where+t_paycwhere+" ^^";
+                	//var t_where = "where=^^custno='" + t_custno + "' " + s2 + " and payc='" + $('#txtPayc').val() + "' ^^";
+                }
                 
                 q_gt("umm_opay", t_where, 1, 1, 0, '', r_accy);
             }

@@ -79,9 +79,10 @@
 		        
 		         $('#txtDatea').blur(function() {
 		         	if(!emp($('#txtDatea').val())&&(q_cur==1 || q_cur==2)){
-                    	var d = new Date(dec($('#txtDatea').val().substr(0,4)), dec($('#txtDatea').val().substr(5,2))-1, dec($('#txtDatea').val().substr(8,2)));
-						d.setMonth(d.getMonth() - 1);
-						$('#txtMon').val(d.getFullYear()+'/'+('0'+(d.getMonth()+1)).slice(-2));
+                    	//var d = new Date(dec($('#txtDatea').val().substr(0,4)), dec($('#txtDatea').val().substr(5,2))-1, dec($('#txtDatea').val().substr(8,2)));
+						//d.setMonth(d.getMonth() - 1);
+						//$('#txtMon').val(d.getFullYear()+'/'+('0'+(d.getMonth()+1)).slice(-2));
+						$('#txtMon').val($('#txtDatea').val().substring(0,r_lenm));
 					}
                 });
 		        

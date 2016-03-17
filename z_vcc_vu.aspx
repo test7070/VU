@@ -98,7 +98,12 @@
                     },{
                         type : '6', //[17] 
                         name : 'qno',
-                      
+                    }, {
+                        type : '2', //[18][19]
+                        name : 'xstore',
+                        dbf : 'store',
+                        index : 'noa,store',
+                        src : 'store_b.aspx'
                     }]
                 });
                 q_popAssign();

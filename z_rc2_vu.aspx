@@ -98,7 +98,11 @@
 						dbf : 'store',
 						index : 'noa,store',
 						src : 'store_b.aspx'
-					}]
+					}, {
+                        type : '0', 
+                        name : 'xworker',
+                        value : r_name
+                    }]
 				});
 				q_popAssign();
 				q_getFormat();

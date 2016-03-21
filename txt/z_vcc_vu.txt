@@ -535,16 +535,19 @@ declare @result table(
 	spec nvarchar(30),
 	size nvarchar(30),
 	length nvarchar(30),
-	totax float
+	totax float,
+	carno nvarchar(50)
 ) 
 
 insert into @result 
 select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon
 ,a.custno custno, isnull(c.comp,''), isnull(c.addr_invo,''), isnull(c.tel,'')
 ,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')
++' '+isnull(b.class,'')
 ,b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 ,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
 ,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
+,a.carno
 from view_vccs b left join view_vcc a on a.noa = b.noa left join cust c on a.custno = c.noa left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
@@ -577,7 +580,7 @@ select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,xproduct xpdt,unit
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax  
-,pcount ,ucolor,spec ,size,length
+,pcount ,ucolor,spec ,size,length,carno
 from @result order by custno,gno,mon,datea,noa,noq ;
 --**************************************************************************************
 z_vcc_vu6:--z_vcc_vu6

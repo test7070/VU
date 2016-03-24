@@ -684,24 +684,68 @@ create table #tmp(
 	cust nvarchar(50)
 )
 
+set @cmd="
 insert #tmp
-select '0',b.datea,a.noa,b.productno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
-,'<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+a.noa+''+CHAR(59)+'104'',''95%'',''95%'',''104'')">'+b.uno+'</a>'
+select '0',b.datea,a.noa,b.productno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.uno
 ,b.mount,b.hmount,b.weight,b.memo,b.comp
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply (select * from view_orde where noa=b.ordeno) c
-where (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
-and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+where b.uno!='' 
+"
+
+if(len(@t_pno)>0)
+	set @cmd=@cmd+" and isnull(b.product,'')=@t_pno "
+if(len(@t_ucolor)>0)
+	set @cmd=@cmd+" and isnull(b.ucolor,'')=@t_ucolor "
+if(len(@t_uno)>0)
+	set @cmd=@cmd+" and isnull(b.uno,'')=@t_uno "
+if(len(@t_spec)>0)
+	set @cmd=@cmd+" and isnull(b.spec,'')=@t_spec "
+if(len(@t_size)>0)
+	set @cmd=@cmd+" and isnull(b.size,'')=@t_size "
+if(len(@t_class)>0)
+	set @cmd=@cmd+" and isnull(b.class,'')=@t_class "
+if not(@t_blengthb='' and  @t_elengthb=char(255))
+	set @cmd=@cmd+" and isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float) "
+if(len(@t_xordeno)>0)
+	set @cmd=@cmd+" and isnull(b.ordeno,'')=@t_xordeno "
+
+set @cmd=@cmd+"
 and (len(isnull(b.ordeno,''))=(case when @t_ordeshow='0' then 0 else len(isnull(b.ordeno,'')) end))
 and (b.mount>0 or b.weight>0) 
 and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
 and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
 and isnull(c.custno,'') between @t_bcustno and @t_ecustno
-and (isnull(b.ordeno,'') = @t_xordeno or  len(@t_xordeno)=0)
 and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
+"
+
+execute sp_executesql @cmd,N'@t_pno nvarchar(50),@t_ucolor nvarchar(50),@t_spec nvarchar(50),@t_size nvarchar(50),@t_blengthb nvarchar(50),@t_elengthb nvarchar(50),@t_class nvarchar(50),@t_uno nvarchar(50),@t_edate nvarchar(20),@t_ordeshow nvarchar(20),@t_bcustno nvarchar(50),@t_ecustno nvarchar(50),@t_xordeno nvarchar(50),@t_sheet nvarchar(30) '
+		,@t_pno=@t_pno,@t_ucolor=@t_ucolor,@t_spec=@t_spec,@t_size=@t_size,@t_blengthb=@t_blengthb
+		,@t_elengthb=@t_elengthb,@t_class=@t_class,@t_uno=@t_uno,@t_edate=@t_edate,@t_ordeshow=@t_ordeshow
+		,@t_bcustno=@t_bcustno,@t_ecustno=@t_ecustno,@t_xordeno=@t_xordeno,@t_sheet=@t_sheet
+update #tmp
+
+set uno='<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+noa+''+CHAR(59)+'104'',''95%'',''95%'',''104'')">'+uno+'</a>'
+
+--1050324 減少where 加快速度
+--insert #tmp
+--select '0',b.datea,a.noa,b.productno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+--,'<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+a.noa+''+CHAR(59)+'104'',''95%'',''95%'',''104'')">'+b.uno+'</a>'
+--,b.mount,b.hmount,b.weight,b.memo,b.comp
+--from view_cub a left join view_cubs b on a.noa=b.noa
+--outer apply (select * from view_orde where noa=b.ordeno) c
+--where (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+--and (len(@t_uno)=0 or b.uno=@t_uno) and b.uno!=''
+--and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+--and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+--and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+--and (len(isnull(b.ordeno,''))=(case when @t_ordeshow='0' then 0 else len(isnull(b.ordeno,'')) end))
+--and (b.mount>0 or b.weight>0) 
+--and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
+--and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
+--and isnull(c.custno,'') between @t_bcustno and @t_ecustno
+--and (isnull(b.ordeno,'') = @t_xordeno or  len(@t_xordeno)=0)
+--and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
 
 if((select count(*) from #tmp)>0)
 begin

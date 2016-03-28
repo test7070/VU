@@ -180,32 +180,40 @@ declare @result table(
 	mechno nvarchar(10),
 	mech nvarchar(20),
 	mount float,
-	weight float
+	weight float,
+	gweight float,
+	bweight float
 )
 
 insert @result 
-select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end ,a.mechno,a.mech,sum(b.mount),SUM(b.weight)
+select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end ,a.mechno,a.mech
+,SUM(case when b.mount>=0 or b.weight>=0 then b.mount else 0 end)
+,SUM(case when b.weight>=0 then b.weight else 0 end)
+,SUM(case when b.weight<0 then -1*b.weight else 0 end)
+,SUM(b.weight)
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
 	and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
-	and (@t_showget='Y' or  (b.mount>=0 or b.weight>=0) )
+	--and (@t_showget='Y' or  (b.mount>=0 or b.weight>=0) )
 	and ISNULL(left(right(a.kind,8),5),'') between @t_btime and @t_etime
 	and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
 group by case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end,a.mechno,a.mech
 
-insert @result (gno,mon,mount,weight)
-select '1',mon,SUM(mount),sum(weight)
+insert @result (gno,mon,mount,weight,gweight,bweight)
+select '1',mon,SUM(mount),sum(weight),sum(gweight),sum(bweight)
 from @result
 group by mon
 
-insert @result (gno,mon,mount,weight)
-select '2','9999/999',SUM(mount),sum(weight)
+insert @result (gno,mon,mount,weight,gweight,bweight)
+select '2','9999/999',SUM(mount),sum(weight),sum(gweight),sum(bweight)
 from @result
 where gno='1'
 
 select gno,mon,mechno,mech
 ,dbo.getComma(mount,[2]) mount
 ,dbo.getComma(weight,[3]) weight
+,dbo.getComma(gweight,[3]) gweight
+,dbo.getComma(bweight,[3]) bweight
 from @result
 order by mon,gno
 ;

@@ -1277,7 +1277,7 @@
 						q_bodyId($(this).attr('id'));
 						b_seq = t_IdSeq;
 						
-						if(!emp($('#txtOrdeno').val()) && $(this).val().indexOf($('#txtOrdeno').val())==-1){
+						if($(this).val().substr(0,1)!='M' && !emp($('#txtOrdeno').val()) && $(this).val().indexOf($('#txtOrdeno').val())==-1){
 							alert('該批號非同一張訂單號碼!!');
 							$(this).val('');
 						}

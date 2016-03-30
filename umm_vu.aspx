@@ -70,7 +70,8 @@
 				
 				$('#txtPayc').change(function() {
 					if(!emp($('#txtPayc').val())){
-						var t_where = "where=^^ charindex(','+noa+',','," + $('#txtPayc').val() + ",')>0 ^^";
+						//var t_where = "where=^^ charindex(','+noa+',','," + $('#txtPayc').val() + ",')>0 ^^";
+						var t_where = "where=^^ noa='" + $('#txtPayc').val() + "' ^^";
 	                	q_gt("view_quat", t_where, 0, 0, 0, 'get_quat', r_accy);
 	                }else{
 	                	getOpay();
@@ -193,7 +194,7 @@
                 if(q_cur==4 || q_cur==0 ){
                 	var t_where = "where=^^custno='" + t_custno + "' " + s2 + " and datea<='"+$('#txtDatea').val()+"' and payc='" + $('#txtPayc').val() + "' ^^";
                 }else{
-                	var t_payc=$('#txtPayc').val().split(',');
+                	/*var t_payc=$('#txtPayc').val().split(',');
                 	var t_where = "where=^^custno='" + t_custno + "' " + s2 + " ";
                 	var t_paycwhere="";
                 	for (var i = 0; i < t_payc.length; i++) {
@@ -205,8 +206,8 @@
                 		t_paycwhere=" and ("+t_paycwhere+")"
                 	}
                 	
-                	t_where=t_where+t_paycwhere+" ^^";
-                	//var t_where = "where=^^custno='" + t_custno + "' " + s2 + " and payc='" + $('#txtPayc').val() + "' ^^";
+                	t_where=t_where+t_paycwhere+" ^^";*/
+                	var t_where = "where=^^custno='" + t_custno + "' " + s2 + " and payc='" + $('#txtPayc').val() + "' ^^";
                 }
                 
                 q_gt("umm_opay", t_where, 1, 1, 0, '', r_accy);
@@ -320,7 +321,7 @@
                 			$('#txtComp').val(as[0].nick);
                 			$('#cmbCno').val(as[0].cno);
                 			
-                			var t_payc=$('#txtPayc').val().split(',');
+                			/*var t_payc=$('#txtPayc').val().split(',');
                 			if(t_payc.length!=as.length){
                 				for (var i = 0; i < t_payc.length; i++) {
                 					for (var j = 0; j < as.length; j++) {
@@ -337,7 +338,7 @@
                 				}
                 				
                 				alert('【'+t_err+'】無合約號碼!!');
-                			}
+                			}*/
                 			
                 		}else{
                 			alert('無此合約號碼!!');

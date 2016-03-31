@@ -70,8 +70,8 @@
 				
 				$('#txtPayc').change(function() {
 					if(!emp($('#txtPayc').val())){
-						//var t_where = "where=^^ charindex(','+noa+',','," + $('#txtPayc').val() + ",')>0 ^^";
-						var t_where = "where=^^ noa='" + $('#txtPayc').val() + "' ^^";
+						var t_where = "where=^^ charindex(','+noa+',','," + $('#txtPayc').val() + ",')>0 ^^";
+						//var t_where = "where=^^ noa='" + $('#txtPayc').val() + "' ^^";
 	                	q_gt("view_quat", t_where, 0, 0, 0, 'get_quat', r_accy);
 	                }else{
 	                	getOpay();

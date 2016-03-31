@@ -1277,7 +1277,10 @@
 						q_bodyId($(this).attr('id'));
 						b_seq = t_IdSeq;
 						
-						if($(this).val().substr(0,1)!='M' && !emp($('#txtOrdeno').val()) && $(this).val().indexOf($('#txtOrdeno').val())==-1){
+						//105/03/31 訂單號碼會打多張訂單編號
+						var t_unoorde=$(this).val().substr(0,$(this).val().indexOf('-')==-1?$(this).val().length:$(this).val().indexOf('-'));
+						
+						if($(this).val().substr(0,1)!='M' && !emp($('#txtOrdeno').val()) && $('#txtOrdeno').val().indexOf(t_unoorde)==-1){
 							alert('該批號非同一張訂單號碼!!');
 							$(this).val('');
 						}

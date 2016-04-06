@@ -493,7 +493,9 @@ declare @result table(
 	spec nvarchar(30), 
 	size nvarchar(30), 
 	lengh decimal(18,2),
-	contno nvarchar(50)
+	contno nvarchar(50),
+	idno int,
+	page int
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono, a.datea
@@ -504,7 +506,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 		,b.price	,(case when a.typea='2' then -1 else 1 end)*b.total
 		,(case when a.typea='2' then -1 else 1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 		,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
-		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb,dbo.split(dbo.split(a.transtart,'##',0),'@',0)
+		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb,dbo.split(dbo.split(a.transtart,'##',0),'@',0),0,0
 from view_rc2s b left join view_rc2 a on a.noa = b.noa
 left join cont c on LEFT(a.transtart,CHARINDEX('@',a.transtart)-1)=c.noa
 outer apply (select  top 1 * from conts where noa=c.noa order by noq desc) d 
@@ -525,10 +527,47 @@ begin
 	from @result a group by tggno,comp 
 end
 
-update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
+update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref))
 
-select 
-gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,odate,productno,product,unit,addr2,contno
+declare @pageline int =43
+declare @tggno nvarchar(50) 
+declare @idno int
+declare @page int
+
+update a
+set idno=xidno,page=ceiling(cast(xidno as float)/@pageline)
+from (select idno,page,row_number()over(partition by tggno order by tggno,gno,datea,noa) xidno from @result)a
+
+--補空白行
+declare cursor_table cursor for 
+select tggno,MAX(idno),MAX(page) from @result group by tggno
+open cursor_table 
+fetch next from cursor_table 
+into @tggno,@idno,@page
+while(@@FETCH_STATUS <> -1) 
+begin
+	while ((@idno)%@pageline>0)
+	begin
+		set @idno=@idno+1
+		insert @result(gno,tggno,page,idno,noa)
+		select '2',@tggno,@page,@idno,CHAR(255)
+	end
+
+	fetch next from cursor_table 
+	into @tggno,@idno,@page
+end 
+close cursor_table 
+deallocate cursor_table 
+
+insert @result(gno,page,idno,tggno)
+select '3',page,MAX(idno)+1,tggno
+from @result group by page,tggno
+
+update a set gno='4'
+from @result a outer apply (select MAX(page)xpage from @result where tggno=a.tggno )b
+where gno='3' and a.page=b.xpage
+
+select gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,odate,productno,product,unit,addr2,contno
 ,reverse(substring(reverse(convert(nvarchar(30),mount,0)),0,30)) mount
 ,dbo.getComma(oweight,0) oweight 
 ,dbo.getComma(oprice,2) oprice 
@@ -539,4 +578,4 @@ gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,odate,productno,product,unit,
 ,dbo.getComma(money,0) money 
 ,reverse(substring(reverse(convert(nvarchar(30),pcount,0)),0,30)) pcount,qhref, 
 row_number()over(partition by tggno,comp order by tggno,gno,datea,noa) idno ,ucolor,size,spec,lengh
-from @result order by tggno,gno,datea,noa  ;
+from @result order by tggno,page,gno,datea,noa,idno;

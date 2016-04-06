@@ -1735,7 +1735,9 @@ declare @result table(
 	size nvarchar(30),
 	length nvarchar(30),
 	totax float,
-	carno nvarchar(50)
+	carno nvarchar(50),
+	idno int,
+	page int
 ) 
 
 insert into @result 
@@ -1747,7 +1749,7 @@ select '0' gno, a.typea, a.noa noa,a.invono invono, b.noq noq, a.datea datea, a.
 ,b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 ,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
 ,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
-,a.carno
+,a.carno,0,0
 from view_vccs b left join view_vcc a on a.noa = b.noa
 left join view_quat c on LEFT(a.apvmemo,CHARINDEX('@',a.apvmemo)-1)=c.noa
 outer apply (select  top 1 * from view_quats where noa=c.noa order by noq desc) d 
@@ -1777,7 +1779,45 @@ update @result set typea = (case typea when '1' then '出' else '退' end) where
 
 update @result set mount=mount*-1,total=total*-1 ,totax=totax*-1,weight=weight*-1,tax=tax*-1 where typea='退' 
 
-select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odate,xproduct xpdt,invono,unit, qhref 
+declare @pageline int =43
+declare @custno nvarchar(50) 
+declare @idno int
+declare @page int
+
+update a
+set idno=xidno,page=ceiling(cast(xidno as float)/@pageline)
+from (select idno,page,row_number()over(partition by custno order by custno,gno,datea,noa,noq) xidno from @result)a
+
+--補空白行
+declare cursor_table cursor for 
+select custno,MAX(idno),MAX(page) from @result group by custno
+open cursor_table 
+fetch next from cursor_table 
+into @custno,@idno,@page
+while(@@FETCH_STATUS <> -1) 
+begin
+	while ((@idno)%@pageline>0)
+	begin
+		set @idno=@idno+1
+		insert @result(gno,custno,page,idno,noa)
+		select '2',@custno,@page,@idno,CHAR(255)
+	end
+
+	fetch next from cursor_table 
+	into @custno,@idno,@page
+end 
+close cursor_table 
+deallocate cursor_table 
+
+insert @result(gno,page,idno,custno)
+select '3',page,MAX(idno)+1,custno
+from @result group by page,custno
+
+update a set gno='4'
+from @result a outer apply (select MAX(page)xpage from @result where custno=a.custno )b
+where gno='3' and a.page=b.xpage
+
+select gno,idno,page,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odate,xproduct xpdt,invono,unit, qhref 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
 ,dbo.getComma(oweight,0) oweight 
@@ -1786,6 +1826,5 @@ select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odate,xproduc
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
-,row_number()over(partition by custno,comp order by custno,gno,datea,noa) idno
 ,pcount ,ucolor,spec ,size,length,carno
-from @result order by custno,gno,mon,datea,noa,noq ;
+from @result order by custno,page,gno,mon,datea,noa,noq,idno;

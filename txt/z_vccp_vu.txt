@@ -400,12 +400,12 @@ select *,
 	   dbo.getComma(pweight4,0) pwei4,
 	   dbo.getComma(pweight5,0) pwei5,
 	   dbo.getComma(pweight6,0) pwei6,
-	   dbo.getComma(pmount1,0) pmou1,
-	   dbo.getComma(pmount2,0) pmou2,
-	   dbo.getComma(pmount3,0) pmou3,
-	   dbo.getComma(pmount4,0) pmou4,
-	   dbo.getComma(pmount5,0) pmou5,
-	   dbo.getComma(pmount6,0) pmou6
+	   dbo.getComma(pmount1,0)+case when pmount1 is not null then '件' else '' end  pmou1,
+	   dbo.getComma(pmount2,0)+case when pmount2 is not null then '件' else '' end pmou2,
+	   dbo.getComma(pmount3,0)+case when pmount3 is not null then '件' else '' end pmou3,
+	   dbo.getComma(pmount4,0)+case when pmount4 is not null then '件' else '' end pmou4,
+	   dbo.getComma(pmount5,0)+case when pmount5 is not null then '件' else '' end pmou5,
+	   dbo.getComma(pmount6,0)+case when pmount6 is not null then '件' else '' end pmou6
 from @tmp2 order by noa,gno  ;
 ------------------------------------------------------------------------------------------------------------------------------
 z_vccp_vu03:--z_vccp_vu03

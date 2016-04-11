@@ -110,26 +110,9 @@
                 $('#Xproduct select').val('鋼筋');
                 $('#txtLostday').val(100);
                 
-				var t_date, t_year, t_month, t_day;
-				t_date = new Date();
-				t_date.setMonth(-6);
-				t_date.setDate(1);
-				t_year = t_date.getUTCFullYear();
-				t_month = t_date.getUTCMonth() + 1;
-				t_month = t_month > 9 ? t_month + '' : '0' + t_month;
-				t_day = t_date.getUTCDate();
-				t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-				$('#txtDate1').val(t_year + '/' + t_month + '/' + t_day);
-
-				t_date = new Date();
-				t_date.setDate(35);
-				t_date.setDate(0);
-				t_year = t_date.getUTCFullYear();
-				t_month = t_date.getUTCMonth() + 1;
-				t_month = t_month > 9 ? t_month + '' : '0' + t_month;
-				t_day = t_date.getUTCDate();
-				t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-				$('#txtDate2').val(t_year + '/' + t_month + '/' + t_day );
+				
+				$('#txtDate1').val(q_date().substr(0,r_len)+'/01/01');
+				$('#txtDate2').val(q_date());
 				
 			}
 

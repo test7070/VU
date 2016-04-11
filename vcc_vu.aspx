@@ -1214,7 +1214,7 @@
 			            		$('#btnMinus_'+i).click();
 						}
 						
-						var as=[];
+						var as=[],tot_uno='';
 						for (var i = 0; i < q_bbtCount; i++) {
 							if(!emp($('#txtUno__'+i).val())){
 								var is_exists=false;
@@ -1227,7 +1227,10 @@
 									//&& as[j].no2==$('#txtNo2__'+i).val()
 									){
 										is_exists=true;
-										as[j].mount=q_add(dec(as[j].mount),dec($('#txtMount__'+i).val()));
+										if(!emp($('#txtUno__'+i).val())&& tot_uno.indexOf($('#txtUno__'+i).val())==-1){
+											as[j].mount=q_add(dec(as[j].mount),1);
+										}
+										//as[j].mount=q_add(dec(as[j].mount),dec($('#txtMount__'+i).val()));
 										as[j].weight=q_add(dec(as[j].weight),dec($('#txtWeight__'+i).val()));
 									}
 								}
@@ -1245,8 +1248,12 @@
 										no2:''//$('#txtNo2__'+i).val()
 									});
 								}
+								
+								tot_uno=tot_uno+($('#txtUno__'+i).val().length>0?',':'')+$('#txtUno__'+i).val();
 							}
 						}
+						
+						as.sort(bbssort);
 						
 						q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtOrdeno,txtNo2'
 						, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,noa,no2', 'txtOrdeno,txtNo2');
@@ -1308,10 +1315,28 @@
                 bbtsum();
             }
             
+            function bbssort(a, b) {
+				if (dec(replaceAll(a.size,'#',''))< dec(replaceAll(b.size,'#','')))
+					return -1;
+				if (dec(replaceAll(a.size,'#',''))> dec(replaceAll(b.size,'#','')))
+					return 1;
+				if(a.spec< b.spec)
+					return -1;
+				if(a.spec> b.spec)
+					return 1;
+				return 0;
+			}
+            
             function bbtsum() {
-            	var tot_mount=0,tot_weight=0;
+            	var tot_mount=0,tot_weight=0,tot_uno='';
                 for (var i = 0; i < q_bbtCount; i++) {
-	                tot_mount=q_add(tot_mount,dec($('#txtMount__'+i).val()));
+                	//105/04/07 改成批號計1件
+                	if(!emp($('#txtUno__'+i).val())&& tot_uno.indexOf($('#txtUno__'+i).val())==-1){
+                		tot_uno=tot_uno+($('#txtUno__'+i).val().length>0?',':'')+$('#txtUno__'+i).val();
+                		tot_mount++;	
+                	}
+                	
+	                //tot_mount=q_add(tot_mount,dec($('#txtMount__'+i).val()));
 	                tot_weight=q_add(tot_weight,dec($('#txtWeight__'+i).val()));
 				}
 				if(tot_mount!=0)

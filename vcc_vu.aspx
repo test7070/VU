@@ -96,7 +96,7 @@
 				bbmNum = [['txtTranmoney', 11, 0, 1], ['txtMoney', 15, 0, 1], ['txtTax', 15, 0, 1],['txtTotal', 15, 0, 1]
 				,['txtTranadd', 15, q_getPara('vcc.weightPrecision'), 1],['txtBenifit', 15, q_getPara('vcc.weightPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]
 				,['textQweight1', 15, q_getPara('vcc.weightPrecision'), 1],['textQweight2', 15, q_getPara('vcc.weightPrecision'), 1]
-				,['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1]];
+				,['txtPrice', 12, 3, 1]];
 				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
 				bbtNum = [['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];
 				//q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
@@ -1887,8 +1887,8 @@
 						<td colspan="2">
 							<input id="txtCarno"  type="text" class="txt" style="width:65px;float: left;"/>
 							<select id="combCarno" style="width: 20px;float: left;"> </select>
-							<a id="lblPrice_vu" class="lbl" style="float: left;">應付單價</a><span style="    float: left;"> </span>
-							<input id="txtPrice"  type="text" class="txt" style="width:60px;"/>
+							<a id="lblPrice_vu" class="lbl" style="float: left;">應付單價</a><span style="float: left;"> </span>
+							<input id="txtPrice"  type="text" class="txt num" style="width:60px;"/>
 						</td>
 						<td><span> </span><a id='lblTranmoney' class="lbl"> </a></td>
 						<td><input id="txtTranmoney" type="text" class="txt num c1"/></td>

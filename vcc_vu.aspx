@@ -1881,15 +1881,17 @@
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblCardeal" class="lbl btn"> </a></td>
-						<td><input id="txtCardealno" type="text" class="txt c1"/></td>
-						<td><input id="txtCardeal" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lblCarno' class="lbl btn"> </a></td>
-						<td colspan="2">
-							<input id="txtCarno"  type="text" class="txt" style="width:65px;float: left;"/>
-							<select id="combCarno" style="width: 20px;float: left;"> </select>
-							<a id="lblPrice_vu" class="lbl" style="float: left;">應付單價</a><span style="float: left;"> </span>
-							<input id="txtPrice"  type="text" class="txt num" style="width:60px;"/>
+						<td>
+							<input id="txtCardealno" type="text" class="txt c1" style="width: 49%;"/>
+							<input id="txtCardeal" type="text" class="txt c1"  style="width: 49%;"/>
 						</td>
+						<td><a id='lblCarno' class="lbl btn" style="float: left;"> </a><span style="float: left;"> </span>
+							<input id="txtCarno"  type="text" class="txt" style="width:60px;float: left;"/>
+							<select id="combCarno" style="width: 20px;float: left;"> </select>
+						</td>
+						<td><span> </span><a id="lblPrice_vu" class="lbl">應付運費單價</a></td>
+						<td><input id="txtPrice"  type="text" class="txt num c1"/></td>
+						<td>/KG</td>
 						<td><span> </span><a id='lblTranmoney' class="lbl"> </a></td>
 						<td><input id="txtTranmoney" type="text" class="txt num c1"/></td>
 					</tr>

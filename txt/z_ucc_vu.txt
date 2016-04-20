@@ -139,6 +139,19 @@ and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
 and @t_cubssheet='Y'
 group by b.uno,b.product,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
 
+--105/04/20 出貨板料也要扣
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '16','vccs',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
+from view_vcc a left join view_vccs b on a.noa=b.noa
+outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+where b.ucolor='板料' and a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+and a.datea>=isnull(c.datea,'')
+and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000' and isnull(b.productno,'')=''
+
 declare @tablea nvarchar(100)
 declare @storeno nvarchar(100)
 declare @x_storeno nvarchar(100)

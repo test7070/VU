@@ -303,7 +303,7 @@
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							
-                			$('#txtMoney_'+b_seq).val(FormatNumber(q_mul(q_float('txtMount_'+b_seq),q_float('txtPrice_'+b_seq))));
+                			$('#txtMoney_'+b_seq).val(FormatNumber(round(q_mul(q_float('txtMount_'+b_seq),q_float('txtPrice_'+b_seq)),0)));
                 			if($('#chkAtax_'+b_seq).prop('checked')){
                 				$('#txtTax_'+b_seq).val(FormatNumber(round(q_mul(q_float('txtMoney_'+b_seq),0.05),0)));
                 			}else{
@@ -318,7 +318,7 @@
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							
-                			$('#txtMoney_'+b_seq).val(FormatNumber(q_mul(q_float('txtMount_'+b_seq),q_float('txtPrice_'+b_seq))));
+                			$('#txtMoney_'+b_seq).val(FormatNumber(round(q_mul(q_float('txtMount_'+b_seq),q_float('txtPrice_'+b_seq)),0)));
                 			if($('#chkAtax_'+b_seq).prop('checked')){
                 				$('#txtTax_'+b_seq).val(FormatNumber(round(q_mul(q_float('txtMoney_'+b_seq),0.05),0)));
                 			}else{

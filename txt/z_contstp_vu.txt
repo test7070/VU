@@ -39,6 +39,7 @@ create table #tmp(
 	product nvarchar(50),
 	spec nvarchar(50),
 	price float,
+	qprice float,
 	weight float,
 	eweight float,
 	emoney float,
@@ -51,7 +52,7 @@ CREATE INDEX tmp_index ON #tmp (noa)
 
 insert #tmp
 select '0',row_number() over(order by a.tggno,a.datea,a.noa),a.datea,a.noa
-,a.cno,a.acomp,a.tggno,case when isnull(d.nick,'')!='' then d.nick else a.nick end,'','','',isnull(b.price,0),a.ordeweight,a.eweight
+,a.cno,a.acomp,a.tggno,case when isnull(d.nick,'')!='' then d.nick else a.nick end,'','','',isnull(b.price,0),0,a.ordeweight,a.eweight
 --,isnull(b.price,0)*a.eweight
 ,0
 ,isnull(c.opay,0),0,a.econtdate,replace(a.memo,'chr(10)',' ')
@@ -180,8 +181,10 @@ begin
 	,sum(emoney),sum(opay),sum(rmoney)
 	from #tmp where gno = '0' group by tggno
 	
-	insert into #tmp(gno,tggno,datea,weight,eweight,price,emoney,opay,rmoney)
-	select '3',char(255),char(255),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
+	insert into #tmp(gno,tggno,datea,weight,eweight,price,qprice,emoney,opay,rmoney)
+	select '3',char(255),char(255),sum(weight),sum(eweight)
+	,case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
+	,case when sum(weight)=0 then 0 else round(sum(weight*price)/sum(weight),2) end
 	,sum(emoney),sum(opay),sum(rmoney)
 	from #tmp where gno = '0'
 	

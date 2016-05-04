@@ -221,6 +221,11 @@ declare @tmp table(
 	ucub float,uvcc float, --定尺訂單 未完工 已完工待出貨
 	pgen float,	ngen float, --上月 本月 定尺產能
 	
+	prm float,prp float, --總進貨量 上月 數量 均價
+	rm float,rp float,--總進貨量 本月 數量 均價
+	pyrm float,pyrp float,--總進貨量 上年度 數量 均價
+	yrm float,yrp float,--總進出貨量 本年度 數量 均價
+	
 	pvm float,pvp float, --總出貨量 上月 數量 均價
 	vm float,vp float,--總出貨量 本月 數量 均價
 	pyvm float,pyvp float,--總出貨量 上年度 數量 均價
@@ -443,7 +448,7 @@ outer apply(
 	from view_cub a left join view_cubs b on a.noa=b.noa
 	outer apply (select * from view_orde where noa=b.ordeno) c
 	where a.datea<=@t_enddate and b.uno!='' and b.product!='鐵線' 
-	and (b.mount>0 or b.weight>0) and (len(isnull(b.ordeno,''))=0)
+	and (b.mount>0 or b.weight>0) --and (len(isnull(b.ordeno,''))=0)
 	and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
 	and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
 )b
@@ -465,21 +470,28 @@ declare @tmpa table(
 	noa nvarchar(40), 
 	bdate nvarchar(20),
 	stand float, 
-	undone float
+	undone float,
+	unfinal float
 )
 insert @tmpa
-select a.noa,a.bdate
+select a.noa,a.datea
 ,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)
 ,case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end 
+,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) 
++(case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end)
 from view_cuc a left join view_cucs b on a.noa=b.noa 
 outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c 
 outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d 
 where a.datea<=@t_enddate 
-group by a.cust,a.noa,a.bdate,a.memo,a.gen 
+group by a.cust,a.noa,a.datea,a.memo,a.gen 
 
-update a set undone=0 from @tmpa a 
+update a set undone=0,unfinal=stand 
+from @tmpa a 
 outer apply(select sum(case when mins=0 then 1 else 0 end) mins from view_cucs where noa=a.noa) b 
 where b.mins=0 
+
+--未結案
+delete @tmpa where unfinal<=0 
 
 update a
 set ucub=b.undone,uvcc=b.stand
@@ -502,6 +514,18 @@ outer apply(
 	where left(a.datea,7) = @t_pmon
 	and isnull(b.uno,'')!='' 
 )c
+
+--總進貨量
+update @tmp
+set prm=isnull((select SUM(weight) from view_rc2s where product='鋼筋' and left(datea,7)=@t_pmon),0)
+,prp=isnull((select case when SUM(weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_rc2s where product='鋼筋' and left(datea,7)=@t_pmon),0)
+,rm=isnull((select SUM(weight) from view_rc2s where product='鋼筋' and left(datea,7)=@t_mon),0)
+,rp=isnull((select case when SUM(weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_rc2s where product='鋼筋' and left(datea,7)=@t_mon),0)
+,pyrm=isnull((select SUM(weight) from view_rc2s where product='鋼筋' and left(datea,4)=@t_pyear),0)
+,pyrp=isnull((select case when SUM(weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_rc2s where product='鋼筋' and left(datea,4)=@t_pyear),0)
+,yrm=isnull((select SUM(weight) from view_rc2s where product='鋼筋' and left(datea,4)=@t_year),0)
+,yrp=isnull((select case when SUM(weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_rc2s where product='鋼筋' and left(datea,4)=@t_year),0)
+
 
 --總出貨量 
 update @tmp
@@ -548,6 +572,11 @@ select gno
 
 ,dbo.getComma(ucub,-1) ucub,dbo.getComma(uvcc,-1) uvcc
 ,dbo.getComma(pgen,-1) pgen,dbo.getComma(ngen,-1) ngen
+
+,dbo.getComma(prm,-1) prm,dbo.getComma(prp,-1) prp
+,dbo.getComma(rm,-1) rm,dbo.getComma(rp,-1) rp
+,dbo.getComma(pyrm,-1) pyrm,dbo.getComma(pyrp,-1) pyrp
+,dbo.getComma(yrm,-1) yrm,dbo.getComma(yrp,-1) yrp
 
 ,dbo.getComma(pvm,-1) pvm,dbo.getComma(pvp,-1) pvp
 ,dbo.getComma(vm,-1) vm,dbo.getComma(vp,-1) vp

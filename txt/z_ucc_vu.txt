@@ -66,7 +66,7 @@ and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnu
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and b.storeno='7000' and isnull(b.productno,'')=''
+and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
 --group by a.datea,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
 
 --刪除多次盤點的資料 只保留最後一次盤點
@@ -79,9 +79,8 @@ insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mou
 select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where a.datea<=@t_edate 
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') and b.ucolor='板料'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
@@ -91,9 +90,8 @@ insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mou
 select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
 from view_ina a left join view_inas b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where a.datea<=@t_edate 
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') and b.ucolor='板料'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
@@ -103,9 +101,8 @@ insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mou
 select '14','cubt',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
 from view_cub a left join view_cubt b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where a.datea<=@t_edate 
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') and b.ucolor='板料'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
@@ -115,9 +112,8 @@ insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mou
 select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
 from view_get a left join view_gets b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where a.datea<=@t_edate 
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') and b.ucolor='板料'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
@@ -127,9 +123,8 @@ insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,hmo
 select '2','cubs','',b.uno,'',b.product,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
-where b.ucolor='板料' and a.datea<=@t_edate 
+where b.ucolor='板料' and a.datea<=@t_edate and isnull(a.datea,'')>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-and isnull(a.datea,'')>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
@@ -144,9 +139,8 @@ insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mou
 select '16','vccs',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
 from view_vcc a left join view_vccs b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
-where b.ucolor='板料' and a.datea<=@t_edate 
+where b.ucolor='板料' and a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)

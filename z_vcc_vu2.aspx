@@ -97,7 +97,10 @@
 					}, {/*3-1[17]*/
                         type : '6',
                         name : 'xsalesgroupano'
-					}]
+					}, {/*3-2 [18]*/
+                        type : '6',
+                        name : 'xenddate'
+                    }]
                 });
                 q_popAssign();
 				q_getFormat();
@@ -105,11 +108,12 @@
 
 				$('#txtDate1').mask(r_picd);
                 $('#txtDate2').mask(r_picd);
+                $('#txtXenddate').mask(r_picd);
                 $('#txtDate1').datepicker({dateFormat : 'yy/mm/dd'});
-                $('#txtDate2').datepicker({dateFormat : 'yy/mm/dd'});
+                $('#txtXenddate').datepicker({dateFormat : 'yy/mm/dd'});
                 $('#Xproduct select').val('鋼筋');
                 $('#txtLostday').val(100);
-                
+                $('#txtXenddate').val(q_date());
 				
 				$('#txtDate1').val(q_date().substr(0,r_len)+'/01/01');
 				$('#txtDate2').val(q_date());

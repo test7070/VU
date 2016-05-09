@@ -697,7 +697,7 @@ select '0',b.datea,a.noa,b.productno,b.product,b.ucolor,b.spec,b.size,b.lengthb,
 ,b.mount,b.hmount,b.weight,b.memo,b.comp
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply (select * from view_orde where noa=b.ordeno) c
-where b.uno!='' 
+where b.uno!='' and a.datea<=@t_edate
 "
 
 if(len(@t_pno)>0)

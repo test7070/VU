@@ -269,13 +269,14 @@ cucstocub:--cucstocub
 -------------------------------------------------------------------------------------------------------------------------------
 stk_vu:--stk_vu
 declare @t_product nvarchar(50)=case when '#non'=[1] then '' else [1] end --品名
-declare @t_spec nvarchar(50)=case when '#non'=[2] then '' else [2] end --材質
-declare @t_size nvarchar(50)=case when '#non'=[3] then '' else [3] end --號數
-declare @t_lengthb nvarchar(50)=case when '#non'=[4] then '' else [4] end--米數
-declare @t_class nvarchar(50)=case when '#non'=[5] then '' else [5] end --廠牌
-declare @t_edate nvarchar(20)=case when '#non'=[6] then char(255) else [6] end --終止日期
+declare @t_ucolor nvarchar(50)=case when '#non'=[2] then '' else [2] end --類別
+declare @t_spec nvarchar(50)=case when '#non'=[3] then '' else [3] end --材質
+declare @t_size nvarchar(50)=case when '#non'=[4] then '' else [4] end --號數
+declare @t_lengthb nvarchar(50)=case when '#non'=[5] then '' else [5] end--米數
+declare @t_class nvarchar(50)=case when '#non'=[6] then '' else [6] end --廠牌
+declare @t_edate nvarchar(20)=case when '#non'=[7] then char(255) else [7] end --終止日期
 
-declare @t_forcibly nvarchar(20)=case when '#non'=[7] then '0' else [7] end --判斷條件強制符合
+declare @t_forcibly nvarchar(20)=case when '#non'=[8] then '0' else [8] end --判斷條件強制符合
 
 --declare @t_ucolor nvarchar(50) --類別 --不判讀
 
@@ -293,6 +294,7 @@ create table #tmp(
 	datea nvarchar(50),
 	noa nvarchar(50),
 	product nvarchar(100),
+	ucolor nvarchar(100),
 	spec nvarchar(50),
 	size nvarchar(50),
 	lengthb float,
@@ -304,10 +306,11 @@ create table #tmp(
 if(@t_forcibly='0') --判斷不強制
 begin
 	insert #tmp
-	select 'ucce',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
+	select 'ucce',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
 	from view_ucce a left join view_ucces b on a.noa=b.noa 
 	where a.datea<=@t_edate 
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -315,16 +318,18 @@ begin
 	
 	delete a
 	from #tmp a outer apply (select MAX(datea) datea from #tmp 
-	where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
+	where product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
 	where a.datea!=b.datea
 	
 	--進貨
 	insert #tmp
-	select 'rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	select 'rc2s',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+	and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -332,11 +337,12 @@ begin
 	and b.storeno='7000'
 	
 	insert #tmp
-	select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	select 'inas',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_ina a left join view_inas b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -345,11 +351,12 @@ begin
 	
 	--領料
 	insert #tmp
-	select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.gmount,-1*b.gweight 
+	select 'cubt',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.gmount,-1*b.gweight 
 	from view_cub a left join view_cubt b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -357,11 +364,12 @@ begin
 	and b.storeno='7000'
 		
 	insert #tmp
-	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
+	select 'gets',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
 	from view_get a left join view_gets b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -369,11 +377,12 @@ begin
 	and b.storeno='7000'
 	
 	insert #tmp
-	select 'vccs',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
+	select 'vccs',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
 	from view_vcc a left join view_vccs b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (len(@t_product)=0 or isnull(b.product,'')=@t_product) 
+	and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -383,10 +392,11 @@ end
 else --強制
 begin
 	insert #tmp
-	select 'ucce',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
+	select 'ucce',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight
 	from view_ucce a left join view_ucces b on a.noa=b.noa 
 	where a.datea<=@t_edate 
 	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.ucolor,'')=@t_ucolor)
 	and (isnull(b.spec,'')=@t_spec) 
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -395,16 +405,17 @@ begin
 	
 	delete a
 	from #tmp a outer apply (select MAX(datea) datea from #tmp 
-	where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
+	where product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
 	where a.datea!=b.datea
 	
 	--進貨
 	insert #tmp
-	select 'rc2s',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	select 'rc2s',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.ucolor,'')=@t_ucolor)
 	and (isnull(b.spec,'')=@t_spec) 
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -412,11 +423,12 @@ begin
 	and b.storeno='7000'
 	
 	insert #tmp
-	select 'inas',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	select 'inas',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
 	from view_ina a left join view_inas b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.ucolor,'')=@t_ucolor)
 	and (isnull(b.spec,'')=@t_spec) 
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -425,11 +437,12 @@ begin
 	
 	--領料
 	insert #tmp
-	select 'cubt',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.gmount,-1*b.gweight 
+	select 'cubt',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.gmount,-1*b.gweight 
 	from view_cub a left join view_cubt b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.ucolor,'')=@t_ucolor)
 	and (isnull(b.spec,'')=@t_spec) 
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -437,11 +450,12 @@ begin
 	and b.storeno='7000'
 		
 	insert #tmp
-	select 'gets',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
+	select 'gets',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
 	from view_get a left join view_gets b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product) 
+	and (isnull(b.ucolor,'')=@t_ucolor)
 	and (isnull(b.spec,'')=@t_spec) 
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -449,11 +463,12 @@ begin
 	and b.storeno='7000'
 	
 	insert #tmp
-	select 'vccs',a.datea,a.noa,b.product,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
+	select 'vccs',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
 	from view_vcc a left join view_vccs b on a.noa=b.noa
-	outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
+	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 	and (isnull(b.product,'')=@t_product)
+	and (isnull(b.ucolor,'')=@t_ucolor)
 	and (isnull(b.spec,'')=@t_spec)
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
@@ -461,11 +476,11 @@ begin
 	and b.storeno='7000'
 end
 
-select isnull(product,'')product,isnull(spec,'')spec,
+select isnull(product,'')product,ISNULL(ucolor,'')ucolor,isnull(spec,'')spec,
 isnull(size,'')size,isnull(lengthb,0)lengthb,isnull(class,'')class,sum(mount)mount,sum(weight)weight
 from #tmp 
-group by isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,0),isnull(class,'')
-order by product,spec,size,lengthb,class
+group by isnull(product,''),ISNULL(ucolor,''),isnull(spec,''),isnull(size,''),isnull(lengthb,0),isnull(class,'')
+order by product,ucolor,spec,size,lengthb,class
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

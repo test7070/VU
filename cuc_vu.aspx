@@ -311,19 +311,21 @@
 							//變動均價
 							if(dec($('#textGmount_'+n).val())!=0 || dec($('#textGweight_'+n).val())!=0){
 								var x_product=$('#textProduct_'+n).val();
+								var x_ucolor=$('#textUcolor_'+n).val();
 								var x_spec=$('#textSpec_'+n).val();
 								var x_size=$('#textSize_'+n).val();
 								var x_lengthb=$('#textLengthb_'+n).val();
 								var x_class=$('#textClass_'+n).val();
 								var x_edate=$('#textDatea').val();
-								if((x_product.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
+								if((x_product.length>0 || x_ucolor.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
 									x_product=emp($('#textProduct_'+n).val())?'#non':$('#textProduct_'+n).val();
+									x_ucolor=emp($('#textUcolor_'+n).val())?'#non':$('#textUcolor_'+n).val();
 									x_spec=emp($('#textSpec_'+n).val())?'#non':$('#textSpec_'+n).val();
 									x_size=emp($('#textSize_'+n).val())?'#non':$('#textSize_'+n).val();
 									x_lengthb=emp($('#textLengthb_'+n).val())?'#non':$('#textLengthb_'+n).val();
 									x_class=emp($('#textClass_'+n).val())?'#non':$('#textClass_'+n).val();
 									x_edate=emp($('#textDatea').val())?q_date():$('#textDatea').val();
-									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
+									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_ucolor+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
 								}
 							}
 						});
@@ -359,19 +361,21 @@
 						if(objname=='textGmount' ){ //10/20 件數輸入才檢查庫存其餘欄位不用檢查庫存 || objname=='textGweight'
 							$(this).focusin(function() {
 								var x_product=$('#textProduct_'+n).val();
+								var x_ucolor=$('#textUcolor_'+n).val();
 								var x_spec=$('#textSpec_'+n).val();
 								var x_size=$('#textSize_'+n).val();
 								var x_lengthb=$('#textLengthb_'+n).val();
 								var x_class=$('#textClass_'+n).val();
 								var x_edate=$('#textDatea').val();
-								if((x_product.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
+								if((x_product.length>0 || x_ucolor.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
 									x_product=emp($('#textProduct_'+n).val())?'#non':$('#textProduct_'+n).val();
+									x_ucolor=emp($('#textUcolor_'+n).val())?'#non':$('#textUcolor_'+n).val();
 									x_spec=emp($('#textSpec_'+n).val())?'#non':$('#textSpec_'+n).val();
 									x_size=emp($('#textSize_'+n).val())?'#non':$('#textSize_'+n).val();
 									x_lengthb=emp($('#textLengthb_'+n).val())?'#non':$('#textLengthb_'+n).val();
 									x_class=emp($('#textClass_'+n).val())?'#non':$('#textClass_'+n).val();
 									x_edate=emp($('#textDatea').val())?q_date():$('#textDatea').val();
-									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
+									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_ucolor+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
 								}
 							});
 						}
@@ -380,19 +384,21 @@
 							//變動均價 //10/20 件數輸入才檢查庫存其餘欄位不用檢查庫存 || dec($('#textGweight_'+n).val())!=0
 							if(dec($('#textGmount_'+n).val())!=0){
 								var x_product=$('#textProduct_'+n).val();
+								var x_ucolor=$('#textUcolor_'+n).val();
 								var x_spec=$('#textSpec_'+n).val();
 								var x_size=$('#textSize_'+n).val();
 								var x_lengthb=$('#textLengthb_'+n).val();
 								var x_class=$('#textClass_'+n).val();
 								var x_edate=$('#textDatea').val();
-								if((x_product.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
+								if((x_product.length>0 || x_ucolor.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
 									x_product=emp($('#textProduct_'+n).val())?'#non':$('#textProduct_'+n).val();
+									x_ucolor=emp($('#textUcolor_'+n).val())?'#non':$('#textUcolor_'+n).val();
 									x_spec=emp($('#textSpec_'+n).val())?'#non':$('#textSpec_'+n).val();
 									x_size=emp($('#textSize_'+n).val())?'#non':$('#textSize_'+n).val();
 									x_lengthb=emp($('#textLengthb_'+n).val())?'#non':$('#textLengthb_'+n).val();
 									x_class=emp($('#textClass_'+n).val())?'#non':$('#textClass_'+n).val();
 									x_edate=emp($('#textDatea').val())?q_date():$('#textDatea').val();
-									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
+									q_func('qtxt.query.getweight_'+n, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_ucolor+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
 								}
 							}
 							//號數
@@ -432,19 +438,21 @@
 	                for(var j=0;j<bbtrow;j++){
 		                if(dec($('#textGmount_'+j).val())!=0 || dec($('#textGweight_'+j).val())!=0){
 							var x_product=$('#textProduct_'+j).val();
+							var x_ucolor=$('#textUcolor_'+j).val();
 							var x_spec=$('#textSpec_'+j).val();
 							var x_size=$('#textSize_'+j).val();
 							var x_lengthb=$('#textLengthb_'+j).val();
 							var x_class=$('#textClass_'+j).val();
 							var x_edate=$('#textDatea').val();
-							if((x_product.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
+							if((x_product.length>0 || x_ucolor.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
 								x_product=emp($('#textProduct_'+j).val())?'#non':$('#textProduct_'+j).val();
+								x_ucolor=emp($('#textUcolor_'+j).val())?'#non':$('#textUcolor_'+j).val();
 								x_spec=emp($('#textSpec_'+j).val())?'#non':$('#textSpec_'+j).val();
 								x_size=emp($('#textSize_'+j).val())?'#non':$('#textSize_'+j).val();
 								x_lengthb=emp($('#textLengthb_'+j).val())?'#non':$('#textLengthb_'+j).val();
 								x_class=emp($('#textClass_'+j).val())?'#non':$('#textClass_'+j).val();
 								x_edate=emp($('#textDatea').val())?q_date():$('#textDatea').val();
-								q_func('qtxt.query.cuctstkupdate_'+j, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
+								q_func('qtxt.query.cuctstkupdate_'+j, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_ucolor+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
 								stkupdate++;
 							}
 							has_get=true;
@@ -1373,19 +1381,21 @@
 				                /*for(var j=0;j<bbtrow;j++){
 					                if(dec($('#textGmount_'+j).val())!=0 || dec($('#textGweight_'+j).val())!=0){
 										var x_product=$('#textProduct_'+j).val();
+										var x_ucolor=$('#textUcolor_'+j).val();
 										var x_spec=$('#textSpec_'+j).val();
 										var x_size=$('#textSize_'+j).val();
 										var x_lengthb=$('#textLengthb_'+j).val();
 										var x_class=$('#textClass_'+j).val();
 										var x_edate=$('#textDatea').val();
-										if((x_product.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
+										if((x_product.length>0 || x_ucolor.length>0 || x_spec.length>0 || x_size.length>0 || x_lengthb.length>0 || x_class.length>0) && x_edate.length>0){
 											x_product=emp($('#textProduct_'+j).val())?'#non':$('#textProduct_'+j).val();
+											x_ucolor=emp($('#textUcolor_'+j).val())?'#non':$('#textUcolor_'+j).val();
 											x_spec=emp($('#textSpec_'+j).val())?'#non':$('#textSpec_'+j).val();
 											x_size=emp($('#textSize_'+j).val())?'#non':$('#textSize_'+j).val();
 											x_lengthb=emp($('#textLengthb_'+j).val())?'#non':$('#textLengthb_'+j).val();
 											x_class=emp($('#textClass_'+j).val())?'#non':$('#textClass_'+j).val();
 											x_edate=emp($('#textDatea').val())?q_date():$('#textDatea').val();
-											q_func('qtxt.query.cucsstkcuct_'+j, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
+											q_func('qtxt.query.cucsstkcuct_'+j, 'cuc_vu.txt,stk_vu,'+x_product+';'+x_ucolor+';'+x_spec+';'+x_size+';'+x_lengthb+';'+x_class+';'+x_edate+';1');
 											stkupdate++;
 										}
 									}

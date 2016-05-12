@@ -396,6 +396,7 @@ declare @tmp table(
 	mon nvarchar(15), 
 	mount float, 
 	total float, 
+	aprice float,
 	tax float ,
 	weight float,
 	totax float
@@ -404,7 +405,7 @@ insert into @tmp
 select '0',a.tggno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end), 
 case when isnull(a.mon,'')!='' then a.mon else left(a.datea,[2]) end
 ,sum((case when a.typea='1' then 1 else -1 end)*b.mount)
-,sum((case when a.typea='1' then 1 else -1 end)*b.total) 
+,sum((case when a.typea='1' then 1 else -1 end)*b.total) ,0
 ,sum((case when a.typea='1' then 1 else -1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)) 
 ,sum((case when a.typea='1' then 1 else -1 end)*b.weight)
 ,sum((case when a.typea='1' then 1 else -1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)) 
@@ -429,9 +430,13 @@ begin
 	select '2','ZZZZ_ZZZ',sum(mount), sum(total), sum(tax), sum(totax),sum(weight) from @tmp where gno='1' 
 end
 
+update @tmp
+set aprice =case when weight=0 then 0 else round(total/weight,2) end 
+
 select gno,tggno,left(comp,10) comp,mon,
 dbo.getComma(mount,0) mount, 
 dbo.getComma(weight,0) weight, 
+dbo.getComma(aprice,-1) aprice, 
 dbo.getComma(tax,0) tax,
 dbo.getComma(totax,0) totax , 
 dbo.getComma(total,0) total

@@ -176,7 +176,7 @@
 				});
 				
 				//類別暫時不放入
-				/*var tmp = document.getElementById("txtXucolor");
+				var tmp = document.getElementById("txtXucolor");
                 var selectbox = document.createElement("select");
                 selectbox.id="combUcolor";
                 selectbox.style.cssText ="width:20px;font-size: medium;";
@@ -185,7 +185,7 @@
                 
                 $('#combUcolor').change(function() {
 					$('#txtXucolor').val($('#combUcolor').find("option:selected").text());
-				});*/
+				});
             }
 
             function q_popPost(s1) {

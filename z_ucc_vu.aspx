@@ -181,7 +181,7 @@
                 selectbox.id="combUcolor";
                 selectbox.style.cssText ="width:20px;font-size: medium;";
                 tmp.parentNode.appendChild(selectbox,tmp);
-                q_cmbParse("combUcolor", t_class); 
+                q_cmbParse("combUcolor", t_color); 
                 
                 $('#combUcolor').change(function() {
 					$('#txtXucolor').val($('#combUcolor').find("option:selected").text());

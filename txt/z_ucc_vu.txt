@@ -124,7 +124,8 @@ insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,stor
 select '2','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
-where --b.ucolor='板料' and 
+where b.ucolor='板料' and  --散把只顯示板料
+not exists (select * from view_vcct where b.uno=uno) and
 a.datea<=@t_edate and isnull(a.datea,'')>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)

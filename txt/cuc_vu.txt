@@ -314,7 +314,7 @@ begin
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class) and isnull(b.productno,'')=''
 	
 	delete a
 	from #tmp a outer apply (select MAX(datea) datea from #tmp 
@@ -333,7 +333,7 @@ begin
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class) and isnull(b.productno,'')=''
 	and b.storeno='7000'
 	
 	insert #tmp
@@ -346,7 +346,7 @@ begin
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class) and isnull(b.productno,'')=''
 	and b.storeno='7000'
 	
 	--領料
@@ -360,7 +360,7 @@ begin
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class) and isnull(b.productno,'')=''
 	and b.storeno='7000'
 		
 	insert #tmp
@@ -373,7 +373,7 @@ begin
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class) and isnull(b.productno,'')=''
 	and b.storeno='7000'
 	
 	insert #tmp
@@ -386,7 +386,7 @@ begin
 	and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) 
 	and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 	and (len(@t_lengthb)=0 or isnull(b.lengthb,0)=cast(@t_lengthb as float))
-	and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+	and (len(@t_class)=0 or isnull(b.class,'')=@t_class) and isnull(b.productno,'')=''
 	and b.storeno='7000'
 end
 else --強制
@@ -401,7 +401,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
-	and b.storeno='7000'
+	and b.storeno='7000' and isnull(b.productno,'')=''
 	
 	delete a
 	from #tmp a outer apply (select MAX(datea) datea from #tmp 
@@ -420,7 +420,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
-	and b.storeno='7000'
+	and b.storeno='7000' and isnull(b.productno,'')=''
 	
 	insert #tmp
 	select 'inas',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
@@ -433,7 +433,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
-	and b.storeno='7000'
+	and b.storeno='7000' and isnull(b.productno,'')=''
 	
 	--領料
 	insert #tmp
@@ -447,7 +447,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
-	and b.storeno='7000'
+	and b.storeno='7000' and isnull(b.productno,'')=''
 		
 	insert #tmp
 	select 'gets',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
@@ -460,7 +460,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
-	and b.storeno='7000'
+	and b.storeno='7000' and isnull(b.productno,'')=''
 	
 	insert #tmp
 	select 'vccs',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,-1*b.mount,-1*b.weight 
@@ -473,7 +473,7 @@ begin
 	and (isnull(b.size,'')=@t_size)
 	and (isnull(b.lengthb,0)=cast(@t_lengthb as float))
 	and (isnull(b.class,'')=@t_class)
-	and b.storeno='7000'
+	and b.storeno='7000' and isnull(b.productno,'')=''
 end
 
 select isnull(product,'')product,ISNULL(ucolor,'')ucolor,isnull(spec,'')spec,

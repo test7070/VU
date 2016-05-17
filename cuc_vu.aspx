@@ -558,7 +558,7 @@
 	    				string+='<tr id="cucu_tr'+i+'">';
 	    				string+='<td style="text-align: center;"><input id="btnMinut__'+i+'" class="minut" type="button" style="font-size: medium; font-weight: bold;" value="－"/></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textProduct__'+i+'"  type="text" class="txt c3" value="鋼筋"/><select id="combProduct__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
-	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor__'+i+'"  type="text" class="txt c3" value="定尺" /><select id="combUcolor__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
+	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textUcolor__'+i+'"  type="text" class="txt c3" value="" /><select id="combUcolor__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSpec__'+i+'"  type="text" class="txt c3" /><select id="combSpec__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textSize__'+i+'"  type="text" class="txt c3 sizea" style="width:50%;" /><select id="combSize__'+i+'" class="txt comb" style="width: 20px;"> </select></td>';
 	    				string+='<td style="text-align: center;color:'+t_color[i%t_color.length]+'"><input id="textLengthb__'+i+'"  type="text" class="txt num c1" /></td>';
@@ -1847,7 +1847,7 @@
 							var n=$(this).attr('id').split('__')[1];
 							$(this).click();
 							$('#textProduct__'+n).val('鋼筋');
-							$('#textUcolor__'+n).val('定尺');
+							$('#textUcolor__'+n).val('');
 	                    });
 						//更新畫面
 						cucsupdata();
@@ -1910,7 +1910,7 @@
 						}
 						$('#lblMount_'+n).text(t_mount);
 						$('#lblWeight_'+n).text(t_weight);
-						if(t_mount==0){
+						if(t_mount<=0){
 							$('#textAvgweight_'+n).val(0);
 						}else{
 							$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
@@ -1958,7 +1958,10 @@
 						}
 						$('#lblMount_'+n).text(t_mount);
 						$('#lblWeight_'+n).text(t_weight);
-						$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
+						if(t_mount<=0)
+							$('#textAvgweight_'+n).val(0);
+						else
+							$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
 						
 						if(dec($('#textGmount_'+n).val())>t_mount){
 							$('#textGmount_'+n).val(0);
@@ -2046,7 +2049,10 @@
 						}
 						$('#lblMount_'+n).text(t_mount);
 						$('#lblWeight_'+n).text(t_weight);
-						$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
+						if(t_mount<=0)
+							$('#textAvgweight_'+n).val(0);
+						else
+							$('#textAvgweight_'+n).val(round(q_div(t_weight,t_mount),3));
 						
 						if(dec($('#textGmount_'+n).val())>t_mount){
 							alert('領料件數大於庫存件數!!');

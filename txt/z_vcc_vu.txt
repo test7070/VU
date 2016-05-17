@@ -620,7 +620,7 @@ set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
 declare @weight_decimal int = 4 
-declare @price_decimal int = 4 
+declare @price_decimal int = 0 
 declare @total_decimal int = 4 
 -------------------------------------------------- 
 declare @tmp table( 
@@ -671,7 +671,7 @@ set aprice =case when weight=0 then 0 else round(total/weight,2) end
 select gno,custno cno,left(custs,10) custs,mon 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,aprice),1)),@price_decimal,30)) aprice
+,dbo.getComma(aprice,2) aprice
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax
 ,dbo.getComma(weight,0) weight

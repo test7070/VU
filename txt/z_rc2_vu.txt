@@ -415,7 +415,7 @@ begin
 	
 	insert @result (gno,tggno,comp,product,mount,weight,money,total)
 	select '2',tggno,MAX(comp),char(255),sum(mount),sum(weight),sum(money),sum(total) 
-	from @result group by tggno
+	from @result where gno='1' group by tggno
 end
  
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 

@@ -52,7 +52,7 @@
                         name : 'tgg',
                         dbf  : 'tgg',
                         index: 'noa,comp',
-                        src  : 'tgg.aspx'
+                        src  : 'tgg_b.aspx'
                     }, {/*1-2 [5][6]*/
                         type : '1',
                         name : 'date'

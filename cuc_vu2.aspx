@@ -192,6 +192,17 @@
                     alert(t_err);
                     return;
                 }
+                t_err='';
+                for (var j = 0; j < q_bbsCount; j++) {
+                	if (!emp($('#txtProduct_'+j).val()) && (emp($('#txtOrdeno_'+j).val()) || emp($('#txtNo2_'+j).val()))){
+                		t_err="【訂單編號/訂序】空白!!";
+                		break;
+                	}	
+                }
+                if (t_err.length > 0) {
+                    alert(t_err);
+                    return;
+                }
 				
 				$('#txtNoa').val(trim($('#txtNoa').val()));
 				var t_noa = trim($('#txtNoa').val());

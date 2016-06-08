@@ -59,8 +59,9 @@
 				q_getFormat();
 				bbmMask = [['txtDatea', r_picd]];
 				q_mask(bbmMask);
-				bbsNum = [['txtPrice', 12, q_getPara('rc2.pricePrecision'), 1], ['txtMount', 9, q_getPara('rc2.mountPrecision'), 1], ['txtWeight', 9, q_getPara('rc2.weightPrecision'), 1]
-								, ['txtEmount2', 9, q_getPara('rc2.mountPrecision'), 1], ['txtEweight2', 9, q_getPara('rc2.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
+				bbsNum = [['txtPrice', 12, q_getPara('rc2.pricePrecision'), 1], ['txtMount', 12, q_getPara('rc2.mountPrecision'), 1], ['txtWeight', 12, q_getPara('rc2.weightPrecision'), 1]
+								, ['txtEmount2', 12, q_getPara('rc2.mountPrecision'), 1], ['txtEweight2', 12, q_getPara('rc2.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]
+								, ['txtLengthc', 12, q_getPara('rc2.mountPrecision'), 1]];
 				
 				q_cmbParse("cmbKind", q_getPara('ucce.kind'));
 				//q_cmbParse("combProduct", q_getPara('rc2s_vu.product'),'s');
@@ -268,8 +269,10 @@
 				$('#lblLengthb_s').text('米數');
 				$('#lblClass_s').text('廠牌');
 				$('#lblUnit_s').text('單位');
-				$('#lblMount_s').text('數量(件)');
+				$('#lblMount_s').text('件數');
 				$('#lblWeight_s').text('重量(KG)');
+				$('#lblLengthc_s').text('支數');
+				$('#lblUno_s').text('批號');
 			}
 
 			function btnIns() {
@@ -404,6 +407,10 @@
 						//['txtProductno_', 'btnProduct_', 'fixucc', 'noa,namea,unit', 'txtProductno_,txtProduct_,txtUnit_', 'fixucc_b.aspx'],
 						['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
 					);
+				}
+				
+				if(q_getPara('sys.project').toUpperCase()=='SF'){     
+					$('.sf').show();
 				}
 			}
 		</script>
@@ -572,6 +579,7 @@
 						<input class="btn" id="btnPlus" type="button" value='+' style="font-weight: bold;" />
 					</td>
 					<td align="center" style="width:200px;"><a id='lblStoreno_s'> </a></td>
+					<td align="center" style="width:150px;display: none;" class="sf"><a id='lblUno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblProductno_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblUcolor_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblSpec_s'> </a></td>
@@ -579,6 +587,7 @@
 					<td align="center" style="width:100px;"><a id='lblLengthb_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
 					<!--<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>-->
+					<td align="center" style="width:85px;display: none;" class="sf"><a id='lblLengthc_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblEmount2_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
@@ -595,6 +604,7 @@
 						<input id="txtStore.*" type="text" style="width:95%;"/>
 						<input id="btnStore.*" type="button" style="display:none;" />
 					</td>
+					<td class="sf" style="display: none;"><input id="txtUno.*" type="text" class="txt c1" style="width: 98%;"/></td>
 					<td>
 						<!--<input id="txtProductno.*" type="text" style="width:95%;"/>
 						<input id="btnProduct.*" type="button" style="display:none;" />-->
@@ -616,6 +626,7 @@
 						<select id="combClass.*" class="txt" style="width: 20px;"> </select>
 					</td>
 					<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
+					<td class="sf" style="display: none;"><input id="txtLengthc.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtEmount2.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>

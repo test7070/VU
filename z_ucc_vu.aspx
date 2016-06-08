@@ -113,6 +113,9 @@
                         type : '0', //[23]
                         name : 'xuserno',
                         value : r_userno
+                    }, {
+                        type : '1',
+                        name : 'xdate' //[24][25]
                     }]
                 });
                 q_popAssign();
@@ -120,8 +123,15 @@
                 q_langShow();
 
                 $('#txtEdate').mask(r_picd);
+                $('#txtXdate1').mask(r_picd);
+                $('#txtXdate2').mask(r_picd);
                 $('#txtEdate').val(q_date());
                 $('#txtEdate').datepicker({dateFormat : 'yy/mm/dd'});
+                $('#txtXdate1').datepicker({dateFormat : 'yy/mm/dd'});
+                $('#txtXdate2').datepicker({dateFormat : 'yy/mm/dd'});
+                $('#txtXdate1').val(q_date().substr(0,r_lenm)+'/01');
+                $('#txtXdate2').val(q_cdn(q_cdn(q_date().substr(0,r_lenm)+'/01',45).substr(0,r_lenm)+'/01',-1));
+                
                 $("#Xlengthb").css('width', '302px');
                 $("#Xlengthb input").css('width', '90px');
 

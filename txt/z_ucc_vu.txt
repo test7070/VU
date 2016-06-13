@@ -844,7 +844,7 @@ create table #tmp(
 	noa nvarchar(50),
 	noq nvarchar(20),
 	datea nvarchar(10),
-	uno nvarchar(50),
+	uno nvarchar(30),
 	product nvarchar(50),
 	ucolor nvarchar(50),
 	spec nvarchar(50),
@@ -864,7 +864,7 @@ CREATE INDEX tmpindex on #tmp (product,spec,size,ucolor,lengthb,class,datea,type
 
 --盤
 insert #tmp
-select '0','ucce',a.accy,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+select '0','ucce',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,b.weight,b.price,b.total,b.storeno,b.price,b.total
 from view_ucce a left join view_ucces b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
@@ -888,7 +888,7 @@ where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,
 and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
 
 insert #tmp
-select '5','vcct',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+select '5','vcct',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,case when a.typea='2' then -1 else 1 end*b.weight,c.price
 ,case when a.typea='2' then -1 else 1 end*b.weight*c.price,case when b.product='鋼筋' and b.ucolor='板料' then '7000' else '7000A' end,0,0
 from view_vcc a left join view_vcct b on a.noa=b.noa
@@ -904,7 +904,7 @@ where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,
 
 --入 --成品倉
 insert #tmp
-select '2','cubs',a.accy,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+select '2','cubs',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,b.weight,b.price,0,case when b.product='鋼筋' and b.ucolor='板料' then '7000' else '7000A' end,0,0
 from view_cub a left join view_cubs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
@@ -922,12 +922,13 @@ create table #tmpb(
 	class nvarchar(50),
 	weight float,
 	total float,
-	aprice float
-	primary key (mon,storeno,product,spec,size,ucolor,lengthb,class)
+	aprice float,
+	uno nvarchar(30),
+	primary key (product,spec,size,ucolor,lengthb,class,storeno,uno,mon)
 )
 insert #tmpb
-select LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class,0,0,0
-from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class
+select LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class,0,0,0,uno
+from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class,uno
 
 --------------------------------------------------------------------
 declare @tablea nvarchar(10)
@@ -938,6 +939,7 @@ declare @mon nvarchar(10)
 declare @t_mon nvarchar(10)=''
 declare @t_cdnum float
 declare @storeno nvarchar(20)
+declare @t_uno nvarchar(50)
 declare @uno nvarchar(50)
 declare @product nvarchar(50)
 declare @spec nvarchar(50)
@@ -964,14 +966,16 @@ declare @tlengthb float=0
 declare @tclass nvarchar(50)='#non'
 declare @tweight float
 declare @ttotal float
+declare @tuweight float
+declare @tutotal float
 
 --計算成本
 declare cursor_table cursor for
-select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class,noa,noq,isnull(weight,0),isnull(total,0)
+select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class,noa,noq,uno,isnull(weight,0),isnull(total,0)
 from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,product,spec,size,ucolor,lengthb,class
 open cursor_table
 fetch next from cursor_table
-into @tablea,@datea,@mon,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@noa,@noq,@weight,@total
+into @tablea,@datea,@mon,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@noa,@noq,@uno,@weight,@total
 while(@@FETCH_STATUS <> -1)
 begin
 	--避免前期超領負數造成金額溢位
@@ -985,20 +989,20 @@ begin
 		end
 	end
 	
-	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno or @t_mon!=@mon)
+	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno or @t_mon!=@mon or @t_uno!=@uno)
 	begin
 		if(@tproduct!='#non')
 		begin
 			update #tmpb
 			set weight=@tweight,total=@ttotal,aprice=@aprice
-			where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and storeno=@tstoreno
+			where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and storeno=@tstoreno and uno=@t_uno
 		end
 		
-		if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno)
+		if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno or @t_uno!=@uno)
 		begin
 			select @tweight=isnull(weight,0),@ttotal=isnull(total,0),@aprice=isnull(aprice,0)
 			from #tmpb
-			where mon=@mon and product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno
+			where mon=@mon and product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and uno=@uno
 		end
 	end
 
@@ -1039,8 +1043,8 @@ begin
 				--當天板料倉領料的加權平均價
 				select @saprice=case when SUM(abs(a.weight))=0 then 0 else SUM(abs(a.weight)*b.aprice)/SUM(abs(a.weight))end 
 				,@sweight=SUM(abs(a.weight))
-				from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and b.mon=@mon
-				where a.datea=@datea and a.product=@product and a.spec=@spec and a.size=@size
+				from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and a.uno=b.uno and LEFT(a.datea,@t_lenm)=b.mon
+				where a.datea=@datea and a.product=@product and a.spec=@spec and a.size=@size and b.mon=@mon
 				and (tablea='cubt' or (tablea='cubs' and a.weight<0)) and a.storeno='7000' and a.noa<@noa
 				
 				--前一天超領 
@@ -1051,8 +1055,8 @@ begin
 						set @t_datea=dbo.q_cdn(@t_datea,-1)
 						select @saprice=case when SUM(abs(a.weight))=0 then 0 else SUM(abs(a.weight)*b.aprice)/SUM(abs(a.weight))end 
 						,@sweight=SUM(abs(a.weight))
-						from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and b.mon=@mon
-						where a.datea=@t_datea and a.product=@product and a.spec=@spec and a.size=@size
+						from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and a.uno=b.uno and LEFT(a.datea,@t_lenm)=b.mon
+						where a.datea=@t_datea and a.product=@product and a.spec=@spec and a.size=@size and b.mon=@mon
 						and (tablea='cubt' or (tablea='cubs' and a.weight<0)) and a.storeno='7000' and a.noa<@noa
 					end try
 					begin catch
@@ -1065,8 +1069,8 @@ begin
 				--當天領料的加權平均價
 				select @saprice=case when SUM(abs(a.weight))=0 then 0 else SUM(abs(a.weight)*b.aprice)/SUM(abs(a.weight))end 
 				,@sweight=SUM(abs(a.weight))
-				from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and b.mon=@mon
-				where a.datea=@datea and a.product=@product and a.spec=@spec and a.size=@size
+				from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and a.uno=b.uno and LEFT(a.datea,@t_lenm)=b.mon
+				where a.datea=@datea and a.product=@product and a.spec=@spec and a.size=@size and b.mon=@mon
 				and (tablea='cubt' or (tablea='cubs' and a.weight<0)) and a.noa<@noa
 				
 				--前一天超領 
@@ -1077,8 +1081,8 @@ begin
 						set @t_datea=dbo.q_cdn(@t_datea,-1)
 						select @saprice=case when SUM(abs(a.weight))=0 then 0 else SUM(abs(a.weight)*b.aprice)/SUM(abs(a.weight))end 
 						,@sweight=SUM(abs(a.weight))
-						from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and b.mon=@mon
-						where a.datea=@t_datea and a.product=@product and a.spec=@spec and a.size=@size
+						from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and a.uno=b.uno and LEFT(a.datea,@t_lenm)=b.mon
+						where a.datea=@t_datea and a.product=@product and a.spec=@spec and a.size=@size and b.mon=@mon
 						and (tablea='cubt' or (tablea='cubs' and a.weight<0)) and a.noa<@noa
 					end try
 					begin catch
@@ -1092,7 +1096,7 @@ begin
 			--散把領料 --成品領料
 					
 			--當時領料均價
-			set @saprice =isnull((select top 1 aprice from #tmpb where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno order by mon desc),@aprice)
+			set @saprice =isnull((select aprice from #tmpb where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and uno=@uno and mon=@mon ),@aprice)
 		end
 		
 		set @tweight=@tweight+@weight
@@ -1115,9 +1119,10 @@ begin
 	set @tclass=@class
 	set @t_mon=@mon
 	set @tstoreno=@storeno
+	set @t_uno=@uno
 	
 	fetch next from cursor_table
-	into @tablea,@datea,@mon,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@noa,@noq,@weight,@total
+	into @tablea,@datea,@mon,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@noa,@noq,@uno,@weight,@total
 end
 close cursor_table
 deallocate cursor_table
@@ -1137,7 +1142,7 @@ if(@tproduct!='#non')
 begin
 	update #tmpb
 	set weight=@tweight,total=@ttotal,aprice=@aprice
-	where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass		
+	where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and uno=@t_uno
 end
 
 ----------------------------------------------------------------
@@ -1146,9 +1151,12 @@ update a
 set aprice=b.aprice,cost=round(b.aprice*a.weight,4)
 from #tmp a left join #tmpb b on LEFT(a.datea,@t_lenm)=b.mon
 and b.product=a.product and b.spec=a.spec and b.size=a.size and b.ucolor=a.ucolor and b.class=a.class and b.lengthb=a.lengthb
-and a.storeno=b.storeno
+and a.storeno=b.storeno and a.uno=b.uno
 where a.tablea!='rc2s' and a.tablea!='ucce'
 ----------------------------------------------------------------
+declare @uweight float=0
+declare @utotal float=0
+
 create table #tmpa(
 	gno nvarchar(10),
 	storeno nvarchar(20),
@@ -1187,7 +1195,7 @@ set @tlengthb=0
 set @tclass='#non'
 
 declare cursor_table cursor for
-select tablea,datea,storeno,product,spec,size,ucolor,lengthb,class,isnull(weight,0),isnull(cost,0)
+select tablea,datea,storeno,product,spec,size,ucolor,lengthb,class,isnull(weight,0),isnull(cost,0),uno
 from #tmp where
 (len(@t_pno)=0 or isnull(product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
@@ -1196,34 +1204,61 @@ and (len(@t_class)=0 or isnull(class,'')=@t_class) and (storeno between @t_bstor
 order by storeno,product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq
 open cursor_table
 fetch next from cursor_table
-into @tablea,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
+into @tablea,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total,@uno
 while(@@FETCH_STATUS <> -1)
 begin
 	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno)
 	begin
 		set @tweight=0
 		set @ttotal=0
+		
+		set @uweight=0
+		set @utotal=0
 	end
 
 	--盤點
 	if(@tablea='ucce')
 	begin
-		set @tweight=@weight
-		set @ttotal=@total
+		if(@uno!='')
+		begin
+			set @uweight=@weight
+			set @utotal=@total
+		end
+		else
+		begin
+			set @tweight=@weight
+			set @ttotal=@total
+		end
 	
 	end
 	--進貨--入庫
 	if(@tablea='rc2s' or @tablea='cubs')
-	begin		
-		set @tweight=@tweight+@weight
-		set @ttotal=@ttotal+@total
+	begin
+		if(@uno!='')
+		begin
+			set @uweight=@uweight+@weight
+			set @utotal=@utotal+@total
+		end
+		else
+		begin
+			set @tweight=@tweight+@weight
+			set @ttotal=@ttotal+@total
+		end
 	end
 	
 	--領料--出貨
 	if(@tablea='cubt' or @tablea='vccs' or @tablea='vcct')
 	begin
-		set @tweight=@tweight-@weight
-		set @ttotal=@ttotal-@total
+		if(@uno!='')
+		begin
+			set @uweight=@uweight-@weight
+			set @utotal=@utotal-@total
+		end
+		else
+		begin
+			set @tweight=@tweight-@weight
+			set @ttotal=@ttotal-@total
+		end
 	end
 	
 	--避免前期超領負數造成金額溢位
@@ -1240,14 +1275,14 @@ begin
 	if(@datea<@t_bdate)
 	begin
 		update #tmpa
-		set bw=@tweight,bm=@ttotal
-		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class
+		set bw=@tweight+@uweight,bm=@ttotal+@utotal
+		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno
 	end
 	else
 	begin
 		update #tmpa
-		set lw=@tweight,lm=@ttotal,lp=case when @tweight=0 then 0 else round(@ttotal/@tweight,2) end
-		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class
+		set lw=@tweight+@uweight,lm=@ttotal+@utotal,lp=case when @tweight+@uweight=0 then 0 else round((@ttotal+@utotal)/(@tweight+@uweight),2) end
+		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno
 	end
 	
 	set @tproduct=@product
@@ -1259,7 +1294,7 @@ begin
 	set @tstoreno=@storeno
 	
 	fetch next from cursor_table
-	into @tablea,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
+	into @tablea,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total,@uno
 end
 close cursor_table
 deallocate cursor_table
@@ -1321,6 +1356,580 @@ gno,product,spec,size,ucolor,dbo.getComma(lengthb,-1)lengthb,class
 ,dbo.getComma(lp,2)lp
 ,dbo.getComma(lm,2)lm
 from #tmpa order by gno,product,ucolor,spec,size,lengthb,class
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#tmpb')is not null
+BEGIN
+	set @cmd = 'drop table #tmpb'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	set @cmd = 'drop table #tmpa'
+	EXECUTE sp_executesql @cmd
+END;
+----------------------------------------------------------------------------------------------------------------------------------
+z_ucc_vu05:--z_ucc_vu05 追蹤表
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max)
+declare @t_pno nvarchar(50)
+declare @t_ucolor nvarchar(50)
+declare @t_spec nvarchar(50)
+declare @t_size nvarchar(50)
+declare @t_blengthb nvarchar(50)
+declare @t_elengthb nvarchar(50)
+declare @t_class nvarchar(50)
+declare @t_bstoreno nvarchar(50)
+declare @t_estoreno nvarchar(50)
+declare @t_bdate nvarchar(50)
+declare @t_edate nvarchar(50)
+declare @x_blengthb float=0
+declare @x_elengthb float=999
+
+set @t_pno = case when '#non'=[5] then '' else [5] end
+set @t_ucolor = case when '#non'=[6] then '' else [6] end
+set @t_spec = case when '#non'=[7] then '' else [7] end
+set @t_size = case when '#non'=[8] then '' else [8] end
+set @t_blengthb = case when '#non'=[9] then '0' else [9] end
+set @t_elengthb = case when '#non'=[10] then '999' else [10] end
+set @x_blengthb = cast(@t_blengthb as float)
+set @x_elengthb = cast(@t_elengthb as float)
+set @t_class = case when '#non'=[11] then '' else [11] end
+set @t_bstoreno = case when '#non'=[14] then '' else [14] end
+set @t_estoreno = case when '#non'=[15] then char(255) else [15] end
+set @t_bdate = case when '#non'=[24] then '' else [24] end
+set @t_edate = case when '#non'=[25] then char(255) else [25] end
+
+declare @t_lenm nvarchar(10) = '7'
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#tmpb')is not null
+BEGIN
+	set @cmd = 'drop table #tmpb'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	set @cmd = 'drop table #tmpa'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #tmp(
+	typea nvarchar(2),
+	tablea nvarchar(10),
+	accy nvarchar(10),
+	noa nvarchar(50),
+	noq nvarchar(20),
+	datea nvarchar(10),
+	uno nvarchar(30),
+	product nvarchar(50),
+	ucolor nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(20),
+	lengthb float,
+	class nvarchar(50),
+	weight float,
+	price float,
+	total float,
+	storeno nvarchar(20),
+	aprice float, --均價
+	cost float --成本
+	primary key (datea,tablea,typea,noa,noq,product,spec,size,ucolor,lengthb,class)
+)
+
+CREATE INDEX tmpindex on #tmp (product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
+
+--盤
+insert #tmp
+select '0','ucce',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,b.weight,b.price,b.total,b.storeno,b.price,b.total
+from view_ucce a left join view_ucces b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
+
+--進
+insert #tmp
+select '1','rc2s',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,case when a.typea='2' then -1 else 1 end*b.weight,b.price
+,case when a.typea='2' then -1 else 1 end*b.total,b.storeno,b.price
+,case when a.typea='2' then -1 else 1 end*b.total
+from view_rc2 a left join view_rc2s b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+
+--銷
+insert #tmp
+select '5','vccs',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,case when a.typea='2' then -1 else 1 end*b.weight,b.price
+,case when a.typea='2' then -1 else 1 end*b.total,b.storeno,0,0
+from view_vcc a left join view_vccs b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
+
+insert #tmp
+select '5','vcct',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,case when a.typea='2' then -1 else 1 end*b.weight,c.price
+,case when a.typea='2' then -1 else 1 end*b.weight*c.price,case when b.product='鋼筋' and b.ucolor='板料' then '7000' else '7000A' end,0,0
+from view_vcc a left join view_vcct b on a.noa=b.noa
+outer apply (select top 1 * from view_vccs where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)c
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+
+--領
+insert #tmp
+select '2','cubt',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,b.gweight,0,0,b.storeno,0,0
+from view_cub a left join view_cubt b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.gweight,0)!=0
+
+--入 --成品倉
+insert #tmp
+select '2','cubs',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,b.weight,b.price,0,case when b.product='鋼筋' and b.ucolor='板料' then '7000' else '7000A' end,0,0
+from view_cub a left join view_cubs b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+
+--------------------------------------------------------------------
+--月成本
+create table #tmpb(
+	mon nvarchar(10),
+	storeno nvarchar(50), 
+	product nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(20),
+	ucolor nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	weight float,
+	total float,
+	aprice float,
+	uno nvarchar(30),
+	primary key (product,spec,size,ucolor,lengthb,class,storeno,uno,mon)
+)
+insert #tmpb
+select LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class,0,0,0,uno
+from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class,uno
+
+--------------------------------------------------------------------
+declare @tablea nvarchar(10)
+declare @accy nvarchar(10)
+declare @datea nvarchar(10)
+declare @t_datea nvarchar(10)
+declare @mon nvarchar(10)
+declare @t_mon nvarchar(10)=''
+declare @t_cdnum float
+declare @storeno nvarchar(20)
+declare @t_uno nvarchar(50)
+declare @uno nvarchar(50)
+declare @product nvarchar(50)
+declare @spec nvarchar(50)
+declare @size nvarchar(20)
+declare @ucolor nvarchar(50)
+declare @lengthb float
+declare @class nvarchar(50)
+declare @weight float
+declare @total float
+declare @aprice float=0
+declare @acost float
+declare @aweight float
+declare @noa nvarchar(50)
+declare @noq nvarchar(10)
+declare @saprice float
+declare @sweight float
+
+declare @tstoreno nvarchar(50)='#non'
+declare @tproduct nvarchar(50)='#non'
+declare @tspec nvarchar(50)='#non'
+declare @tsize nvarchar(20)='#non'
+declare @tucolor nvarchar(50)='#non'
+declare @tlengthb float=0
+declare @tclass nvarchar(50)='#non'
+declare @tweight float
+declare @ttotal float
+declare @tuweight float
+declare @tutotal float
+
+--計算成本
+declare cursor_table cursor for
+select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,size,ucolor,lengthb,class,noa,noq,uno,isnull(weight,0),isnull(total,0)
+from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,product,spec,size,ucolor,lengthb,class
+open cursor_table
+fetch next from cursor_table
+into @tablea,@datea,@mon,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@noa,@noq,@uno,@weight,@total
+while(@@FETCH_STATUS <> -1)
+begin
+	--避免前期超領負數造成金額溢位
+	if(round(@tweight,0)<=0)
+	begin
+		set @ttotal=0
+		--避免領用有小數點導致無法全部被領用
+		if(round(@tweight,0)=0)
+		begin
+			set @tweight=0
+		end
+	end
+	
+	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno or @t_mon!=@mon or @t_uno!=@uno)
+	begin
+		if(@tproduct!='#non')
+		begin
+			update #tmpb
+			set weight=@tweight,total=@ttotal,aprice=@aprice
+			where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and storeno=@tstoreno and uno=@t_uno
+		end
+		
+		if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno or @t_uno!=@uno)
+		begin
+			select @tweight=isnull(weight,0),@ttotal=isnull(total,0),@aprice=isnull(aprice,0)
+			from #tmpb
+			where mon=@mon and product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and uno=@uno
+		end
+	end
+
+	--盤點
+	if(@tablea='ucce')
+	begin
+		set @tweight=@weight
+		set @ttotal=@total
+		set @aprice=case when @weight=0 then 0 else round(@total/@weight,4) end
+	end
+	
+	--進貨
+	if(@tablea='rc2s')
+	begin
+		if(@ttotal<=0 or @tweight<=0) --處理超領導致金額不正確 以最近進貨的單價作為目前超領的單價
+			set @ttotal=@tweight*case when @weight=0 then 0 else round(@total/@weight,4) end
+			
+		set @tweight=@tweight+@weight
+		set @ttotal=@ttotal+@total
+		set @aprice=case when @tweight=0 then 0 else round(@ttotal/@tweight,4) end
+	end
+	
+	--領料
+	if(@tablea='cubt')
+	begin
+		set @tweight=@tweight-@weight
+		set @ttotal=@ttotal-round(@weight*@aprice,4)
+	end
+	
+	--入庫
+	if(@tablea='cubs')
+	begin
+		--產出
+		if(@weight>0)
+		begin
+			if(@storeno='7000') --餘料入庫(散把板料)
+			begin
+				--當天板料倉領料的加權平均價
+				select @saprice=case when SUM(abs(a.weight))=0 then 0 else SUM(abs(a.weight)*b.aprice)/SUM(abs(a.weight))end 
+				,@sweight=SUM(abs(a.weight))
+				from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and a.uno=b.uno and LEFT(a.datea,@t_lenm)=b.mon
+				where a.datea=@datea and a.product=@product and a.spec=@spec and a.size=@size and b.mon=@mon
+				and (tablea='cubt' or (tablea='cubs' and a.weight<0)) and a.storeno='7000' and a.noa<@noa
+				
+				--前一天超領 
+				if(ISNULL(@sweight,0)=0)
+				begin
+					set @t_datea=@datea
+					begin try
+						set @t_datea=dbo.q_cdn(@t_datea,-1)
+						select @saprice=case when SUM(abs(a.weight))=0 then 0 else SUM(abs(a.weight)*b.aprice)/SUM(abs(a.weight))end 
+						,@sweight=SUM(abs(a.weight))
+						from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and a.uno=b.uno and LEFT(a.datea,@t_lenm)=b.mon
+						where a.datea=@t_datea and a.product=@product and a.spec=@spec and a.size=@size and b.mon=@mon
+						and (tablea='cubt' or (tablea='cubs' and a.weight<0)) and a.storeno='7000' and a.noa<@noa
+					end try
+					begin catch
+						set @saprice=@aprice
+					end catch
+				end
+			end
+			else --成品入庫
+			begin
+				--當天領料的加權平均價
+				select @saprice=case when SUM(abs(a.weight))=0 then 0 else SUM(abs(a.weight)*b.aprice)/SUM(abs(a.weight))end 
+				,@sweight=SUM(abs(a.weight))
+				from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and a.uno=b.uno and LEFT(a.datea,@t_lenm)=b.mon
+				where a.datea=@datea and a.product=@product and a.spec=@spec and a.size=@size and b.mon=@mon
+				and (tablea='cubt' or (tablea='cubs' and a.weight<0)) and a.noa<@noa
+				
+				--前一天超領 
+				if(ISNULL(@sweight,0)=0)
+				begin
+					set @t_datea=@datea
+					begin try
+						set @t_datea=dbo.q_cdn(@t_datea,-1)
+						select @saprice=case when SUM(abs(a.weight))=0 then 0 else SUM(abs(a.weight)*b.aprice)/SUM(abs(a.weight))end 
+						,@sweight=SUM(abs(a.weight))
+						from #tmp a left join #tmpb b on a.product=b.product and a.spec=b.spec and a.size=b.size and a.ucolor=b.ucolor and a.lengthb=b.lengthb and a.class=b.class and a.storeno=b.storeno and a.uno=b.uno and LEFT(a.datea,@t_lenm)=b.mon
+						where a.datea=@t_datea and a.product=@product and a.spec=@spec and a.size=@size and b.mon=@mon
+						and (tablea='cubt' or (tablea='cubs' and a.weight<0)) and a.noa<@noa
+					end try
+					begin catch
+						set @saprice=@aprice
+					end catch
+				end
+			end
+		end
+		else --條碼領料
+		begin
+			--散把領料 --成品領料
+					
+			--當時領料均價
+			set @saprice =isnull((select aprice from #tmpb where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and uno=@uno and mon=@mon ),@aprice)
+		end
+		
+		set @tweight=@tweight+@weight
+		set @ttotal=@ttotal+round(@weight*isnull(@saprice,0),4)
+		set @aprice=case when @tweight=0 then @aprice else round(@ttotal/@tweight,4) end
+	end
+	
+	--出貨
+	if(@tablea='vccs' or @tablea='vcct')
+	begin
+		set @tweight=@tweight-@weight
+		set @ttotal=@ttotal-round(@weight*@aprice,4)
+	end
+
+	set @tproduct=@product
+	set @tspec=@spec
+	set @tsize=@size
+	set @tucolor=@ucolor
+	set @tlengthb=@lengthb
+	set @tclass=@class
+	set @t_mon=@mon
+	set @tstoreno=@storeno
+	set @t_uno=@uno
+	
+	fetch next from cursor_table
+	into @tablea,@datea,@mon,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@noa,@noq,@uno,@weight,@total
+end
+close cursor_table
+deallocate cursor_table
+--最後一筆更新-------------------------------------------------------------
+--避免前期超領負數造成金額溢位
+if(round(@tweight,0)<=0)
+begin
+	set @ttotal=0
+	--避免領用有小數點導致無法全部被領用
+	if(round(@tweight,0)=0)
+	begin
+		set @tweight=0
+	end
+end
+
+if(@tproduct!='#non')
+begin
+	update #tmpb
+	set weight=@tweight,total=@ttotal,aprice=@aprice
+	where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and uno=@t_uno
+end
+
+----------------------------------------------------------------
+--更新單據成本
+update a
+set aprice=b.aprice,cost=round(b.aprice*a.weight,4)
+from #tmp a left join #tmpb b on LEFT(a.datea,@t_lenm)=b.mon
+and b.product=a.product and b.spec=a.spec and b.size=a.size and b.ucolor=a.ucolor and b.class=a.class and b.lengthb=a.lengthb
+and a.storeno=b.storeno and a.uno=b.uno
+where a.tablea!='rc2s' and a.tablea!='ucce'
+----------------------------------------------------------------
+
+declare @typea nvarchar(50)
+declare @uweight float
+declare @utotal float
+
+create table #tmpa(
+	gno nvarchar(10),
+	typea nvarchar(2),
+	tablea nvarchar(20),
+	noa nvarchar(20),
+	noq nvarchar(50),
+	uno nvarchar(50),
+	storeno nvarchar(20),
+	product nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(20),
+	ucolor nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	datea nvarchar(15),
+	weight float,
+	money float,
+	tweight float,
+	tmoney float
+)
+
+CREATE INDEX tmpaindex on #tmpa (product,spec,size,ucolor,lengthb,class,storeno,gno)
+
+--插入資料 --期初
+insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,datea,tablea,typea,weight,money,tweight,tmoney)
+select '0',storeno,product,spec,size,ucolor,lengthb,class,'','期初','',0,0,0,0
+from #tmp 
+where (len(@t_pno)=0 or isnull(product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(ucolor,'')=@t_ucolor)
+and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
+and ((@x_blengthb=0 and  @x_elengthb=999)  or isnull(lengthb,0) between @x_blengthb and @x_elengthb )
+and (len(@t_class)=0 or isnull(class,'')=@t_class)  and (storeno between @t_bstoreno and @t_estoreno)
+group by storeno,product,spec,size,ucolor,lengthb,class
+
+--分頁
+insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,datea,tablea,typea,weight,money,tweight,tmoney)
+select '1',storeno,product,spec,size,ucolor,lengthb,class,CHAR(255),'','',0,0,0,0
+from #tmp 
+where (len(@t_pno)=0 or isnull(product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(ucolor,'')=@t_ucolor)
+and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
+and ((@x_blengthb=0 and  @x_elengthb=999)  or isnull(lengthb,0) between @x_blengthb and @x_elengthb )
+and (len(@t_class)=0 or isnull(class,'')=@t_class)  and (storeno between @t_bstoreno and @t_estoreno)
+group by storeno,product,spec,size,ucolor,lengthb,class
+
+set @tstoreno='#non'
+set @tproduct='#non'
+set @tspec='#non'
+set @tsize='#non'
+set @tucolor='#non'
+set @tlengthb=0
+set @tclass='#non'
+
+declare cursor_table cursor for
+select tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,isnull(weight,0),isnull(cost,0)
+from #tmp where
+(len(@t_pno)=0 or isnull(product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(ucolor,'')=@t_ucolor)
+and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
+and ((@x_blengthb=0 and  @x_elengthb=999)  or isnull(lengthb,0) between @x_blengthb and @x_elengthb )
+and (len(@t_class)=0 or isnull(class,'')=@t_class) and (storeno between @t_bstoreno and @t_estoreno)
+order by storeno,product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq
+open cursor_table
+fetch next from cursor_table
+into @tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
+while(@@FETCH_STATUS <> -1)
+begin
+	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno)
+	begin
+		set @tweight=0
+		set @ttotal=0
+		
+		set @uweight=0
+		set @utotal=0
+	end
+
+	--盤點
+	if(@tablea='ucce')
+	begin
+		if(@uno!='')
+		begin
+			set @uweight=@weight
+			set @utotal=@total
+		end
+		else
+		begin
+			set @tweight=@weight
+			set @ttotal=@total
+		end
+	end
+	--進貨--入庫
+	if(@tablea='rc2s' or @tablea='cubs')
+	begin	
+		if(@uno!='')
+		begin
+			set @uweight=@uweight+@weight
+			set @utotal=@utotal+@total
+		end
+		else
+		begin	
+			set @tweight=@tweight+@weight
+			set @ttotal=@ttotal+@total
+		end
+	end
+	
+	--領料--出貨
+	if(@tablea='cubt' or @tablea='vccs' or @tablea='vcct')
+	begin
+		if(@uno!='')
+		begin
+			set @uweight=@uweight-@weight
+			set @utotal=@utotal-@total
+		end
+		else
+		begin
+			set @tweight=@tweight-@weight
+			set @ttotal=@ttotal-@total
+		end
+	end
+	
+	--避免前期超領負數造成金額溢位
+	if(round(@tweight,0)<=0)
+	begin
+		set @ttotal=0
+		--避免領用有小數點導致無法全部被領用
+		if(round(@tweight,0)=0)
+		begin
+			set @tweight=0
+		end
+	end
+		
+	if(@datea<@t_bdate)
+	begin
+		update #tmpa
+		set tweight=@tweight+@uweight,tmoney=@ttotal+@utotal
+		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and tablea='期初'
+	end
+	else
+	begin
+		insert #tmpa(gno,tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,weight,money,tweight,tmoney)
+		select '0',@tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
+		,@tweight+@uweight,@ttotal+@utotal
+	end
+	
+	set @tproduct=@product
+	set @tspec=@spec
+	set @tsize=@size
+	set @tucolor=@ucolor
+	set @tlengthb=@lengthb
+	set @tclass=@class
+	set @tstoreno=@storeno
+	
+	fetch next from cursor_table
+	into @tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
+end
+close cursor_table
+deallocate cursor_table
+
+delete a from #tmpa a 
+where exists (select count(*) from #tmpa 
+where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno
+and gno='0' and tablea!='期初' having count(*)=0)
+and not exists (select * from #tmpa 
+where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno
+and gno='0' and tablea='期初' and tweight!=0)
+
+update #tmpa
+set tablea=case 
+when tablea='ucce' then '盤點' 
+when tablea='rc2s' then '進貨' 
+when tablea='cubs' then '入庫'
+when tablea='cubt' then '領料'
+when tablea='vccs' then '出貨'
+when tablea='vcct' then '出貨'
+else tablea end
+
+select 
+gno,product,spec,size,ucolor,dbo.getComma(lengthb,-1)lengthb,class
+,(select top 1 store from store where noa=a.storeno )store
+,tablea,typea,noa,noq,datea,storeno,uno
+,dbo.getComma(weight,2) weight
+,dbo.getComma(money,2) money
+,dbo.getComma(tweight,2) tweight
+,dbo.getComma(tmoney,2) tmoney
+from #tmpa a order by product,ucolor,spec,size,lengthb,class,storeno,datea,gno,typea,noa,noq
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

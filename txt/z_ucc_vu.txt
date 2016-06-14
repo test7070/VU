@@ -77,7 +77,8 @@ where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb a
 where a.datea!=b.datea
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
+select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
+,case when a.typea='2' then -1 else 1 end*b.mount,case when a.typea='2' then -1 else 1 end*b.weight,case when a.typea='2' then -1 else 1 end*b.total,0,0
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') --and b.ucolor='板料'
@@ -413,7 +414,8 @@ where product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and 
 where a.datea!=b.datea
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0 
+select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
+,case when a.typea='2' then -1 else 1 end*b.mount,case when a.typea='2' then -1 else 1 end*b.weight,case when a.typea='2' then -1 else 1 end*b.total,0,0 
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
 where a.datea<=@t_edate 

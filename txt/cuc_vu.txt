@@ -323,7 +323,8 @@ begin
 	
 	--進貨
 	insert #tmp
-	select 'rc2s',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	select 'rc2s',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+	,case when a.typea='2' then -1 else 1 end*b.mount,case when a.typea='2' then -1 else 1 end*b.weight 
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
 	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
@@ -410,7 +411,8 @@ begin
 	
 	--進貨
 	insert #tmp
-	select 'rc2s',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.mount,b.weight 
+	select 'rc2s',a.datea,a.noa,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+	,case when a.typea='2' then -1 else 1 end*b.mount,case when a.typea='2' then -1 else 1 end*b.weight 
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
 	outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =isnull(b.lengthb,0) and class =b.class and tablea='ucce')c
 	where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')

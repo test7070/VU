@@ -1144,7 +1144,7 @@ if(@tproduct!='#non')
 begin
 	update #tmpb
 	set weight=@tweight,total=@ttotal,aprice=@aprice
-	where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and uno=@t_uno
+	where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and storeno=@tstoreno and uno=@t_uno
 end
 
 ----------------------------------------------------------------
@@ -1733,7 +1733,7 @@ if(@tproduct!='#non')
 begin
 	update #tmpb
 	set weight=@tweight,total=@ttotal,aprice=@aprice
-	where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and uno=@t_uno
+	where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize and ucolor=@tucolor and lengthb=@tlengthb and class=@tclass and storeno=@tstoreno and uno=@t_uno
 end
 
 ----------------------------------------------------------------

@@ -863,6 +863,7 @@ create table #tmp(
 )
 
 CREATE INDEX tmpindex on #tmp (product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
+CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 
 --盤
 insert #tmp
@@ -1112,6 +1113,10 @@ begin
 		set @tweight=@tweight-@weight
 		set @ttotal=@ttotal-round(@weight*@aprice,4)
 	end
+	
+	update #tmp 
+	set aprice=@aprice,cost=round(isnull(@aprice,0)*weight,4)
+	where noa=@noa and noq=@noq and tablea=@tablea
 
 	set @tproduct=@product
 	set @tspec=@spec
@@ -1148,13 +1153,24 @@ begin
 end
 
 ----------------------------------------------------------------
+--將月份增加一個月讓其資料抓取上個月的單價
+--update #tmpb set mon=left(dbo.q_cdn(mon+'/01',45),@t_lenm) where isnull(uno,'')=''
+
+--insert #tmpb(mon,storeno,product,spec,size,ucolor,lengthb,class,aprice,uno)
+--select left(dbo.q_cdn(a.mon+'/01',-1),@t_lenm),a.storeno,a.product,a.spec,a.size,a.ucolor,a.lengthb,a.class,b.aprice,''
+--from (
+--	select MIN(mon)mon,storeno,product,spec,size,ucolor,lengthb,class
+--	from #tmpb where isnull(uno,'')='' group by storeno,product,spec,size,ucolor,lengthb,class
+--) a
+--outer apply (select aprice from #tmpb where mon=a.mon and storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and uno='')b
+
 --更新單據成本
-update a
-set aprice=b.aprice,cost=round(b.aprice*a.weight,4)
-from #tmp a left join #tmpb b on LEFT(a.datea,@t_lenm)=b.mon
-and b.product=a.product and b.spec=a.spec and b.size=a.size and b.ucolor=a.ucolor and b.class=a.class and b.lengthb=a.lengthb
-and a.storeno=b.storeno and a.uno=b.uno
-where a.tablea!='rc2s' and a.tablea!='ucce'
+--update a
+--set aprice=b.aprice,cost=round(b.aprice*a.weight,4)
+--from #tmp a left join #tmpb b on LEFT(a.datea,@t_lenm)=b.mon
+--and b.product=a.product and b.spec=a.spec and b.size=a.size and b.ucolor=a.ucolor and b.class=a.class and b.lengthb=a.lengthb
+--and a.storeno=b.storeno and a.uno=b.uno
+--where a.tablea!='rc2s' and a.tablea!='ucce'
 ----------------------------------------------------------------
 declare @uweight float=0
 declare @utotal float=0
@@ -1168,6 +1184,7 @@ create table #tmpa(
 	ucolor nvarchar(50),
 	lengthb float,
 	class nvarchar(50),
+	uno nvarchar(50),
 	bw float,bm float,
 	rw float,rm float,
 	gw float,gc float,
@@ -1175,18 +1192,18 @@ create table #tmpa(
 	vw float,vc float,vm float,profit float,
 	dw float,dm float,
 	lw float,lp float,lm float,
-	primary key (product,spec,size,ucolor,lengthb,class,storeno,gno)
+	primary key (product,spec,size,ucolor,lengthb,class,storeno,uno,gno)
 )
 
 --插入資料
-insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,bw,bm,lw,lp,lm)
-select '9',storeno,product,spec,size,ucolor,lengthb,class,0,0,0,0,0
+insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,uno,bw,bm,lw,lp,lm)
+select '9',storeno,product,spec,size,ucolor,lengthb,class,uno,0,0,0,0,0
 from #tmp 
 where (len(@t_pno)=0 or isnull(product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
 and ((@x_blengthb=0 and  @x_elengthb=999)  or isnull(lengthb,0) between @x_blengthb and @x_elengthb )
 and (len(@t_class)=0 or isnull(class,'')=@t_class)  and (storeno between @t_bstoreno and @t_estoreno)
-group by storeno,product,spec,size,ucolor,lengthb,class
+group by storeno,product,spec,size,ucolor,lengthb,class,uno
 
 set @tstoreno='#non'
 set @tproduct='#non'
@@ -1209,7 +1226,7 @@ fetch next from cursor_table
 into @tablea,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total,@uno
 while(@@FETCH_STATUS <> -1)
 begin
-	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno)
+	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno and @t_uno!=@uno)
 	begin
 		set @tweight=0
 		set @ttotal=0
@@ -1258,6 +1275,9 @@ begin
 		end
 		else
 		begin
+			if(@total=0)
+				set @total=@weight*case when @tweight=0 then 0 else @ttotal/@tweight end
+				
 			set @tweight=@tweight-@weight
 			set @ttotal=@ttotal-@total
 		end
@@ -1278,13 +1298,13 @@ begin
 	begin
 		update #tmpa
 		set bw=@tweight+@uweight,bm=@ttotal+@utotal
-		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno
+		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and uno=@uno
 	end
 	else
 	begin
 		update #tmpa
 		set lw=@tweight+@uweight,lm=@ttotal+@utotal,lp=case when @tweight+@uweight=0 then 0 else round((@ttotal+@utotal)/(@tweight+@uweight),2) end
-		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno
+		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and uno=@uno
 	end
 	
 	set @tproduct=@product
@@ -1294,6 +1314,7 @@ begin
 	set @tlengthb=@lengthb
 	set @tclass=@class
 	set @tstoreno=@storeno
+	set @t_uno=@uno
 	
 	fetch next from cursor_table
 	into @tablea,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total,@uno
@@ -1308,11 +1329,11 @@ set rw=isnull(b.weight,0),rm=isnull(b.cost,0),
 	vw=isnull(f.weight,0),vc=isnull(f.cost,0),
 	vm=isnull(f.total,0),profit=case when isnull(f.cost,0)=0 then 0 else round((isnull(f.total,0)-isnull(f.cost,0))/f.cost*100,2) end
 from #tmpa a
-outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and tablea='rc2s' and datea between @t_bdate and @t_edate)b
-outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and tablea='cubt' and datea between @t_bdate and @t_edate)c
-outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and tablea='cubs' and weight<0 and datea between @t_bdate and @t_edate)d
-outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and tablea='cubs' and weight>0 and datea between @t_bdate and @t_edate)e
-outer apply (select SUM(weight)weight,SUM(cost)cost,SUM(total)total from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and (tablea='vccs' or tablea='vcct') and datea between @t_bdate and @t_edate )f
+outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and uno=a.uno and tablea='rc2s' and datea between @t_bdate and @t_edate)b
+outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and uno=a.uno and tablea='cubt' and datea between @t_bdate and @t_edate)c
+outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and uno=a.uno and tablea='cubs' and weight<0 and datea between @t_bdate and @t_edate)d
+outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and uno=a.uno and tablea='cubs' and weight>0 and datea between @t_bdate and @t_edate)e
+outer apply (select SUM(weight)weight,SUM(cost)cost,SUM(total)total from #tmp where product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and storeno=a.storeno and uno=a.uno and (tablea='vccs' or tablea='vcct') and datea between @t_bdate and @t_edate )f
 
 update #tmpa
 set dw=round(lw-(bw+rw-gw+iw-vw),4)
@@ -1320,20 +1341,20 @@ set dw=round(lw-(bw+rw-gw+iw-vw),4)
 
 delete #tmpa where bw=0 and rw=0 and gw=0 and iw=0 and vw=0 and dw=0 and lw=0
 
-insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,bw,bm,rw,rm,gw,gc,iw,ic,vw,vc,vm,profit,dw,dm,lw,lp,lm)
+insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,bw,bm,rw,rm,gw,gc,iw,ic,vw,vc,vm,profit,dw,dm,lw,lp,lm,uno)
 select '0'gno,CHAR(255),product,spec,size,ucolor,lengthb,class
 ,sum(bw),sum(bm),sum(rw),sum(rm),sum(gw),sum(gc),sum(iw),sum(ic)
 ,sum(vw),sum(vc),sum(vm)
 ,case when isnull(sum(vc),0)=0 then 0 else round((isnull(sum(vm),0)-isnull(sum(vc),0))/sum(vc)*100,2) end
-,sum(dw),sum(dm),sum(lw),sum(lp),sum(lm)
+,sum(dw),sum(dm),sum(lw),case when sum(lw)=0 then 0 else round(sum(lm)/sum(lw),4) end,sum(lm),''
 from #tmpa where gno='9' group by product,spec,size,ucolor,lengthb,class
 
-insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,bw,bm,rw,rm,gw,gc,iw,ic,vw,vc,vm,profit,dw,dm,lw,lp,lm)
+insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,bw,bm,rw,rm,gw,gc,iw,ic,vw,vc,vm,profit,dw,dm,lw,lp,lm,uno)
 select '1'gno,CHAR(255),CHAR(255),CHAR(255),CHAR(255),CHAR(255),0,CHAR(255)
 ,sum(bw),sum(bm),sum(rw),sum(rm),sum(gw),sum(gc),sum(iw),sum(ic)
 ,sum(vw),sum(vc),sum(vm)
 ,case when isnull(sum(vc),0)=0 then 0 else round((isnull(sum(vm),0)-isnull(sum(vc),0))/sum(vc)*100,2) end
-,sum(dw),sum(dm),sum(lw),sum(lp),sum(lm)
+,sum(dw),sum(dm),sum(lw),case when sum(lw)=0 then 0 else round(sum(lm)/sum(lw),4) end,sum(lm),''
 from #tmpa where gno='9' --group by product,spec,size,ucolor,lengthb,class
 
 delete #tmpa where gno='9'
@@ -1452,6 +1473,7 @@ create table #tmp(
 )
 
 CREATE INDEX tmpindex on #tmp (product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
+CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 
 --盤
 insert #tmp
@@ -1701,6 +1723,10 @@ begin
 		set @tweight=@tweight-@weight
 		set @ttotal=@ttotal-round(@weight*@aprice,4)
 	end
+	
+	update #tmp 
+	set aprice=@aprice,cost=round(isnull(@aprice,0)*weight,4)
+	where noa=@noa and noq=@noq and tablea=@tablea
 
 	set @tproduct=@product
 	set @tspec=@spec
@@ -1737,13 +1763,24 @@ begin
 end
 
 ----------------------------------------------------------------
+--將月份增加一個月讓其資料抓取上個月的單價
+--update #tmpb set mon=left(dbo.q_cdn(mon+'/01',45),@t_lenm) where isnull(uno,'')=''
+
+--insert #tmpb(mon,storeno,product,spec,size,ucolor,lengthb,class,aprice,uno)
+--select left(dbo.q_cdn(a.mon+'/01',-1),@t_lenm),a.storeno,a.product,a.spec,a.size,a.ucolor,a.lengthb,a.class,b.aprice,''
+--from (
+--	select MIN(mon)mon,storeno,product,spec,size,ucolor,lengthb,class
+--	from #tmpb where isnull(uno,'')='' group by storeno,product,spec,size,ucolor,lengthb,class
+--) a
+--outer apply (select aprice from #tmpb where mon=a.mon and storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and uno='')b
+
 --更新單據成本
-update a
-set aprice=b.aprice,cost=round(b.aprice*a.weight,4)
-from #tmp a left join #tmpb b on LEFT(a.datea,@t_lenm)=b.mon
-and b.product=a.product and b.spec=a.spec and b.size=a.size and b.ucolor=a.ucolor and b.class=a.class and b.lengthb=a.lengthb
-and a.storeno=b.storeno and a.uno=b.uno
-where a.tablea!='rc2s' and a.tablea!='ucce'
+--update a
+--set aprice=b.aprice,cost=round(b.aprice*a.weight,4)
+--from #tmp a left join #tmpb b on LEFT(a.datea,@t_lenm)=b.mon
+--and b.product=a.product and b.spec=a.spec and b.size=a.size and b.ucolor=a.ucolor and b.class=a.class and b.lengthb=a.lengthb
+--and a.storeno=b.storeno and a.uno=b.uno
+--where a.tablea!='rc2s' and a.tablea!='ucce'
 ----------------------------------------------------------------
 
 declare @typea nvarchar(50)
@@ -1767,6 +1804,10 @@ create table #tmpa(
 	datea nvarchar(15),
 	weight float,
 	money float,
+	aweight float,
+	amoney float,
+	bweight float,
+	bmoney float,
 	tweight float,
 	tmoney float
 )
@@ -1862,6 +1903,9 @@ begin
 		end
 		else
 		begin
+			if(@total=0)
+				set @total=@weight*case when @tweight=0 then 0 else @ttotal/@tweight end
+				
 			set @tweight=@tweight-@weight
 			set @ttotal=@ttotal-@total
 		end
@@ -1882,13 +1926,14 @@ begin
 	begin
 		update #tmpa
 		set tweight=@tweight+@uweight,tmoney=@ttotal+@utotal
+		,aweight=@tweight,amoney=@ttotal,bweight=@uweight,bmoney=@utotal
 		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and tablea='期初'
 	end
 	else
 	begin
-		insert #tmpa(gno,tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,weight,money,tweight,tmoney)
+		insert #tmpa(gno,tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,weight,money,tweight,tmoney,aweight,amoney,bweight,bmoney)
 		select '0',@tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
-		,@tweight+@uweight,@ttotal+@utotal
+		,@tweight+@uweight,@ttotal+@utotal,@tweight,@ttotal,@uweight,@utotal
 	end
 	
 	set @tproduct=@product
@@ -1929,6 +1974,10 @@ gno,product,spec,size,ucolor,dbo.getComma(lengthb,-1)lengthb,class
 ,tablea,typea,noa,noq,datea,storeno,uno
 ,dbo.getComma(weight,2) weight
 ,dbo.getComma(money,2) money
+,dbo.getComma(aweight,2) aweight
+,dbo.getComma(amoney,2) amoney
+,dbo.getComma(bweight,2) bweight
+,dbo.getComma(bmoney,2) bmoney
 ,dbo.getComma(tweight,2) tweight
 ,dbo.getComma(tmoney,2) tmoney
 from #tmpa a order by product,ucolor,spec,size,lengthb,class,storeno,datea,gno,typea,noa,noq

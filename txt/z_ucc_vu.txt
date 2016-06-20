@@ -1171,6 +1171,8 @@ end
 --and b.product=a.product and b.spec=a.spec and b.size=a.size and b.ucolor=a.ucolor and b.class=a.class and b.lengthb=a.lengthb
 --and a.storeno=b.storeno and a.uno=b.uno
 --where a.tablea!='rc2s' and a.tablea!='ucce'
+
+update a set cost=total from #tmp a where a.tablea='rc2s' or a.tablea='ucce'
 ----------------------------------------------------------------
 declare @uweight float=0
 declare @utotal float=0
@@ -1220,7 +1222,7 @@ from #tmp where
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
 and ((@x_blengthb=0 and  @x_elengthb=999)  or isnull(lengthb,0) between @x_blengthb and @x_elengthb )
 and (len(@t_class)=0 or isnull(class,'')=@t_class) and (storeno between @t_bstoreno and @t_estoreno)
-order by storeno,product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq
+order by storeno,product,spec,size,ucolor,lengthb,class,uno,datea,typea,noa,noq
 open cursor_table
 fetch next from cursor_table
 into @tablea,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total,@uno
@@ -1781,6 +1783,8 @@ end
 --and b.product=a.product and b.spec=a.spec and b.size=a.size and b.ucolor=a.ucolor and b.class=a.class and b.lengthb=a.lengthb
 --and a.storeno=b.storeno and a.uno=b.uno
 --where a.tablea!='rc2s' and a.tablea!='ucce'
+
+update a set cost=total from #tmp a where a.tablea='rc2s' or a.tablea='ucce'
 ----------------------------------------------------------------
 
 declare @typea nvarchar(50)

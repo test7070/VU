@@ -440,7 +440,8 @@ set @t_eordeno=case when '#non' = [18] then char(255)  else [18] end
 declare @result table(
 	gno nvarchar(1),
 	rank int,
-	comp  nvarchar(100),
+	custno nvarchar(50),
+	comp nvarchar(100),
 	product nvarchar(100),
 	ucolor nvarchar(30),
 	spec nvarchar(30),
@@ -449,23 +450,41 @@ declare @result table(
 	class nvarchar(15),
 	uno nvarchar(30),
 	mount float,
-	weight float
-
+	weight float,
+	ordeno nvarchar(50),
+	date2 nvarchar(50)
 ) 
 insert @result 
-select '0',ROW_NUMBER() over(order by product,uno),a.comp
-,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,a.uno,a.mount,a.weight  
-from view_cubs a outer apply (select * from view_orde where noa=a.ordeno) b
-where (len(@t_uno)=0 or uno=@t_uno) and uno!='' and a.date2 <= @t_edate 
+select '9',ROW_NUMBER() over(order by product,uno),b.custno,a.comp
+,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,a.uno,a.mount,a.weight,a.ordeno,a.date2
+from view_cubs a left join view_orde b on b.noa=a.ordeno
+where uno!='' 
+--and (len(@t_uno)=0 or uno=@t_uno)
+--and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) 
+--and (len(@t_size)=0 or isnull(size,'')=@t_size) 
+--and ((@t_slengthb='' and @t_elengthb=char(255)) or isnull(lengthb,0) between cast(@t_slengthb as float) and cast(@t_elengthb as float)) 
+--and (len(@t_class)=0 or isnull(class,'')=@t_class) 
+--and isnull(b.custno,'') between @t_bcustno and @t_ecustno
+--and isnull(a.ordeno,'') between @t_bordeno and @t_eordeno
+--and a.date2 <= @t_edate 
+and (a.mount>0 or a.weight>0)
+and not exists (select * from view_vcct where uno=a.uno)
+and not exists (select * from view_cubs where uno=a.uno and (mount<0 or weight<0) )
+
+--分開 where條件 加快速度
+insert @result
+select '0',ROW_NUMBER() over(order by product,uno),custno,comp
+,product,ucolor,spec,size,lengthb,class,uno,mount,weight,ordeno,date2
+from @result where (len(@t_uno)=0 or uno=@t_uno)
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) 
 and (len(@t_size)=0 or isnull(size,'')=@t_size) 
 and ((@t_slengthb='' and @t_elengthb=char(255)) or isnull(lengthb,0) between cast(@t_slengthb as float) and cast(@t_elengthb as float)) 
 and (len(@t_class)=0 or isnull(class,'')=@t_class) 
-and (a.mount>0 or a.weight>0)
-and not exists (select * from view_vcct where uno=a.uno)
-and not exists (select * from view_cubs where uno=a.uno and (mount<0 or weight<0) )
-and isnull(b.custno,'') between @t_bcustno and @t_ecustno
-and isnull(a.ordeno,'') between @t_bordeno and @t_eordeno
+and isnull(custno,'') between @t_bcustno and @t_ecustno
+and isnull(ordeno,'') between @t_bordeno and @t_eordeno
+and date2 <= @t_edate 
+
+delete @result where gno='9'
 
 if ((select count(*) from @result) != 0) 
 begin 

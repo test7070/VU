@@ -165,7 +165,7 @@
                 	//11/12 拿掉月份判斷
                 	t_mon=r_picd;
                 	
-                	q_gt('umm_import',"where=^^['"+t_noa+"','"+t_custno+"','"+t_custno2+"','"+t_mon+"','VU#"+t_payc+"#"+q_getPara('sys.d4taxtype')+"')^^", 0, 0, 0, "umm_import");
+                	q_gt('umm_import',"where=^^['"+t_noa+"','"+t_custno+"','"+t_custno2+"','"+t_mon+"','"+q_getPara('sys.project').toUpperCase()+"#"+t_payc+"#"+q_getPara('sys.d4taxtype')+"')^^", 0, 0, 0, "umm_import");
                 	
                 });
                 
@@ -350,8 +350,12 @@
                 		var as = _q_appendData(t_name, "", true);
                 		var t_unpay=0;
                 		for (var i = 0; i < as.length; i++) {
-                			if(as[i].tablea!='vcca')
-                				as[i].tablea='vcc_vu';
+                			if(as[i].tablea!='vcca'){
+                				if(q_getPara('sys.project').toUpperCase()=='SF')
+                					as[i].tablea='vcc_sf';
+                				else
+                					as[i].tablea='vcc_vu';
+                			}
                 			t_unpay=q_add(t_unpay,dec(as[i].unpay));
 						}
                 		q_gridAddRow(bbsHtm, 'tbbs', 'txtCno,txtCustno,txtPaymon,txtCoin,txtUnpay,txtUnpayorg,txtTablea,txtAccy,txtVccno,txtMemo2', as.length, as, 'cno,custno,mon,coin,unpay,unpay,tablea,tableaccy,vccno,memo', '', '');
@@ -467,7 +471,10 @@
                         
                         var as = _q_appendData("umm_mon", "", true);
                         for (var i = 0; i < as.length; i++) {
-							as[i].tablea='vcc_vu';							
+                        	if(q_getPara('sys.project').toUpperCase()=='SF')
+                        		as[i].tablea='vcc_sf';
+                        	else
+								as[i].tablea='vcc_vu';							
                         }
                         q_gridAddRow(bbsHtm, 'tbbs', 'txtAccy,txtTablea,txtVccno,txtMemo2,txtUnpay,txtUnpayorg,txtPart2', as.length, as, 'accy,tablea,noa,memo,unpay,unpay,part', 'txtVccno', '');
                         sum();
@@ -706,7 +713,10 @@
                 
                 for (var i = 0; i < q_bbsCount; i++) {
                 	if (emp($('#txtTablea_'+i).val())&&!emp($('#txtVccno_'+i).val())){
-                		$('#txtTablea_'+i).val('vcc_vu');
+                		if(q_getPara('sys.project').toUpperCase()=='SF')
+                        	$('#txtTablea_'+i).val('vcc_sf');
+                        else
+                			$('#txtTablea_'+i).val('vcc_vu');
                 	}
                 }
                 

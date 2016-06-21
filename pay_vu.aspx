@@ -132,7 +132,7 @@
                 		alert('請先輸入'+q_getMsg('lblTgg')+'!!');
                 		return;
                 	}
-                	q_gt('pay_import',"where=^^['"+t_noa+"','"+t_tggno+"','"+t_tggno2+"','"+t_mon+"','VU#"+t_payc+"#"+q_getPara('rc2.d4taxtype')+"')^^", 0, 0, 0, "pay_import");
+                	q_gt('pay_import',"where=^^['"+t_noa+"','"+t_tggno+"','"+t_tggno2+"','"+t_mon+"','"+q_getPara('sys.project').toUpperCase()+"#"+t_payc+"#"+q_getPara('rc2.d4taxtype')+"')^^", 0, 0, 0, "pay_import");
 		        });
 		        /*$('#btnMon').click(function (e) {
 		        	var t_noa = $.trim($('#txtNoa').val());
@@ -261,7 +261,10 @@
                 		var t_unpay=0;
                 		for(var i=0;i<q_bbsCount;i++){
                 			if($('#txtTablea_'+i).val()=='rc2'){
-                				as[i].tablea='rc2_vu';
+                				if(q_getPara('sys.project').toUpperCase()=='SF')
+                					as[i].tablea='rc2_sf';
+                				else
+                					as[i].tablea='rc2_vu';
                 				t_unpay=q_add(t_unpay,dec(as[i].unpay));
 							}
                 		}

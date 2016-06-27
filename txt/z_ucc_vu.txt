@@ -1228,7 +1228,7 @@ fetch next from cursor_table
 into @tablea,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total,@uno
 while(@@FETCH_STATUS <> -1)
 begin
-	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno and @t_uno!=@uno)
+	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno or @t_uno!=@uno)
 	begin
 		set @tweight=0
 		set @ttotal=0
@@ -1300,6 +1300,7 @@ begin
 	begin
 		update #tmpa
 		set bw=@tweight+@uweight,bm=@ttotal+@utotal
+		,lw=@tweight+@uweight,lm=@ttotal+@utotal,lp=case when @tweight+@uweight=0 then 0 else round((@ttotal+@utotal)/(@tweight+@uweight),2) end
 		where product=@product and spec=@spec and size=@size and ucolor=@ucolor and lengthb=@lengthb and class=@class and storeno=@storeno and uno=@uno
 	end
 	else

@@ -69,7 +69,7 @@
                 $('#textDatea').mask(r_picd);
                 $('#textDatea').val(q_date());
                 q_cur=2;
-                document.title='現場加工作業';
+                document.title='現場裁剪作業';
 				
 				//載入案號 資料
                 var t_where = "where=^^ 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";

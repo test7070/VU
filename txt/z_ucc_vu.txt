@@ -1471,7 +1471,8 @@ create table #tmp(
 	total float,
 	storeno nvarchar(20),
 	aprice float, --均價
-	cost float --成本
+	cost float, --成本
+	qhref nvarchar(100)
 	primary key (datea,tablea,typea,noa,noq,product,spec,size,ucolor,lengthb,class)
 )
 
@@ -1481,7 +1482,7 @@ CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 --盤
 insert #tmp
 select '0','ucce',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
-,b.weight,b.price,b.total,b.storeno,b.price,b.total
+,b.weight,b.price,b.total,b.storeno,b.price,b.total,'ucce_vu?noa=$noa'
 from view_ucce a left join view_ucces b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 
@@ -1490,7 +1491,7 @@ insert #tmp
 select '1','rc2s',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,b.storeno,b.price
-,case when a.typea='2' then -1 else 1 end*b.total
+,case when a.typea='2' then -1 else 1 end*b.total,'rc2_vu?noa=$noa'
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 
@@ -1498,7 +1499,7 @@ where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,
 insert #tmp
 select '5','vccs',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,case when a.typea='2' then -1 else 1 end*b.weight,b.price
-,case when a.typea='2' then -1 else 1 end*b.total,b.storeno,0,0
+,case when a.typea='2' then -1 else 1 end*b.total,b.storeno,0,0,'vcc_vu?noa=$noa'
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
@@ -1507,6 +1508,7 @@ insert #tmp
 select '5','vcct',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,case when a.typea='2' then -1 else 1 end*b.weight,c.price
 ,case when a.typea='2' then -1 else 1 end*b.weight*c.price,case when b.product='鋼筋' and b.ucolor='板料' then '7000' else '7000A' end,0,0
+,'vcc_vu?noa=$noa'
 from view_vcc a left join view_vcct b on a.noa=b.noa
 outer apply (select top 1 * from view_vccs where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)c
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
@@ -1514,7 +1516,7 @@ where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,
 --領
 insert #tmp
 select '2','cubt',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
-,b.gweight,0,0,b.storeno,0,0
+,b.gweight,0,0,b.storeno,0,0,'cub_vu?noa=$noa'
 from view_cub a left join view_cubt b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.gweight,0)!=0
 
@@ -1522,6 +1524,7 @@ where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,
 insert #tmp
 select '2','cubs',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,b.weight,b.price,0,case when b.product='鋼筋' and b.ucolor='板料' then '7000' else '7000A' end,0,0
+,'cub_vu?noa=$noa'
 from view_cub a left join view_cubs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 
@@ -1814,7 +1817,8 @@ create table #tmpa(
 	bweight float,
 	bmoney float,
 	tweight float,
-	tmoney float
+	tmoney float,
+	qhref nvarchar(100) 
 )
 
 CREATE INDEX tmpaindex on #tmpa (product,spec,size,ucolor,lengthb,class,storeno,gno)
@@ -1847,8 +1851,10 @@ set @tucolor='#non'
 set @tlengthb=0
 set @tclass='#non'
 
+declare @qhref nvarchar(100)
+
 declare cursor_table cursor for
-select tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,isnull(weight,0),isnull(cost,0)
+select tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,isnull(weight,0),isnull(cost,0),qhref
 from #tmp where
 (len(@t_pno)=0 or isnull(product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
@@ -1857,7 +1863,7 @@ and (len(@t_class)=0 or isnull(class,'')=@t_class) and (storeno between @t_bstor
 order by storeno,product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq
 open cursor_table
 fetch next from cursor_table
-into @tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
+into @tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total,@qhref
 while(@@FETCH_STATUS <> -1)
 begin
 	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tucolor!=@ucolor or @tlengthb!=@lengthb or @tclass!=@class or @tstoreno!=@storeno)
@@ -1936,9 +1942,9 @@ begin
 	end
 	else
 	begin
-		insert #tmpa(gno,tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,weight,money,tweight,tmoney,aweight,amoney,bweight,bmoney)
+		insert #tmpa(gno,tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,weight,money,tweight,tmoney,aweight,amoney,bweight,bmoney,qhref)
 		select '0',@tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
-		,@tweight+@uweight,@ttotal+@utotal,@tweight,@ttotal,@uweight,@utotal
+		,@tweight+@uweight,@ttotal+@utotal,@tweight,@ttotal,@uweight,@utotal,@qhref
 	end
 	
 	set @tproduct=@product
@@ -1950,7 +1956,7 @@ begin
 	set @tstoreno=@storeno
 	
 	fetch next from cursor_table
-	into @tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total
+	into @tablea,@typea,@noa,@noq,@uno,@datea,@storeno,@product,@spec,@size,@ucolor,@lengthb,@class,@weight,@total,@qhref
 end
 close cursor_table
 deallocate cursor_table
@@ -1976,7 +1982,7 @@ else tablea end
 select 
 gno,product,spec,size,ucolor,dbo.getComma(lengthb,-1)lengthb,class
 ,(select top 1 store from store where noa=a.storeno )store
-,tablea,typea,noa,noq,datea,storeno,uno
+,tablea,typea,noa,noq,datea,storeno,uno,qhref
 ,dbo.getComma(weight,2) weight
 ,dbo.getComma(money,2) money
 ,dbo.getComma(aweight,2) aweight

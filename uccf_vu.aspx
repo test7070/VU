@@ -301,6 +301,11 @@
 
 			function readonly(t_para, empty) {
 				_readonly(t_para, empty);
+				if (t_para) {
+					$('#btnImport').removeAttr('disabled');
+				} else {
+					$('#btnImport').attr('disabled', 'disabled');
+				}
 			}
 
 			function btnMinus(id) {

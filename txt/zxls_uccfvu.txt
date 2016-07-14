@@ -1,4 +1,4 @@
-﻿zxls_uccfvu:--zxls_cucvu 
+﻿zxls_uccfvu:--zxls_uccfvu 
 ----------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 
@@ -46,4 +46,10 @@ set @cmd =
 	from view_cubs a 
 	outer apply (select SUM(mount)mount,SUM(weight)weight from view_vcct where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)c
 	group by a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class "+@str
-execute sp_executesql @cmd;
+execute sp_executesql @cmd
+
+insert into uccfs(noa,noq,uno,product,ucolor,spec,size,lengthb,class,mount,weight,memo)
+select @uccfnoa,RIGHT('000'+CAST((select count(*) from uccfs where noa=@uccfnoa)+ROW_NUMBER()over(order by UPPER(a))as nvarchar(5)),3) noq
+,UPPER(a)uno,'' product,'' ucolor,'' spec,'' size,'' lengthb,'' class,0 mount,0 weight,'無批號資料' memo
+from ztmpxls a where not exists (select * from uccfs where noa=@uccfnoa and uno=a.a)
+;

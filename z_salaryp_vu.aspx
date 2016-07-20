@@ -45,7 +45,7 @@
                     }, {
                         type : '5',
                         name : 'xkind',
-                        value : [].concat(trim('上期,下期').split(','))
+                        value : [].concat(trim('上期,下期,整月').split(','))
                     }, {
                         type : '5',
                         name : 'xclass',

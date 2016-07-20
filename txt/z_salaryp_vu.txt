@@ -48,36 +48,45 @@ create table #tmp(
 --本國
 insert #tmp
 select '1',case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
-,dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,c.partno,c.typea
-,(isnull(b.money,0)/2),b.day,isnull(b.daymoney,0),isnull(b.bo_admin,0)+isnull(b.bo_traffic,0),b.money1,b.money2
-,isnull(b.addmoney,0),isnull(b.addh2_1,0)+isnull(b.addh100,0),isnull(b.bo_full,0),ISNULL(b.bo_special,0)
-,isnull(b.bo_full,0)+ISNULL(b.bo_special,0)
-,ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.meals,0)+ISNULL(b.tax_other,0)+ISNULL(b.tax_other2,0)
-,isnull(b.ch_labor,0),isnull(b.ch_health,0)
-,isnull(b.minus,0)+isnull(b.welfare,0)+isnull(b.tax5,0)+isnull(b.tax,0)+isnull(b.hplus2,0)+ISNULL(b.ch_labor_self,0)+ISNULL(b.borrow,0)+ISNULL(b.mi_total,0)
-,isnull(b.total5,0),b.memo
+,MAX(dbo.AD2ChineseEraName(a.datea)),b.sno,b.namea,c.partno,c.typea
+,sum((isnull(b.money,0)/2)),sum(b.day),sum(isnull(b.daymoney,0)),sum(isnull(b.bo_admin,0)+isnull(b.bo_traffic,0)),sum(b.money1),sum(b.money2)
+,sum(isnull(b.addmoney,0)),sum(isnull(b.addh2_1,0)+isnull(b.addh100,0)),sum(isnull(b.bo_full,0)),sum(ISNULL(b.bo_special,0))
+,sum(isnull(b.bo_full,0)+ISNULL(b.bo_special,0))
+,sum(ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.meals,0)+ISNULL(b.tax_other,0)+ISNULL(b.tax_other2,0))
+,sum(isnull(b.ch_labor,0)),sum(isnull(b.ch_health,0))
+,sum(isnull(b.minus,0)+isnull(b.welfare,0)+isnull(b.tax5,0)+isnull(b.tax,0)+isnull(b.hplus2,0)+ISNULL(b.ch_labor_self,0)+ISNULL(b.borrow,0)+ISNULL(b.mi_total,0))
+,sum(isnull(b.total5,0))
+,stuff((select ','+xb.memo from salary xa left join salarys xb on xa.noa=xb.noa where xb.sno=b.sno and xa.mon=@t_xmon 
+and (xa.monkind=@t_xkind or @t_xkind='整月') and xa.person='本國' and len(memo)>0 group by xb.memo FOR XML PATH('')),1,1,'')
 from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
-where a.mon=@t_xmon and a.monkind=@t_xkind and a.person='本國'
+where a.mon=@t_xmon and (a.monkind=@t_xkind or @t_xkind='整月')  and a.person='本國'
 and (len(@t_xclass)=0 or charindex(@t_xclass,case when b.memo2!='' then b.memo2 else c.typea end )>0)
 and b.sno between @t_bsno and @t_esno
 and (len(@t_part)=0 or b.partno=@t_part) 
+group by case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
+,b.sno,b.namea,c.partno,c.typea
 
 --日薪
 insert #tmp
 select '1',case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
-,dbo.AD2ChineseEraName(a.datea),b.sno,b.namea,c.partno,c.typea,isnull(b.mtotal,0)
-,b.day,isnull(b.daymoney,0),isnull(b.bo_admin,0)+isnull(b.bo_traffic,0),b.money1,b.money2
-,isnull(b.addmoney,0),isnull(b.addh2_1,0)+isnull(b.addh100,0),isnull(b.bo_full,0),ISNULL(b.bo_special,0)
-,isnull(b.bo_full,0)+ISNULL(b.bo_special,0)
-,ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.meals,0)+ISNULL(b.tax_other,0)+ISNULL(b.tax_other2,0)
-,isnull(b.ch_labor,0),isnull(b.ch_health,0)
-,isnull(b.minus,0)+isnull(b.welfare,0)+isnull(b.tax5,0)+isnull(b.tax,0)+isnull(b.hplus2,0)+ISNULL(b.ch_labor_self,0)+ISNULL(b.borrow,0)+ISNULL(b.mi_total,0)
-,isnull(b.total5,0),b.memo
+,MAX(dbo.AD2ChineseEraName(a.datea)),b.sno,b.namea,c.partno,c.typea
+,sum(isnull(b.mtotal,0))
+,sum(b.day),sum(isnull(b.daymoney,0)),sum(isnull(b.bo_admin,0)+isnull(b.bo_traffic,0)),sum(b.money1),sum(b.money2)
+,sum(isnull(b.addmoney,0)),sum(isnull(b.addh2_1,0)+isnull(b.addh100,0)),sum(isnull(b.bo_full,0)),sum(ISNULL(b.bo_special,0))
+,sum(isnull(b.bo_full,0)+ISNULL(b.bo_special,0))
+,sum(ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.meals,0)+ISNULL(b.tax_other,0)+ISNULL(b.tax_other2,0))
+,sum(isnull(b.ch_labor,0)),sum(isnull(b.ch_health,0))
+,sum(isnull(b.minus,0)+isnull(b.welfare,0)+isnull(b.tax5,0)+isnull(b.tax,0)+isnull(b.hplus2,0)+ISNULL(b.ch_labor_self,0)+ISNULL(b.borrow,0)+ISNULL(b.mi_total,0))
+,sum(isnull(b.total5,0))
+,stuff((select ','+xb.memo from salary xa left join salarys xb on xa.noa=xb.noa where xb.sno=b.sno and xa.mon=@t_xmon 
+and (xa.monkind=@t_xkind or @t_xkind='整月') and xa.person='日薪' and len(memo)>0 group by xb.memo FOR XML PATH('')),1,1,'')
 from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
-where a.mon=@t_xmon and a.monkind=@t_xkind and a.person='日薪'
+where a.mon=@t_xmon and (a.monkind=@t_xkind or @t_xkind='整月') and a.person='日薪'
 and (len(@t_xclass)=0 or charindex(@t_xclass,case when b.memo2!='' then b.memo2 else c.typea end )>0)
 and b.sno between @t_bsno and @t_esno
 and (len(@t_part)=0 or b.partno=@t_part) 
+group by case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
+,b.sno,b.namea,c.partno,c.typea
 
 if((select count(*) from #tmp)>0)
 begin
@@ -111,7 +120,7 @@ case when gno='1' and ROW_NUMBER()over (partition by typea order by typea,sssno)
 ,case when a15<=0 then null else dbo.getComma(a15,0) end a15
 ,dbo.getComma(a16,0) a16
 ,LEFT(datea,3)+'年'+LEFT(RIGHT(datea,5),2)+'月'+RIGHT(datea,2)+'日' datea
-,RIGHT(@t_xmon,2)+'月 '+@t_xkind period
+,RIGHT(@t_xmon,2)+'月 '+case when @t_xkind='整月' then '' else @t_xkind end period
 ,gno xgno,sssno,namea,memo,partno,stype,typea
 from #tmp 
 order by typea,xgno,sssno
@@ -242,12 +251,13 @@ BEGIN
 END
 
 create table #tmp(
-	idno int identity(1,1),
+	gno nvarchar(10),
+	idno int ,
 	sssno nvarchar(50),
 	namea nvarchar(50),
 	money decimal(18, 0),
 	mi_total decimal(18, 0),
-	days decimal(18, 0),
+	days float,
 	mtotal decimal(18, 0),
 	total1 decimal(18, 0),
 	bo_admin decimal(18, 0),
@@ -272,7 +282,7 @@ create table #tmp(
 )
 
 insert #tmp
-select b.sno,b.namea,isnull(b.money/2,0)+isnull(b.mtotal,0),b.mi_total
+select '0',0,b.sno,b.namea,isnull(b.money/2,0)+isnull(b.mtotal,0),b.mi_total
 ,b.day,b.daymoney,isnull(b.money/2,0)+isnull(b.mtotal,0)-ISNULL(b.mi_total,0)
 ,b.bo_admin,b.bo_traffic,b.money1,b.money2
 ,b.addh2_1,round(b.addh2_1*b.ostand*1.3333,0),b.addh100,round(b.addh100*b.ostand,0)
@@ -281,7 +291,7 @@ select b.sno,b.namea,isnull(b.money/2,0)+isnull(b.mtotal,0),b.mi_total
 ,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
 ,case when b.memo2!='' then b.memo2 else c.typea end
 from salary a left join salarys b on a.noa=b.noa left join sss c on b.sno=c.noa
-where a.mon=@t_xmon and a.monkind=@t_xkind
+where a.mon=@t_xmon and (a.monkind=@t_xkind or @t_xkind='整月')
 and b.sno between @t_bsno and @t_esno
 and (len(@t_part)=0 or b.partno=@t_part) 
 
@@ -292,6 +302,24 @@ when charindex('早班',(case when b.memo2!='' then b.memo2 else c.typea end))>0
 
 update #tmp set total3=total1+total2
 update #tmp set total5=total3-ISNULL(ch_labor,0)-ISNULL(ch_health,0)-ISNULL(minus,0)
+
+insert #tmp
+select '9',0,sssno,namea,SUM(money),SUM(mi_total),SUM(days),SUM(mtotal),SUM(total1)
+,SUM(bo_admin),SUM(bo_traffic),SUM(money1),SUM(money2),SUM(addh),SUM(addmoney),SUM(add0),SUM(addm0)
+,SUM(bo_oth),SUM(bo_special),SUM(bo_full),SUM(total2),SUM(total3),SUM(ch_labor),SUM(ch_health),SUM(minus),SUM(total5)
+,isnull(stuff((select ','+memo from #tmp where len(memo)>0 and sssno=a.sssno group by memo FOR XML PATH('')),1,1,''),'')
+,isnull(stuff((select ','+typea from #tmp where len(typea)>0 and sssno=a.sssno group by typea FOR XML PATH('')),1,1,''),'')	
+from #tmp a
+group by sssno,namea
+
+delete #tmp where gno='0'
+
+update a
+set idno=rr
+from (select idno,ROW_NUMBER() over (order by 
+(case when charindex('晚班',(case when typea!='' then typea else typea end))>0 then '3'
+when charindex('早班',(case when typea!='' then typea else typea end))>0 then '2' else '1' end),sssno
+)rr from #tmp ) a
 
 create table #tmpa(
 	idno int identity(1,1),	gno nvarchar(10),
@@ -354,7 +382,7 @@ begin
 		addh_1 ,addmoney_1 ,add0_1 ,addm0_1 ,bo_oth_1 ,bo_special_1 ,bo_full_1 ,total3_1 ,ch_labor_1 ,ch_health_1 ,minus_1 ,
 		total5_1 ,memo_1,typea_1)
 		select @gcount,sssno,namea
-		,'$'+dbo.getComma(money,0),'$'+dbo.getComma(mi_total,0),dbo.getComma(days,0)+'天*$'+dbo.getComma(mtotal,0)
+		,'$'+dbo.getComma(money,0),'$'+dbo.getComma(mi_total,0),dbo.getComma(days,-1)+'天*$'+dbo.getComma(mtotal,0)
 		,'$'+dbo.getComma(bo_admin,0),'$'+dbo.getComma(bo_traffic,0),dbo.getComma(money1,-1),dbo.getComma(money2,-1)
 		,dbo.getComma(addh,-1)+'H','$'+dbo.getComma(addmoney,0),dbo.getComma(add0,-1)+'H','$'+dbo.getComma(addm0,0)
 		,'$'+dbo.getComma(bo_oth,0),'$'+dbo.getComma(bo_special,0),'$'+dbo.getComma(bo_full,0),'$'+dbo.getComma(total3,0)
@@ -378,7 +406,7 @@ begin
 			,namea_"+@fcount+" = b.namea
 			,money_"+@fcount+" = '$'+dbo.getComma(b.money,0)
 			,mi_total_"+@fcount+" = '$'+dbo.getComma(b.mi_total,0)
-			,mtotal_"+@fcount+" = dbo.getComma(b.days,0)+'天*$'+dbo.getComma(b.mtotal,0)
+			,mtotal_"+@fcount+" = dbo.getComma(b.days,-1)+'天*$'+dbo.getComma(b.mtotal,0)
 			,bo_admin_"+@fcount+" = '$'+dbo.getComma(b.bo_admin,0)
 			,bo_traffic_"+@fcount+" = '$'+dbo.getComma(b.bo_traffic,0)
 			,money1_"+@fcount+" = dbo.getComma(b.money1,-1)

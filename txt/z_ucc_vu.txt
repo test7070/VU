@@ -889,6 +889,7 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
+and b.storeno!='7000A' --105/07/21 成品倉只看bbt
 
 insert #tmp
 select '5','vcct',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
@@ -1445,6 +1446,7 @@ declare @t_size nvarchar(50)
 declare @t_blengthb nvarchar(50)
 declare @t_elengthb nvarchar(50)
 declare @t_class nvarchar(50)
+declare @x_uno nvarchar(50) --105/07/21 增加批號查詢
 declare @t_bstoreno nvarchar(50)
 declare @t_estoreno nvarchar(50)
 declare @t_bdate nvarchar(50)
@@ -1461,6 +1463,7 @@ set @t_elengthb = case when '#non'=[10] then '999' else [10] end
 set @x_blengthb = cast(@t_blengthb as float)
 set @x_elengthb = cast(@t_elengthb as float)
 set @t_class = case when '#non'=[11] then '' else [11] end
+set @x_uno = case when '#non'=[12] then '' else [12] end
 set @t_bstoreno = case when '#non'=[14] then '' else [14] end
 set @t_estoreno = case when '#non'=[15] then char(255) else [15] end
 set @t_bdate = case when '#non'=[24] then '' else [24] end
@@ -1537,6 +1540,7 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
+and b.storeno!='7000A' --105/07/21 成品倉只看bbt
 
 insert #tmp
 select '5','vcct',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
@@ -1858,7 +1862,9 @@ update a set cost=total from #tmp a where a.tablea='rc2s' or a.tablea='ucce'
 delete #tmp where not((len(@t_pno)=0 or isnull(product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
 and ((@x_blengthb=0 and  @x_elengthb=999)  or isnull(lengthb,0) between @x_blengthb and @x_elengthb )
-and (len(@t_class)=0 or isnull(class,'')=@t_class)  and (storeno between @t_bstoreno and @t_estoreno))
+and (len(@t_class)=0 or isnull(class,'')=@t_class)  and (storeno between @t_bstoreno and @t_estoreno)
+and (len(@x_uno)=0 or uno=@x_uno)
+)
 
 update #tmp set lengthb=0,class='' where product!='鋼筋' or ucolor!='板料'
 

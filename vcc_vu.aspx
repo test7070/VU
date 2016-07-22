@@ -19,7 +19,7 @@
 			var q_name = "vcc";
 			var q_readonly = ['txtNoa', 'txtAccno', 'txtComp','txtCardeal','txtSales', 'txtAcomp', 'txtMoney', 'txtTotal', 'txtWorker', 'txtWorker2'];
 			var q_readonlys = ['txtOrdeno', 'txtNo2','txtNoq'];
-			var q_readonlyt = ['txtMount','txtWeight'];
+			var q_readonlyt = ['txtMount','txtWeight','txtProduct','txtUcolor','txtSpec','txtSize','txtLengthb','txtClass'];//105/07/22表身除了批號其他全鎖
 			var bbmNum = [];
 			var bbsNum = [];
 			var bbtNum = [];
@@ -2048,22 +2048,22 @@
 						<input class="btn" id="btnProductno..*" type="button" value='.' style="font-weight: bold;" />
 					</td>-->
 					<td>
-						<input id="txtProduct..*" type="text" class="txt c1" style="width: 70%;"/>
-						<select id="combProduct..*" class="txt" style="width: 20px;"> </select>
+						<input id="txtProduct..*" type="text" class="txt c1" style="width: 90%;"/>
+						<select id="combProduct..*" class="txt" style="width: 20px;display: none;"> </select>
 					</td>
 					<td>
-						<input id="txtUcolor..*" type="text" class="txt c1" style="width: 110px;"/>
-						<select id="combUcolor..*" class="txt" style="width: 20px;"> </select>
+						<input id="txtUcolor..*" type="text" class="txt c1" style="width: 90%;"/>
+						<select id="combUcolor..*" class="txt" style="width: 20px;display: none;"> </select>
 					</td>
 					<td>
-						<input id="txtSpec..*" type="text" class="txt c1" style="width: 70%;"/>
-						<select id="combSpec..*" class="txt" style="width: 20px;"> </select>
+						<input id="txtSpec..*" type="text" class="txt c1" style="width: 90%;"/>
+						<select id="combSpec..*" class="txt" style="width: 20px;display: none;"> </select>
 					</td>
 					<td><input id="txtSize..*" type="text" class="txt c1" /></td>
 					<td><input id="txtLengthb..*" type="text" class="txt num c1" /></td>
 					<td>
-						<input id="txtClass..*" type="text" class="txt c1" style="width: 70%;"/>
-						<select id="combClass..*" class="txt" style="width: 20px;"> </select>
+						<input id="txtClass..*" type="text" class="txt c1" style="width: 90%;"/>
+						<select id="combClass..*" class="txt" style="width: 20px;display: none;"> </select>
 					</td>
 					<!--<td><input id="txtUnit..*" type="text" class="txt c1"/></td>-->
 					<td><input id="txtMount..*" type="text" class="txt c1 num"/></td>

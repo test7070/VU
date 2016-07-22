@@ -1416,7 +1416,7 @@ gno,product,spec,size,ucolor,dbo.getComma(lengthb,-1)lengthb,class
 ,dbo.getComma(lw,2)lw
 ,dbo.getComma(lp,2)lp
 ,dbo.getComma(lm,2)lm
-from #tmpa order by gno,product,ucolor,spec,size,lengthb,class
+from #tmpa order by gno,product,cast(dbo.get_num(size) as int),spec,lengthb,ucolor,class
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

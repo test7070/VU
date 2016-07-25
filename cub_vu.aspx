@@ -260,17 +260,32 @@
                             _btnDele();
                         }
                         break;
+					case 'deleCubs':
+						var as = _q_appendData("view_cubs", "", true);
+						var err_str = '';
+						if (as[0] != undefined) {
+							for (var i = 0; i < as.length; i++) {
+                                if (as[i].uno.length>0) {
+                                    err_str += as[i].uno + '已領料，不能刪除!!\n';
+                                }
+                            }
+                            alert(err_str);
+						} else {
+                            _btnDele();
+                        }
+						break;
 					case 'btnOk_cubs':
 						var as = _q_appendData("view_cubs", "", true);
                         if (as[0] != undefined) {
-                        	var t_uno='';
-                        	for ( i = 0; i < as.length; i++) {
-                        		t_uno=((t_uno.length>0)?',':'')+as[i].uno;
-                        	}
-                            alert(t_uno+"批號已存在!!");
-                        }else{
-                        	check_cubs_uno=true;
-                        	btnOk();
+							for (var i = 0; i < as.length; i++) {
+                                if (as[i].uno.length>0) {
+                                    err_str += as[i].uno + '已領料，不能刪除!!\n';
+                                }
+                            }
+                            alert(err_str);
+						} else {
+                            var t_noa = trim($('#txtNoa').val());
+							wrServer(t_noa);
                         }
                         break;
 					case 'btnOk_getuno':
@@ -582,62 +597,6 @@
                     return;
                 }
                 
-                //1040914 不產生uno由cuc產生
-                //判斷批號是否已使用
-				/*if(!check_cubs_uno){
-                	var t_uno = "1=0";
-                    for (var i = 0; i < q_bbsCount; i++) {
-                        if ($.trim($('#txtUno_' + i).val()).length > 0)
-                            t_uno += " or uno='" + $.trim($('#txtUno_' + i).val()) + "'";
-                    }
-					var t_where = "where=^^ ("+t_uno+") and noa!='"+$('#txtNoa').val()+"' ^^";
-					q_gt('view_cubs', t_where, 0, 0, 0, "btnOk_cubs", r_accy);
-					return;
-                }*/
-                
-                //產生批號當天最大批號數
-				//判斷是否要產生批號
-				/*var ordenos_where=' 1=0 ';
-				if(!get_uno){
-					for (var j = 0; j < (q_bbsCount == 0 ? 1 : q_bbsCount); j++) {
-						if(!emp($('#txtProduct_'+j).val()) && emp($('#txtUno_'+j).val()) && !emp($('#txtOrdeno_'+j).val()) && !emp($('#txtNo2_'+j).val())){
-							if(ordenos_where.indexOf(($('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()))==-1)
-								ordenos_where=ordenos_where+" or  (uno=isnull((select MAX(uno) from view_cubs where uno like '"+$('#txtOrdeno_'+j).val()+$('#txtNo2_'+j).val()+"-%' ),'') )";
-							get_uno=true;
-						}
-					}
-				}*/
-				
-				//預設產生批號 (訂單號碼(12)+訂序(3)+'-'+機台(?)+流水號(3))
-                /*if(get_uno && !get_maxuno){
-	                var t_where = "where=^^ uno!='' and ("+ordenos_where+") ^^";
-					q_gt('view_cubs', t_where, 0, 0, 0, "btnOk_getuno", r_accy);
-					return;
-                }*/
-				
-				/*check_cubs_uno=false;
-				get_uno=false;
-				get_maxuno=false;*/
-                
-                //檢查是否批號重複
-                /*var uno_repeat=false;
-                for (var i = 0; i < q_bbsCount; i++) {
-                	if(!emp($('#txtUno_'+i).val())){
-	                	for (var j = i+1; j < q_bbsCount; j++) {
-	                		if($('#txtUno_'+i).val()==$('#txtUno_'+j).val()){
-	                			uno_repeat=true;
-	                			break;
-	                		}
-	                	}
-                	}
-                	if(uno_repeat)
-                		break;
-                }
-                if(uno_repeat){
-                	alert("批號重複!!");
-                    return;
-                }*/
-                
                 sum();
                 
                 if(q_cur==1){
@@ -651,6 +610,18 @@
 					if ($.trim($('#txtDate2_' + i).val()).length == 0)
 						$('#txtDate2_' + i).val(q_date());
 				}
+                
+                if(q_cur!=1){
+                	var t_unowhere='';
+                	for (var i = 0; i < q_bbsCount; i++) {
+                		if(!emp($('#txtUno_'+i).val()))
+                			t_unowhere=t_unowhere+" and uno!='"+$('#txtUno_'+i).val()+"' ";
+                	}
+                	
+	                var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' and uno!='' and (exists (select * from view_vcct where uno=view_cubs.uno ) or exists (select * from view_cubs where uno=view_cubs.uno and weight<0)) "+t_unowhere+" ^^";
+	                q_gt('view_cubs', t_where, 0, 0, 0, 'btnOk_Cubs',r_accy);
+	                return;
+                }
                     
                 var t_noa = trim($('#txtNoa').val());
                 var t_date = trim($('#txtDatea').val());
@@ -913,8 +884,12 @@
             }
 
             function btnDele() {
-                var t_where = 'where=^^ uno in(' + getBBTWhere('Uno') + ') ^^';
-                q_gt('uccy', t_where, 0, 0, 0, 'deleUccy', r_accy);
+                //var t_where = 'where=^^ uno in(' + getBBTWhere('Uno') + ') ^^';
+                //q_gt('uccy', t_where, 0, 0, 0, 'deleUccy', r_accy);
+                
+                var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' and uno!='' and (exists (select * from view_vcct where uno=view_cubs.uno ) or exists (select * from view_cubs where uno=view_cubs.uno and weight<0)) ^^";
+                q_gt('view_cubs', t_where, 0, 0, 0, 'deleCubs',r_accy);
+                
             }
 
             function btnCancel() {

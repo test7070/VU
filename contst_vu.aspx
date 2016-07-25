@@ -182,10 +182,7 @@
 					return;
 				}
 				
-				if($('#txtPrice_0').val())
-					$('#txtEarnest').val($('#txtPrice_0').val());
-				else
-					$('#txtEarnest').val(0);
+				$('#txtEarnest').val($('#txtPrice_0').val());
 				
 				//1030419 當專案沒有勾 BBM的取消和結案被打勾BBS也要寫入
 				if(!$('#chkIsproj').prop('checked')){

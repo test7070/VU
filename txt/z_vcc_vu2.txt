@@ -248,13 +248,13 @@ select '0'
 --進貨合約
 update  a
 set cm=isnull((select sum(eweight) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
-,cp=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*earnest)/sum(eweight) end from cont where datea<=@t_enddate and isnull(enda,0)!=1),0),2)
+,cp=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*earnest)/sum(eweight) end from cont where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
 from @tmp a
 
 --銷售合約
 update  a
 set qm=isnull((select sum(eweight) from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0)
-,qp=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*price)/sum(eweight) end from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0),2)
+,qp=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*price)/sum(eweight) end from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
 from @tmp a
 
 --智勝-板料
@@ -271,12 +271,12 @@ create table #tmp(
 	lengthb float,
 	class nvarchar(50),
 	storeno nvarchar(50),
-	hmount decimal(20,2),
-	mount decimal(20,2),
-	weight decimal(20,2),
+	hmount decimal(20,3),
+	mount decimal(20,3),
+	weight decimal(20,3),
 	money float,
-	avgweight decimal(20,2),
-	aprice  decimal(20,2),
+	avgweight decimal(20,3),
+	aprice  decimal(20,3),
 	page int,
 	idno int
 )
@@ -398,7 +398,7 @@ begin
 		set @t_weight=@weight
 		set @t_money=@money
 		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
-		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
 	end
 	else if(@tablea in ('rc2s','inas','cubs'))
 	begin
@@ -408,13 +408,13 @@ begin
 		begin
 			set @t_money=@t_money+(@weight*@aprice)
 			set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
-			set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+			set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
 		end
 		else
 		begin
 			set @t_money=@t_money+@money
 			set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
-			set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+			set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
 		end
 	end
 	else
@@ -426,7 +426,7 @@ begin
 		else
 			set @t_money=@t_money-round((@weight*@aprice),0)
 		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
-		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,2) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
 	end
 	
 	set @x_storeno=@storeno
@@ -458,7 +458,7 @@ delete #tmp where gno='2'
 
 update  a
 set sm=isnull((select top 1 round(weight,0) from #tmp),0)
-,sp=isnull((select top 1 round(aprice,2) from #tmp),0)
+,sp=isnull((select top 1 round(aprice,3) from #tmp),0)
 from @tmp a
 
 --智勝-成品(含散把板料) 105/07/22 不含散把板料
@@ -478,13 +478,13 @@ outer apply(
 --可用餘量
 update a
 set am=ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)
-,ap=case when ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)=0 then 0 else round((ISNULL(cm*cp,0)+ISNULL(sm*sp,0)+ISNULL(em*ep,0))/(ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)),2) end
+,ap=case when ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)=0 then 0 else round((ISNULL(cm*cp,0)+ISNULL(sm*sp,0)+ISNULL(em*ep,0))/(ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)),3) end
 from @tmp a
 
 --可銷售額度
 update a
 set tm=ISNULL(am,0)-ISNULL(qm,0)
-,tp=case when ISNULL(am,0)-ISNULL(qm,0)=0 then 0 else round((ISNULL(am*ap,0)-ISNULL(qm*qp,0))/(ISNULL(am,0)-ISNULL(qm,0)),2) end
+,tp=case when ISNULL(am,0)-ISNULL(qm,0)=0 then 0 else round((ISNULL(am*ap,0)-ISNULL(qm*qp,0))/(ISNULL(am,0)-ISNULL(qm,0)),3) end
 from @tmp a
 
 --定尺訂單 未完工 已完工待出貨
@@ -540,47 +540,47 @@ outer apply(
 --總進貨量
 update @tmp
 set prm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product='鋼筋' and left(datea,7)=@t_pmon),0)
-,prp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_rc2s where product='鋼筋' and left(datea,7)=@t_pmon),0)
+,prp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product='鋼筋' and left(datea,7)=@t_pmon),0)
 ,rm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product='鋼筋' and left(datea,7)=@t_mon),0)
-,rp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_rc2s where product='鋼筋' and left(datea,7)=@t_mon),0)
+,rp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product='鋼筋' and left(datea,7)=@t_mon),0)
 ,pyrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product='鋼筋' and left(datea,4)=@t_pyear),0)
-,pyrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_rc2s where product='鋼筋' and left(datea,4)=@t_pyear),0)
+,pyrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product='鋼筋' and left(datea,4)=@t_pyear),0)
 ,yrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product='鋼筋' and left(datea,4)=@t_year),0)
-,yrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_rc2s where product='鋼筋' and left(datea,4)=@t_year),0)
+,yrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product='鋼筋' and left(datea,4)=@t_year),0)
 
 
 --總出貨量 
 update @tmp
 set pvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product='鋼筋' and left(datea,7)=@t_pmon),0)
-,pvp=isnull((select case when SUM(weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_vccs where product='鋼筋' and left(datea,7)=@t_pmon),0)
+,pvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product='鋼筋' and left(datea,7)=@t_pmon),0)
 ,vm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product='鋼筋' and left(datea,7)=@t_mon),0)
-,vp=isnull((select case when SUM(weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_vccs where product='鋼筋' and left(datea,7)=@t_mon),0)
+,vp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product='鋼筋' and left(datea,7)=@t_mon),0)
 ,pyvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product='鋼筋' and left(datea,4)=@t_pyear),0)
-,pyvp=isnull((select case when SUM(weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_vccs where product='鋼筋' and left(datea,4)=@t_pyear),0)
+,pyvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product='鋼筋' and left(datea,4)=@t_pyear),0)
 ,yvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product='鋼筋' and left(datea,4)=@t_year),0)
-,yvp=isnull((select case when SUM(weight)=0 then 0 else round(SUM(total)/SUM(weight),2) end from view_vccs where product='鋼筋' and left(datea,4)=@t_year),0)
+,yvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product='鋼筋' and left(datea,4)=@t_year),0)
 
 --進貨合約
 update @tmp
 set pccm=isnull((select SUM(ordeweight) from cont where left(datea,7)=@t_pmon),0)
-,pccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,7)=@t_pmon),0),2)
+,pccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,7)=@t_pmon),0),3)
 ,ccm=isnull((select SUM(ordeweight) from cont where left(datea,7)=@t_mon),0)
-,ccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,7)=@t_mon),0),2)
+,ccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,7)=@t_mon),0),3)
 ,pyccm=isnull((select SUM(ordeweight) from cont where left(datea,4)=@t_pyear),0)
-,pyccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,4)=@t_pyear),0),2)
+,pyccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,4)=@t_pyear),0),3)
 ,yccm=isnull((select SUM(ordeweight) from cont where left(datea,4)=@t_year),0)
-,yccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,4)=@t_year),0),2)
+,yccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,4)=@t_year),0),3)
 
 --銷售合約
 update @tmp
 set pqvm=isnull((select SUM(weight) from view_quat where left(datea,7)=@t_pmon),0)
-,pqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,7)=@t_pmon),0),2)
+,pqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,7)=@t_pmon),0),3)
 ,qvm=isnull((select SUM(weight) from view_quat where left(datea,7)=@t_mon),0)
-,qvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,7)=@t_mon),0),2)
+,qvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,7)=@t_mon),0),3)
 ,pyqvm=isnull((select SUM(weight) from view_quat where left(datea,4)=@t_pyear),0)
-,pyqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,4)=@t_pyear),0),2)
+,pyqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,4)=@t_pyear),0),3)
 ,yqvm=isnull((select SUM(weight) from view_quat where left(datea,4)=@t_year),0)
-,yqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,4)=@t_year),0),2)
+,yqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,4)=@t_year),0),3)
 
 
 

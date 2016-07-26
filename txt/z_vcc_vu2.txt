@@ -331,7 +331,7 @@ where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
 and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
 
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
-select '2','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
+select '13','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
 where b.ucolor='板料' and  --散把只顯示板料
@@ -373,7 +373,7 @@ set @aprice=0
 --板料倉庫在7000
 declare cursor_table cursor for
 select tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) 
-from #tmp --where tablea!='cubs' 
+from #tmp where tablea!='cubs' 
 order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa,noq
 open cursor_table
 fetch next from cursor_table
@@ -400,22 +400,13 @@ begin
 		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
 		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
 	end
-	else if(@tablea in ('rc2s','inas','cubs'))
+	else if(@tablea in ('rc2s','inas'))
 	begin
 		set @t_mount=@t_mount+@mount
 		set @t_weight=@t_weight+@weight
-		if(@tablea='cubs')
-		begin
-			set @t_money=@t_money+(@weight*@aprice)
-			set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
-			set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
-		end
-		else
-		begin
-			set @t_money=@t_money+@money
-			set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
-			set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
-		end
+		set @t_money=@t_money+@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
 	end
 	else
 	begin
@@ -446,19 +437,20 @@ deallocate cursor_table
 insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,'',@t_mount,@t_weight,@t_money,@avgweight,@aprice
 
-delete #tmp where mount=0 or weight=0 or gno!='2'
+--delete #tmp where mount=0 or weight=0 or gno!='2'
 
 insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '5','datea','','',char(255),char(255),char(255),999,'ZZZ','',sum(mount),SUM(weight),SUM(money)
 ,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
 ,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
-from #tmp 
+from #tmp where not(mount=0 or weight=0 or gno!='2')
 
-delete #tmp where gno='2'
+--delete #tmp where gno='2'
 
 update  a
-set sm=isnull((select top 1 round(weight,0) from #tmp),0)
-,sp=isnull((select top 1 round(aprice,3) from #tmp),0)
+set sm=isnull((select top 1 round(weight,0) from #tmp where gno='5'),0)
++isnull((select SUM(weight) from #tmp where tablea='cubs'),0)
+,sp=isnull((select top 1 round(aprice,3) from #tmp where gno='5'),0)
 from @tmp a
 
 --智勝-成品(含散把板料) 105/07/22 不含散把板料

@@ -588,10 +588,10 @@
 					<td align="center" style="width:150px;"><a id='lblClass_s'> </a></td>
 					<!--<td align="center" style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 					<td align="center" style="width:85px;display: none;" class="sf"><a id='lblLengthc_s'> </a></td>
-					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblEmount2_s'> </a></td>
-					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblEweight2_s'> </a></td>
+					<td align="center" style="width:85px;"><a id='lblMount_s'> </a></td>
+					<td align="center" style="width:85px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
 					<!--<td align="center" style="width:200px;"><a id='lblUno_s'> </a></td>-->
@@ -627,10 +627,10 @@
 					</td>
 					<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
 					<td class="sf" style="display: none;"><input id="txtLengthc.*" type="text" class="txt num c1"/></td>
-					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtEmount2.*" type="text" class="txt num c1"/></td>
-					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtEweight2.*" type="text" class="txt num c1"/></td>
+					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
+					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtPrice.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtTotal.*" type="text" class="txt num c1"/></td>
 					<!--<td><input id="txtUno.*" type="text" class="txt c1"/></td>-->

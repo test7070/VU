@@ -618,7 +618,7 @@
                 			t_unowhere=t_unowhere+" and uno!='"+$('#txtUno_'+i).val()+"' ";
                 	}
                 	
-	                var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' and uno!='' and (exists (select * from view_vcct where uno=view_cubs.uno ) or exists (select * from view_cubs where uno=view_cubs.uno and weight<0)) "+t_unowhere+" ^^";
+	                var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' and uno!='' and (exists (select * from view_vcct a where a.uno=view_cubs.uno ) or exists (select * from view_cubs a where a.uno=view_cubs.uno and a.weight<0)) "+t_unowhere+" ^^";
 	                q_gt('view_cubs', t_where, 0, 0, 0, 'btnOk_Cubs',r_accy);
 	                return;
                 }
@@ -887,7 +887,7 @@
                 //var t_where = 'where=^^ uno in(' + getBBTWhere('Uno') + ') ^^';
                 //q_gt('uccy', t_where, 0, 0, 0, 'deleUccy', r_accy);
                 
-                var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' and uno!='' and (exists (select * from view_vcct where uno=view_cubs.uno ) or exists (select * from view_cubs where uno=view_cubs.uno and weight<0)) ^^";
+                var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' and uno!='' and (exists (select * from view_vcct a where a.uno=view_cubs.uno ) or exists (select * from view_cubs a where a.uno=view_cubs.uno and weight<0)) ^^";
                 q_gt('view_cubs', t_where, 0, 0, 0, 'deleCubs',r_accy);
                 
             }

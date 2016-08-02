@@ -611,7 +611,8 @@
 						$('#txtDate2_' + i).val(q_date());
 				}
                 
-                if(q_cur!=1){
+                //2016/08/01 不判斷批號是否異動
+                /*if(q_cur!=1){
                 	var t_unowhere='';
                 	for (var i = 0; i < q_bbsCount; i++) {
                 		if(!emp($('#txtUno_'+i).val()))
@@ -621,7 +622,7 @@
 	                var t_where = "where=^^ noa='"+$('#txtNoa').val()+"' and uno!='' and (exists (select * from view_vcct a where a.uno=view_cubs.uno ) or exists (select * from view_cubs a where a.uno=view_cubs.uno and a.weight<0)) "+t_unowhere+" ^^";
 	                q_gt('view_cubs', t_where, 0, 0, 0, 'btnOk_Cubs',r_accy);
 	                return;
-                }
+                }*/
                     
                 var t_noa = trim($('#txtNoa').val());
                 var t_date = trim($('#txtDatea').val());

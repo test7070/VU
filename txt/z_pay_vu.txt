@@ -791,11 +791,13 @@ z_pay_vu05:--z_pay_vu05
 	declare @t_edate nvarchar(10)
 	declare @t_btggno nvarchar(30)
 	declare @t_etggno nvarchar(30)
+	declare @t_detail nvarchar(max)
 	
 	set @t_bdate = case when '#non' = [6] then '' else [6] end
 	set @t_edate = case when '#non' = [7] then CHAR(255) else [7] end
 	set @t_btggno = case when '#non' = [8] then '' else [8] end
 	set @t_etggno = case when '#non' = [9] then CHAR(255) else [9] end
+	set @t_detail = case when '#non' = [16] then '' else [16] end
 	---------------------------------------------------------------------------------
 	IF OBJECT_ID('tempdb..#tmp')is not null
 	BEGIN
@@ -809,12 +811,14 @@ z_pay_vu05:--z_pay_vu05
 		tggno nvarchar(30),
 		datea nvarchar(20),
 		noa nvarchar(50),
+		rc2no nvarchar(50),
 		sale float,
 		paysale float,
 		opay float,
 		unopay float,
 		unpay float,
-		qhref nvarchar(50)
+		qhref nvarchar(50),
+		ghref nvarchar(50)
 	)
 	
 	--應付金額 --沖帳金額
@@ -847,6 +851,17 @@ z_pay_vu05:--z_pay_vu05
 	
 	--delete #tmp where sale=0 and paysale=0 and opay=0 and unopay=0 and unpay=0
 	
+	if LEN(@t_detail)>0
+	begin
+		insert #tmp(gno,tggno,noa,rc2no,sale,paysale,opay,unopay,ghref)
+		select '1',a.tggno,left(a.transtart,charindex('@',a.transtart)-1),a.noa
+		,isnull(a.total,0),isnull(b.paysale,0),null,null,'rc2_vu?noa=$rc2no'
+		from view_rc2 a outer apply (select SUM(paysale)paysale from pays where rc2no=a.noa)b
+		where a.datea between @t_bdate and @t_edate
+		and a.tggno between @t_btggno and @t_etggno
+		and left(a.transtart,charindex('@',a.transtart)-1)!=''
+	end
+	
 	update a set datea=(select datea from cont where noa=a.noa) from #tmp a
 	
 	insert #tmp(gno,tggno,noa,datea,sale,paysale,opay,unopay,unpay,qhref)
@@ -873,11 +888,11 @@ z_pay_vu05:--z_pay_vu05
 	if((select count(*) from #tmp)>0)
 	begin
 		insert #tmp (gno,tggno,datea,noa,sale,paysale,opay,unopay,unpay)
-		select '1',tggno,CHAR(255),CHAR(255),sum(sale),sum(paysale),sum(opay),sum(unopay),sum(unpay)
+		select '2',tggno,CHAR(255),CHAR(255),sum(sale),sum(paysale),sum(opay),sum(unopay),sum(unpay)
 		from #tmp where gno='0'  group by tggno
 		
 		insert #tmp (gno,tggno,datea,noa,sale,paysale,opay,unopay,unpay)
-		select '2',CHAR(255),CHAR(255),CHAR(255),sum(sale),sum(paysale),sum(opay),sum(unopay),sum(unpay)
+		select '3',CHAR(255),CHAR(255),CHAR(255),sum(sale),sum(paysale),sum(opay),sum(unopay),sum(unpay)
 		from #tmp where gno='0' 
 	end
 	
@@ -892,7 +907,7 @@ z_pay_vu05:--z_pay_vu05
 	,b.nick tnick
 	from #tmp a
 	left join tgg b on a.tggno=b.noa
-	order by a.tggno,gno,a.recno
+	order by a.tggno,a.noa,gno,a.recno,a.rc2no
 	
 	IF OBJECT_ID('tempdb..#tmp')is not null
 	BEGIN

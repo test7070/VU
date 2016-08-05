@@ -901,23 +901,31 @@ z_umm_vu05:--z_umm_vu05
 	--select * from umm
 	--select * from view_vcc where apvmemo like '@%'
 	
+	--105/08/05 日期為合約日 出貨也要判斷
+	insert #tmp(gno,custno,noa,sale,paysale,opay,unopay)
+	select '9',custno,noa,0,0,0,0 from view_quat a
+	where a.datea between @t_bdate and @t_edate
+	and a.custno between @t_bcustno and @t_ecustno
+	
 	--應收金額 --沖帳金額
 	insert #tmp(gno,custno,noa,sale,paysale,opay,unopay)
 	select '9',a.custno,left(a.apvmemo,charindex('@',a.apvmemo)-1),isnull(sum(a.total),0),isnull(sum(b.paysale),0),0,0
 	from view_vcc a outer apply (select SUM(paysale)paysale from umms where vccno=a.noa)b
 	where a.datea between @t_bdate and @t_edate
-	and a.custno between @t_bcustno and @t_ecustno
-	and left(a.apvmemo,charindex('@',a.apvmemo)-1)!=''
+	and exists (select * from #tmp where noa=left(a.apvmemo,charindex('@',a.apvmemo)-1))
+	--and a.custno between @t_bcustno and @t_ecustno
+	--and left(a.apvmemo,charindex('@',a.apvmemo)-1)!=''
 	group by a.custno,left(a.apvmemo,charindex('@',a.apvmemo)-1)
 	
 	--預收金額 --預收沖帳
 	insert #tmp(gno,custno,noa,opay,unopay,sale,paysale)
 	select '8',custno,payc,isnull(sum(opay),0),isnull(SUM(unopay),0),0,0
 	from umm a
-	where exists (select * from #tmp where noa=isnull(a.payc,''))
-	or (a.datea between @t_bdate and @t_edate
-	and a.custno between @t_bcustno and @t_ecustno
-	and payc!='')
+	where a.datea between @t_bdate and @t_edate
+	and exists (select * from #tmp where noa=isnull(a.payc,''))
+	--or (a.datea between @t_bdate and @t_edate
+	--and a.custno between @t_bcustno and @t_ecustno
+	--and payc!='')
 	group by custno,payc
 	
 	delete #tmp where gno='8' and opay=0 and unopay=0
@@ -938,8 +946,9 @@ z_umm_vu05:--z_umm_vu05
 		,isnull(a.total,0),isnull(b.paysale,0),null,null,'vcc_vu?noa=$vccno'
 		from view_vcc a outer apply (select SUM(paysale)paysale from umms where vccno=a.noa)b
 		where a.datea between @t_bdate and @t_edate
-		and a.custno between @t_bcustno and @t_ecustno
-		and left(a.apvmemo,charindex('@',a.apvmemo)-1)!=''
+		and exists (select * from #tmp where noa=left(a.apvmemo,charindex('@',a.apvmemo)-1))
+		--and a.custno between @t_bcustno and @t_ecustno
+		--and left(a.apvmemo,charindex('@',a.apvmemo)-1)!=''
 	end
 	
 	update a set datea=(select datea from view_quat where noa=a.noa) from #tmp a
@@ -969,7 +978,7 @@ z_umm_vu05:--z_umm_vu05
 	begin
 		insert #tmp (gno,custno,datea,noa,sale,paysale,opay,unopay,unpay)
 		select '2',custno,CHAR(255),CHAR(255),sum(sale),sum(paysale),sum(opay),sum(unopay),sum(unpay)
-		from #tmp where gno='0'  group by custno
+		from #tmp where gno='0' group by custno
 		
 		insert #tmp (gno,custno,datea,noa,sale,paysale,opay,unopay,unpay)
 		select '3',CHAR(255),CHAR(255),CHAR(255),sum(sale),sum(paysale),sum(opay),sum(unopay),sum(unpay)

@@ -821,23 +821,31 @@ z_pay_vu05:--z_pay_vu05
 		ghref nvarchar(50)
 	)
 	
+	--105/08/05 日期為合約日 進貨也要判斷
+	insert #tmp(gno,tggno,noa,sale,paysale,opay,unopay)
+	select '9',tggno,noa,0,0,0,0 from cont a
+	where a.datea between @t_bdate and @t_edate
+	and a.tggno between @t_btggno and @t_etggno
+	
 	--應付金額 --沖帳金額
 	insert #tmp(gno,tggno,noa,sale,paysale,opay,unopay)
 	select '9',a.tggno,left(a.transtart,charindex('@',a.transtart)-1),isnull(sum(a.total),0),isnull(sum(b.paysale),0),0,0
 	from view_rc2 a outer apply (select SUM(paysale)paysale from pays where rc2no=a.noa)b
 	where a.datea between @t_bdate and @t_edate
-	and a.tggno between @t_btggno and @t_etggno
-	and left(a.transtart,charindex('@',a.transtart)-1)!=''
+	and exists (select * from #tmp where noa=left(a.transtart,charindex('@',a.transtart)-1))
+	--and a.tggno between @t_btggno and @t_etggno
+	--and left(a.transtart,charindex('@',a.transtart)-1)!=''
 	group by a.tggno,left(a.transtart,charindex('@',a.transtart)-1)
 	
 	--預付金額 --預付沖帳
 	insert #tmp(gno,tggno,noa,opay,unopay,sale,paysale)
 	select '8',tggno,payc,isnull(sum(opay),0),isnull(SUM(unopay),0),0,0
 	from pay a
-	where exists (select * from #tmp where noa=isnull(a.payc,''))
-	or (a.datea between @t_bdate and @t_edate
-	and a.tggno between @t_btggno and @t_etggno
-	and payc!='')
+	where a.datea between @t_bdate and @t_edate
+	and exists (select * from #tmp where noa=isnull(a.payc,''))
+	--or (a.datea between @t_bdate and @t_edate
+	--and a.tggno between @t_btggno and @t_etggno
+	--and payc!='')
 	group by tggno,payc
 	
 	delete #tmp where gno='8' and opay=0 and unopay=0
@@ -858,8 +866,9 @@ z_pay_vu05:--z_pay_vu05
 		,isnull(a.total,0),isnull(b.paysale,0),null,null,'rc2_vu?noa=$rc2no'
 		from view_rc2 a outer apply (select SUM(paysale)paysale from pays where rc2no=a.noa)b
 		where a.datea between @t_bdate and @t_edate
-		and a.tggno between @t_btggno and @t_etggno
-		and left(a.transtart,charindex('@',a.transtart)-1)!=''
+		and exists (select * from #tmp where noa=left(a.transtart,charindex('@',a.transtart)-1))
+		--and a.tggno between @t_btggno and @t_etggno
+		--and left(a.transtart,charindex('@',a.transtart)-1)!=''
 	end
 	
 	update a set datea=(select datea from cont where noa=a.noa) from #tmp a
@@ -889,7 +898,7 @@ z_pay_vu05:--z_pay_vu05
 	begin
 		insert #tmp (gno,tggno,datea,noa,sale,paysale,opay,unopay,unpay)
 		select '2',tggno,CHAR(255),CHAR(255),sum(sale),sum(paysale),sum(opay),sum(unopay),sum(unpay)
-		from #tmp where gno='0'  group by tggno
+		from #tmp where gno='0' group by tggno
 		
 		insert #tmp (gno,tggno,datea,noa,sale,paysale,opay,unopay,unpay)
 		select '3',CHAR(255),CHAR(255),CHAR(255),sum(sale),sum(paysale),sum(opay),sum(unopay),sum(unpay)

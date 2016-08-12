@@ -1,4 +1,4 @@
-﻿z_vcc_vu21:--z_vcc_vu21
+﻿﻿z_vcc_vu21:--z_vcc_vu21
 declare @t_bdate nvarchar(10)
 declare @t_edate nvarchar(10)
 declare @t_groupano nvarchar(30)
@@ -655,3 +655,87 @@ BEGIN
 END
 ;
 --*************************************************************************************************
+z_vcc_vu25:--z_vcc_vu25
+declare @t_bdate nvarchar(20)
+declare @t_edate nvarchar(20)
+declare @t_btggno nvarchar(20) 
+declare @t_etggno nvarchar(20) 
+declare @rc2typea nvarchar(10)
+declare @t_product nvarchar(max)
+declare @t_spec nvarchar(30)
+declare @t_size nvarchar(10)
+declare @t_class nvarchar(10)
+declare @t_blengthb float
+declare @t_elengthb float 
+declare @t_qno nvarchar(50)
+declare @t_bstoreno nvarchar(20) 
+declare @t_estoreno nvarchar(20)
+------------------------------------------------- 
+set @t_bdate = case when '#non'=[7] then '' else [7] end 
+set @t_edate = case when '#non'=[8] then char(255) else [8] end 
+set @t_btggno = case when '#non'=[19] then '' else [19] end 
+set @t_etggno = case when '#non'=[20] then char(255) else [20]  end
+set @rc2typea = case when '#non' = [21] then '' else [21] end  
+set @t_product = case when '#non'=[12] then '' else [12] end
+set @t_spec = case when '#non'=[22] then '' else [22] end
+set @t_size = case when '#non'=[23] then '' else [23] end
+set @t_class = case when '#non'=[24] then '' else [24] end
+set @t_qno = case when '#non'=[25] then '' else [25] end
+set @t_blengthb = case when '#non'=[26] then 0 else [26] end
+set @t_elengthb = case when '#non'=[27] then 99 else [27] end
+set @t_bstoreno = case when '#non'=[28] then '' else [28] end 
+set @t_estoreno = case when '#non'=[29] then char(255) else [29] end
+--***********************************************************************************
+declare @tmp table( 
+	gno nvarchar(1), 
+	tggno nvarchar(30), 
+	comp nvarchar(90), 
+	mon nvarchar(15), 
+	mount float, 
+	total float, 
+	aprice float,
+	tax float ,
+	weight float,
+	totax float
+) 
+insert into @tmp 
+select '0',a.tggno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end), 
+case when isnull(a.mon,'')!='' then a.mon else left(a.datea,[30]) end
+,sum((case when a.typea='1' then 1 else -1 end)*b.mount)
+,sum((case when a.typea='1' then 1 else -1 end)*b.total) ,0
+,sum((case when a.typea='1' then 1 else -1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)) 
+,sum((case when a.typea='1' then 1 else -1 end)*b.weight)
+,sum((case when a.typea='1' then 1 else -1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)) 
+from view_rc2 a left join view_rc2s b on a.noa = b.noa left join tgg c on a.tggno = c.noa 
+where (a.datea between @t_bdate and @t_edate) and 
+(a.tggno between @t_btggno and @t_etggno)  and
+(b.storeno between @t_bstoreno and @t_estoreno) and
+(len(@rc2typea)=0 or @rc2typea=a.typea) and
+(len(@t_product)=0 or @t_product=b.product)and
+(len(@t_spec)=0 or @t_spec=b.spec) and
+(len(@t_size)=0 or @t_size=b.size) and
+(len(@t_class)=0 or @t_class=b.class) and
+(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) and 
+(len(@t_qno)=0 or dbo.split(dbo.split(a.transtart,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.transtart,'##',1),'@',0) = @t_qno)
+group by a.tggno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,[30]) end
+
+if((select count(*) from @tmp)>0)
+begin
+	insert into @tmp(gno,tggno,comp,mon,mount,total,tax,totax,weight) 
+	select '1',tggno,comp,'9999/99',sum(mount),sum(total),sum(tax),sum(totax),sum(weight) from @tmp group by tggno,comp 
+	
+	insert into @tmp(gno,tggno,mount,total,tax,totax,weight) 
+	select '2','ZZZZ_ZZZ',sum(mount), sum(total), sum(tax), sum(totax),sum(weight) from @tmp where gno='1' 
+end
+
+update @tmp
+set aprice =case when weight=0 then 0 else round(total/weight,2) end 
+
+select gno,tggno,left(comp,10) comp,mon,
+dbo.getComma(mount,0) mount, 
+dbo.getComma(weight,0) weight, 
+dbo.getComma(aprice,2) aprice, 
+dbo.getComma(tax,0) tax,
+dbo.getComma(totax,0) totax , 
+dbo.getComma(total,0) total
+from @tmp order by tggno,mon,gno ;

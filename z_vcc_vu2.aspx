@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" >
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -21,6 +21,7 @@
 				_q_boxClose();
 				q_getId();
 				q_gt('custtype', '', 0, 0, 0, "");
+
 				
 				$.datepicker.regional['zh-TW']={
 				   dayNames:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],
@@ -34,7 +35,10 @@
 				//將預設語系設定為中文
 				$.datepicker.setDefaults($.datepicker.regional["zh-TW"]);
 			});  
-			
+			var xclassItem ='';
+            var xspecItem ='';
+            var xlengthbItem ='';
+            
             function q_gfPost() {
                 $('#q_report').q_report({
                     fileName : 'z_vcc_vu2',
@@ -100,6 +104,44 @@
 					}, {/*3-2 [18]*/
                         type : '6',
                         name : 'xenddate'
+                    }, {/*5-1 [19][20]*/
+						type : '2', 
+						name : 'tgg',
+						dbf : 'tgg',
+						index : 'noa,comp',
+						src : 'tgg_b.aspx'
+					}, {/*5-2 [21]*/
+                        type : '5',
+                        name : 'rc2typea', 
+                        value : [q_getPara('report.all')].concat(q_getPara('rc2.typea').split(','))
+                    }, {/*5-3 [22]*/
+                        type : '5',
+                        name : 'xspec' ,
+                        value :xspecItem.split(',')
+                    }, {/*5-4 [23]*/
+                        type : '5',
+                        name : 'xsize',
+                        value:(' @全部,#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16').split(',')
+                    }, {/*5-5 [24]*/
+                        type : '5',
+                        name : 'xclass',
+                        value : xclassItem.split(',')
+                    },{/*5-6 [25]*/
+                        type : '6',
+                        name : 'qno',
+                    },{/*5-7 [26][27]*/
+                        type : '1',
+                        name : 'xlengthb',
+                    }, {/*5-8 [28][29]*/
+						type : '2', //[18][19]
+						name : 'xstore',
+						dbf : 'store',
+						index : 'noa,store',
+						src : 'store_b.aspx'
+					}, {/*[30]*/
+                        type : '0', //判斷顯示小數點與其他判斷
+                        name : 'lenm',
+                        value : r_lenm
                     }]
                 });
                 q_popAssign();
@@ -117,6 +159,27 @@
 				
 				$('#txtDate1').val(q_date().substr(0,r_len)+'/01/01');
 				$('#txtDate2').val(q_date());
+				
+				var tmp = document.getElementById("txtQno");
+                var selectbox = document.createElement("select");
+                selectbox.id="combQno";
+                selectbox.style.cssText ="width:20px;font-size: medium;";
+                tmp.parentNode.appendChild(selectbox,tmp);
+                
+                $('#combQno').change(function() {
+					$('#txtQno').val($('#combQno').find("option:selected").text());
+				});
+				
+				$('#txtXlengthb1').addClass('num').val(0).change(function() {
+                    $(this).val(dec($(this).val()));
+                    if ($(this).val() == 'NaN')
+                    	$(this).val(0);
+                });
+                $('#txtXlengthb2').addClass('num').val(99).change(function() {
+                    $(this).val(dec($(this).val()));
+                    if ($(this).val() == 'NaN')
+                    	$(this).val(99);
+                });
 				
 			}
 
@@ -141,7 +204,23 @@
                             uccgaItem = uccgaItem + (uccgaItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa +' . '+as[i].namea;
                         }
                         q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 					
-                        break;	
+                        break;
+                    case 'spec':
+                		var as = _q_appendData("spec", "", true);
+                		xspecItem = " @全部";
+						for ( i = 0; i < as.length; i++) {
+							xspecItem+=","+as[i].noa;
+						}
+						q_gt('class', '1=1 ', 0, 0, 0, "class");
+                		break;
+                	case 'class':
+                		var as = _q_appendData("class", "", true);
+                		xclassItem = " @全部";
+						for ( i = 0; i < as.length; i++) {
+							xclassItem+=","+as[i].noa;
+						}
+						q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
+						break;	
 					case 'ucc':
 						xuccItem = " @全部";
                 		var as = _q_appendData("ucc", "", true);
@@ -149,7 +228,8 @@
 							xuccItem+=","+as[i].product;
 						}
 						q_gf('', 'z_vcc_vu2');
-						break;  
+						break;
+					  
 				}
 			}
 		</script>

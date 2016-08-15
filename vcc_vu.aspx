@@ -790,12 +790,12 @@
 						$('#btnMinut__'+n).click();
 					}else{
 						//105/08/12 加上判斷cub 被領料
-						var t_where = "where=^^ uno='" + $(this).val() + "' and (weight<0 or mount<0) ^^";
+						var t_where = "where=^^ uno='" + $('#txtUno__' + n).val() + "' and (weight<0 or mount<0) ^^";
 						q_gt('view_cubs', t_where, 0, 0, 0, "getunocubs_"+n);
 					}
 				}else if (t_name.substring(0,10)=='getunocubs'){
 					var n=t_name.split('_')[1];
-					var as = _q_appendData('view_vcct', '', true);
+					var as = _q_appendData('view_cubs', '', true);
 					if (as[0] != undefined) {
 						alert('該批號已被領料!!');
 						$('#btnMinut__'+n).click();

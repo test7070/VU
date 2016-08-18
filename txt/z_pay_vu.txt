@@ -890,6 +890,15 @@ z_pay_vu05:--z_pay_vu05
 	and (isnull(opay,0)!=0 or isnull(unopay,0)!=0)
 	and isnull(payc,'')=''
 	
+	--105/08/18 增加payb
+	insert #tmp(gno, tggno,noa,datea,sale,paysale,opay,unopay,unpay,qhref)
+	select '0',a.tggno,a.noa,a.datea,isnull(a.total,0),isnull(b.paysale,0),0,0,isnull(a.total,0)-isnull(b.paysale,0)
+	,'payb_vu?noa=$noa'
+	from payb a outer apply (select SUM(paysale)paysale from pays where rc2no=a.noa)b
+	where a.datea between @t_bdate and @t_edate
+	and a.tggno between @t_btggno and @t_etggno
+	and a.total>0
+	
 	update a
 	set recno=rr
 	from (select ROW_NUMBER() over (order by tggno,datea,noa)rr,recno from #tmp )a

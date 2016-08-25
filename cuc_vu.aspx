@@ -829,7 +829,7 @@
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
 						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
-						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins' style='font-size:16px;width: 30px;height: 45px;' value='完&#010;工'/></td>";
+						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins' style='font-size:16px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs').html(string);
@@ -868,7 +868,7 @@
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
 						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
-						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins2' style='font-size:16px;width: 30px;height: 45px;' value='完&#010;工'/></td>";
+						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins2' style='font-size:16px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs_float').remove();

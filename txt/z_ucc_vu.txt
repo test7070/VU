@@ -35,6 +35,12 @@ BEGIN
 	EXECUTE sp_executesql @cmd
 END
 
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	set @cmd = 'drop table #tmpa'
+	EXECUTE sp_executesql @cmd
+END
+
 create table #tmp(
 	gno nvarchar(2),
 	tablea nvarchar(50),
@@ -57,6 +63,15 @@ create table #tmp(
 	page int,
 	idno int
 )
+
+create table #tmpa(
+	uno nvarchar(50)
+)
+if(@t_cubssheet='Y')
+begin
+	insert #tmpa
+	select uno from view_vcct
+end
 
 insert #tmp (gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '11','ucce',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
@@ -121,22 +136,59 @@ and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and a.storeno='7000' and isnull(b.productno,'')=''
 
-insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
-select '2','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
-from view_cub a left join view_cubs b on a.noa=b.noa
-outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
-where b.ucolor='板料' and  --散把只顯示板料
-not exists (select * from view_vcct where b.uno=uno) and
-a.datea<=@t_edate and isnull(a.datea,'')>=isnull(c.datea,'')
-and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
-and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
-and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
---and b.storeno='7000' 
-and isnull(b.productno,'')='' and isnull(b.product,'')!='' --and isnull(b.productno2,'')=''
-and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
-and @t_cubssheet='Y'
-group by b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
+--105/08/30 調整 加快速度
+--insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
+--select '2','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
+--from view_cub a left join view_cubs b on a.noa=b.noa
+--outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
+--where b.ucolor='板料' and  --散把只顯示板料
+--not exists (select * from #tmpa where b.uno=uno) and
+--a.datea<=@t_edate and isnull(a.datea,'')>=isnull(c.datea,'')
+--and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
+--and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+--and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
+--and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+----and b.storeno='7000' 
+--and isnull(b.productno,'')='' and isnull(b.product,'')!='' --and isnull(b.productno2,'')=''
+--and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
+--and @t_cubssheet='Y'
+--group by b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
+
+if(@t_cubssheet='Y')
+begin
+	set @cmd = "
+	insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
+	select '2','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
+	from view_cub a left join view_cubs b on a.noa=b.noa
+	outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
+	where b.ucolor='板料'  --散把只顯示板料
+	and not exists (select * from #tmpa where b.uno=uno) 
+	and	a.datea<='"+@t_edate+"' and isnull(a.datea,'')>=isnull(c.datea,'')"
+	
+	if(len(@t_pno)>0)
+		set @cmd = @cmd+" and isnull(b.product,'')='"+@t_pno+"'"
+	
+	if(len(@t_ucolor)>0)
+		set @cmd = @cmd+" and isnull(b.ucolor,'')='"+@t_ucolor+"'"
+	
+	if(len(@t_spec)>0)
+		set @cmd = @cmd+" and isnull(b.spec,'')='"+@t_spec+"'"
+		
+	if(len(@t_size)>0)
+		set @cmd = @cmd+" and isnull(b.size,'')='"+@t_size+"'"
+		
+	if(len(@t_class)>0)
+		set @cmd = @cmd+" and isnull(b.class,'')='"+@t_class+"'"
+		
+	if(@t_blengthb!='0' and @t_elengthb!='999')
+		set @cmd = @cmd+" and isnull(b.lengthb,0) between cast('"+@t_blengthb+"' as float) and cast('"+@t_elengthb+"' as float) "
+		
+	set @cmd = @cmd+"and isnull(b.productno,'')='' and isnull(b.product,'')!='' 
+	and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
+	group by b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
+	"
+	EXECUTE sp_executesql @cmd
+end
 
 --105/04/20 出貨板料也要扣
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -331,6 +383,12 @@ from #tmp order by page,case when tablea='Paging' then 3 when tablea='title' the
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	set @cmd = 'drop table #tmpa'
 	EXECUTE sp_executesql @cmd
 END
 ;

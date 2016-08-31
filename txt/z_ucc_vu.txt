@@ -917,11 +917,8 @@ create table #tmp(
 	storeno nvarchar(20),
 	aprice float, --均價
 	cost float --成本
-	primary key (datea,tablea,typea,noa,noq,product,spec,size,ucolor,lengthb,class)
+	--primary key (datea,tablea,typea,noa,noq,product,spec,size,ucolor,lengthb,class)
 )
-
-CREATE INDEX tmpindex on #tmp (product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
-CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 
 --盤
 insert #tmp
@@ -970,6 +967,10 @@ select '2','cubs',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor
 ,b.weight,b.price,0,case when b.product='鋼筋' and b.ucolor='板料' then '7000' else '7000A' end,0,0
 from view_cub a left join view_cubs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+
+CREATE INDEX tmpindex0 on #tmp (datea,tablea,typea,noa,noq,product,spec,size,ucolor,lengthb,class)
+CREATE INDEX tmpindex1 on #tmp (product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
+CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 
 --------------------------------------------------------------------
 --月成本
@@ -1285,7 +1286,6 @@ create table #tmpa(
 	lw float,lp float,lm float
 	--primary key (product,spec,size,ucolor,lengthb,class,storeno,uno,gno)
 )
-CREATE INDEX tmpaindex on #tmpa (product,spec,size,ucolor,lengthb,class,storeno,uno,gno)
 
 --插入資料
 insert #tmpa (gno,storeno,product,spec,size,ucolor,lengthb,class,uno,bw,bm,lw,lp,lm)
@@ -1297,6 +1297,8 @@ and ((@x_blengthb=0 and  @x_elengthb=999)  or isnull(lengthb,0) between @x_bleng
 and (len(@t_class)=0 or isnull(class,'')=@t_class)  and (storeno between @t_bstoreno and @t_estoreno)
 group by storeno,product,spec,size,ucolor,lengthb,class,uno
 
+CREATE INDEX tmpaindex on #tmpa (product,spec,size,ucolor,lengthb,class,storeno,uno,gno)
+
 set @tstoreno='#non'
 set @tproduct='#non'
 set @tspec='#non'
@@ -1305,6 +1307,7 @@ set @tucolor='#non'
 set @tlengthb=0
 set @tclass='#non'
 
+CREATE INDEX tmpindex3 on #tmp (storeno,product,spec,size,ucolor,lengthb,class,uno,datea,typea,noa,noq)
 declare cursor_table cursor for
 select tablea,datea,storeno,product,spec,size,ucolor,lengthb,class,isnull(weight,0),isnull(cost,0),uno
 from #tmp where
@@ -1987,6 +1990,8 @@ set @tlengthb=0
 set @tclass='#non'
 
 declare @qhref nvarchar(100)
+
+CREATE INDEX tmpindex3 on #tmp (storeno,product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
 
 declare cursor_table cursor for
 select tablea,typea,noa,noq,uno,datea,storeno,product,spec,size,ucolor,lengthb,class,isnull(weight,0),isnull(cost,0),qhref

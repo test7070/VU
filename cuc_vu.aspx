@@ -1935,7 +1935,11 @@
 						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount){
 							$('#textGweight_'+n).val(t_weight);
 						}else{
-							$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+							if(dec(t_mount)==0){
+								$('#textGweight_'+n).val(0);
+							}else{
+								$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+							}
 						}
 					}else{
 						alert('無此物品!!');
@@ -1978,7 +1982,11 @@
 						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount ){
 							$('#textGweight_'+n).val(t_weight);
 						}else{
-							$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+							if(dec(t_mount)==0){
+								$('#textGweight_'+n).val(0);
+							}else{
+								$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+							}
 						}
 					}else{
 						$('#textAvgweight_'+n).val(0);
@@ -2073,7 +2081,11 @@
 						if(dec($('#textGmount_'+n).val())>0 && dec($('#textGmount_'+n).val())==t_mount){
 							$('#textGweight_'+n).val(t_weight);
 						}else{
-							$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+							if(dec(t_mount)==0){
+								$('#textGweight_'+n).val(0);
+							}else{
+								$('#textGweight_'+n).val(q_mul(dec($('#textGmount_'+n).val()),round(q_div(t_weight,t_mount),3)));
+							}
 						}
 					}else{
 						$('#textAvgweight_'+n).val(0);

@@ -33,6 +33,8 @@
 				};
 				//將預設語系設定為中文
 				$.datepicker.setDefaults($.datepicker.regional["zh-TW"]);
+				
+				q_gf('', 'z_quatp_vu');
 			});  
 			
             function q_gfPost() {
@@ -65,32 +67,21 @@
                     }, {/*1-1 [7][8]*/
                         type : '1',
                         name : 'date'
-                    }, {/*1-2[9][10]*/
+                    }, {/*1-2 [9]*/
+                        type : '8',
+                        name : 'xoption02',
+                        value : q_getMsg('toption02').split('&')
+                    }, {/*1-3[10][11]*/
                         type : '2',
                         name : 'xcust',
                         dbf  : 'cust',
                         index: 'noa,comp',
                         src  : 'cust_b.aspx'
-                    }, {/*1-3 [11]*/
+                    }, {/*1-4 [12]*/
                         type : '8',
                         name : 'xoption01',
                         value : q_getMsg('toption01').split('&')
-                    }, {/*1-4[12]*/
-                        type : '5',
-                        name : 'xproduct',
-                        value : xuccItem.split(',')
-                    }, {/*2-1[13]*/
-                        type : '5', 
-                        name : 'custtype',
-                        value : custtypeItem.split(',')
-					}, {/*2-2[14]*/
-						type : '6',
-						name : 'lostday'
-					}, {/*2-3[15]*/
-                        type : '5', 
-                        name : 'lostorder',
-                        value : "0@最後交易日,1@客戶編號".split(',')
-					}]
+                    }]
                 });
                 q_popAssign();
 				q_getFormat();
@@ -100,8 +91,6 @@
                 $('#txtDate2').mask(r_picd);
                 $('#txtDate1').datepicker({dateFormat : 'yy/mm/dd'});
                 $('#txtDate2').datepicker({dateFormat : 'yy/mm/dd'});
-                $('#Xproduct select').val('鋼筋');
-                $('#txtLostday').val(100);
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();
@@ -124,6 +113,12 @@
 				t_day = t_day > 9 ? t_day + '' : '0' + t_day;
 				$('#txtDate2').val(t_year + '/' + t_month + '/' + t_day );
 				
+				$('#Date').css('width','300px');
+				$('#Date .c3').css('width','90px');
+				$('#Xoption02').css('width','300px').css('height','30px');
+				$('#chkXoption02').css('width','200px').css('margin-top','5px');
+				$('#chkXoption02 span').css('width','150px');
+				$('#chkXoption02 input').prop('checked',true);
 			}
 
 			function q_boxClose(s2) {
@@ -131,22 +126,6 @@
 
 			function q_gtPost(t_name) {
 				switch (t_name) {
-					case 'custtype':
-                        var as = _q_appendData("custtype", "", true);
-                        custtypeItem = " @全部";
-                        for ( i = 0; i < as.length; i++) {
-                            custtypeItem = custtypeItem + (custtypeItem.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].noa +' . '+as[i].namea;
-                        }
-                        q_gt('ucc', '1=1 ', 0, 0, 0, "ucc"); 
-						break;
-					case 'ucc':
-						xuccItem = " @全部";
-                		var as = _q_appendData("ucc", "", true);
-						for ( i = 0; i < as.length; i++) {
-							xuccItem+=","+as[i].product;
-						}
-						q_gf('', 'z_quatp_vu');
-						break;  
 				}
 			}
 		</script>

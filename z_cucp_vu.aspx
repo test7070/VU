@@ -132,7 +132,7 @@
 					for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
 						if($('#q_report').data().info.reportData[i].report==t_report){
 							click_report=i;
-							$('#q_report div div .radio').eq(delete_report).removeClass('nonselect').addClass('select').click();
+							$('#q_report div div .radio').eq(click_report).removeClass('nonselect').addClass('select').click();
 						}
 					}
 					$('#txtXnoa1').val(t_noa);

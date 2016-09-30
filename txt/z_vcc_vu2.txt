@@ -219,7 +219,7 @@ declare @tmp table(
 	tm float,tp float, --可銷售額度 餘量 均價
 	
 	ucub float,uvcc float, --定尺訂單 未完工 已完工待出貨
-	pgen float,	ngen float, --上月 本月 定尺產能
+	pgen float,	ngen float,ygen float, --上月 本月 本年 定尺產能
 	
 	prm float,prp float, --總進貨量 上月 數量 均價
 	rm float,rp float,--總進貨量 本月 數量 均價
@@ -524,7 +524,7 @@ outer apply(select SUM(undone) undone,SUM(stand) stand from @tmpa)b
 
 --上月 本月 定尺產能
 update a
-set pgen=isnull(c.weight,0),ngen=isnull(b.weight,0)
+set pgen=isnull(c.weight,0),ngen=isnull(b.weight,0),ygen=isnull(d.weight,0)
 from @tmp a
 outer apply(
 	select SUM(b.weight) weight
@@ -538,6 +538,12 @@ outer apply(
 	where left(a.datea,7) = @t_pmon
 	and isnull(b.uno,'')!='' 
 )c
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,4) = left(@t_mon,4)
+	and isnull(b.uno,'')!='' 
+)d
 
 --左區塊------------------------------------------------------------------------------------------------------------------------------------------------------
 --鋼筋總進貨量
@@ -615,7 +621,7 @@ select gno
 ,dbo.getComma(tm,0) tm,dbo.getComma(tp,-1) tp
 
 ,dbo.getComma(ucub,0) ucub,dbo.getComma(uvcc,0) uvcc
-,dbo.getComma(pgen,0) pgen,dbo.getComma(ngen,0) ngen
+,dbo.getComma(pgen,0) pgen,dbo.getComma(ngen,0) ngen,dbo.getComma(ygen,0) ygen
 
 ,dbo.getComma(prm,0) prm,dbo.getComma(prp,-1) prp
 ,dbo.getComma(rm,0) rm,dbo.getComma(rp,-1) rp

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
 		<title> </title>
@@ -32,7 +32,8 @@
 			brwKey = 'Datea';
 			aPop = new Array(
 				['txtCustno', 'lblCust', 'cust', 'noa,comp,nick', 'txtCustno,txtComp,txtNick', 'cust_b.aspx'],
-				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx']
+				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
+				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx']
 				//['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit,spec', 'txtProductno_,txtProduct_,txtUnit_,txtSpec_,txtUcolor_', 'ucaucc_b.aspx']
 			);
 			$(document).ready(function() {
@@ -101,6 +102,7 @@
 				$('#lblEnda').text('終止');
 				$('#lblAcomp').text('簽約公司');
 				$('#lblAddr2').text('工地名稱');
+				$('#lblSales').text('業務');
 				document.title='出貨合約';
 				
 				$('#txtCustno').change(function() {
@@ -665,6 +667,9 @@
 							<input id="txtComp" type="text" class="txt c1"/>
 							<input id="txtNick" type="text" class="txt c1" style="display: none;"/>
 						</td>
+						<td><span> </span><a id='lblSales' class="lbl  btn"> </a></td>
+						<td><input id="txtSalesno" type="text" class="txt c2">
+						           <input id="txtSales" type="text" class="txt c2"></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblAddr2' class="lbl"> </a></td>

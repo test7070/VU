@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
 		<title> </title>
@@ -323,6 +323,8 @@
 							if (!b_ret || b_ret.length == 0 || b_ret[0]==undefined)
 								return;
 							$('#textQno1').val(b_ret[0].noa);
+							$('#txtSalesno').val(b_ret[0].salesno);
+							$('#txtSales').val(b_ret[0].sales);
 							if(b_ret[0].atax=="true"){
 								$('#chkAtax').prop('checked',true);
 							}else{
@@ -749,8 +751,12 @@
 							}else{
 								if(as[0].atax=="true"){
 									$('#chkAtax').prop('checked',true);
+									$('#txtSalesno').val();
+									$('#txtSales').val();
 								}else{
-									$('#chkAtax').prop('checked',false);	
+									$('#chkAtax').prop('checked',false);
+									$('#txtSalesno').val();
+									$('#txtSales').val();	
 								}
 								refreshBbm();
 								sum();

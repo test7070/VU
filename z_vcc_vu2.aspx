@@ -142,6 +142,12 @@
                         type : '0', //判斷顯示小數點與其他判斷
                         name : 'lenm',
                         value : r_lenm
+                    }, {/*[31][32]*/
+                        type : '2',
+                        name : 'xsales',
+                        dbf : 'sss',
+                        index : 'noa,namea',
+                        src : 'sss_b.aspx'
                     }]
                 });
                 q_popAssign();

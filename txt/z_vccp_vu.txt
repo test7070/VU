@@ -1,4 +1,4 @@
-z_vccp_vu01:--z_vccp_vu01
+﻿z_vccp_vu01:--z_vccp_vu01
 
 declare @t_bxnoa nvarchar(20)
 declare @t_exnoa nvarchar(20)
@@ -194,6 +194,7 @@ declare @tmp1 table(
 	long float,
 	pmount float,
 	pweight float,
+	bmemo nvarchar(max),
 	
 	trantype nvarchar(10),
 	intime nvarchar(10),
@@ -204,7 +205,7 @@ declare @tmp1 table(
 
 insert into @tmp1
 select '0',a.noa,a.datea,a.custno,a.comp,a.addr2,a.apvmemo,a.benifit,a.tranadd,a.weight,a.memo,
-	   b.ucolor,b.spec,b.product,b.size,b.lengthb,b.mount,b.weight,
+	   b.ucolor,b.spec,b.product,b.size,b.lengthb,b.mount,b.weight,b.memo,
 	   a.trantype,a.paydate,a.cardeal,b.store,a.carno
 from view_vcc a
 left join view_vccs b on a.noa = b. noa
@@ -287,6 +288,7 @@ declare @tmp2 table(
 	product1 nvarchar(max),product2 nvarchar(max),product3 nvarchar(max),product4 nvarchar(max),product5 nvarchar(max),product6 nvarchar(max),
 	pmount1 float,pmount2 float,pmount3 float,pmount4 float,pmount5 float,pmount6 float,
 	pweight1 float,pweight2 float,pweight3 float,pweight4 float,pweight5 float,pweight6 float,
+	bmemo1 nvarchar(max),bmemo2 nvarchar(max),bmemo3 nvarchar(max),bmemo4 nvarchar(max),bmemo5 nvarchar(max),bmemo6 nvarchar(max),
 	
 	trantype nvarchar(10),
 	intime nvarchar(10),
@@ -315,8 +317,8 @@ begin
 	if(@noa2 != @noa1 or @recno%6 = 1) 
 	begin 
 		set @recno = 1 
-		insert into @tmp2(gno,noa,datea,custno,cust,addr,qno,tweight,eweight,nweight,memo,class1,spec1,product1,pmount1,pweight1,trantype,intime,cardeal,store,carno) 
-		select gno,noa,datea,custno,cust,addr,qno,tweight,eweight,nweight,memo,class,spec,product,pmount,pweight,trantype,intime,cardeal,store,carno
+		insert into @tmp2(gno,noa,datea,custno,cust,addr,qno,tweight,eweight,nweight,memo,class1,spec1,product1,pmount1,pweight1,bmemo1,trantype,intime,cardeal,store,carno) 
+		select gno,noa,datea,custno,cust,addr,qno,tweight,eweight,nweight,memo,class,spec,product,pmount,pweight,bmemo,trantype,intime,cardeal,store,carno
 		from @tmp1 where idno = @idno1 
 		
 		set @noa2 = @noa1 
@@ -329,7 +331,8 @@ begin
 						 spec2 = (select spec from @tmp1 where idno = @idno1), 
 						 product2 = (select product from @tmp1 where idno = @idno1), 
 						 pmount2 = (select pmount from @tmp1 where idno = @idno1),
-						 pweight2 = (select pweight from @tmp1 where idno = @idno1)						 
+						 pweight2 = (select pweight from @tmp1 where idno = @idno1),
+						 bmemo2 = (select bmemo from @tmp1 where idno = @idno1)							 
 		where idno = @idno2 
 		
 		set @noa2 = @noa1 
@@ -341,7 +344,8 @@ begin
 						 spec3 = (select spec from @tmp1 where idno = @idno1), 
 						 product3 = (select product from @tmp1 where idno = @idno1), 
 						 pmount3 = (select pmount from @tmp1 where idno = @idno1),
-						 pweight3 = (select pweight from @tmp1 where idno = @idno1)
+						 pweight3 = (select pweight from @tmp1 where idno = @idno1),
+						 bmemo3 = (select bmemo from @tmp1 where idno = @idno1)
 		where idno = @idno2 
 		
 		set @noa2 = @noa1 
@@ -353,7 +357,8 @@ begin
 						 spec4 = (select spec from @tmp1 where idno = @idno1), 
 						 product4 = (select product from @tmp1 where idno = @idno1), 
 						 pmount4 = (select pmount from @tmp1 where idno = @idno1),
-						 pweight4 = (select pweight from @tmp1 where idno = @idno1)
+						 pweight4 = (select pweight from @tmp1 where idno = @idno1),
+						 bmemo4 = (select bmemo from @tmp1 where idno = @idno1)
 		where idno = @idno2 
 		
 		set @noa2 = @noa1 
@@ -365,7 +370,8 @@ begin
 						 spec5 = (select spec from @tmp1 where idno = @idno1), 
 						 product5 = (select product from @tmp1 where idno = @idno1), 
 						 pmount5 = (select pmount from @tmp1 where idno = @idno1),
-						 pweight5 = (select pweight from @tmp1 where idno = @idno1)
+						 pweight5 = (select pweight from @tmp1 where idno = @idno1),
+						 bmemo5 = (select bmemo from @tmp1 where idno = @idno1)
 		where idno = @idno2 
 		
 		set @noa2 = @noa1 
@@ -377,7 +383,8 @@ begin
 						 spec6 = (select spec from @tmp1 where idno = @idno1), 
 						 product6 = (select product from @tmp1 where idno = @idno1), 
 						 pmount6 = (select pmount from @tmp1 where idno = @idno1),
-						 pweight6 = (select pweight from @tmp1 where idno = @idno1)
+						 pweight6 = (select pweight from @tmp1 where idno = @idno1),
+						 bmemo6 = (select bmemo from @tmp1 where idno = @idno1)
 		where idno = @idno2 
 		
 		set @noa2 = @noa1 

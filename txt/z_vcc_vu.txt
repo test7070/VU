@@ -224,17 +224,19 @@ declare @tmp table(
 	total float ,
 	tax float,
 	weight float,
-	money float
+	money float,
+	price float
 ) 
 
 insert into @tmp 
 select '9'
 	   ,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end+ isnull(b.ucolor,'')
 	   ,a.custno,	(case when isnull(c.nick,'') = '' then c.comp else c.nick end) 
-	   ,(case when a.typea='1' then 1 else -1 end)*b.mount,(case when a.typea='1' then 1 else -1 end)*b.total 
+	   ,(case when a.typea='1' then 1 else -1 end)*b.mount,(case when a.typea='1' then 1 else -1 end)*b.total
 	   ,(case when a.typea='1' then 1 else -1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 	   ,(case when a.typea='1' then 1 else -1 end)*b.weight
 	   ,(case when a.typea='1' then 1 else -1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
+	   ,b.price
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy left join cust c on a.custno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
@@ -249,8 +251,8 @@ where (a.datea between @t_bdate and @t_edate) and
 order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
-select '0',products,cno,custnick,SUM(mount),SUM(total),sum(tax),sum(weight),sum(money) from @tmp 
-group by products,cno,custnick
+select '0',products,cno,custnick,SUM(mount),SUM(total),sum(tax),sum(weight),sum(money),price from @tmp 
+group by products,cno,custnick,price
 
 delete @tmp where gno='9' 
 
@@ -263,6 +265,7 @@ select gno,products,cno,custnick
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money
+,dbo.getComma(price,2)price
 ,dbo.getComma(weight,0) weight
 from @tmp order by cno,custnick,gno  
 ;

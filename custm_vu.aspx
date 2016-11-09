@@ -19,7 +19,7 @@
 			var decbbs = [];
 			var decbbm = [];
 			var q_readonly = [];
-			var q_readonlys = [];
+			var q_readonlys = ['txtNoq'];
 			var bbmNum = [];
 			var bbsNum = [];
 			var bbmMask = [];
@@ -61,7 +61,10 @@
 						btnMinus($(this).attr('id')); 
 					});
 				} //j
+				$('#lblNoq').text('編號');
 				$('#lblAccount').text('工地名稱');
+				$('#lblMemo').text('備註');
+				$('#lblEnda').text('結案');
 			}
 			
 			function btnOk() {
@@ -126,16 +129,21 @@
 				<table id="tbbs" class='tbbs'  border="1"  cellpadding='2' cellspacing='1'  >
 					<tr style='color:White; background:#003366;' >
 						<td align="center"><input class="btn"  id="btnPlus" type="button" value='+' style="font-weight: bold;"  /></td>
+						<td align="center"><a id='lblNoq'> </a></td>
 						<td align="center"><a id='lblAccount'> </a></td>
+						<td align="center"><a id='lblMemo'> </a></td>
+						<td align="center"><a id='lblEnda'> </a></td>
 					</tr>
 					<tr  style='background:#cad3ff;'>
 						<td style="width:1%;"  align="center">
 							<input class="btn"  id="btnMinus.*" type="button" value='-' style=" font-weight: bold;" />
 							<input id="txtNoa.*" type="hidden" />
-							<input id="txtNoq.*" type="hidden" />
 							<input id="recno.*" type="hidden" />
 						</td>
-						<td style="width:10%;"><input class="txt" id="txtAccount.*" maxlength='23'type="text" style="width:98%;"/></td>
+						<td style="width:15%;"><input class="txt" id="txtNoq.*" type="text" style="width:98%;"/></td>
+						<td style="width:40%;"><input class="txt" id="txtAccount.*" type="text" style="width:98%;"/></td>
+						<td ><input class="txt" id="txtMemo.*" type="text" style="width:98%;"/></td>
+						<td style="width:2%;"><input class="txt" id="chkEnda.*" type="checkbox"/></td>
 					</tr>
 				</table>
 			</div>

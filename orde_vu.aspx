@@ -168,7 +168,10 @@
 				$('#txtCustno').change(function() {
 					if (!emp($('#txtCustno').val())) {
 						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-						q_gt('custm', t_where, 0, 0, 0, "");
+						if(q_getPara('sys.project').toUpperCase()=='SF'){
+							t_where = "where=^^ noa='" + $('#txtCustno').val() + "' and isnull(enda,0)=0  order by noq desc^^";
+						}
+						q_gt('custms', t_where, 0, 0, 0, "");
 					}
 				});
 
@@ -302,20 +305,15 @@
 							z_nick = as[0].nick;
 						}
 						break;
-					case 'custm':
-						var as = _q_appendData("custm", "", true);
-						if(as[0] != undefined){
-							var ass = _q_appendData("custms", "", true);
-							if(ass[0] != undefined){
-								var t_item = " @ ";
-								for ( i = 0; i < ass.length; i++) {
-									t_item = t_item + (t_item.length > 0 ? ',' : '') + ass[i].account + '@' + ass[i].account;
-								}
-								$('#combAddr').text('');
-								q_cmbParse("combAddr", t_item);
-							}else{
-								$('#combAddr').text('');
+					case 'custms':
+						var ass = _q_appendData("custms", "", true);
+						if(ass[0] != undefined){
+							var t_item = " @ ";
+							for ( i = 0; i < ass.length; i++) {
+								t_item = t_item + (t_item.length > 0 ? ',' : '') + ass[i].account + '@' + ass[i].account;
 							}
+							$('#combAddr').text('');
+							q_cmbParse("combAddr", t_item);
 						}else{
 							$('#combAddr').text('');
 						}
@@ -557,7 +555,10 @@
 
 				if (!emp($('#txtCustno').val())) {
 					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-					q_gt('custm', t_where, 0, 0, 0, "");
+					if(q_getPara('sys.project').toUpperCase()=='SF'){
+						t_where = "where=^^ noa='" + $('#txtCustno').val() + "' and isnull(enda,0)=0  order by noq desc^^";
+					}
+					q_gt('custms', t_where, 0, 0, 0, "");
 				}else{
 					$('#combAddr').text('');
 				}
@@ -682,7 +683,10 @@
 					case 'txtCustno':
 						if (!emp($('#txtCustno').val())) {
 							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
-							q_gt('custm', t_where, 0, 0, 0, "");
+							if(q_getPara('sys.project').toUpperCase()=='SF'){
+								t_where = "where=^^ noa='" + $('#txtCustno').val() + "' and isnull(enda,0)=0  order by noq desc^^";
+							}
+							q_gt('custms', t_where, 0, 0, 0, "");
 						}
 						break;
 				}

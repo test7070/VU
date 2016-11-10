@@ -22,6 +22,7 @@
             var xlengthbItem ='';
             var xclassItem ='';
             var xuccItem ='';
+            var t_first=true;
 
             if (location.href.indexOf('?') < 0) {
                 location.href = location.href + "?;;;;100";
@@ -42,6 +43,24 @@
 				};
 				//將預設語系設定為中文
 				$.datepicker.setDefaults($.datepicker.regional["zh-TW"]);
+				
+				$('#q_report').click(function(e) {
+					if(window.parent.q_name=="z_quatp_vu"){
+						for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
+							if($('#q_report').data().info.reportData[i].report!='z_vcc_vu19')
+								$('#q_report div div').eq(i).hide();
+						}
+						$('#q_report div div .radio').parent().each(function(index) {
+							if(!$(this).is(':hidden') && t_first){
+								$(this).children().removeClass('nonselect').addClass('select');
+								t_first=false;
+							}
+							if($(this).is(':hidden') && t_first){
+								$(this).children().removeClass('select').addClass('nonselect');
+							}
+						});
+					}
+				});
             });
             
             function q_gfPost() {
@@ -110,9 +129,7 @@
                 q_getFormat();
                 q_langShow();
                 
-                 var r_1911=1911;
 				if(r_len==4){//西元年
-					r_1911=0;
 					$('#txtDate1').datepicker({dateFormat : 'yy/mm/dd'});
 					$('#txtDate2').datepicker({dateFormat : 'yy/mm/dd'});
 				}else{
@@ -125,40 +142,21 @@
           
                 $('#txtDate1').mask(r_picd);
 				$('#txtDate2').mask(r_picd);
-
-                var t_date, t_year, t_month, t_day;
-                t_date = new Date();
-                t_date.setDate(1);
-                t_year = t_date.getUTCFullYear() - r_1911;
-                t_year = t_year > 99 ? t_year + '' : '0' + t_year;
-                t_month = t_date.getUTCMonth() + 1;
-                t_month = t_month > 9 ? t_month + '' : '0' + t_month;
-                t_day = t_date.getUTCDate();
-                t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-                $('#txtDate1').val(t_year + '/' + t_month + '/' + t_day);
-                $('#txtMon1').val(t_year + '/' + t_month);
-
-                t_date = new Date();
-                t_date.setDate(35);
-                t_date.setDate(0);
-                t_year = t_date.getUTCFullYear() - r_1911;
-                t_year = t_year > 99 ? t_year + '' : '0' + t_year;
-                t_month = t_date.getUTCMonth() + 1;
-                t_month = t_month > 9 ? t_month + '' : '0' + t_month;
-                t_day = t_date.getUTCDate();
-                t_day = t_day > 9 ? t_day + '' : '0' + t_day;
-                $('#txtDate2').val(t_year + '/' + t_month + '/' + t_day);
-                $('#txtMon2').val(t_year + '/' + t_month);
+				
+                $('#txtDate1').val(q_date().substr(0,r_lenm)+'/01');
+                $('#txtMon1').val(q_date().substr(0,r_lenm));                
+                $('#txtDate2').val(q_cdn(q_cdn(q_date().substr(0,r_lenm)+'/01',35).substr(0,r_lenm)+'/01',-1));
+                $('#txtMon2').val(q_date().substr(0,r_lenm));
                 
 				//$('.c3').css('display : none');
                  $('#txtXlengthb1').addClass('num').val(0).change(function() {
                     $(this).val(dec($(this).val()));
-                    if ($(this).val() == 'NaN')
+                    if (isNaN($(this).val()))
                     	$(this).val(0);
                 });
                 $('#txtXlengthb2').addClass('num').val(99).change(function() {
                     $(this).val(dec($(this).val()));
-                    if ($(this).val() == 'NaN')
+                    if (isNaN($(this).val()))
                     	$(this).val(99);
                 });
                 
@@ -193,6 +191,12 @@
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
 				});
+				
+				if(window.parent.q_name=="z_quatp_vu"){
+					$('#txtQno').val(q_getHref()[1]);
+					$('#txtDate1').val('');
+					$('#q_report div div .radio.select').click();
+				}
             }
 
             function q_boxClose(s2) {

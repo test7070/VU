@@ -751,12 +751,12 @@
 							}else{
 								if(as[0].atax=="true"){
 									$('#chkAtax').prop('checked',true);
-									$('#txtSalesno').val();
-									$('#txtSales').val();
+									$('#txtSalesno').val(as[0].salesno);
+									$('#txtSales').val(as[0].sales);
 								}else{
 									$('#chkAtax').prop('checked',false);
-									$('#txtSalesno').val();
-									$('#txtSales').val();	
+									$('#txtSalesno').val(as[0].salesno);
+									$('#txtSales').val(as[0].sales);
 								}
 								refreshBbm();
 								sum();

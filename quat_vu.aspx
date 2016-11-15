@@ -107,7 +107,7 @@
 				
 				$('#txtCustno').change(function() {
 					if (!emp($('#txtCustno').val())) {
-						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
+						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
 						if(q_getPara('sys.project').toUpperCase()=='SF'){
 							t_where = "where=^^ noa='" + $('#txtCustno').val() + "' and isnull(enda,0)=0  order by noq desc^^";
 						}
@@ -341,7 +341,7 @@
 				$('#txtProduct').focus();
 				
 				if (!emp($('#txtCustno').val())) {
-					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
+					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
 					if(q_getPara('sys.project').toUpperCase()=='SF'){
 						t_where = "where=^^ noa='" + $('#txtCustno').val() + "' and isnull(enda,0)=0  order by noq desc^^";
 					}
@@ -458,7 +458,7 @@
 				switch (s1) {
 					case 'txtCustno':
 						if (!emp($('#txtCustno').val())) {
-							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' ^^";
+							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
 							if(q_getPara('sys.project').toUpperCase()=='SF'){
 								t_where = "where=^^ noa='" + $('#txtCustno').val() + "' and isnull(enda,0)=0  order by noq desc^^";
 							}

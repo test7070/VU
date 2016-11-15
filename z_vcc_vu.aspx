@@ -194,7 +194,7 @@
 				
 				if(window.parent.q_name=="z_quatp_vu"){
 					$('#txtQno').val(q_getHref()[1]);
-					$('#txtDate1').val('');
+					$('#txtDate1').val(q_getHref()[3].substr(0,r_lenm)+'/01');
 					$('#q_report div div .radio.select').click();
 				}
             }

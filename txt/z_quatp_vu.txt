@@ -233,7 +233,7 @@ begin
 	dbo.getComma(opay,0)opay,
 	dbo.getComma(vmoney,0)vmoney,
 	'quat_vu?noa=$noa?' qhrefa,
-	"z_vcc_vu?qno=\'"+a.noa+"\' and recno=$recno" qhrefb,
+	"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 	case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
 	* from #tmp a
 	order by grpno,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
@@ -247,7 +247,7 @@ begin
 	dbo.getComma(opay,0)opay,
 	dbo.getComma(vmoney,0)vmoney,
 	'quat_vu?noa=$noa?' qhrefa, 
-	"z_vcc_vu?qno=\'"+a.noa+"\' and recno=$recno" qhrefb,
+	"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 	'' grpname,
 	* from #tmp
 	order by custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno

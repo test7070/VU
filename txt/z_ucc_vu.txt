@@ -192,7 +192,10 @@ end
 
 --105/04/20 出貨板料也要扣
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '16','vccs',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
+select '16','vccs',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
+,case when a.typea='2' then -1 else 1 end*b.mount
+,case when a.typea='2' then -1 else 1 end*b.weight
+,case when a.typea='2' then -1 else 1 end*b.total,0,0
 from view_vcc a left join view_vccs b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 where --b.ucolor='板料' and 

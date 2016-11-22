@@ -249,7 +249,7 @@ begin
 	'quat_vu?noa=$noa?' qhrefa, 
 	"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 	'' grpname,
-	* from #tmp
+	* from #tmp a
 	order by custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
 end
 

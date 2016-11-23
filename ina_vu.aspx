@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 	<head>
 		<title> </title>
@@ -17,11 +17,11 @@
 
             q_tables = 's';
             var q_name = "ina";
-            var q_readonly = ['txtNoa','txtStation','txtComp','txtStore','txtCardeal','txtAddr','txtTranstart','txtWorker','txtWorker2','txtTotal'];
+            var q_readonly = ['txtNoa','txtStation','txtComp','txtStore','txtCardeal','txtAddr','txtWorker','txtWorker2'];
 			var q_readonlys = ['txtTotal','txtNoq'];
-			var bbmNum = [['txtTotal', 15, 0, 1], ['txtTranmoney', 15, 0, 1]];
+			var bbmNum = [['txtMount', 10, 0, 1], ['txtPrice', 10, 0, 1], ['txtTotal', 15, 0, 1]];
 			var bbsNum = [['txtMount', 10, 0, 1], ['txtPrice', 10, 2, 1], ['txtTotal', 15, 0, 1]];
-            var bbmMask = [];
+            var bbmMask = [['txtTranstart','99:99']];
             var bbsMask = [];
             q_sqlCount = 6;
             brwCount = 6;
@@ -29,7 +29,7 @@
             brwNowPage = 0;
             brwKey = 'Datea';
             aPop = new Array(['txtPost', 'lblPost', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
-				['txtTranstartno', 'lblTranstart', 'addr2', 'noa,post','txtTranstartno,txtTranstart', 'addr2_b.aspx'],
+				//['txtTranstartno', 'lblTranstart', 'addr2', 'noa,post','txtTranstartno,txtTranstart', 'addr2_b.aspx'],
 				['txtStationno', 'lblStation', 'station', 'noa,station', 'txtStationno,txtStation', 'station_b.aspx'],
 				['txtStoreno', 'lblStore', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
 				['txtRackno', 'lblRackno', 'rack', 'noa,rack,storeno,store', 'txtRackno', 'rack_b.aspx'],
@@ -61,8 +61,9 @@
             }
             
             function sum() {
-				var t1 = 0, t_unit, t_mount, t_weight = 0,t_money=0, t_tax = 0, t_total = 0;
-				for (var j = 0; j < q_bbsCount; j++) {
+				var t1 = 0, t_unit, t_mount, t_weight = 0,t_money=0, t_tax = 0,t_total;
+				$('#txtPrice').val(q_sub(dec($('#txtTotal').val()),dec($('#txtMount').val())));
+				/*for (var j = 0; j < q_bbsCount; j++) {
 					t_unit = trim($('#txtUnit_' + j).val());
 					if (t_unit.length == 0 || t_unit == 'KG' || t_unit == 'M2' || t_unit == 'M' || t_unit == '批' || t_unit == '公斤' || t_unit == '噸' || t_unit == '頓' || t_unit == 'T') {
 						t_mount = $('#txtWeight_' + j).val();
@@ -73,18 +74,18 @@
 					$('#txtTotal_' + j).val(round(q_mul(q_float('txtPrice_' + j), dec(t_mount)), 0));
 					t_money = q_add(t_money, dec(q_float('txtTotal_' + j)));
 				}
-				$('#txtTotal').val(FormatNumber(t_money));
+				$('#txtTotal').val(FormatNumber(t_money));*/
 			}
 
             function mainPost() {
                 q_getFormat();
-                bbmMask = [['txtDatea', r_picd]];
+                bbmMask = [['txtDatea', r_picd],['txtTranstart','99:99']];
                 q_mask(bbmMask);
                 bbsNum = [['txtMount', 15, q_getPara('rc2.mountPrecision'), 1],['txtWeight', 15, q_getPara('rc2.weightPrecision'), 1], ['txtPrice', 15, q_getPara('rc2.pricePrecision'), 1]
 								, ['txtTotal', 15, 0, 1], ['txtLengthb', 15, 2, 1]];
                 
-				q_cmbParse("cmbItype", q_getPara('ina.typea'));
-				q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
+				//q_cmbParse("cmbItype", q_getPara('ina.typea'));
+				//q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
 				//q_cmbParse("combUcolor", q_getPara('rc2s_vu.typea'),'s');
 				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
 				
@@ -106,6 +107,9 @@
 					var thisVal = $(this).val();
 					var t_where = "where=^^ noa=N'" + thisVal + "' ^^";
 					q_gt('cardeal', t_where, 0, 0, 0, "getCardealCarno");
+				});
+				$('#txtPrice').change(function() {
+					sum();
 				});
 
             }
@@ -253,6 +257,7 @@
 			var check_cubs_uno=false;
 			var get_uno=false,get_maxuno=false;
             function btnOk() {
+            	sum();
                 t_err = q_chkEmpField([['txtNoa', q_getMsg('lblNoa')],['txtDatea', q_getMsg('lblDatea')]]);
                 if (t_err.length > 0) {
                     alert(t_err);
@@ -442,7 +447,7 @@
             }
 
             function btnPrint() {
-                //q_box('z_inap.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtNoa').val()), '', "95%", "650px", q_getMsg("popPrint"));
+                q_box('z_inap_vu.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtNoa').val()), '', "95%", "650px", q_getMsg("popPrint"));
             }
 
             function wrServer(key_value) {
@@ -682,66 +687,83 @@
 				</table>
 			</div>
 			<div class='dbbm' style="width: 68%;float:left">
-				<table class="tbbm" id="tbbm" border="0" cellpadding='2' cellspacing='0'>
-					<tr>
-						<td><span> </span><a id="lblItype" class="lbl"> </a></td>
-						<td><select id="cmbItype" class="txt c1"> </select></td>
-						<td><span> </span><a id="lblDatea" class="lbl"> </a></td>
-						<td><input id="txtDatea" type="text" class="txt c1"/></td>
-						<td><span> </span><a id="lblNoa" class="lbl" > </a></td>
-						<td><input id="txtNoa" type="text" class="txt c1"/></td>
-					</tr>
-					<tr>
-						<td><span> </span><a id="lblTgg" class="lbl btn"> </a></td>
-						<td colspan="3">
-							<input id="txtTggno" type="text" class="txt c2"/>
-							<input id="txtComp" type="text" class="txt c3"/>
-						</td>
-						<td><span> </span><a id="lblTrantype" class="lbl"> </a></td>
-						<td><select id="cmbTrantype" class="txt c1"> </select></td>
-					</tr>
-					<tr>
-						<td><span> </span><a id="lblStore" class="lbl btn" > </a></td>
-						<td colspan="3">
-							<input id="txtStoreno" type="text" class="txt c2"/>
-							<input id="txtStore" type="text" class="txt c3"/>
-						</td>
-					</tr>
-					<tr>
-						<td><span> </span><a id="lblCardeal" class="lbl btn"> </a></td>
-						<td colspan="3">
-							<input id="txtCardealno" type="text" class="txt c2"/>
-							<input id="txtCardeal" type="text" class="txt c3"/>
-						</td>
-						<td><span> </span><a id="lblCarno" class="lbl"> </a></td>
-						<td>
-							<input id="txtCarno" type="text" class="txt" style="width:75%;"/>
-							<select id="combCarno" style="width: 20%;"> </select>
-						</td>
-					</tr>
-					<tr>
-						<td><span> </span><a id="lblPost" class="lbl"> </a></td>
-						<td colspan="3">
-							<input id="txtPost" type="text" class="txt c2"/>
-							<input id="txtAddr" type="text" class="txt c3"/>
-						</td>
-						<td><span> </span><a id="lblTranmoney" class="lbl"> </a></td>
-						<td><input id="txtTranmoney" type="text" class="txt num c1" /></td>
-					</tr>
-					<tr>
-						<td><span> </span><a id="lblTotal" class="lbl"> </a></td>
-						<td><input id="txtTotal" type="text" class="txt num c1" /></td>
-						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
-						<td><input id="txtWorker" type="text" class="txt c1"/></td>	
-						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
-						<td><input id="txtWorker2" type="text" class="txt c1"/></td>					
-					</tr>
-					<tr>
-						<td><span> </span><a id="lblMemo" class="lbl"> </a></td>
-						<td colspan='5'><input id="txtMemo" type="text" class="txt c1"/></td>
-					</tr>
-				</table>
-			</div>
+			<table class="tbbm"  id="tbbm"   border="0" cellpadding='2'  cellspacing='0'>
+				<tr style="height: 1px;">
+					<td> </td>
+					<td> </td>
+					<td> </td>
+					<td> </td>
+					<td> </td>
+				</tr>
+				<tr>
+					<td><span> </span><a id="lblDatea_sf" class="lbl">互換進貨日期</a></td>
+					<td><input id="txtDatea" type="text" class="txt c3"/></td>
+					<td><span> </span><a id="lblNoa_sf" class="lbl" >互換進貨單號</a></td>
+					<td><input id="txtNoa" type="text" class="txt c1"/></td>
+				</tr>
+				<tr>
+					<td><span> </span><a id="lblTgg" class="lbl btn"> </a></td>
+					<td colspan="3">
+						<input id="txtTggno" type="text"  class="txt c2"/>
+						<input id="txtComp" type="text"  class="txt c3"/>
+					</td>
+				</tr>
+				<tr>
+					<td><span> </span><a id="lblStore" class="lbl btn" > </a></td>
+					<td colspan="3">
+						<input id="txtStoreno"  type="text"  class="txt c2"/>
+						<input id="txtStore"  type="text" class="txt c3"/>
+					</td>
+				</tr>
+				<tr>
+					<td><span> </span><a id="lblCardeal" class="lbl btn"> </a></td>
+					<td colspan="3">
+						<input id="txtCardealno" type="text" class="txt c2"/>
+						<input id="txtCardeal" type="text" class="txt c3"/>
+					</td>
+				</tr>
+				<tr>
+					<td><span> </span><a id="lblTranstart_sf" class="lbl">入廠時間</a></td>
+					<td><input id="txtTranstart" type="text" class="txt num c1"/></td>
+					<td><span> </span><a id="lblCarno" class="lbl"> </a></td>
+					<td>
+						<input id="txtCarno" type="text" class="txt" style="width:75%;"/>
+						<select id="combCarno" style="width: 20%;"> </select>
+					</td>
+				</tr>
+				<tr>
+					<td><span> </span><a id="lblTotal_sf" class="lbl">車總重</a></td>
+					<td><input id="txtTotal" type="text" class="txt num c1"/></td>
+				</tr>
+				<tr>
+					<td><span> </span><a id="lblMount_sf" class="lbl" >空重</a></td>
+					<td><input id="txtMount" type="text" class="txt num c1"/></td>
+					<td><span> </span><a id="lblPrice_sf" class="lbl" >淨重</a></td>
+					<td><input id="txtPrice" type="text" class="txt num c1"/></td>
+				</tr>
+				<!--<tr>
+					<td><span> </span><a id="lblOrdeno_sf" class="lbl btn">合約號碼</a></td>
+					<td><input id="txtOrdeno" type="text" class="txt c1"/></td>
+					<td><span> </span><a id="lblWeight_sf" class="lbl">合約重量</a></td>
+					<td><input id="txtWeight" type="text" class="txt num c1"/></td>
+				</tr>-->
+				<tr>
+					<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
+					<td><input id="txtWorker" type="text" class="txt c1"/></td>
+					<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
+					<td><input id="txtWorker2" type="text" class="txt c1"/></td>
+				</tr>
+				<tr>
+					<td><span> </span><a id="lblMemo_sf" class="lbl">備註</a></td>
+					<td colspan='3'>
+						<textarea id="txtMemo" cols="10" rows="5" style="width: 99%;height: 50px;"> </textarea>
+					</td>
+				</tr>
+				<!--<tr >
+					<td><span> </span><a id="lblTranstartno_sf" class="lbl">立帳單號</a></td>
+					<td><input id="txtTranstartno" type="text" class="txt c1"/></td>
+				</tr>-->
+			</table>
 		</div>
 		<div class='dbbs' >
 			<table id="tbbs" class='tbbs'  border="1"  cellpadding='2' cellspacing='1'  >
@@ -760,7 +782,7 @@
 					<td align="center" style="width:90px;"><a id='lblMount_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblWeight_s'> </a></td>
 					<td align="center" style="width:90px;"><a id='lblPrice_s'> </a></td>
-					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
+					<!--<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>-->
 					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
 				</tr>
 				<tr  style='background:#cad3ff;'>
@@ -793,7 +815,7 @@
 					<td><input id="txtMount.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtWeight.*" type="text" class="txt num c1" /></td>
 					<td><input id="txtPrice.*" type="text" class="txt num c1" /></td>
-					<td><input id="txtTotal.*" type="text" class="txt num c1" /></td>
+					<!--<td><input id="txtTotal.*" type="text" class="txt num c1" /></td>-->
 					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
 				</tr>
 			</table>

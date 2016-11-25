@@ -1748,22 +1748,61 @@ declare @result table(
 	page int
 ) 
 
-insert into @result 
-select '0' gno, a.typea, a.noa noa,a.invono invono, b.noq noq, a.datea datea, a.mon mon
-,a.custno custno, isnull(e.comp,''), isnull(e.addr_invo,''), isnull(e.tel,'')
-,c.noa onoa,c.datea odate,c.weight oweight,c.price
-,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')
-+' '+isnull(b.class,'')
-,b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
-,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
-,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
-,a.carno,0,0
-from view_vccs b left join view_vcc a on a.noa = b.noa
+insert @result (gno,noa,invono)
+select '1',a.noa,b.noa
+from view_vcc a
+left join vccat b on a.noa=b.vccno
+where (a.datea between @t_bdate and @t_edate) and 
+(a.custno between @t_bcustno and @t_ecustno)
+group by a.noa,b.noa
+
+--從vccat取明細對帳
+insert @result
+select '0',b.typea,a.noa,a.invono,c.vccnoq,b.datea,b.mon,b.custno,isnull(d.comp,''),isnull(d.addr_invo,''),isnull(d.tel,'')
+		,e.noa,e.datea,e.weight,e.price,
+		f.product+' '+isnull(f.size,'')+' '+isnull(f.spec,'')+' '+case when (isnull(convert(nvarchar,f.lengthb),'')='' or isnull(convert(nvarchar,f.lengthb),'') = '0') then '' else isnull(convert(nvarchar,f.lengthb),'')+'M ' end + isnull(f.ucolor,'')+' '+isnull(f.class,'')
+		,f.unit,case when c.mount=0 then NULL else c.mount end,case when c.weight=0 then NULL else c.weight end,c.price,c.money, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+b.accy 
+		,round((b.tax*(case when b.money=0 then 0 else (f.total/b.money) end)),0),f.ucolor,f.spec,f.size,f.lengthb
+		,round((b.tax*(case when b.money=0 then 0 else (f.total/b.money) end)),0)+f.total
+		,b.carno,0,0
+from @result a left join view_vcc b on a.noa=b.noa
+left join vccat c on a.invono=c.noa and a.noa=c.vccno
+left join cust d on b.custno=d.noa
+left join view_quat e on LEFT(b.apvmemo,CHARINDEX('@',b.apvmemo)-1)=e.noa
+left join view_vccs f on c.vccno=f.noa and c.vccnoq=f.noq
+where len(a.invono)!=0 and
+(b.datea between @t_bdate and @t_edate) and 
+(b.custno between @t_bcustno and @t_ecustno)  and
+(len(@vcctypea)=0 or @vcctypea=b.typea) and
+(len(@t_product)=0 or @t_product like f.product)and
+(len(@t_spec)=0 or @t_spec like f.spec) and
+(len(@t_size)=0 or @t_size like f.size) and
+(len(@t_class)=0 or @t_class like f.class) and
+(isnull(f.lengthb,0) between @t_blengthb and @t_elengthb)
+and (len(@t_qno)=0 or dbo.split(dbo.split(b.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(b.apvmemo,'##',1),'@',0) = @t_qno)
+and (f.storeno between @t_bstoreno and @t_estoreno)
+order by b.custno,gno,b.mon,b.datea,a.noa,c.vccnoq
+
+--沒有vccat撈vcc
+insert @result
+select '0',a.typea,r.noa,r.invono,b.noq, a.datea datea, a.mon mon
+		,a.custno custno, isnull(e.comp,''), isnull(e.addr_invo,''), isnull(e.tel,'')
+		,c.noa onoa,c.datea odate,c.weight oweight,c.price
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')
+		+' '+isnull(b.class,'')
+		,b.unit,case when b.mount=0 then NULL else b.mount end,case when b.weight=0 then NULL else b.weight end, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
+		,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
+		,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
+		,a.carno,0,0
+from @result r
+left join view_vccs b on r.noa=b.noa
+ left join view_vcc a on a.noa = b.noa
 left join view_quat c on LEFT(a.apvmemo,CHARINDEX('@',a.apvmemo)-1)=c.noa
 --outer apply (select  top 1 * from view_quats where noa=c.noa order by noq desc) d 
 left join cust e on a.custno = e.noa 
-left join sss s on isnull(a.salesno,'')=s.noa 
-where (a.datea between @t_bdate and @t_edate) and 
+left join sss s on isnull(a.salesno,'')=s.noa
+where isnull(r.invono,'')='' and
+(a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
 (len(@vcctypea)=0 or @vcctypea=a.typea) and
 (len(@t_product)=0 or @t_product like b.product)and
@@ -1773,7 +1812,9 @@ where (a.datea between @t_bdate and @t_edate) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
-order by custno,gno,mon,datea,noa,noq 
+order by custno,gno,mon,datea,a.noa,b.noq 
+
+delete @result where gno='1'
 
 insert into @result(gno,custno,pcount,mount,total,totax,weight) 
 select '1',custno, count(*), 

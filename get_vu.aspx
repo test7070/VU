@@ -17,15 +17,10 @@
 
 			q_tables = 's';
 			var q_name = "get";
-			var q_readonly = ['txtNoa', 'txtWorker','txtAddr','txtStation','txtComp','txtStore','txtCardeal','txtWorker2'];
+			var q_readonly = ['txtNoa', 'txtWorker','txtComp','txtStore','txtCardeal','txtWorker2'];
 			var q_readonlys = [];
-			var bbmNum = [['txtMount', 10, 0, 1], ['txtPrice', 10, 0, 1], ['txtTotal', 15, 0, 1]];
-			var bbsNum = [
-				['txtSize1', 10, 3], ['txtSize2', 10, 2], ['txtSize3', 10, 3],
-				['txtSize4', 10, 2], ['txtRadius', 10, 3], ['txtWidth', 10, 2],
-				['txtDime', 10, 3], ['txtLengthb', 10, 2], ['txtMount', 10, 0],
-				['txtWeight', 10, 1]
-			];
+			var bbmNum = [];
+			var bbsNum = [];
 			var bbmMask = [];
 			var bbsMask = [];
 			q_sqlCount = 6;
@@ -35,15 +30,9 @@
 			brwKey = 'Datea';
 
 			aPop = new Array(
-				//['txtPost', 'lblPost', 'addr', 'post,addr', 'txtPost', 'addr_b.aspx'],
-				['txtPost', 'lblPost', 'addr2', 'noa,post', 'txtPost,txtAddr', 'addr2_b.aspx'],
-				//['txtTranstartno', 'lblTranstart', 'addr2', 'noa,post','txtTranstartno,txtTranstart', 'addr2_b.aspx'],
-				['txtStationno', 'lblStation', 'station', 'noa,station', 'txtStationno,txtStation', 'station_b.aspx'],
 				['txtStoreno', 'lblStore', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
-				['txtUno_', 'btnUno_', 'view_uccc', 'noa', 'txtUno_', 'uccc_seek_b.aspx?;;;1=0', '95%', '60%'],
 				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,unit', 'txtProductno_,txtProduct_,txtUnit_', 'ucaucc_b.aspx'],
 				['txtCustno', 'lblCustno', 'cust', 'noa,comp', 'txtCustno,txtComp', 'cust_b.aspx'],
-				['txtRackno', 'lblRackno', 'rack', 'noa,rack,storeno,store', 'txtRackno', 'rack_b.aspx'],
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx']
 			);
 
@@ -52,9 +41,6 @@
 				bbsKey = ['noa', 'noq'];
 				q_brwCount();
 				q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
-				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
-                q_gt('color', '1=1 ', 0, 0, 0, "bbscolor");
-				q_gt('class', '1=1 ', 0, 0, 0, "bbsclass");
 			});
 
 			function main() {
@@ -66,39 +52,57 @@
 			}
 
 			function mainPost() {
+				document.title='領料出貨作業';
 				q_getFormat();
 				bbmMask = [['txtDatea', r_picd], ['txtCucdate', r_picd]];
 				q_mask(bbmMask);
-				//q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
-				//q_cmbParse("cmbTypea", q_getPara('get.typea'));
-				//q_cmbParse("cmbTrantype", q_getPara('sys.tran'));
-				$('#txtPost').change(function(){
-					GetTranPrice();
-				});
-				$('#txtTranstartno').change(function(){
-					GetTranPrice();
-				});
+				
+				bbmNum = [['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]
+				, ['txtMount', 15, q_getPara('vcc.weightPrecision'), 1], ['txtTranstyle', 15, q_getPara('vcc.weightPrecision'), 1], ['txtTotal', 15, q_getPara('vcc.weightPrecision'), 1]
+            	, ['txtPrice', 12, 3, 1], ['txtTranmoney', 15, 0, 1]]
+				bbsNum = [['txtLengthb', 10, 2, 1], ['txtMount', 10, q_getPara('vcc.mountPrecision'), 1]
+				, ['txtWeight', 10, q_getPara('vcc.weightPrecision'), 1]];
+				
+				q_gt('ucc', "1=1", 0, 0, 0, "bbsucc");
+				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
+                q_gt('color', '1=1 ', 0, 0, 0, "bbscolor");
+				q_gt('class', '1=1 ', 0, 0, 0, "bbsclass");
+				
 				$('#txtCardealno').change(function(){
-					GetTranPrice();
 					//取得車號下拉式選單
 					var thisVal = $(this).val();
 					var t_where = "where=^^ noa=N'" + thisVal + "' ^^";
 					q_gt('cardeal', t_where, 0, 0, 0, "getCardealCarno");
 				});
-				$('#cmbTranstyle').change(function(){
-					GetTranPrice();
-				});
-				$('#txtPrice').change(function(){
-					sum();
-				});
-				$('#txtTranadd').change(function(){
-					sum();
+				
+				$('#combAccount').change(function() {
+					if(q_cur==1 || q_cur==2)
+						$('#txtAddr').val($('#combAccount').find("option:selected").text());
 				});
 				
-				if (q_getPara('sys.menu').substr(0,3)!='qra'){
-					$('#lblTranadd').hide()
-					$('#txtTranadd').hide()
-				}
+				$('#txtTotal').change(function() {
+					if(q_cur==1 || q_cur==2){
+						$('#txtMount').val(q_sub(dec($('#txtTotal').val()),dec($('#txtTranstyle').val())));
+						$('#txtTranmoney').val(round(q_mul(dec($('#txtPrice').val()),dec($('#txtMount').val())),0))
+					}
+				});
+				$('#txtTranstyle').change(function() {
+					if(q_cur==1 || q_cur==2){
+						$('#txtMount').val(q_sub(dec($('#txtTotal').val()),dec($('#txtTranstyle').val())));
+						$('#txtTranmoney').val(round(q_mul(dec($('#txtPrice').val()),dec($('#txtMount').val())),0))
+					}
+				});
+				$('#txtMount').change(function() {
+					if(q_cur==1 || q_cur==2){
+						$('#txtTranmoney').val(round(q_mul(dec($('#txtPrice').val()),dec($('#txtMount').val())),0))
+					}
+				});
+				$('#txtPrice').change(function() {
+					if(q_cur==1 || q_cur==2){
+						$('#txtTranmoney').val(round(q_mul(dec($('#txtPrice').val()),dec($('#txtMount').val())),0))
+					}
+				});
+				
 			}
 			
 			function q_popPost(s1) {
@@ -109,32 +113,8 @@
 						var t_where = "where=^^ noa=N'" + thisVal + "' ^^";
 						q_gt('cardeal', t_where, 0, 0, 0, "getCardealCarno");
 						break;
-					case 'txtPost':
-						GetTranPrice();
-						break;
-					case 'txtTranstartno':
-						GetTranPrice();
-						break;	
 				}
-			}
-
-			function GetTranPrice(){
-				var Post = $.trim($('#txtPost').val()); 
-				var Transtartno = $.trim($('#txtTranstartno').val()); 
-				var Cardealno = $.trim($('#txtCardealno').val()); 
-				var TranStyle = $.trim($('#cmbTranstyle').val());
-				var Carspecno = $.trim(thisCarSpecno);
-				var t_where = 'where=^^ 1=1 ';
-				t_where += " and post=N'" + Post + "' ";
-				t_where += " and transtartno=N'" + Transtartno + "' ";
-				t_where += " and cardealno=N'" + Cardealno + "' ";
-				t_where += " and transtyle=N'" + TranStyle + "' ";
-				if(Carspecno.length > 0){
-					t_where += " and carspecno=N'" + Carspecno + "' ";
-				}
-				t_where += ' ^^';
-				q_gt('addr', t_where, 0, 0, 0, "GetTranPrice");
-			}
+			}		
 
 			function q_boxClose(s2) {
 				var ret;
@@ -162,6 +142,14 @@
 
 			function q_gtPost(t_name) {
 				switch (t_name) {
+					case 'bbsucc':
+						var as = _q_appendData("ucc", "", true);
+						var t_ucc='@';
+						for ( i = 0; i < as.length; i++) {
+							t_ucc+=","+as[i].product;
+						}
+						q_cmbParse("combProduct", t_ucc,'s');
+						break;
 					case 'bbsspec':
 						var as = _q_appendData("spec", "", true);
 						var t_spec='@';
@@ -213,17 +201,7 @@
 									break;
 								}
 							}
-							GetTranPrice();
 						});
-						break;
-					case 'GetTranPrice' :
-						var as = _q_appendData("addr", "", true);
-						if (as[0] != undefined) {
-							$('#txtPrice').val(as[0].driverprice2);
-						}else{
-							$('#txtPrice').val(0);
-						}
-						sum();
 						break;
 					case q_name:
 						if (q_cur == 4)
@@ -251,24 +229,7 @@
 				else
 					wrServer(s1);
 			}
-
-			function HiddenTreat(returnType){
-				returnType = $.trim(returnType).toLowerCase();
-				var hasStyle = q_getPara('sys.isstyle');
-				var isStyle = (hasStyle.toString()=='1'?$('.isStyle').show():$('.isStyle').hide());
-				var hasSpec = q_getPara('sys.isspec');
-				var isSpec = (hasSpec.toString()=='1'?$('.isSpec').show():$('.isSpec').hide());
-				var hasRackComp = q_getPara('sys.rack');
-				var isRack = (hasRackComp.toString()=='1'?$('.isRack').show():$('.isRack').hide());
-				if(returnType=='style'){
-					return (hasStyle.toString()=='1');
-				}else if(returnType=='spec'){
-					return (hasSpec.toString()=='1');
-				}else if(returnType=='rack'){
-					return (hasRackComp.toString()=='1');
-				}
-			}
-
+			
 			function _btnSeek() {
 				if (q_cur > 0 && q_cur < 4)
 					return;
@@ -301,7 +262,7 @@
 				$('#lblClass_s').text('廠牌');
 				$('#lblMount_s').text('數量(件)');
 				$('#lblWeight_s').text('重量(KG)');
-				HiddenTreat();
+				$('#vewNoa').text('領料出貨單號');
 			}
 
 			function btnIns() {
@@ -309,7 +270,6 @@
 				$('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val('AUTO');
 				$('#txtDatea').val(q_date());
 				$('#txtDatea').focus();
-				$('#cmbTypea').val('領料');
 			}
 
 			function btnModi() {
@@ -346,28 +306,12 @@
 				return true;
 			}
 
-			function sum() {
-				/*var price = dec($('#txtPrice').val());
-				var addMoney = dec(q_getPara('sys.tranadd'));
-				var addMul = dec($('#txtTranadd').val());
-				var total = 0
-				var transtyle = $.trim($('#cmbTranstyle').val());
-				if(transtyle=='4' || transtyle=='9'){
-					price = 0;
-				}
-				total = q_add(q_mul(addMoney,addMul),price);
-				q_tr('txtTranmoney', total);*/
-				$('#txtPrice').val(q_sub(dec($('#txtTotal').val()),dec($('#txtMount').val())));
-			}
-
 			function refresh(recno) {
 				_refresh(recno);
-				HiddenTreat();
 			}
 
 			function readonly(t_para, empty) {
 				_readonly(t_para, empty);
-				HiddenTreat();
 			}
 
 			function btnMinus(id) {
@@ -574,9 +518,9 @@
 						<td> </td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblDatea_sf" class="lbl" >互換出貨日期</a></td>
+						<td><span> </span><a id="lblDatea_vu" class="lbl" >領料出貨日期</a></td>
 						<td><input id="txtDatea" type="text" class="txt c3"/></td>
-						<td><span> </span><a id="lblNoa_sf" class="lbl" >互換出貨單號</a></td>
+						<td><span> </span><a id="lblNoa_vu" class="lbl" >領料出貨單號</a></td>
 						<td><input id="txtNoa" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
@@ -601,38 +545,40 @@
 						</td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblTranstart_sf" class="lbl">入廠時間</a></td>
-						<td><input id="txtTranstart" type="text" class="txt num c1"/></td>
 						<td><span> </span><a id="lblCarno" class="lbl"> </a></td>
 						<td>
 							<input id="txtCarno" type="text" class="txt" style="width:75%;"/>
-							<select id="combCarno" style="width: 20%;"> </select>
+							<select id="combCarno" style="width: 20px;"> </select>
 						</td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblTotal_sf" class="lbl">車總重</a></td>
+						<td><span> </span><a id="lblTranstart_vu" class="lbl">入廠時間</a></td>
+						<td><input id="txtTranstart" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblTotal_vu" class="lbl">車總重</a></td>
 						<td><input id="txtTotal" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblAddr_sf" class="lbl" >交貨工地</a></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblTranstyle_vu" class="lbl" >空重</a></td>
+						<td><input id="txtTranstyle" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblMount_vu" class="lbl" >淨重</a></td>
+						<td><input id="txtMount" type="text" class="txt num c1"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblPrice_vu" class="lbl" >應付費用單價</a></td>
+						<td><input id="txtPrice" type="text" class="txt num c1" style="width: 130px;"/>/KG</td>
+						<td><span> </span><a id="lblTranmoney_vu" class="lbl" >應付運費</a></td>
+						<td><input id="txtTranmoney" type="text" class="txt num c1"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblAddr_vu" class="lbl" >交貨工地</a></td>
 						<td><input id="txtAddr"type="text" class="txt c1" style="width: 98%;"/></td>
 						<td><select id="combAccount" class="txt" style="width: 20px;"> </select></td>
 					</tr>
-					<tr>
-						<td><span> </span><a id="lblMount_sf" class="lbl" >空重</a></td>
-						<td><input id="txtMount" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblPrice_sf" class="lbl" >淨重</a></td>
-						<td><input id="txtPrice" type="text" class="txt num c1"/></td>
-					</tr>
-					<!--<tr>
-						<td><span> </span><a id="lblIdno_sf" class="lbl btn">合約號碼</a></td>
+					<tr style="display: none;">
+						<td><span> </span><a id="lblIdno_vu" class="lbl btn">合約號碼</a></td>
 						<td><input id="txtIdno" type="text" class="txt c1"/></td>
-						<td><span> </span><a id="lblWeight_sf" class="lbl">合約重量</a></td>
+						<td><span> </span><a id="lblWeight_vu" class="lbl">合約重量</a></td>
 						<td><input id="txtWeight" type="text" class="txt num c1"/></td>
-					</tr>-->
-					<tr>
-						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
-						<td><input id="txtWorker" type="text" class="txt c1"/></td>
-						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
-						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl" > </a></td>
@@ -640,10 +586,16 @@
 							<textarea id="txtMemo" cols="10" rows="5" style="width: 99%;height: 50px;"> </textarea>
 						</td>
 					</tr>
-					<!--<tr>
-						<td><span> </span><a id="lblTranstartno_sf" class="lbl">立帳單號</a></td>
+					<tr>
+						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
+						<td><input id="txtWorker" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
+						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
+					</tr>
+					<tr style="display: none;">
+						<td><span> </span><a id="lblTranstartno_vu" class="lbl">立帳單號</a></td>
 						<td><input id="txtTranstartno" type="text" class="txt c1"/></td>
-					</tr>-->
+					</tr>
 				</table>
 			</div>
 		</div>

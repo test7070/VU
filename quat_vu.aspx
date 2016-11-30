@@ -106,13 +106,13 @@
 				document.title='出貨合約';
 				
 				$('#txtCustno').change(function() {
-					if (!emp($('#txtCustno').val())) {
+					/*if (!emp($('#txtCustno').val())) {
 						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
 						if(q_getPara('sys.project').toUpperCase()=='SF'){
 							t_where = "where=^^ noa='" + $('#txtCustno').val() + "' and isnull(enda,0)=0  order by noq desc^^";
 						}
 						q_gt('custms', t_where, 0, 0, 0, "");
-					}
+					}*/
 				});
 			}
 

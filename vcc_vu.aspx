@@ -216,10 +216,10 @@
 				});
 
 				$('#txtCustno').change(function() {
-					if (!emp($('#txtCustno').val())) {
+					/*if (!emp($('#txtCustno').val())) {
 						var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
 						q_gt('custms', t_where, 0, 0, 0, "");
-					}
+					}*/
 				});
 				
 				$('#lblQno1').click(function() {

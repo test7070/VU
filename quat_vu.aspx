@@ -98,6 +98,8 @@
 				$('#lblEweight').text('合約餘量');
 				$('#lblAtax').text('含稅');
 				$('#lblChka1').text('含運');
+				$('#lblChka2').text('自運');
+				$('#lblChka3').text('收費');
 				$('#lblTotal').text('合約金額');
 				$('#lblEnda').text('終止');
 				$('#lblAcomp').text('簽約公司');
@@ -114,6 +116,10 @@
 						q_gt('custms', t_where, 0, 0, 0, "");
 					}*/
 				});
+				
+				if(q_getPara('sys.project').toUpperCase()=='SF'){
+					$('.issf').show();	
+				}
 			}
 
 			function q_boxClose(s2) {
@@ -698,20 +704,27 @@
 						<td><span> </span><a id='lblTotal' class="lbl"> </a></td>
 						<td><input id="txtTotal" type="text" class="txt c1 num" /></td>
 						<td><span> </span><a id='lblAtax' class="lbl"> </a></td>
-						<td colspan="2">
+						<td colspan="3">
 							<input id="chkAtax" type="checkbox"/>
 							<span> </span><a id='lblChka1' class="lbl" style="float: none;"> </a>
 							<input id="chkChka1" type="checkbox"/>
 							<span> </span><a id='lblEnda' class="lbl"  style="float: none;"> </a>
 							<input id="chkEnda" type="checkbox"/>
 							<input id="chkIsproj" type="checkbox" style="display: none;"/>
+							
+							<span class="issf" style="display: none;"> 
+							</span><a id='lblChka2' class="lbl issf" style="float: none;display: none;"> </a>
+							<input id="chkChka2" type="checkbox" class="issf" style="display: none;"/>
+							<span class="issf" style="display: none;"> 
+							</span><a id='lblChka3' class="lbl issf" style="float: none;display: none;"> </a>
+							<input id="chkChka3" type="checkbox" class="issf" style="display: none;"/>
 						</td>
 					</tr>
 					<tr>
 						<td ><span> </span><a id='lblMemo' class="lbl"> </a></td>
 						<td colspan='5'>
 							<!--<input id="txtMemo" type="text" style="width: 99%;"/>-->
-							<textarea id="txtMemo"  rows='3' cols='3' style="width: 100%; " > </textarea>
+							<textarea id="txtMemo"  rows='3' cols='3' style="width: 99%; " > </textarea>
 							<input id="txtPrice" type="hidden"/>
 						</td>
 					</tr>

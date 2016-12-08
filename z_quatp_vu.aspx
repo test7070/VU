@@ -81,6 +81,9 @@
                         type : '8',
                         name : 'xoption01',
                         value : q_getMsg('toption01').split('&')
+                    }, {/*2-1 [13]*/
+                        type : '6',
+                        name : 'xaddr2'
                     }]
                 });
                 q_popAssign();

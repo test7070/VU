@@ -46,7 +46,7 @@
 				$('#q_report').click(function(e) {
 					if(window.parent.q_name=="z_quatp_vu"){
 						for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
-							if($('#q_report').data().info.reportData[i].report!='z_vcc_vu19')
+							if($('#q_report').data().info.reportData[i].report!='z_vcc_vu9')
 								$('#q_report div div').eq(i).hide();
 						}
 						$('#q_report div div .radio').parent().each(function(index) {
@@ -58,6 +58,14 @@
 								$(this).children().removeClass('select').addClass('nonselect');
 							}
 						});
+					}
+					if(q_getPara('sys.project').toUpperCase()!='SF'){
+						for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
+							if($('#q_report').data().info.reportData[i].report=='z_vcc_vu10'){
+								$('#q_report div div').eq(i).hide();
+								break;
+							}
+						}
 					}
 				});
             });

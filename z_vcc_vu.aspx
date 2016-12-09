@@ -19,7 +19,6 @@
             var xucolorItem ='';
             var xspecItem ='';
             var t_qno='';
-            var xlengthbItem ='';
             var xclassItem ='';
             var xuccItem ='';
             var t_first=true;
@@ -113,7 +112,6 @@
                     },{
                         type : '1',
                         name : 'xlengthb', //[15][16]
-                        value : xlengthbItem.split(',')
                     },{
                         type : '6', //[17] 
                         name : 'qno',
@@ -123,6 +121,10 @@
                         dbf : 'store',
                         index : 'noa,store',
                         src : 'store_b.aspx'
+                    }, {
+                        type : '8',
+                        name : 'xatax',//[20]
+                        value : '1@顯示稅金'.split(',')
                     }]
                 });
                 q_popAssign();

@@ -543,10 +543,11 @@ set @t_estoreno = case when '#non'=[19] then char(255) else [19] end
 set @qhref_acomp='_vu' 
 
 declare @result table( 
-	gno nvarchar(1), 
+	gno nvarchar(10), 
 	type nvarchar(4), 
 	noa nvarchar(15), 
-	invono nvarchar(30), 
+	noq nvarchar(15),
+	invono nvarchar(90), 
 	datea nvarchar(10), 
 	tggno nvarchar(20), 
 	comp nvarchar(40), 
@@ -576,17 +577,17 @@ declare @result table(
 	page int
 ) 
 insert into @result 
-select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono, a.datea
-		,a.tggno, isnull(e.comp,''), isnull(e.addr_invo,''),a.addr2, isnull(e.tel,'')
+select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,b.noq,a.invono, a.datea
+		,a.tggno,isnull(e.comp,''),isnull(e.addr_invo,''),a.addr2,isnull(e.tel,'')
 		,c.datea,c.ordeweight,d.price,b.productno
 		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
 		,(case when a.typea='2' then -1 else 1 end)*b.mount,(case when a.typea='2' then -1 else 1 end)*b.weight 
-		,b.price	,(case when a.typea='2' then -1 else 1 end)*b.total
+		,b.price ,(case when a.typea='2' then -1 else 1 end)*b.total
 		,(case when a.typea='2' then -1 else 1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 		,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
 		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb,dbo.split(dbo.split(a.transtart,'##',0),'@',0),0,0
 from view_rc2s b left join view_rc2 a on a.noa = b.noa
-left join cont c on LEFT(a.transtart,CHARINDEX('@',a.transtart)-1)=c.noa
+left join cont c on case when CHARINDEX('@',a.transtart)=0 then '' else LEFT(a.transtart,CHARINDEX('@',a.transtart)-1) end=c.noa
 outer apply (select  top 1 * from conts where noa=c.noa order by noq desc) d 
 left join tgg e on a.tggno = e.noa
 where (a.datea between @t_bdate and @t_edate) 
@@ -595,6 +596,24 @@ and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno)
 and (len(@t_product)=0 or b.product=@t_product) 
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.transtart,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.transtart,'##',1),'@',0) = @t_qno)
 order by a.tggno,a.datea,a.noa 
+
+while ((select count(*) from @result where len(invono)>11)>0)
+begin
+	insert into @result
+	select '1', type,noa,noq+'-1',invono,datea,tggno,comp,addr_invo,addr2,tel,odate,oweight,oprice, 
+	productno,'',unit,null,null,null,null,null,null,pcount,qhref,ucolor,spec,size,lengh,contno,idno,page
+	from @result where len(invono)>11
+	
+	update @result
+	set invono=LEFT(invono,11)
+	where len(invono)>11 and gno='0'
+	
+	update @result
+	set invono=substring(invono,12,len(invono))
+	where gno='1'
+	
+	update @result set gno='0'
+end
 
 if((select count(*) from @result)>0)
 begin 
@@ -607,14 +626,14 @@ end
 
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref))
 
-declare @pageline int =43
+declare @pageline int =45
 declare @tggno nvarchar(50) 
 declare @idno int
 declare @page int
 
 update a
 set idno=xidno,page=ceiling(cast(xidno as float)/@pageline)
-from (select idno,page,row_number()over(partition by tggno order by tggno,gno,datea,noa) xidno from @result)a
+from (select idno,page,row_number()over(partition by tggno order by tggno,gno,datea,noa,noq) xidno from @result)a
 
 --補空白行
 declare cursor_table cursor for 
@@ -645,7 +664,7 @@ update a set gno='4'
 from @result a outer apply (select MAX(page)xpage from @result where tggno=a.tggno )b
 where gno='3' and a.page=b.xpage
 
-select gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,odate,productno,product,unit,addr2,contno
+select gno,type,noa,noq,invono,datea,tggno,comp,addr_invo,tel,odate,productno,product,unit,addr2,contno
 ,reverse(substring(reverse(convert(nvarchar(30),mount,0)),0,30)) mount
 ,dbo.getComma(oweight,0) oweight 
 ,dbo.getComma(oprice,2) oprice 
@@ -655,5 +674,5 @@ select gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,odate,productno,produc
 ,dbo.getComma(tax,0) tax 
 ,dbo.getComma(money,0) money 
 ,reverse(substring(reverse(convert(nvarchar(30),pcount,0)),0,30)) pcount,qhref, 
-row_number()over(partition by tggno,comp order by tggno,gno,datea,noa) idno ,ucolor,size,spec,lengh
+row_number()over(partition by tggno,comp order by tggno,gno,datea,noa,noq) idno ,ucolor,size,spec,lengh
 from @result order by tggno,page,gno,datea,noa,idno;

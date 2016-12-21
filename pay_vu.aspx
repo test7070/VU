@@ -167,6 +167,11 @@
 		               			t_money += q_float('txtMoney_' + i);
 		               			//104/04/29費用不算在付款金額//0601恢復並改為- //1102智勝拿掉費用計算
 		               			//t_money-=q_float('txtChgs_' + i);
+		               		
+		               		//負數取出沖帳
+		               		if(q_float('txtUnpayorg_'+i)<0){
+		               			t_money -= q_float('txtUnpayorg_'+i);
+		               		}
 		               }
 						
 		               var t_unpay, t_pay=0;

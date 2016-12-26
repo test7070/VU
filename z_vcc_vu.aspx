@@ -67,6 +67,10 @@
 							}
 						}
 					}
+					
+					if(q_getPara('sys.project').toUpperCase()!='SF'){
+	                	$('#Xcouplers').hide();
+	                }
 				});
             });
             
@@ -133,6 +137,10 @@
                         type : '8',
                         name : 'xatax',//[20]
                         value : '1@顯示稅金'.split(',')
+                    }, {
+                        type : '8',
+                        name : 'xcouplers',//[21]
+                        value : '1@續接器'.split(',')
                     }]
                 });
                 q_popAssign();
@@ -207,6 +215,12 @@
 					$('#txtDate1').val(q_getHref()[3].substr(0,r_lenm)+'/01');
 					$('#q_report div div .radio.select').click();
 				}
+				
+				$('#Xcouplers').css('width', '300px').css('height', '30px');
+                $('#Xcouplers .label').css('width','0px');
+                $('#chkXcouplers').css('width', '220px').css('margin-top', '5px');
+                $('#chkXcouplers span').css('width','180px')
+                
             }
 
             function q_boxClose(s2) {

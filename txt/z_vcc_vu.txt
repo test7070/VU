@@ -929,6 +929,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
+declare @t_couplers nvarchar(20)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -944,6 +945,7 @@ set @t_elengthb = case when '#non'=[16] then 99 else [16] end
 set @t_qno = case when '#non'=[17] then '' else [17] end
 set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
 set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_couplers = case when '#non'=[21] then '' else [21]  end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -1057,6 +1059,15 @@ and (b.storeno between @t_bstoreno and @t_estoreno)
 order by custno,gno,mon,datea,a.noa,b.noq 
 
 delete @result where gno='1'
+
+if(@t_couplers='1')
+begin
+	delete @result where xproduct not like '%續接器%'
+end
+else
+begin
+	delete @result where xproduct like '%續接器%'
+end
 
 insert into @result(gno,custno,pcount,mount,total,totax,weight) 
 select '1',custno, count(*), 

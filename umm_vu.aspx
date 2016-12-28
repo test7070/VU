@@ -842,6 +842,11 @@
             			}else{
             				Unlock(1);
             			}
+            			
+            			if(t_checkno.length>0 && $('#txtAcc1_'+n).val().substr(0,4)!='1131' && $('#txtAcc1_'+n).val().length>0){
+            				alert('支票所對應的會計科目不符!!');
+            			}
+            			
             		}).bind('contextmenu', function(e) {
                         /*滑鼠右鍵*/
                         e.preventDefault();

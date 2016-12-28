@@ -929,7 +929,6 @@ declare @isspec nvarchar(10)='0'
 declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
-declare @t_couplers nvarchar(20)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -945,7 +944,6 @@ set @t_elengthb = case when '#non'=[16] then 99 else [16] end
 set @t_qno = case when '#non'=[17] then '' else [17] end
 set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
 set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
-set @t_couplers = case when '#non'=[21] then '' else [21]  end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -1060,15 +1058,6 @@ order by custno,gno,mon,datea,a.noa,b.noq
 
 delete @result where gno='1'
 
-if(@t_couplers='1')
-begin
-	delete @result where xproduct not like '%續接器%'
-end
-else
-begin
-	delete @result where xproduct like '%續接器%'
-end
-
 insert into @result(gno,custno,pcount,mount,total,totax,weight) 
 select '1',custno, count(*), 
 	sum((case typea when '1' then mount else (-1)*mount end)), 
@@ -1085,6 +1074,7 @@ declare @pageline int =43
 declare @custno nvarchar(50) 
 declare @idno int
 declare @page int
+
 
 update a
 set idno=xidno,page=ceiling(cast(xidno as float)/@pageline)
@@ -1129,7 +1119,235 @@ select gno,idno,page,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odat
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
 ,pcount ,ucolor,spec ,size,length,carno
-from @result order by custno,page,gno,mon,datea,noa,noq,idno;
+from @result order by custno,page,gno,mon,datea,noa,noq,idno
+
+;
+-------------------------------------------------------------------------------------------------------------------
+z_vcc_sf9:--z_vcc_sf9
+declare @t_bdate nvarchar(20)
+declare @t_edate nvarchar(20)
+declare @t_bcustno nvarchar(20) 
+declare @t_ecustno nvarchar(20) 
+declare @t_product nvarchar(max)
+declare @t_spec nvarchar(30)
+declare @t_size nvarchar(10)
+declare @t_class nvarchar(10)
+declare @t_blengthb float
+declare @t_elengthb float
+declare @t_acomp nvarchar(MAX)='[3]' 
+declare @qhref_acomp nvarchar(10) ='' 
+declare @vcctypea nvarchar(10) ='' 
+declare @isspec nvarchar(10)='0' 
+declare @t_qno nvarchar(50)
+declare @t_bstoreno nvarchar(20) 
+declare @t_estoreno nvarchar(20)
+declare @t_couplers nvarchar(20)
+declare @t_addr2 nvarchar(100)
+------------------------------------------------- 
+set @t_bdate = case when '#non'=[4] then '' else [4] end 
+set @t_edate = case when '#non'=[5] then char(255) else [5] end 
+set @t_bcustno = case when '#non'=[8] then '' else [8] end 
+set @t_ecustno = case when '#non'=[9] then char(255) else [9]  end
+set @vcctypea = case when '#non' = [10] then '' else [10] end  
+set @t_product = case when '#non'=[11] then '' else [11] end
+set @t_spec = case when '#non'=[12] then '' else [12] end
+set @t_size = case when '#non'=[13] then '' else [13] end
+set @t_class = case when '#non'=[14] then '' else [14] end
+set @t_blengthb = case when '#non'=[15] then 0 else [15] end
+set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+set @t_qno = case when '#non'=[17] then '' else [17] end
+set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
+set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_couplers = case when '#non'=[21] then '' else [21]  end
+set @t_addr2 = case when '#non'=[22] then '' else [22]  end
+-------------------------------------------------- 
+--設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
+declare @mount_decimal int = 4 
+declare @weight_decimal int = 4 
+declare @price_decimal int = 4 
+declare @total_decimal int = 4 
+-------------------------------------------------- 
+set @qhref_acomp='_sf' 
+------------------------------------------------- 
+declare @result table( 
+	gno nvarchar(1), 
+	typea nvarchar(4), 
+	noa nvarchar(30), 
+	invono nvarchar(30),
+	addr2 nvarchar(100),
+	noq nvarchar(3), 
+	datea nvarchar(10), 
+	mon nvarchar(7), 
+	custno nvarchar(30), 
+	comp nvarchar(90), 
+	addr_invo nvarchar(MAX), 
+	tel nvarchar(MAX),
+	onoa nvarchar(20),
+	odate nvarchar(20),
+	oweight float,
+	oprice float,
+	xproduct nvarchar(MAX), 
+	unit nvarchar(8), 
+	mount float, 
+	weight float, 
+	price float, 
+	total float, 
+	pcount int, 
+	qhref nvarchar(MAX) ,
+	tax float,
+	ucolor nvarchar(30),
+	spec nvarchar(30),
+	size nvarchar(30),
+	length nvarchar(30),
+	totax float,
+	carno nvarchar(50),
+	idno int,
+	page int
+) 
+
+insert @result (gno,noa,invono)
+select '1',a.noa,b.noa
+from view_vcc a
+left join vccat b on a.noa=b.vccno
+where (a.datea between @t_bdate and @t_edate) and 
+(a.custno between @t_bcustno and @t_ecustno)
+and (len(@t_addr2)=0 or a.addr2 like '%'+@t_addr2+'%')
+group by a.noa,b.noa
+
+--從vccat取明細對帳
+insert @result
+select '0',b.typea,a.noa,a.invono,b.addr2,c.vccnoq,b.datea,b.mon,b.custno,isnull(d.comp,''),isnull(d.addr_invo,''),isnull(d.tel,'')
+		,e.noa,e.datea,e.weight,e.price,
+		f.product+' '+isnull(f.size,'')+' '+isnull(f.spec,'')+' '+case when (isnull(convert(nvarchar,f.lengthb),'')='' or isnull(convert(nvarchar,f.lengthb),'') = '0') then '' else isnull(convert(nvarchar,f.lengthb),'')+'M ' end + isnull(f.ucolor,'')+' '+isnull(f.class,'')
+		,f.unit,case when c.mount=0 then NULL else c.mount end,case when c.weight=0 then NULL else c.weight end,c.price,c.money, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+b.accy 
+		,round((b.tax*(case when b.money=0 then 0 else (f.total/b.money) end)),0),f.ucolor,f.spec,f.size,f.lengthb
+		,round((b.tax*(case when b.money=0 then 0 else (f.total/b.money) end)),0)+f.total
+		,b.carno,0,0
+from @result a left join view_vcc b on a.noa=b.noa
+left join vccat c on a.invono=c.noa and a.noa=c.vccno
+left join cust d on b.custno=d.noa
+left join view_quat e on case when CHARINDEX('@',b.apvmemo)=0 then '' else LEFT(b.apvmemo,CHARINDEX('@',b.apvmemo)-1) end=e.noa
+left join view_vccs f on c.vccno=f.noa and c.vccnoq=f.noq
+where len(a.invono)!=0 and
+(b.datea between @t_bdate and @t_edate) and 
+(b.custno between @t_bcustno and @t_ecustno)  and
+(len(@vcctypea)=0 or @vcctypea=b.typea) and
+(len(@t_product)=0 or @t_product like f.product)and
+(len(@t_spec)=0 or @t_spec like f.spec) and
+(len(@t_size)=0 or @t_size like f.size) and
+(len(@t_class)=0 or @t_class like f.class) and
+(isnull(f.lengthb,0) between @t_blengthb and @t_elengthb)
+and (len(@t_qno)=0 or dbo.split(dbo.split(b.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(b.apvmemo,'##',1),'@',0) = @t_qno)
+and (f.storeno between @t_bstoreno and @t_estoreno)
+and (len(@t_addr2)=0 or b.addr2 like '%'+@t_addr2+'%')
+order by b.custno,gno,b.mon,b.datea,a.noa,c.vccnoq
+
+--沒有vccat撈vcc
+insert @result
+select '0',a.typea,r.noa,r.invono,a.addr2,b.noq, a.datea datea, a.mon mon
+		,a.custno custno, isnull(e.comp,''), isnull(e.addr_invo,''), isnull(e.tel,'')
+		,c.noa onoa,c.datea odate,c.weight oweight,c.price
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')
+		+' '+isnull(b.class,'')
+		,b.unit,case when b.mount=0 then NULL else b.mount end,case when b.weight=0 then NULL else b.weight end, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
+		,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
+		,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
+		,a.carno,0,0
+from @result r
+left join view_vccs b on r.noa=b.noa
+left join view_vcc a on a.noa = b.noa
+left join view_quat c on case when CHARINDEX('@',a.apvmemo)=0 then '' else LEFT(a.apvmemo,CHARINDEX('@',a.apvmemo)-1) end=c.noa
+--outer apply (select  top 1 * from view_quats where noa=c.noa order by noq desc) d 
+left join cust e on a.custno = e.noa 
+left join sss s on isnull(a.salesno,'')=s.noa
+where isnull(r.invono,'')='' and
+(a.datea between @t_bdate and @t_edate) and 
+(a.custno between @t_bcustno and @t_ecustno)  and
+(len(@vcctypea)=0 or @vcctypea=a.typea) and
+(len(@t_product)=0 or @t_product like b.product)and
+(len(@t_spec)=0 or @t_spec like b.spec) and
+(len(@t_size)=0 or @t_size like b.size) and
+(len(@t_class)=0 or @t_class like b.class) and
+(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
+and (b.storeno between @t_bstoreno and @t_estoreno)
+order by custno,gno,mon,datea,a.noa,b.noq 
+
+delete @result where gno='1'
+
+if(@t_couplers='1')
+begin
+	delete @result where xproduct not like '%續接器%'
+end
+else
+begin
+	delete @result where xproduct like '%續接器%'
+end
+
+
+insert into @result(gno,custno,addr2,pcount,mount,total,totax,weight) 
+select '1',custno,addr2, count(*), 
+	sum((case typea when '1' then mount else (-1)*mount end)), 
+	sum((case typea when '1' then total else (-1)*total end)),
+	sum((case typea when '1' then totax else (-1)*totax end)),
+	sum((case typea when '1' then weight else (-1)*weight end))  
+from @result a group by custno,addr2
+
+update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
+
+update @result set mount=mount*-1,total=total*-1 ,totax=totax*-1,weight=weight*-1,tax=tax*-1 where typea='退' 
+
+declare @pageline int =42
+declare @custno nvarchar(50) 
+declare @addr2 nvarchar(100) 
+declare @idno int
+declare @page int
+
+update a
+set idno=xidno,page=ceiling(cast(xidno as float)/@pageline)
+from (select idno,page,row_number()over(partition by custno,addr2 order by custno,addr2,gno,datea,noa,noq) xidno from @result)a
+
+--補空白行
+declare cursor_table cursor for 
+select custno,addr2,MAX(idno),MAX(page) from @result group by custno,addr2
+open cursor_table 
+fetch next from cursor_table 
+into @custno,@addr2,@idno,@page
+while(@@FETCH_STATUS <> -1) 
+begin
+	while ((@idno)%@pageline>0)
+	begin
+		set @idno=@idno+1
+		insert @result(gno,custno,addr2,page,idno,noa)
+		select '2',@custno,@addr2,@page,@idno,CHAR(255)
+	end
+
+	fetch next from cursor_table 
+	into @custno,@addr2,@idno,@page
+end 
+close cursor_table 
+deallocate cursor_table 
+
+insert @result(gno,page,idno,custno,addr2)
+select '3',page,MAX(idno)+1,custno,addr2
+from @result group by page,custno,addr2
+
+update a set gno='4'
+from @result a outer apply (select MAX(page)xpage from @result where custno=a.custno and addr2=a.addr2 )b
+where gno='3' and a.page=b.xpage
+
+select gno,idno,page,typea,noa,noq,datea,mon,custno,addr2,comp,addr_invo,tel,onoa,odate,xproduct xpdt,invono,unit, qhref 
+,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
+,dbo.getComma(oweight,0) oweight 
+,dbo.getComma(oprice,2) oprice
+,dbo.getComma(price,-1)price 
+,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
+,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
+,pcount ,ucolor,spec ,size,length,carno
+from @result order by custno,addr2,page,gno,mon,datea,noa,noq,idno
+;
 --***************************************************************************************************
 z_vcc_vu10:--z_vcc_vu10
 declare @t_bdate nvarchar(20)

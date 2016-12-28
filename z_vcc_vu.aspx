@@ -70,6 +70,7 @@
 					
 					if(q_getPara('sys.project').toUpperCase()!='SF'){
 	                	$('#Xcouplers').hide();
+	                	$('#Xaddr2').hide();
 	                }
 				});
             });
@@ -141,6 +142,9 @@
                         type : '8',
                         name : 'xcouplers',//[21]
                         value : '1@續接器'.split(',')
+                    },{
+                        type : '6', //[22] 
+                        name : 'xaddr2'
                     }]
                 });
                 q_popAssign();
@@ -206,8 +210,13 @@
 					q_gt('view_quat',t_where, 0, 0, 0, "view_quat");
                  });
                  
+                 $('#txtQno').change(function() {
+					changeaddr2();
+                 });
+                 
                 $('#combQno').change(function() {
 					$('#txtQno').val($('#combQno').find("option:selected").text());
+					changeaddr2();
 				});
 				
 				if(window.parent.q_name=="z_quatp_vu"){
@@ -221,8 +230,23 @@
                 $('#chkXcouplers').css('width', '220px').css('margin-top', '5px');
                 $('#chkXcouplers span').css('width','180px')
                 
+				var tmp = document.getElementById("txtXaddr2");
+	            var selectbox = document.createElement("select");
+	            selectbox.id="combXaddr2";
+	            selectbox.style.cssText ="width:20px;font-size: medium;";
+	            tmp.parentNode.appendChild(selectbox,tmp);
+	                
+	            $('#combXaddr2').change(function() {
+					$('#txtXaddr2').val($('#combXaddr2').find("option:selected").text());
+				});
             }
-
+			function changeaddr2() {
+				if(q_getPara('sys.project').toUpperCase()=='SF' && !emp($('#txtQno').val())
+				){
+					var t_where="where=^^ apvmemo like '%"+$('#txtQno').val()+"@%' ^^ "
+					q_gt('view_vcc',t_where, 0, 0, 0, "view_vcc");
+				}
+			}
             function q_boxClose(s2) {
             }
             
@@ -270,6 +294,19 @@
 								 q_cmbParse("combQno", t_qno); 
 							}
 							t_qno='';
+                     	}
+                		break;
+                	case 'view_vcc':
+                		var as = _q_appendData("view_vcc", "", true);
+                		if(as != undefined){
+                			var t_addr2='';
+							for ( i = 0; i < as.length; i++) {
+								t_addr2+=","+as[i].addr2;
+							}
+							if(t_addr2.length != 0){							
+								$('#combXaddr2').empty();
+								 q_cmbParse("combXaddr2", t_addr2); 
+							}
                      	}
                 		break;
                 	               			

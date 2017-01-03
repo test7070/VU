@@ -158,8 +158,16 @@ begin
 		
 		set @tweight=@tweight+@qweight2
 		
-		set @ttotal=@ttotal+case when @tweight=0 then 0 else (@total*@weight/@tweight) end
-		set @tpayed=@tpayed+case when @tweight=0 then 0 else (@payed*@weight/@tweight) end
+		if(@tweight=0 and (@qno1='' or @qno2=''))
+		begin
+			set @ttotal=@ttotal+@total
+			set @tpayed=@tpayed+@payed
+		end
+		else
+		begin
+			set @ttotal=@ttotal+case when @tweight=0 then 0 else (@total*@weight/@tweight) end
+			set @tpayed=@tpayed+case when @tweight=0 then 0 else (@payed*@weight/@tweight) end
+		end
 		
 		fetch next from cursor_table2
 		into @apvmemo,@qno1,@qweight1,@qno2,@qweight2,@total,@payed

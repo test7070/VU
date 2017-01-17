@@ -72,7 +72,8 @@ declare @result table(
 	memo nvarchar(MAX),
 	carno nvarchar(100),
 	quatno nvarchar(100),
-	money float
+	money float,
+	wtname nvarchar(100)
 ) 
 insert into @result 
 select '91' gno,ROW_NUMBER()over(order by a.datea,a.custno,a.noa,b.noq), a.noa noa, b.noq noq, a.typea typea, a.datea datea, (case when a.mon='' then left(a.datea,7) else a.mon end), a.custno, a.comp 
@@ -84,7 +85,7 @@ select '91' gno,ROW_NUMBER()over(order by a.datea,a.custno,a.noa,b.noq), a.noa n
 		,b.total 
 		,b.ucolor,b.spec,b.size,b.lengthb,a.addr,b.memo,a.carno,dbo.split(dbo.split(a.apvmemo,'##',0),'@',0)
 		--,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
-		,(a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))+b.total
+		,(a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))+b.total,'重量'
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 				 left join sss s on isnull(a.salesno,'')=s.noa 
 				 left join vcca v on a.invono=v.noa 
@@ -98,7 +99,15 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 	  and (len(@t_qno)=0 or a.apvmemo like @t_qno+'%')
 	  and (b.storeno between @t_bstoreno and @t_estoreno)
-order by a.datea,gno,noa,noq 
+order by a.datea,gno,noa,noq
+
+--2017/01/16 三泰續接器印數量
+if(left(@t_acomp,2)='三泰')
+begin
+	update @result 
+	set weight=mount,wtname='數量'
+	where left(xproduct,3)='續接器'
+end  
 
 insert into @result(gno,rec,datea,noa,noq,custno,mount,price,total,money,weight) 
 select '92',MAX(rec),datea,noa,'999',MAX(custno),
@@ -135,13 +144,13 @@ insert into @result(gno,rec,datea,noa,noq,custno)
 select '96',MAX(rec),datea,MAX(noa),'999',MAX(custno)
 from @result where gno='91' group by datea
 
-insert into @result(gno,rec,datea,custno,noa,noq) 
-select '97',MIN(rec)-1,MIN(datea),custno,MIN(noa),'000'
-from @result where gno='91' group by datea,custno 
+insert into @result(gno,rec,datea,custno,noa,noq,wtname) 
+select '97',MIN(rec)-1,MIN(datea),custno,MIN(noa),'000',wtname
+from @result where gno='91' group by datea,custno,wtname
 --*************************************************************************	
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
-update @result set datea = '',noa='',typea=''
+update @result set datea = '',noa='',typea='',comp='',carno=''
 from @result a
 left join(
 	select noa,MIN(noq)noq from @result where gno ='91' group by noa
@@ -171,7 +180,7 @@ select rec, gno, noa, noq, typea, datea, LEFT(datea,7) xdatea, mon, custno, left
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,itax),1)),@total_decimal,30)) itax 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,itotal),1)),@total_decimal,30)) itotal 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money
-,ucolor,spec,size,lengh,conn cust,memo,carno,quatno
+,ucolor,spec,size,lengh,conn cust,memo,carno,quatno,wtname
 from @result order by rec,gno;
 --**********************************************************************************************
 z_vcc_vu2:--z_vcc_vu2

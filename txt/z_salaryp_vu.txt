@@ -30,7 +30,7 @@ create table #tmp(
 	a02 decimal(18, 1),--天數
 	a03 decimal(18, 0),--日薪
 	a04 decimal(18, 0),--獎金
-	a05 decimal(18, 2),--基數
+	a05 decimal(18, 3),--基數
 	a06 decimal(18, 2),--噸數
 	a07 decimal(18, 0),--加班費
 	a08 decimal(18, 1),--時數
@@ -262,7 +262,7 @@ create table #tmp(
 	total1 decimal(18, 0),
 	bo_admin decimal(18, 0),
 	bo_traffic decimal(18, 0),
-	money1 decimal(18, 2),
+	money1 decimal(18, 3),
 	money2 decimal(18, 2),
 	addh decimal(18, 1),
 	addmoney decimal(18, 0),

@@ -15,6 +15,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @qhref_acomp nvarchar(10) ='' 
+declare @t_check nvarchar(1) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -25,11 +26,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99.99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19] end
+set @t_check = case when '#non'=[15] then '' else [15] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --------------------------------------------------------------------------------------------------------------  
 set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
@@ -61,7 +63,8 @@ declare @result table(
 	rtotal float,
 	btotal float,
 	store nvarchar(max) ,
-	contno nvarchar(50)
+	contno nvarchar(50),
+	bsize nvarchar(50)
 ) 
 
 insert into @result 
@@ -76,6 +79,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 	,(case when a.typea='2' then 0 else b.total end)
 	,(case when a.typea='2' then b.total else 0 end),b.store
 	,dbo.split(dbo.split(a.transtart,'##',0),'@',0)
+	,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.tggno between @t_btggno and @t_etggno)  and
@@ -97,18 +101,37 @@ end
 
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
 
-select 
-dbo.getComma(mount,0) mount, 
-dbo.getComma(weight,0) weight, 
-dbo.getComma(price,-1) price, 
-dbo.getComma(total,0) total,  
-dbo.getComma(tax,0) tax ,
-dbo.getComma(money,0) money,
-dbo.getComma(lengh,0) lengh , 
-dbo.getComma(rtotal,0) rtotal,
-dbo.getComma(btotal,0) btotal,
-row_number()over(order by gno,datea,product,noa) idno ,left(comp,5) comp,* 
-from @result order by gno,datea,product,noa ;
+if (@t_check=1)
+begin
+	select 
+	dbo.getComma(mount,0) mount, 
+	dbo.getComma(weight,0) weight, 
+	dbo.getComma(price,-1) price, 
+	dbo.getComma(total,0) total,  
+	dbo.getComma(tax,0) tax ,
+	dbo.getComma(money,0) money,
+	dbo.getComma(lengh,0) lengh , 
+	dbo.getComma(rtotal,0) rtotal,
+	dbo.getComma(btotal,0) btotal,
+	row_number()over(order by gno,bsize,datea,tggno) idno ,left(comp,5) comp,* 
+	from @result a order by gno,bsize,datea,tggno
+end
+else
+begin
+	select 
+	dbo.getComma(mount,0) mount, 
+	dbo.getComma(weight,0) weight, 
+	dbo.getComma(price,-1) price, 
+	dbo.getComma(total,0) total,  
+	dbo.getComma(tax,0) tax ,
+	dbo.getComma(money,0) money,
+	dbo.getComma(lengh,0) lengh , 
+	dbo.getComma(rtotal,0) rtotal,
+	dbo.getComma(btotal,0) btotal,
+	row_number()over(order by gno,datea,product,noa) idno ,left(comp,5) comp,* 
+	from @result order by gno,datea,product,noa
+end
+;
 --*********************************************************************
 z_rc2_vu02:--z_rc2_vu02
 SET QUOTED_IDENTIFIER OFF
@@ -127,6 +150,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @qhref_acomp nvarchar(10) ='' 
+declare @t_check nvarchar(1)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -137,11 +161,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99.99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19] end
+set @t_check = case when '#non'=[15] then '' else [15] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 -------------------------------------------------------------------------------------------------------------- 
 set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
@@ -165,7 +190,8 @@ declare @result table(
 	ucolor nvarchar(30),
 	spec nvarchar(30),
 	size nvarchar(30),
-	lengh decimal(18,2)
+	lengh decimal(18,2),
+	bsize nvarchar(30)
 ) 
 
 insert into @result 
@@ -180,6 +206,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.datea
 		--,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
 		,(case when a.typea='2' then -1 else 1 end)*((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end))+b.total)
 		,'rc2'+b.accy,a.memo,b.ucolor,b.spec,b.size,b.lengthb
+		,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.tggno between @t_btggno and @t_etggno)  and
@@ -195,27 +222,44 @@ order by b.productno,gno,a.datea,a.noa
 
 if((select count(*) from @result)>0)
 begin 
-	insert into @result(gno,product,mount,weight,money,tax,total) 
-	select '1',product,sum(mount),sum(weight),sum(money),SUM(tax),sum(total) from @result 
-	where gno='0' group by product
+	insert into @result(gno,product,mount,weight,money,tax,total,bsize) 
+	select '1',product,sum(mount),sum(weight),sum(money),SUM(tax),sum(total),bsize from @result 
+	where gno='0' group by product,bsize
 	
-	insert into @result(gno,product,mount,weight,money,tax,total) 
-	select '2',char(255),sum(mount),sum(weight),sum(money),SUM(tax),sum(total) from @result 
+	insert into @result(gno,product,mount,weight,money,tax,total,bsize) 
+	select '2',char(255),sum(mount),sum(weight),sum(money),SUM(tax),sum(total),char(255) from @result 
 	where gno='0'
 end
 
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
 
-select left(comp,5) comp,
-dbo.getComma(mount,0) mount, 
-dbo.getComma(weight,0) weight, 
-dbo.getComma(price,-1) price,
-dbo.getComma(money,0) money, 
-dbo.getComma(tax,0) tax,
-dbo.getComma(total,0) total, 
-row_number()over(order by gno,product,datea,noa) idno,
-dbo.getComma(lengh,0) lengh,*
-from @result order by product,gno,datea,noa;
+if(@t_check='1')
+begin
+	select left(comp,5) comp,
+	dbo.getComma(mount,0) mount, 
+	dbo.getComma(weight,0) weight, 
+	dbo.getComma(price,-1) price,
+	dbo.getComma(money,0) money, 
+	dbo.getComma(tax,0) tax,
+	dbo.getComma(total,0) total, 
+	row_number()over(order by bsize,product,gno,datea,tggno) idno,
+	dbo.getComma(lengh,0) lengh,*
+	from @result a order by bsize,product,gno,datea,tggno
+end
+else
+begin
+	select left(comp,5) comp,
+	dbo.getComma(mount,0) mount, 
+	dbo.getComma(weight,0) weight, 
+	dbo.getComma(price,-1) price,
+	dbo.getComma(money,0) money, 
+	dbo.getComma(tax,0) tax,
+	dbo.getComma(total,0) total, 
+	row_number()over(order by gno,product,datea,noa) idno,
+	dbo.getComma(lengh,0) lengh,*
+	from @result order by product,gno,datea,noa
+end
+;
 --*********************************************************************
 z_rc2_vu03:--z_rc2_vu03
 SET QUOTED_IDENTIFIER OFF
@@ -234,6 +278,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @qhref_acomp nvarchar(10) ='' 
+declare @t_check nvarchar(1)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -244,11 +289,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99.99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19] end
+set @t_check = case when '#non'=[15] then '' else [15] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 -----------------------------------------------------------
 set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
@@ -278,7 +324,8 @@ declare @result table(
 	spec nvarchar(30), 
 	size nvarchar(30), 
 	lengh decimal(18,2),
-	contno nvarchar(50)
+	contno nvarchar(50),
+	bsize nvarchar(30)
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono, a.datea
@@ -289,6 +336,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 		,(case when a.typea='2' then -1 else 1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 		,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
 		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb,dbo.split(dbo.split(a.transtart,'##',0),'@',0)
+		,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.tggno between @t_btggno and @t_etggno)  and
@@ -313,17 +361,35 @@ end
 
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
 
-select 
-gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,productno,product,unit,addr2,contno
-,reverse(substring(reverse(convert(nvarchar(30),mount,0)),0,30)) mount 
-,dbo.getComma(weight,0) weight 
-,dbo.getComma(price,-1) price 
-,dbo.getComma(total,0) total 
-,dbo.getComma(tax,0) tax 
-,dbo.getComma(money,0) money 
-,reverse(substring(reverse(convert(nvarchar(30),pcount,0)),0,30)) pcount,qhref, 
-row_number()over(partition by tggno,comp order by tggno,gno,datea,noa) idno ,ucolor,size,spec,lengh
-from @result order by tggno,gno,datea,noa  ;
+if(@t_check='1')
+begin
+	select 
+	gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,productno,product,unit,addr2,contno
+	,reverse(substring(reverse(convert(nvarchar(30),mount,0)),0,30)) mount 
+	,dbo.getComma(weight,0) weight 
+	,dbo.getComma(price,-1) price 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax 
+	,dbo.getComma(money,0) money 
+	,reverse(substring(reverse(convert(nvarchar(30),pcount,0)),0,30)) pcount,qhref, 
+	row_number()over(partition by tggno,comp order by tggno,gno,bsize,datea) idno ,ucolor,size,spec,lengh,bsize
+	from @result order by tggno,gno,bsize,datea
+end
+else
+begin
+	select 
+	gno,type,noa,invono,datea,tggno,comp,addr_invo,tel,productno,product,unit,addr2,contno
+	,reverse(substring(reverse(convert(nvarchar(30),mount,0)),0,30)) mount 
+	,dbo.getComma(weight,0) weight 
+	,dbo.getComma(price,-1) price 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax 
+	,dbo.getComma(money,0) money 
+	,reverse(substring(reverse(convert(nvarchar(30),pcount,0)),0,30)) pcount,qhref, 
+	row_number()over(partition by tggno,comp order by tggno,gno,datea,noa) idno ,ucolor,size,spec,lengh
+	from @result order by tggno,gno,datea,noa
+end
+;
 --*********************************************************************
 z_rc2_vu04:--z_rc2_vu04
 SET QUOTED_IDENTIFIER OFF
@@ -342,6 +408,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @qhref_acomp nvarchar(10) ='' 
+declare @t_check nvarchar(1)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -352,11 +419,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99.99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19] end
+set @t_check = case when '#non'=[15] then '' else [15] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --------------------------------------------------------------------------------------------------------
 set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
@@ -381,7 +449,8 @@ declare @result table(
 	ucolor nvarchar(30), 
 	spec nvarchar(30), 
 	size nvarchar(30), 
-	lengh decimal(18,2)
+	lengh decimal(18,2),
+	bsize nvarchar(30)
 ) 
 insert into @result 
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invono,a.datea,a.tggno,isnull(c.nick,'')
@@ -394,6 +463,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,a.invon
 		,(case when a.typea='2' then -1 else 1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 		,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
 		,'rc2'+b.accy,a.memo,b.ucolor,b.spec,b.size,b.lengthb
+		,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_rc2s b left join view_rc2 a on a.noa = b.noa left join tgg c on a.tggno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.tggno between @t_btggno and @t_etggno)  and
@@ -409,26 +479,39 @@ order by gno,a.datea,a.noa
  
 if((select count(*) from @result)>0)
 begin 
-	insert @result (gno,tggno,product,mount,weight,money,total)
-	select '1',tggno,product,sum(mount),sum(weight),sum(money),sum(total) 
-	from @result group by tggno,product
+	insert @result (gno,tggno,product,mount,weight,money,total,bsize)
+	select '1',tggno,product,sum(mount),sum(weight),sum(money),sum(total),bsize 
+	from @result group by tggno,product,bsize
 	
-	insert @result (gno,tggno,comp,product,mount,weight,money,total)
-	select '2',tggno,MAX(comp),char(255),sum(mount),sum(weight),sum(money),sum(total) 
+	insert @result (gno,tggno,comp,product,mount,weight,money,total,bsize)
+	select '2',tggno,MAX(comp),char(255),sum(mount),sum(weight),sum(money),sum(total),char(255) 
 	from @result where gno='1' group by tggno
 end
  
 update @result set qhref = substring(qhref,0,len(qhref)-2)+@qhref_acomp+'?left(noa,'+cast(len(noa) as nvarchar)+')=$noa?'+substring(qhref,len(qhref)-2,len(qhref)) 
 
-select 
-dbo.getComma(mount,0) mount, 
-dbo.getComma(weight,0) weight, 
-dbo.getComma(price,-1) price, 
-dbo.getComma(tax,0) tax,
-dbo.getComma(money,0) money , 
-dbo.getComma(total,0) total,
-row_number()over(partition by tggno,comp order by tggno,product,gno,datea) idno,* 
-from @result order by tggno,product,gno,datea  
+if(@t_check='1')
+begin
+	select dbo.getComma(mount,0) mount, 
+	dbo.getComma(weight,0) weight, 
+	dbo.getComma(price,-1) price, 
+	dbo.getComma(tax,0) tax,
+	dbo.getComma(money,0) money , 
+	dbo.getComma(total,0) total,
+	row_number()over(partition by tggno,comp order by tggno,bsize,gno,product,datea) idno,* 
+	from @result order by tggno,bsize,product,gno,datea   
+end
+else
+begin
+	select dbo.getComma(mount,0) mount, 
+	dbo.getComma(weight,0) weight, 
+	dbo.getComma(price,-1) price, 
+	dbo.getComma(tax,0) tax,
+	dbo.getComma(money,0) money , 
+	dbo.getComma(total,0) total,
+	row_number()over(partition by tggno,comp order by tggno,product,gno,datea) idno,* 
+	from @result order by tggno,product,gno,datea  
+end
 ;
 -----------------------------------------------------------------------------------------------------------------------------
 z_rc2_vu05:--z_rc2_vu05
@@ -456,11 +539,11 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99.99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --***********************************************************************************
 declare @tmp table( 
 	gno nvarchar(1), 
@@ -536,9 +619,9 @@ set @t_edate = case when '#non'=[5] then char(255) else [5] end
 set @t_btggno = case when '#non'=[8] then '' else [8] end 
 set @t_etggno = case when '#non'=[9] then char(255) else [9] end 
 set @t_product = case when '#non'=[11] then '' else [11] end 
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 -----------------------------------------------------------
 set @qhref_acomp='_vu' 
 

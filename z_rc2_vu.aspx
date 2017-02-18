@@ -105,13 +105,17 @@
                         name : 'xclass',//[14]
                         value : xclassItem.split(',')
                     },{
-                        type : '1',
-                        name : 'xlengthb', //[15][16]
+                    	type : '8', //[15]
+						name : 'xshowenda',
+						value : "1@依號數排序".split(',')
                     },{
-                        type : '6', //[17] //判斷顯示小數點與其他判斷
+                        type : '1',
+                        name : 'xlengthb', //[16][17]
+                    },{
+                        type : '6', //[18] //判斷顯示小數點與其他判斷
                         name : 'qno',
                     }, {
-						type : '2', //[18][19]
+						type : '2', //[19][20]
 						name : 'xstore',
 						dbf : 'store',
 						index : 'noa,store',
@@ -190,6 +194,11 @@
 					$('#txtDate1').val(q_getHref()[3].substr(0,r_lenm)+'/01');
 					$('#q_report div div .radio.select').click();
 				}
+				
+				$('#Xshowenda').css('width', '300px').css('height', '30px');
+				$('#Xshowenda .label').css('width','0px');
+				$('#chkXshowenda').css('width', '220px').css('margin-top', '5px');
+				$('#chkXshowenda span').css('width','180px')
 			}
 
 			function q_boxClose(s2) {

@@ -122,28 +122,32 @@
                         type : '5',
                         name : 'xclass',//[14]
                         value : xclassItem.split(',')
-                    },{
+                    }, {
+                    	type : '8', //[15]
+						name : 'xshowenda',
+						value : "1@依號數排序".split(',')
+                    }, {
                         type : '1',
-                        name : 'xlengthb', //[15][16]
-                    },{
-                        type : '6', //[17] 
+                        name : 'xlengthb', //[16][17]
+                    }, {
+                        type : '6', //[18] 
                         name : 'qno',
                     }, {
-                        type : '2', //[18][19]
+                        type : '2', //[19][20]
                         name : 'xstore',
                         dbf : 'store',
                         index : 'noa,store',
                         src : 'store_b.aspx'
                     }, {
                         type : '8',
-                        name : 'xatax',//[20]
+                        name : 'xatax',//[21]
                         value : '1@顯示稅金'.split(',')
                     }, {
                         type : '8',
-                        name : 'xcouplers',//[21]
+                        name : 'xcouplers',//[22]
                         value : '1@續接器'.split(',')
                     },{
-                        type : '6', //[22] 
+                        type : '6', //[23] 
                         name : 'xaddr2'
                     }]
                 });
@@ -239,6 +243,15 @@
 	            $('#combXaddr2').change(function() {
 					$('#txtXaddr2').val($('#combXaddr2').find("option:selected").text());
 				});
+				
+				$('#q_report .report').css('width','400px');
+				$('#q_report .report div').css('width','200px');
+				
+				$('#Xshowenda').css('width', '300px').css('height', '30px');
+				$('#Xshowenda .label').css('width','0px');
+				$('#chkXshowenda').css('width', '220px').css('margin-top', '5px');
+				$('#chkXshowenda span').css('width','180px')
+
             }
 			function changeaddr2() {
 				if(q_getPara('sys.project').toUpperCase()=='SF' && !emp($('#txtQno').val())

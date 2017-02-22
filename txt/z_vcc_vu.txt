@@ -36,11 +36,11 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --*********************************************************************************** 
 declare @result table( 
 	gno nvarchar(10), 
@@ -200,6 +200,7 @@ declare @vcctypea nvarchar(10) =''
 declare @isspec nvarchar(10)='0' 
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
+declare @t_check nvarchar(20)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -210,12 +211,13 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+set @t_check= case when '#non'=[15] then '' else [15] end 
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
 declare @t_qno nvarchar(50)
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --***********************************************************************************
 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
@@ -236,7 +238,8 @@ declare @tmp table(
 	tax float,
 	weight float,
 	money float,
-	price float
+	price float,
+	size nvarchar(50)
 ) 
 
 insert into @tmp 
@@ -247,7 +250,7 @@ select '9'
 	   ,(case when a.typea='1' then 1 else -1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 	   ,(case when a.typea='1' then 1 else -1 end)*b.weight
 	   ,(case when a.typea='1' then 1 else -1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
-	   ,b.price
+	   ,b.price,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy left join cust c on a.custno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 	  (a.custno between @t_bcustno and @t_ecustno)  and
@@ -262,8 +265,8 @@ where (a.datea between @t_bdate and @t_edate) and
 order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
-select '0',products,cno,custnick,SUM(mount),SUM(total),sum(tax),sum(weight),sum(money),price from @tmp 
-group by products,cno,custnick,price
+select '0',products,cno,custnick,SUM(mount),SUM(total),sum(tax),sum(weight),sum(money),price,size from @tmp 
+group by products,cno,custnick,price,size
 
 delete @tmp where gno='9' 
 
@@ -271,14 +274,28 @@ insert into @tmp(gno,cno,custnick,mount,total,weight,money)
 select '1',cno,custnick,sum(mount),sum(total),sum(weight),sum(money) 
 from @tmp where gno='0' group by cno,custnick 
 
-select gno,products,cno,custnick 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money
-,dbo.getComma(price,2)price
-,dbo.getComma(weight,0) weight
-from @tmp order by cno,custnick,gno  
+if(@t_check='1')
+begin
+	select gno,products,cno,custnick,size
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money
+	,dbo.getComma(price,2)price
+	,dbo.getComma(weight,0) weight
+	from @tmp order by cno,custnick,gno,size
+end
+else
+begin
+	select gno,products,cno,custnick,size
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money
+	,dbo.getComma(price,2)price
+	,dbo.getComma(weight,0) weight
+	from @tmp order by cno,custnick,gno  
+end
 ;
 --**********************************************************************************************
 z_vcc_vu3:--z_vcc_vu3 
@@ -299,6 +316,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
+declare @t_check nvarchar(20)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -309,11 +327,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_check= case when '#non'=[15] then '' else [15] end  
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -334,7 +353,7 @@ declare @result table(
 	mon nvarchar(7), 
 	custno nvarchar(20), 
 	comp nvarchar(90), 
-	xproduct nvarchar(100), 
+	xproduct nvarchar(200), 
 	unit nvarchar(8), 
 	mount float, 
 	weight float, 
@@ -361,7 +380,8 @@ declare @result table(
 	,(case when a.typea='1' then 1 else -1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0) tax
 	,(case when a.typea='1' then 1 else -1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
 	,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy
-	,b.ucolor,b.spec,b.size,b.lengthb,b.memo 
+	,b.ucolor,b.spec,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
+	,b.lengthb,b.memo
 	from view_vccs b left join view_vcc a on a.noa = b.noa 
 	left join cust c on a.custno = c.noa left join view_ucaucc d on b.productno = d.noa left join sss s on isnull(a.salesno,'')=s.noa 
 	where (a.datea between @t_bdate and @t_edate) and 
@@ -377,20 +397,31 @@ declare @result table(
 	order by custno,productno,gno,datea,noa,noq 
 
 --*********************************************************************** 
-insert @result(gno,comp,xproduct,mount,weight,money,total)
-select '1',comp,xproduct,sum(mount),SUM(weight),SUM(money),SUM(total)
-from @result where gno='0' group by xproduct,comp
+insert @result(gno,comp,xproduct,size,mount,weight,money,total)
+select '1',comp,xproduct,size,sum(mount),SUM(weight),SUM(money),SUM(total)
+from @result where gno='0' group by xproduct,comp,size
 
-insert @result (gno,comp,mount,weight,money,total,xproduct)
-select '2',comp,sum(mount),SUM(weight),SUM(money),SUM(total),char(255)
+insert @result (gno,comp,mount,weight,money,total,xproduct,size)
+select '2',comp,sum(mount),SUM(weight),SUM(money),SUM(total),char(255),char(255)
 from @result where gno='0' group by comp
 
+if(@t_check='1')
+begin
 select gno,xproduct xpdt,datea,noa,dbo.getComma(mount,0) mount,dbo.getComma(weight,0) weight,
 	   dbo.getComma(money,0) money,dbo.getComma(tax,0) tax,dbo.getComma(price,2) price,
-	   dbo.getComma(total,0) total,memo,comp,custno
+	   dbo.getComma(total,0) total,memo,comp,custno,size
+from @result
+order by comp,size,xpdt,gno,datea
+end
+else
+begin
+select gno,xproduct xpdt,datea,noa,dbo.getComma(mount,0) mount,dbo.getComma(weight,0) weight,
+	   dbo.getComma(money,0) money,dbo.getComma(tax,0) tax,dbo.getComma(price,2) price,
+	   dbo.getComma(total,0) total,memo,comp,custno,size
 from @result
 order by comp,xpdt,gno
-  ;
+end
+;
 --************************************************************************************  
  z_vcc_vu4:--z_vcc_vu4 
 declare @t_bdate nvarchar(20)
@@ -411,6 +442,7 @@ declare @t_bstoreno nvarchar(20)
 declare @t_estoreno nvarchar(20)
 declare @t_qno nvarchar(50)
 declare @t_atax nvarchar(50)
+declare @t_check nvarchar(50)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -421,12 +453,13 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
-set @t_atax = case when '#non'=[20] then '' else [20]  end
+set @t_check = case when '#non'=[15] then '' else [15] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_atax = case when '#non'=[21] then '' else [21]  end
 --*********************************************************************************** 
 declare @mount_decimal int = 0
 declare @weight_decimal int = 0 
@@ -436,7 +469,7 @@ declare @total_decimal int = 0
 
 declare @tmp table(
 	gno nvarchar(1), 
-	products nvarchar(MAX), 
+	products nvarchar(MAX),
 	cno nvarchar(30), 
 	custnick nvarchar(90), 
 	mount float, 
@@ -445,7 +478,8 @@ declare @tmp table(
 	weight float,
 	totax float,
 	recno int,
-	page int
+	page int,
+	size nvarchar(50)
 ) 
 insert into @tmp 
 select '9',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end+ isnull(b.ucolor,'')
@@ -455,7 +489,7 @@ select '9',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (
 ,(case when a.typea='1' then 1 else -1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0) 
 ,(case when a.typea='1' then 1 else -1 end)*b.weight
 ,(case when a.typea='1' then 1 else -1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
-,0,0 
+,0,0,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_vcc a left join view_vccs b on a.noa = b.noa left join cust c on a.custno = c.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
@@ -470,14 +504,14 @@ and (b.storeno between @t_bstoreno and @t_estoreno)
 order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
-select '2',products,cno,custnick,SUM(mount),SUM(total),sum(tax),sum(weight),sum(totax),0,0 from @tmp 
-group by products,cno,custnick 
+select '2',products,cno,custnick,SUM(mount),SUM(total),sum(tax),sum(weight),sum(totax),0,0,size from @tmp 
+group by products,cno,custnick,size 
 
 delete @tmp where gno='9'
 
-insert into @tmp(gno,products,mount,total,weight,totax) 
-select '3',products,sum(mount),sum(total),sum(weight),sum(totax) 
-from @tmp where gno='2' group by products 
+insert into @tmp(gno,products,mount,total,weight,totax,size) 
+select '3',products,sum(mount),sum(total),sum(weight),sum(totax),size  
+from @tmp where gno='2' group by products,size 
 
 --105/12/09 判斷是否顯示稅金
 declare @pageline int = 20
@@ -486,28 +520,42 @@ update a
 set recno=rr,page=ceiling(cast(rr as float)/@pageline)
 from (select page,recno,ROW_NUMBER()over (partition by products order by products,gno,cno)rr from @tmp) a
 
-insert into @tmp(gno,products,page) 
-select '1',products,page
-from @tmp where gno='2' group by products,page
+insert into @tmp(gno,products,page,size) 
+select '1',products,page,size
+from @tmp where gno='2' group by products,page,size
 
 if(@t_atax!='1')
 begin
 	update @tmp set gno=cast(CAST(gno as int)+3 as nvarchar(10))
 end
 
-insert @tmp (gno,products,page) 
-select '7',products,page
-from @tmp group by products,page
- 
-select gno,products,cno,left(custnick,10) custnick 
-,dbo.getComma(mount,@mount_decimal) mount 
-,dbo.getComma(total,@total_decimal) total 
-,dbo.getComma(tax,@total_decimal) tax 
-,dbo.getComma(totax,@total_decimal) totax 
-,dbo.getComma(weight,@weight_decimal) weight,recno,page
-from @tmp order by products,page,gno,cno;
+insert @tmp (gno,products,page,size) 
+select '7',products,page,size
+from @tmp group by products,page,size
+
+if(@t_check='1')
+begin
+	select gno,products,cno,left(custnick,10) custnick 
+	,dbo.getComma(mount,@mount_decimal) mount 
+	,dbo.getComma(total,@total_decimal) total 
+	,dbo.getComma(tax,@total_decimal) tax 
+	,dbo.getComma(totax,@total_decimal) totax 
+	,dbo.getComma(weight,@weight_decimal) weight,recno,page,size
+	from @tmp order by size,products,page,gno,cno
+end
+else
+begin
+	select gno,products,cno,left(custnick,10) custnick 
+	,dbo.getComma(mount,@mount_decimal) mount 
+	,dbo.getComma(total,@total_decimal) total 
+	,dbo.getComma(tax,@total_decimal) tax 
+	,dbo.getComma(totax,@total_decimal) totax 
+	,dbo.getComma(weight,@weight_decimal) weight,recno,page,size
+	from @tmp order by products,page,gno,cno
+end
+;
 --***************************************************************************************
- z_vcc_vu5:--z_vcc_vu5
+z_vcc_vu5:--z_vcc_vu5
 declare @t_bdate nvarchar(20)
 declare @t_edate nvarchar(20)
 declare @t_bcustno nvarchar(20) 
@@ -525,6 +573,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
+declare @t_check nvarchar(20)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -535,11 +584,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_check = case when '#non'=[15] then '' else [15] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -577,7 +627,8 @@ declare @result table(
 	size nvarchar(30),
 	length nvarchar(30),
 	totax float,
-	carno nvarchar(50)
+	carno nvarchar(50),
+	tsize nvarchar(50)
 ) 
 
 insert into @result 
@@ -588,7 +639,7 @@ select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, a.mon mon
 ,b.unit,b.mount, b.weight, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 ,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
 ,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
-,a.carno
+,a.carno,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_vccs b left join view_vcc a on a.noa = b.noa left join cust c on a.custno = c.noa left join sss s on isnull(a.salesno,'')=s.noa 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
@@ -602,27 +653,44 @@ and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or d
 and (b.storeno between @t_bstoreno and @t_estoreno)
 order by custno,gno,mon,datea,noa,noq 
 
-insert into @result(gno,custno,pcount,mount,total,totax,weight) 
+insert into @result(gno,custno,pcount,mount,total,totax,weight,tsize) 
 select '1',custno, count(*), 
 	sum((case typea when '1' then mount else (-1)*mount end)), 
 	sum((case typea when '1' then total else (-1)*total end)),
 	sum((case typea when '1' then totax else (-1)*totax end)),
-	sum((case typea when '1' then weight else (-1)*weight end))  
-from @result a group by custno 
+	sum((case typea when '1' then weight else (-1)*weight end)),
+	CHAR(255) 
+from @result a group by custno
 
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
 update @result set mount=mount*-1,total=total*-1 ,totax=totax*-1,weight=weight*-1,tax=tax*-1 where typea='退' 
 
-select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,xproduct xpdt,unit, qhref 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
-,dbo.getComma(price,-1)price 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax  
-,pcount ,ucolor,spec ,size,length,carno
-from @result order by custno,gno,mon,datea,noa,noq ;
+if(@t_check='1')
+begin
+	select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,xproduct xpdt,unit, qhref 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
+	,dbo.getComma(price,-1)price 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax  
+	,pcount ,ucolor,spec ,size,length,carno
+	from @result order by custno,tsize,gno,datea,noa,noq
+end
+else
+begin
+	select 	gno,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,xproduct xpdt,unit, qhref 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
+	,dbo.getComma(price,-1)price 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax  
+	,pcount ,ucolor,spec ,size,length,carno
+	from @result order by custno,gno,mon,datea,noa,noq 
+end
+;
 --**************************************************************************************
 z_vcc_vu6:--z_vcc_vu6
 declare @t_bdate nvarchar(20)
@@ -652,11 +720,11 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -737,6 +805,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
+declare @t_check nvarchar(20)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -747,11 +816,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_check = case when '#non'=[15] then '' else [15] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -781,7 +851,8 @@ declare @result table(
 	money float,
 	tax float,  
 	total float, 
-	qhref nvarchar(MAX)
+	qhref nvarchar(MAX),
+	size nvarchar(50)
 ) 
 
 insert into @result 
@@ -793,6 +864,7 @@ select '0' gno, a.typea, a.noa noa, b.noq noq, a.datea datea, case when isnull(a
 ,(case when a.typea='1' then 1 else -1 end) *round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)
 ,(case when a.typea='1' then 1 else -1 end) *(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
 ,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy
+,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_vccs b left join view_vcc a on a.noa = b.noa 
 left join cust c on a.custno = c.noa 
 left join view_ucaucc d on b.productno = d.noa 
@@ -809,22 +881,37 @@ and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or d
 and (b.storeno between @t_bstoreno and @t_estoreno)
 order by gno,datea,noa,noq 
 
-insert into @result (gno,xproduct,mount,weight,money,tax,total)
-select '1',xproduct,sum(mount),sum(weight),sum(money),sum(tax),sum(total)
-from @result group by xproduct
+insert into @result (gno,xproduct,mount,weight,money,tax,total,size)
+select '1',xproduct,sum(mount),sum(weight),sum(money),sum(tax),sum(total),size
+from @result group by xproduct,size
 
 --*********************************************************************** 
 update @result set typea = (case typea when '1' then '出' else '退' end) where typea ='1' or typea = '2' 
 
-select left(comp,10) comp,xproduct xpdt
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
-,dbo.getComma(price,-1)price 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money  
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
-,*
-from @result order by xproduct,gno,datea,noa,noq ;
+if(@t_check='1')
+begin
+	select left(comp,10) comp,xproduct xpdt
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
+	,dbo.getComma(price,-1)price 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money  
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
+	,*
+	from @result a order by size,xproduct,gno,datea,a.comp,noa,noq 
+end
+else
+begin
+	select left(comp,10) comp,xproduct xpdt
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
+	,dbo.getComma(price,-1)price 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,money),1)),@total_decimal,30)) money  
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax 
+	,*
+	from @result order by xproduct,gno,datea,noa,noq 
+end
 ;
 --********************************************************************************
 z_vcc_vu8:--z_vcc_vu8
@@ -845,6 +932,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
+declare @t_check nvarchar(20)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -855,11 +943,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_check = case when '#non'=[15] then '' else [15] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -876,7 +965,8 @@ declare @tmp table(
 	total float,
 	tax float,
 	weight float,
-	totax float 
+	totax float,
+	size nvarchar(50)
 ) 
 insert into @tmp 
 select '0',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'') 
@@ -886,6 +976,7 @@ select '0',b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (
 ,sum((case when a.typea='1' then 1 else -1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0))
 ,sum((case when a.typea='1' then 1 else -1 end)*b.weight)
 ,sum((case when a.typea='1' then 1 else -1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total))
+,case when len(size)!=0 and len(size)!=3 and right(size,1) not like '%[^A-Za-z0-9]%' then left(size,1)+'0'+right(size,1) else size end
 from view_vcc a left join view_vccs b on a.noa = b.noa and a.accy = b.accy 
 where (a.datea between @t_bdate and @t_edate) and 
 (a.custno between @t_bcustno and @t_ecustno)  and
@@ -898,27 +989,42 @@ where (a.datea between @t_bdate and @t_edate) and
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
 group by b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')  
-,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end 
+,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end ,size
 		
 if((select count(*) from @tmp)>0)
 begin
-	insert into @tmp(gno,products,mon,mount,total,tax,totax,weight) 
-	select '1',products,'999/99',sum(mount),sum(total),SUM(tax),sum(totax),sum(weight) 
-	from @tmp group by products 
+	insert into @tmp(gno,products,mon,mount,total,tax,totax,weight,size) 
+	select '1',products,'999/99',sum(mount),sum(total),SUM(tax),sum(totax),sum(weight),size 
+	from @tmp group by products,size
 	
-	insert into @tmp(gno,products,mount,total,totax,weight,mon) 
-	select '2',char(255),sum(mount),sum(total),sum(totax),sum(weight),'999/99'
+	insert into @tmp(gno,products,mount,total,totax,weight,mon,size)
+	select '2',char(255),sum(mount),sum(total),sum(totax),sum(weight),'999/99',CHAR(255)
 	from @tmp where gno='1' 
 end
 
-select gno,products,mon 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
-,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
-,dbo.getComma(weight,0) weight
-from @tmp 
-order by products,mon,gno ;
+if(@t_check='1')
+begin
+	select gno,products,mon,size
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
+	,dbo.getComma(weight,0) weight
+	from @tmp 
+	order by size,products,mon,gno
+end
+else
+begin
+	select gno,products,mon,size
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),@total_decimal,30)) total 
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
+	,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
+	,dbo.getComma(weight,0) weight
+	from @tmp 
+	order by products,mon,gno
+end
+;
 -------------------------------------------------------------------------------------------------------------------
 z_vcc_vu9:--z_vcc_vu9
 declare @t_bdate nvarchar(20)
@@ -948,11 +1054,11 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -1162,13 +1268,13 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
-set @t_couplers = case when '#non'=[21] then '' else [21]  end
-set @t_addr2 = case when '#non'=[22] then '' else [22]  end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_couplers = case when '#non'=[22] then '' else [22]  end
+set @t_addr2 = case when '#non'=[23] then '' else [23]  end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -1385,12 +1491,12 @@ set @t_product = case when '#non'=[11] then '' else [11] end
 set @t_spec = case when '#non'=[12] then '' else [12] end
 set @t_size = case when '#non'=[13] then '' else [13] end
 set @t_class = case when '#non'=[14] then '' else [14] end
-set @t_blengthb = case when '#non'=[15] then 0 else [15] end
-set @t_elengthb = case when '#non'=[16] then 99 else [16] end
+set @t_blengthb = case when '#non'=[16] then 0 else [16] end
+set @t_elengthb = case when '#non'=[17] then 99 else [17] end
 declare @t_qno nvarchar(50)
-set @t_qno = case when '#non'=[17] then '' else [17] end
-set @t_bstoreno = case when '#non'=[18] then '' else [18] end 
-set @t_estoreno = case when '#non'=[19] then char(255) else [19]  end
+set @t_qno = case when '#non'=[18] then '' else [18] end
+set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
+set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 --***********************************************************************************
 declare @tmp table( 
 	gno nvarchar(1), 

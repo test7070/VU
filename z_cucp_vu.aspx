@@ -81,6 +81,12 @@
                     }, {//[14][15]
                         type : '1',
                         name : 'xordeno'
+                    }, {
+                        type : '1', //[16][17]
+                        name : 'xdate'
+                    }, {//[18]
+                        type : '6',
+                        name : 'xbdate' 
                     }]
 				});
                 q_popAssign();
@@ -95,6 +101,22 @@
 				$('#txtEdate').mask(r_picd);
                 $('#txtEdate').val(q_date());
                 $('#txtEdate').datepicker({dateFormat : 'yy/mm/dd'});
+                
+                if(r_len==4){                	
+                	$.datepicker.r_len=4;
+					//$.datepicker.setDefaults($.datepicker.regional["ENG"]);
+                }
+
+                $('#txtXdate1').mask(r_picd);
+                $('#txtXdate1').datepicker();
+                $('#txtXdate2').mask(r_picd);
+                $('#txtXdate2').datepicker();
+
+				$('#txtXdate1').val(q_date().substr(0,r_lenm)+'/01');
+				$('#txtXdate2').val(q_cdn(q_cdn(q_date().substr(0,r_lenm)+'/01',45).substr(0,r_lenm)+'/01',-1));
+                
+                $('#txtXbdate').mask(r_picd);
+                $('#txtXbdate').datepicker({dateFormat : 'yy/mm/dd'});
                 
                 $("#Xlengthb").css('width', '302px');
                 $("#Xlengthb input").css('width', '90px');

@@ -157,3 +157,61 @@ dbo.getComma(mount,0)mount
 from @result 
 order by gno,product,uno
 ;
+-------------------------------------------------------------------------------------------
+z_cucp_vu03:--z_cucp_vu03
+declare @t_bnoa nvarchar(100)
+declare @t_enoa nvarchar(100)
+declare @t_bcustno nvarchar(50)
+declare @t_ecustno nvarchar(50)
+declare @t_bdatea nvarchar(50)
+declare @t_edatea nvarchar(50)
+declare @t_bdate nvarchar(30)
+
+set @t_bnoa = case when '#non'=[1] then '' else [1] end 
+set @t_enoa = case when '#non'=[2] then char(255) else [2] end 
+set @t_bcustno=case when '#non' = [12] then '' else [12] end
+set @t_ecustno=case when '#non' = [13] then char(255)  else [13] end
+set @t_bdatea=case when '#non' = [16] then '' else [16] end
+set @t_edatea=case when '#non' = [17] then char(255)  else [17] end
+set @t_bdate=case when '#non' = [18] then '' else [18] end
+
+declare @tmp table(
+	gno nvarchar(1),
+	noa nvarchar(50),
+	cust nvarchar(100),
+	memo nvarchar(max),
+	datea nvarchar(10),
+	bdate nvarchar(10),
+	rr nvarchar(10),
+	spec nvarchar(20),
+	size nvarchar(20),
+	lenghtb float,
+	mount1 float,
+	mount float,
+	weight float,
+	class nvarchar(50),
+	smemo nvarchar(max),
+	size2 nvarchar(100)
+)
+insert @tmp
+select '0',a.noa,a.cust,a.memo,a.datea,a.bdate,b.no2,b.spec,b.size,b.lengthb,b.mount1,b.mount,b.weight,b.class,b.memo,b.size2 
+from view_cuc a left join view_cucs b on a.noa=b.noa
+where (a.noa between @t_bnoa and @t_enoa)
+and (a.custno between @t_bcustno and @t_ecustno)
+and (a.datea between @t_bdatea and @t_edatea)
+and (len(@t_bdate)=0 or a.bdate=@t_bdate)
+
+if((select count(*) from @tmp)>0)
+begin
+	insert @tmp(gno,noa)
+	select '1',noa from @tmp group by noa
+end
+
+select 
+dbo.getComma(lenghtb,-1) lenghtb,
+dbo.getComma(mount1,0)mount1,
+dbo.getComma(mount,0)mount,
+dbo.getComma(weight,0)weight,
+* from @tmp
+order by noa,gno
+;

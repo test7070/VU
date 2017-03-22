@@ -215,3 +215,200 @@ dbo.getComma(weight,0)weight,
 * from @tmp
 order by noa,gno
 ;
+---------------------------------------------------------------------------------
+z_cucp_vu04:--z_cucp_vu04
+SET QUOTED_IDENTIFIER OFF
+declare @t_bnoa nvarchar(100)
+declare @t_enoa nvarchar(100)
+declare @t_bdate nvarchar(100)
+declare @t_edate nvarchar(100)
+
+set @t_bnoa = case when '#non'=[1] then '' else [1] end 
+set @t_enoa = case when '#non'=[2] then char(255) else [2] end 
+set @t_bdate = case when '#non'=[16] then '' else [16] end 
+set @t_edate = case when '#non'=[17] then char(255) else [17] end 
+
+
+declare @tmp table(
+	gno nvarchar(1),
+	rr int,
+	years nvarchar(10),
+	weeks nvarchar(100),
+	weeka nvarchar(10),
+	bdate nvarchar(10),
+	noa nvarchar(100),
+	custno nvarchar(50),
+	cust nvarchar(100),
+	memo nvarchar(max)	
+)
+
+insert @tmp 
+select '1','',left(bdate,4),
+REPLICATE('0',2-LEN(DATEPART(ISO_WEEK,bdate))) + RTRIM(CAST(DATEPART(ISO_WEEK,bdate) AS CHAR))
+,'星期'+case DATEPART(WEEKDAY,bdate) when 1 then '日' when 2 then '一' when 3 then '二' when 4 then '三' when 5 then '四' when 6 then '五' when 7 then '六' end
+,bdate,noa,custno,cust,memo 
+from view_cuc
+where ISDATE(bdate)=1 and (noa between @t_bnoa and @t_enoa) and (bdate between @t_bdate and @t_edate)
+
+update a
+set rr=rx,gno= case when rx=1 then 1 else 2 end
+from (select ROW_NUMBER()over(partition by weeks order by years,weeks,bdate,noa,custno)rx,rr,gno from @tmp)a
+
+select * from @tmp
+order by years,weeks,rr
+;
+
+---------------------------------------------------------------------------------------------------------------
+z_cucp_vu05:--z_cucp_vu05
+SET QUOTED_IDENTIFIER OFF
+declare @t_bdate nvarchar(100)
+declare @t_edate nvarchar(100)
+set @t_bdate = case when '#non'=[16] then '' else [16] end 
+set @t_edate = case when '#non'=[17] then char(255) else [17] end 
+
+declare @tmp table(
+	datea nvarchar(10),
+	week nvarchar(10),
+	noa nvarchar(50),
+	weight float,
+	custno nvarchar(50),
+	cust nvarchar(100),
+	mech nvarchar(100),
+	size nvarchar(50),
+	spec nvarchar(100),
+	pweight float,
+	class nvarchar(50),
+	total float
+)
+insert @tmp
+select a.bdate,case DATEPART(WEEKDAY,bdate) when 1 then '日' when 2 then '一' when 3 then '二' when 4 then '三' when 5 then '四' when 6 then '五' when 7 then '六' end
+,a.noa,'',a.custno,a.cust,a.mech,case when b.mins=1 then '■ '+b.size else '□ '+b.size end,b.spec,sum(b.weight),b.class,''
+from view_cuc a left join view_cucs b on a.noa=b.noa
+where (a.bdate between @t_bdate and @t_edate) and ISDATE(bdate)=1 and a.bdate>=convert(nvarchar,getdate(),111)
+group by a.noa,a.bdate,a.custno,a.cust,a.mech,b.size,b.spec,b.class,b.mins
+
+update @tmp
+set weight=b.weight
+from @tmp a left join (select datea,sum(pweight)weight from @tmp group by datea) b on a.datea=b.datea
+
+update @tmp
+set total=b.total
+from @tmp a left join (select noa,sum(pweight)total from @tmp group by noa) b on a.noa=b.noa
+
+declare @tmpa table(
+	gno nvarchar(1),
+	rr int,
+	recno int,
+	pageno int,
+	datea nvarchar(10),
+	week nvarchar(10),
+	weight float,
+	noa nvarchar(50),
+	total float,
+	cust nvarchar(100),
+	mech nvarchar(100),
+	product nvarchar(max)
+)
+
+insert @tmpa(gno,recno,datea,week,weight)
+select '1','0',datea,week,weight
+from @tmp
+group by datea,week,weight
+
+insert @tmpa(gno,datea,week,weight,noa,total,cust,mech,product)
+select '2',datea,week,weight,noa,total,cust,mech,''
+from @tmp
+group by datea,week,weight,noa,total,cust,mech
+
+declare @noa nvarchar(50)
+declare @product nvarchar(200)
+
+declare cursor_table cursor for
+select noa,size+' '+spec+'*'+cast(dbo.getcomma(pweight,0) as nvarchar(50))+'KG '+class product from @tmp
+open cursor_table
+fetch next from cursor_table
+into @noa,@product
+while(@@FETCH_STATUS <> -1)
+begin		
+	update @tmpa
+	set product=@product+'<br/>'+product
+	where noa=@noa
+
+	fetch next from cursor_table 
+	into @noa,@product
+end
+close cursor_table 
+deallocate cursor_table
+
+update a
+set rr=rx,pageno=case when rx%7=0 then rx/7 else rx/7+1 end
+from @tmpa a left join(select ROW_NUMBER()over(partition by gno order by datea)rx,datea from @tmpa group by gno,datea)b on a.datea=b.datea
+
+update a
+set recno=rx
+from (select ROW_NUMBER()over(partition by datea order by gno)rx,recno from @tmpa where gno!='1')a
+
+declare @result table(
+	gno nvarchar(1),
+	recno int,
+	pageno int,
+	datea1 nvarchar(10),datea2 nvarchar(10),datea3 nvarchar(10),datea4 nvarchar(10),datea5 nvarchar(10),datea6 nvarchar(10),datea7 nvarchar(10),
+	week1 nvarchar(10),week2 nvarchar(10),week3 nvarchar(10),week4 nvarchar(10),week5 nvarchar(10),week6 nvarchar(10),week7 nvarchar(10),
+	weight1 nvarchar(50),weight2 nvarchar(50),weight3 nvarchar(50),weight4 nvarchar(50),weight5 nvarchar(50),weight6 nvarchar(50),weight7 nvarchar(50),
+	noa1 nvarchar(50),noa2 nvarchar(50),noa3 nvarchar(50),noa4 nvarchar(50),noa5 nvarchar(50),noa6 nvarchar(50),noa7 nvarchar(50),
+	cust1 nvarchar(100),cust2 nvarchar(100),cust3 nvarchar(100),cust4 nvarchar(100),cust5 nvarchar(100),cust6 nvarchar(100),cust7 nvarchar(100),
+	product1 nvarchar(max),product2 nvarchar(max),product3 nvarchar(max),product4 nvarchar(max),product5 nvarchar(max),product6 nvarchar(max),product7 nvarchar(max)
+)
+
+insert @result(gno,recno,pageno)
+select gno,recno,pageno
+from @tmpa
+group by gno,recno,pageno
+
+update @result
+set datea1=a.datea,week1=a.week,weight1=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa1=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+	,cust1=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product1=a.product
+from @result b left join @tmpa a on a.rr%7=1 and a.recno=b.recno and a.pageno=b.pageno
+
+update @result
+set datea2=a.datea,week2=a.week,weight2=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa2=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+	,cust2=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product2=a.product
+from @result b left join @tmpa a on a.rr%7=2 and a.recno=b.recno and a.pageno=b.pageno
+
+update @result
+set datea3=a.datea,week3=a.week,weight3=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa3=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+	,cust3=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product3=a.product
+from @result b left join @tmpa a on a.rr%7=3 and a.recno=b.recno and a.pageno=b.pageno
+
+update @result
+set datea4=a.datea,week4=a.week,weight4=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa4=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+	,cust4=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product4=a.product
+from @result b left join @tmpa a on a.rr%7=4 and a.recno=b.recno and a.pageno=b.pageno
+
+update @result
+set datea5=a.datea,week5=a.week,weight5=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa5=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+	,cust5=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product5=a.product
+from @result b left join @tmpa a on a.rr%7=5 and a.recno=b.recno and a.pageno=b.pageno
+
+update @result
+set datea6=a.datea,week6=a.week,weight6=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa6=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+	,cust6=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product6=a.product
+from @result b left join @tmpa a on a.rr%7=6 and a.recno=b.recno and a.pageno=b.pageno
+
+update @result
+set datea7=a.datea,week7=a.week,weight7=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa7=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+	,cust7=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product7=a.product
+from @result b left join @tmpa a on a.rr%7=0 and a.recno=b.recno and a.pageno=b.pageno
+
+update @result
+set gno=case when recno%2=1 then 2 else 3 end
+where gno='2'
+
+insert @result(gno,pageno,recno)
+select '4',pageno,MAX(recno)+1
+from @result
+group by pageno
+
+select * from @result
+order by pageno,recno
+;

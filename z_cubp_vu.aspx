@@ -105,6 +105,13 @@
                         dbf : 'cust',
                         index : 'noa,comp',
                         src : 'cust_b.aspx'
+                    },{//[23][24]
+                        type : '1',
+						name : 'xfdate'
+                    },{
+                        type : '8', //[25]//
+                        name : 'xenda',
+                        value : "1@日顯示(日報表)".split(',')
                     }]
 				});
                 q_popAssign();
@@ -116,13 +123,19 @@
 					r_1911=0;
 					$('#txtXdate1').datepicker({dateFormat : 'yy/mm/dd'});
 					$('#txtXdate2').datepicker({dateFormat : 'yy/mm/dd'});
+					$('#txtXfdate1').datepicker({dateFormat : 'yy/mm/dd'});
+					$('#txtXfdate2').datepicker({dateFormat : 'yy/mm/dd'});
 				}else{
 					$('#txtXdate1').datepicker();
 					$('#txtXdate2').datepicker();
+					$('#txtXfdate1').datepicker();
+					$('#txtXfdate2').datepicker();
 				}
                  
                  $('#txtXdate1').mask(r_picd);
 	             $('#txtXdate2').mask(r_picd);
+	             $('#txtXfdate1').mask(r_picd);
+	             $('#txtXfdate2').mask(r_picd);
 	             $('#txtXmon1').mask(r_picm);
 	             $('#txtXmon2').mask(r_picm);
 	             $('#txtXtime1').mask('99:99');
@@ -134,6 +147,8 @@
                 //1050930 預設1號到月底
                 $('#txtXdate1').val(q_date().substr(0,r_lenm)+'/01');
                 $('#txtXdate2').val(q_cdn(q_cdn(q_date().substr(0,r_lenm)+'/01',35).substr(0,r_lenm)+'/01',-1));
+                $('#txtXfdate1').val(q_date());
+                $('#txtXfdate2').val(q_cdn(q_date(),30));
                 
                 //1204 預設兩個月 與類別預設顯示 未結案
                 $('#txtXmon1').val(q_cdn(q_date().substring(0,r_lenm)+'/01',-25).substring(0,r_lenm));
@@ -178,7 +193,12 @@
  				if(window.parent.q_name=='cuc'){
  					$('#q_report .report div').eq(3).click();
  					$('#btnOk').click();
- 				}	
+ 				}
+ 				
+ 				$('#Xenda').css('width', '300px').css('height', '30px');
+				$('#Xenda .label').css('width','0px');
+				$('#chkXenda').css('width', '220px').css('margin-top', '5px');
+				$('#chkXenda span').css('width','180px')	
  				
 			}
 			

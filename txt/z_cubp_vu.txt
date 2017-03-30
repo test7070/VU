@@ -164,6 +164,7 @@ declare @t_showget nvarchar(30)
 declare @t_btime nvarchar(30)
 declare @t_etime nvarchar(30)
 declare @t_sheet nvarchar(30)
+declare @t_enda nvarchar(10)
 
 set @t_bdate = case when '#non'=[6] then '' else [6] end 
 set @t_edate = case when '#non'=[7] then char(255) else [7] end 
@@ -172,7 +173,8 @@ set @t_emechno = case when '#non'=[9] then char(255) else [9] end
 set @t_showget = case when '#non'=[16] then 'N' else [16] end
 set @t_btime = case when '#non'=[18] then '' else [18] end 
 set @t_etime = case when '#non'=[19] then char(255) else [19] end 
-set @t_sheet = case when '#non'=[20] then 'N' else [20] end 
+set @t_sheet = case when '#non'=[20] then 'N' else [20] end
+set @t_enda = case when '#non'=[25] then '' else [25] end  
 -----------------------------------------------------------------------------------------------------
 declare @result table(
 	gno nvarchar(1),
@@ -184,32 +186,61 @@ declare @result table(
 	gweight float,
 	bweight float
 )
+if(@t_enda='1')
+begin
+	insert @result 
+	select '0',a.datea,a.mechno,a.mech
+	,SUM(case when b.mount>=0 or b.weight>=0 then b.mount else 0 end)
+	,SUM(case when b.weight>=0 then b.weight else 0 end)
+	,SUM(case when b.weight<0 then -1*b.weight else 0 end)
+	,SUM(b.weight)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
+		and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
+		--and (@t_showget='Y' or  (b.mount>=0 or b.weight>=0) )
+		and ISNULL(left(right(a.kind,8),5),'') between @t_btime and @t_etime
+		and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
+	group by a.datea,a.mechno,a.mech
 
-insert @result 
-select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end ,a.mechno,a.mech
-,SUM(case when b.mount>=0 or b.weight>=0 then b.mount else 0 end)
-,SUM(case when b.weight>=0 then b.weight else 0 end)
-,SUM(case when b.weight<0 then -1*b.weight else 0 end)
-,SUM(b.weight)
-from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
-where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
-	and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
-	--and (@t_showget='Y' or  (b.mount>=0 or b.weight>=0) )
-	and ISNULL(left(right(a.kind,8),5),'') between @t_btime and @t_etime
-	and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
-group by case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end,a.mechno,a.mech
+	insert @result (gno,mon,mount,weight,gweight,bweight)
+	select '2',mon,SUM(mount),sum(weight),sum(gweight),sum(bweight)
+	from @result
+	group by mon
 
-insert @result (gno,mon,mount,weight,gweight,bweight)
-select '1',mon,SUM(mount),sum(weight),sum(gweight),sum(bweight)
-from @result
-group by mon
+	insert @result (gno,mon)
+	select '3',mon
+	from @result
+	group by mon
+end
+else
+begin
+	insert @result 
+	select '0',case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end ,a.mechno,a.mech
+	,SUM(case when b.mount>=0 or b.weight>=0 then b.mount else 0 end)
+	,SUM(case when b.weight>=0 then b.weight else 0 end)
+	,SUM(case when b.weight<0 then -1*b.weight else 0 end)
+	,SUM(b.weight)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	where a.datea between @t_bdate and @t_edate and a.mechno between @t_bmechno and @t_emechno
+		and isnull(b.uno,'')!='' --and isnull(b.ordeno,'')!=''
+		--and (@t_showget='Y' or  (b.mount>=0 or b.weight>=0) )
+		and ISNULL(left(right(a.kind,8),5),'') between @t_btime and @t_etime
+		and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
+	group by case when len(rtrim(ltrim(a.datea))) = 10 then left(a.datea,7) else left(a.datea,6) end,a.mechno,a.mech
 
-insert @result (gno,mon,mount,weight,gweight,bweight)
-select '2','9999/999',SUM(mount),sum(weight),sum(gweight),sum(bweight)
-from @result
-where gno='1'
+	insert @result (gno,mon,mount,weight,gweight,bweight)
+	select '1',mon,SUM(mount),sum(weight),sum(gweight),sum(bweight)
+	from @result
+	group by mon
 
-select gno,mon,mechno,mech
+	insert @result (gno,mon,mount,weight,gweight,bweight)
+	select '2','9999/999',SUM(mount),sum(weight),sum(gweight),sum(bweight)
+	from @result
+	where gno='1'
+end
+
+
+select gno,mon,mechno,mech,case when @t_enda='1' then '日期' else '月份' end nmon
 ,dbo.getComma(mount,[2]) mount
 ,dbo.getComma(weight,[3]) weight
 ,dbo.getComma(gweight,[3]) gweight
@@ -854,8 +885,10 @@ z_cubp_vu08:--z_cubp_vu08
 SET QUOTED_IDENTIFIER OFF
 declare @t_bdate nvarchar(100)
 declare @t_edate nvarchar(100)
-set @t_bdate = case when '#non'=[6] then '' else [6] end 
-set @t_edate = case when '#non'=[7] then char(255) else [7] end 
+declare @t_enda  nvarchar(2)
+set @t_bdate = case when '#non'=[23] then '' else [23] end 
+set @t_edate = case when '#non'=[24] then char(255) else [24] end
+set @t_enda  = case when '#non'=[25] then '' else [25] end  
 
 declare @tmp table(
 	datea nvarchar(10),
@@ -875,8 +908,9 @@ insert @tmp
 select a.bdate,case DATEPART(WEEKDAY,bdate) when 1 then '日' when 2 then '一' when 3 then '二' when 4 then '三' when 5 then '四' when 6 then '五' when 7 then '六' end
 ,a.noa,'',a.custno,a.cust,a.mech,case when b.mins=1 then '■ '+b.size else '□ '+b.size end,b.spec,sum(b.weight),b.class,''
 from view_cuc a left join view_cucs b on a.noa=b.noa
-where (a.bdate between @t_bdate and @t_edate) and ISDATE(bdate)=1 and a.bdate>=convert(nvarchar,getdate(),111)
+where (a.bdate between @t_bdate and @t_edate) and ISDATE(bdate)=1
 group by a.noa,a.bdate,a.custno,a.cust,a.mech,b.size,b.spec,b.class,b.mins
+
 
 update @tmp
 set weight=b.weight
@@ -887,7 +921,7 @@ set total=b.total
 from @tmp a left join (select noa,sum(pweight)total from @tmp group by noa) b on a.noa=b.noa
 
 declare @tmpa table(
-	gno nvarchar(1),
+	gno nvarchar(2),
 	rr int,
 	recno int,
 	pageno int,
@@ -900,106 +934,162 @@ declare @tmpa table(
 	mech nvarchar(100),
 	product nvarchar(max)
 )
-
-insert @tmpa(gno,recno,datea,week,weight)
-select '1','0',datea,week,weight
-from @tmp
-group by datea,week,weight
-
-insert @tmpa(gno,datea,week,weight,noa,total,cust,mech,product)
-select '2',datea,week,weight,noa,total,cust,mech,''
-from @tmp
-group by datea,week,weight,noa,total,cust,mech
-
-declare @noa nvarchar(50)
-declare @product nvarchar(200)
-
-declare cursor_table cursor for
-select noa,size+' '+spec+'*'+cast(dbo.getcomma(pweight,0) as nvarchar(50))+'KG '+class product from @tmp
-open cursor_table
-fetch next from cursor_table
-into @noa,@product
-while(@@FETCH_STATUS <> -1)
-begin		
-	update @tmpa
-	set product=@product+'<br/>'+product
-	where noa=@noa
-
-	fetch next from cursor_table 
-	into @noa,@product
+if(@t_enda='1')
+begin
+	insert @tmpa(gno,rr,recno,datea,week,weight,noa,total,cust,mech,product)
+	select '7',ROW_NUMBER()over(partition by datea order by noa,custno,cast(dbo.get_num(size) as int),spec),ROW_NUMBER()over(partition by noa order by datea,custno,cast(dbo.get_num(size) as int),spec),datea,week,weight,noa,total,cust,mech,size+' '+spec+'*'+cast(dbo.getcomma(pweight,0) as nvarchar(50))+'KG '+class
+	from @tmp
 end
-close cursor_table 
-deallocate cursor_table
+else
+begin
+	insert @tmpa(gno,recno,datea,week,weight)
+	select '2','0',datea,week,weight
+	from @tmp
+	group by datea,week,weight
 
-update a
-set rr=rx,pageno=case when rx%7=0 then rx/7 else rx/7+1 end
-from @tmpa a left join(select ROW_NUMBER()over(partition by gno order by datea)rx,datea from @tmpa group by gno,datea)b on a.datea=b.datea
+	insert @tmpa(gno,datea,week,weight,noa,total,cust,mech,product)
+	select '3',datea,week,weight,noa,total,cust,mech,''
+	from @tmp
+	group by datea,week,weight,noa,total,cust,mech
 
-update a
-set recno=rx
-from (select ROW_NUMBER()over(partition by datea order by gno)rx,recno from @tmpa where gno!='1')a
+	declare @noa nvarchar(50)
+	declare @product nvarchar(200)
 
+	declare cursor_table cursor for
+	select noa,size+' '+spec+'*'+cast(dbo.getcomma(pweight,0) as nvarchar(50))+'KG '+class product from @tmp order by noa,size desc,spec desc
+	open cursor_table
+	fetch next from cursor_table
+	into @noa,@product
+	while(@@FETCH_STATUS <> -1)
+	begin		
+		update @tmpa
+		set product=@product+'<br/>'+product
+		where noa=@noa
+		
+
+		fetch next from cursor_table 
+		into @noa,@product
+	end
+	close cursor_table 
+	deallocate cursor_table
+
+	update a
+	set rr=rx,pageno=case when rx%7=0 then rx/7 else rx/7+1 end
+	from @tmpa a left join(select ROW_NUMBER()over(partition by gno order by datea)rx,datea from @tmpa group by gno,datea)b on a.datea=b.datea
+
+	update a
+	set recno=rx
+	from (select ROW_NUMBER()over(partition by datea order by gno)rx,recno from @tmpa where gno='3')a
+end
 declare @result table(
-	gno nvarchar(1),
+	gno nvarchar(2),
 	recno int,
 	pageno int,
+	title nvarchar(10),
 	datea1 nvarchar(10),datea2 nvarchar(10),datea3 nvarchar(10),datea4 nvarchar(10),datea5 nvarchar(10),datea6 nvarchar(10),datea7 nvarchar(10),
 	week1 nvarchar(10),week2 nvarchar(10),week3 nvarchar(10),week4 nvarchar(10),week5 nvarchar(10),week6 nvarchar(10),week7 nvarchar(10),
 	weight1 nvarchar(50),weight2 nvarchar(50),weight3 nvarchar(50),weight4 nvarchar(50),weight5 nvarchar(50),weight6 nvarchar(50),weight7 nvarchar(50),
 	noa1 nvarchar(50),noa2 nvarchar(50),noa3 nvarchar(50),noa4 nvarchar(50),noa5 nvarchar(50),noa6 nvarchar(50),noa7 nvarchar(50),
+	aweight1 nvarchar(50),aweight2 nvarchar(50),aweight3 nvarchar(50),aweight4 nvarchar(50),aweight5 nvarchar(50),aweight6 nvarchar(50),aweight7 nvarchar(50),
 	cust1 nvarchar(100),cust2 nvarchar(100),cust3 nvarchar(100),cust4 nvarchar(100),cust5 nvarchar(100),cust6 nvarchar(100),cust7 nvarchar(100),
-	product1 nvarchar(max),product2 nvarchar(max),product3 nvarchar(max),product4 nvarchar(max),product5 nvarchar(max),product6 nvarchar(max),product7 nvarchar(max)
+	product1 nvarchar(max),product2 nvarchar(max),product3 nvarchar(max),product4 nvarchar(max),product5 nvarchar(max),product6 nvarchar(max),product7 nvarchar(max),
+	ghref nvarchar(max),ghrefa nvarchar(max),ghrefb nvarchar(max),ghrefc nvarchar(max),ghrefd nvarchar(max),ghrefe nvarchar(max),ghreff nvarchar(max)
 )
+if(@t_enda='1')
+begin
+	insert @result(gno,recno,datea1,week1,weight1,noa1,aweight1,cust1,product1,ghref)
+	select '7',recno,datea,week,cast(dbo.getcomma(weight,0) as nvarchar(50))+' KG',noa,'('+cast(dbo.getcomma(total,0) as nvarchar(50))+'KG)',case when len(mech)=0 then cust else cust+' - '+mech end,product,"cuc_vu2?noa=$noa1?"
+	from @tmpa
+	where recno%3=1
+	order by datea,rr
 
-insert @result(gno,recno,pageno)
-select gno,recno,pageno
-from @tmpa
-group by gno,recno,pageno
+	update @result
+	set product2=a.product
+	from @result b left join @tmpa a on a.recno%3=2 and b.recno+1=a.recno and a.noa=b.noa1
 
-update @result
-set datea1=a.datea,week1=a.week,weight1=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa1=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
-	,cust1=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product1=a.product
-from @result b left join @tmpa a on a.rr%7=1 and a.recno=b.recno and a.pageno=b.pageno
+	update @result
+	set product3=a.product
+	from @result b left join @tmpa a on a.recno%3=0 and b.recno+2=a.recno and a.noa=b.noa1
 
-update @result
-set datea2=a.datea,week2=a.week,weight2=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa2=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
-	,cust2=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product2=a.product
-from @result b left join @tmpa a on a.rr%7=2 and a.recno=b.recno and a.pageno=b.pageno
+	update @result
+	set pageno=rx
+	from @result a left join(
+	select ROW_NUMBER()over(partition by datea1 order by noa1)rx,noa1 from @result group by noa1,datea1,pageno) b on a.noa1=b.noa1
 
-update @result
-set datea3=a.datea,week3=a.week,weight3=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa3=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
-	,cust3=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product3=a.product
-from @result b left join @tmpa a on a.rr%7=3 and a.recno=b.recno and a.pageno=b.pageno
+	insert @result(gno,recno,datea1,week1,weight1)
+	select '6','0',datea1,week1,weight1
+	from @result
+	group by datea1,week1,weight1
 
-update @result
-set datea4=a.datea,week4=a.week,weight4=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa4=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
-	,cust4=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product4=a.product
-from @result b left join @tmpa a on a.rr%7=4 and a.recno=b.recno and a.pageno=b.pageno
+	update @result
+	set gno=case when pageno%2=1 and recno=1 then 7 else(case when pageno%2=0 and recno=1 then 9 else (case when pageno%2=1 and recno!=1 then 8 else 10 end) end) end
+	where gno='7'
+	
+	insert @result(gno,datea1,pageno)
+	select '11',datea1,MAX(pageno)+1
+	from @result
+	group by datea1
 
-update @result
-set datea5=a.datea,week5=a.week,weight5=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa5=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
-	,cust5=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product5=a.product
-from @result b left join @tmpa a on a.rr%7=5 and a.recno=b.recno and a.pageno=b.pageno
+	select * from @result
+	order by datea1,pageno,noa1
+end
+else
+begin
+	insert @result(gno,recno,pageno)
+	select gno,recno,pageno
+	from @tmpa
+	group by gno,recno,pageno
 
-update @result
-set datea6=a.datea,week6=a.week,weight6=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa6=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
-	,cust6=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product6=a.product
-from @result b left join @tmpa a on a.rr%7=6 and a.recno=b.recno and a.pageno=b.pageno
+	insert @result(gno,recno,pageno,title)
+	select '1','0',pageno,'生產計劃日程表'
+	from @result
+	group by pageno
 
-update @result
-set datea7=a.datea,week7=a.week,weight7=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa7=a.noa+' ('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
-	,cust7=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product7=a.product
-from @result b left join @tmpa a on a.rr%7=0 and a.recno=b.recno and a.pageno=b.pageno
+	update @result
+	set datea1=a.datea,week1=a.week,weight1=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa1=a.noa,aweight1='('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+		,cust1=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product1=a.product,ghref="cuc_vu2?noa=$noa1?"
+	from @result b left join @tmpa a on a.rr%7=1 and a.recno=b.recno and a.pageno=b.pageno
 
-update @result
-set gno=case when recno%2=1 then 2 else 3 end
-where gno='2'
+	update @result
+	set datea2=a.datea,week2=a.week,weight2=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa2=a.noa,aweight2='('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+		,cust2=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product2=a.product,ghrefa="cuc_vu2?noa=$noa2?"
+	from @result b left join @tmpa a on a.rr%7=2 and a.recno=b.recno and a.pageno=b.pageno
 
-insert @result(gno,pageno,recno)
-select '4',pageno,MAX(recno)+1
-from @result
-group by pageno
+	update @result
+	set datea3=a.datea,week3=a.week,weight3=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa3=a.noa,aweight3='('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+		,cust3=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product3=a.product,ghrefb="cuc_vu2?noa=$noa3?"
+	from @result b left join @tmpa a on a.rr%7=3 and a.recno=b.recno and a.pageno=b.pageno
 
-select * from @result
-order by pageno,recno
+	update @result
+	set datea4=a.datea,week4=a.week,weight4=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa4=a.noa,aweight4='('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+		,cust4=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product4=a.product,ghrefc="cuc_vu2?noa=$noa4?"
+	from @result b left join @tmpa a on a.rr%7=4 and a.recno=b.recno and a.pageno=b.pageno
+
+	update @result
+	set datea5=a.datea,week5=a.week,weight5=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa5=a.noa,aweight5='('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+		,cust5=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product5=a.product,ghrefd="cuc_vu2?noa=$noa5?"
+	from @result b left join @tmpa a on a.rr%7=5 and a.recno=b.recno and a.pageno=b.pageno
+
+	update @result
+	set datea6=a.datea,week6=a.week,weight6=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa6=a.noa,aweight6='('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+		,cust6=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product6=a.product,ghrefe="cuc_vu2?noa=$noa6?"
+	from @result b left join @tmpa a on a.rr%7=6 and a.recno=b.recno and a.pageno=b.pageno
+
+	update @result
+	set datea7=a.datea,week7=a.week,weight7=cast(dbo.getcomma(a.weight,0) as nvarchar(50))+' KG',noa7=a.noa,aweight7='('+cast(dbo.getcomma(a.total,0) as nvarchar(50))+'KG)'
+		,cust7=case when len(a.mech)=0 then a.cust else a.cust+' - '+a.mech end,product7=a.product,ghreff="cuc_vu2?noa=$noa7?"
+	from @result b left join @tmpa a on a.rr%7=0 and a.recno=b.recno and a.pageno=b.pageno
+
+	update @result
+	set gno=case when recno%2=1 then 3 else 4 end
+	where gno='3'
+	
+	insert @result(gno,pageno,recno)
+	select '5',pageno,9999
+	from @result
+	group by pageno
+	
+	select * from @result
+	order by pageno,recno,gno
+end
 ;

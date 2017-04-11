@@ -947,9 +947,9 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*b.total,b.storeno,0,0
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
---106/04/10
-and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
-and b.storeno!='7000'
+--106/04/11 bbs要扣板料 但不看成品倉
+--and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
+--and b.storeno!='7000'
 and b.storeno!='7000A' --105/07/21 成品倉只看bbt
 
 insert #tmp
@@ -1580,9 +1580,6 @@ create table #tmp(
 	primary key (datea,tablea,typea,noa,noq,product,spec,size,ucolor,lengthb,class)
 )
 
-CREATE INDEX tmpindex on #tmp (product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
-CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
-
 --盤
 insert #tmp
 select '0','ucce',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
@@ -1606,9 +1603,9 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*b.total,b.storeno,0,0,'vcc_vu?noa=$noa'
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
---106/04/10
-and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
-and b.storeno!='7000'
+--106/04/11 bbs要扣板料 但不看成品倉
+--and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
+--and b.storeno!='7000' 
 and b.storeno!='7000A' --105/07/21 成品倉只看bbt
 
 insert #tmp
@@ -1634,6 +1631,9 @@ select '2','cubs',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor
 ,'cub_vu?noa=$noa'
 from view_cub a left join view_cubs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+
+CREATE INDEX tmpindex on #tmp (product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
+CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 
 --------------------------------------------------------------------
 --月成本

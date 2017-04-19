@@ -295,6 +295,8 @@ create table #tmp(
 	idno int
 )
 
+CREATE INDEX tmpindex on #tmp (gno,tablea,datea,noa,noq)
+
 insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '11','ucce',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno
 ,b.mount,b.weight,b.total,0,0

@@ -64,6 +64,8 @@ create table #tmp(
 	idno int
 )
 
+CREATE INDEX tmpindex on #tmp (gno,tablea,datea,noa,noq)
+
 create table #tmpa(
 	uno nvarchar(50)
 )

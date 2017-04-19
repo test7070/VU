@@ -380,6 +380,8 @@ create table #tmp(
 	aprice  decimal(20,2),
 )
 
+CREATE INDEX tmpindex on #tmp (gno,tablea,datea,noa,noq)
+
 insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
 select '11','ucce',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0
 from view_ucce a left join view_ucces b on a.noa=b.noa 

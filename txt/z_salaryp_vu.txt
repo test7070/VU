@@ -50,7 +50,7 @@ insert #tmp
 select '1',case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
 ,MAX(dbo.AD2ChineseEraName(a.datea)),b.sno,b.namea,c.partno,c.typea
 ,sum((isnull(b.money,0)/2)),sum(b.day),sum(isnull(b.daymoney,0)),sum(isnull(b.bo_admin,0)+isnull(b.bo_traffic,0)),sum(b.money1),sum(b.money2)
-,sum(isnull(b.addmoney,0)),sum(isnull(b.addh2_1,0)+isnull(b.addh100,0)),sum(isnull(b.bo_full,0)),sum(ISNULL(b.bo_special,0))
+,sum(isnull(b.addmoney,0)),sum(isnull(b.addh2_1,0)+isnull(b.addh2_2,0)+isnull(b.addh100,0)),sum(isnull(b.bo_full,0)),sum(ISNULL(b.bo_special,0))
 ,sum(isnull(b.bo_full,0)+ISNULL(b.bo_special,0))
 ,sum(ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.meals,0)+ISNULL(b.tax_other,0)+ISNULL(b.tax_other2,0))
 ,sum(isnull(b.ch_labor,0)),sum(isnull(b.ch_health,0))
@@ -72,7 +72,7 @@ select '1',case when charindex('早班',c.typea)>0 then '2' when charindex('晚�
 ,MAX(dbo.AD2ChineseEraName(a.datea)),b.sno,b.namea,c.partno,c.typea
 ,sum(isnull(b.mtotal,0))
 ,sum(b.day),sum(isnull(b.daymoney,0)),sum(isnull(b.bo_admin,0)+isnull(b.bo_traffic,0)),sum(b.money1),sum(b.money2)
-,sum(isnull(b.addmoney,0)),sum(isnull(b.addh2_1,0)+isnull(b.addh100,0)),sum(isnull(b.bo_full,0)),sum(ISNULL(b.bo_special,0))
+,sum(isnull(b.addmoney,0)),sum(isnull(b.addh2_1,0)+isnull(b.addh2_2,0)+isnull(b.addh100,0)),sum(isnull(b.bo_full,0)),sum(ISNULL(b.bo_special,0))
 ,sum(isnull(b.bo_full,0)+ISNULL(b.bo_special,0))
 ,sum(ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.meals,0)+ISNULL(b.tax_other,0)+ISNULL(b.tax_other2,0))
 ,sum(isnull(b.ch_labor,0)),sum(isnull(b.ch_health,0))
@@ -266,6 +266,8 @@ create table #tmp(
 	money2 decimal(18, 2),
 	addh decimal(18, 1),
 	addmoney decimal(18, 0),
+	add2h decimal(18, 1),
+	add2money decimal(18, 0),
 	add0 decimal(18, 1),
 	addm0 decimal(18, 0),
 	bo_oth decimal(18, 0),
@@ -285,7 +287,9 @@ insert #tmp
 select '0',0,b.sno,b.namea,isnull(b.money/2,0)+isnull(b.mtotal,0),b.mi_total
 ,b.day,b.daymoney,isnull(b.money/2,0)+isnull(b.mtotal,0)-ISNULL(b.mi_total,0)
 ,b.bo_admin,b.bo_traffic,b.money1,b.money2
-,b.addh2_1,round(b.addh2_1*b.ostand*1.3333,0),b.addh100,round(b.addh100*b.ostand,0)
+,b.addh2_1,round(b.addh2_1*b.ostand*1.3333,0)
+,b.addh2_2,round(b.addh2_2*b.ostand*1.6666,0)
+,b.addh100,round(b.addh100*b.ostand,0)
 ,ISNULL(b.bo_oth,0)+ISNULL(b.plus,0),b.bo_special,b.bo_full
 ,ISNULL(b.bo_admin,0)+ISNULL(b.bo_traffic,0)+ISNULL(b.addmoney,0)+ISNULL(b.bo_oth,0)+ISNULL(b.plus,0)+ISNULL(b.bo_special,0)+ISNULL(b.bo_full,0)
 ,0,b.ch_labor,b.ch_health,b.minus,0,b.memo
@@ -305,7 +309,7 @@ update #tmp set total5=total3-ISNULL(ch_labor,0)-ISNULL(ch_health,0)-ISNULL(minu
 
 insert #tmp
 select '9',0,sssno,namea,SUM(money),SUM(mi_total),SUM(days),SUM(mtotal),SUM(total1)
-,SUM(bo_admin),SUM(bo_traffic),SUM(money1),SUM(money2),SUM(addh),SUM(addmoney),SUM(add0),SUM(addm0)
+,SUM(bo_admin),SUM(bo_traffic),SUM(money1),SUM(money2),SUM(addh),SUM(addmoney),SUM(add2h),SUM(add2money),SUM(add0),SUM(addm0)
 ,SUM(bo_oth),SUM(bo_special),SUM(bo_full),SUM(total2),SUM(total3),SUM(ch_labor),SUM(ch_health),SUM(minus),SUM(total5)
 ,isnull(stuff((select ','+memo from #tmp where len(memo)>0 and sssno=a.sssno group by memo FOR XML PATH('')),1,1,''),'')
 ,isnull(stuff((select ','+typea from #tmp where len(typea)>0 and sssno=a.sssno group by typea FOR XML PATH('')),1,1,''),'')	
@@ -327,7 +331,9 @@ create table #tmpa(
 	sssno_1 nvarchar(50),namea_1 nvarchar(50),money_1 nvarchar(200),
 	mi_total_1 nvarchar(200),mtotal_1 nvarchar(200),bo_admin_1 nvarchar(200),bo_traffic_1 nvarchar(200),
 	money1_1 nvarchar(200),money2_1 nvarchar(200),
-	addh_1 nvarchar(200),addmoney_1 nvarchar(200),	add0_1 nvarchar(200),	addm0_1 nvarchar(200),
+	addh_1 nvarchar(200),addmoney_1 nvarchar(200),
+	add2h_1 nvarchar(200),add2money_1 nvarchar(200),
+	add0_1 nvarchar(200),	addm0_1 nvarchar(200),
 	bo_oth_1 nvarchar(200),bo_special_1 nvarchar(200),bo_full_1 nvarchar(200),total3_1 nvarchar(200),
 	ch_labor_1 nvarchar(200),ch_health_1 nvarchar(200),minus_1 nvarchar(200),total5_1 nvarchar(200),
 	memo_1 nvarchar(MAX),typea_1 nvarchar(20),
@@ -335,7 +341,9 @@ create table #tmpa(
 	sssno_2 nvarchar(50),namea_2 nvarchar(50),money_2 nvarchar(200),
 	mi_total_2 nvarchar(200),mtotal_2 nvarchar(200),bo_admin_2 nvarchar(200),bo_traffic_2 nvarchar(200),
 	money1_2 nvarchar(200),money2_2 nvarchar(200),
-	addh_2 nvarchar(200),addmoney_2 nvarchar(200),add0_2 nvarchar(200),	addm0_2 nvarchar(200),
+	addh_2 nvarchar(200),addmoney_2 nvarchar(200),
+	add2h_2 nvarchar(200),add2money_2 nvarchar(200),
+	add0_2 nvarchar(200),	addm0_2 nvarchar(200),
 	bo_oth_2 nvarchar(200),bo_special_2 nvarchar(200),bo_full_2 nvarchar(200),total3_2 nvarchar(200),
 	ch_labor_2 nvarchar(200),ch_health_2 nvarchar(200),minus_2 nvarchar(200),total5_2 nvarchar(200),
 	memo_2 nvarchar(MAX),typea_2 nvarchar(20),
@@ -343,7 +351,9 @@ create table #tmpa(
 	sssno_3 nvarchar(50),namea_3 nvarchar(50),money_3 nvarchar(200),
 	mi_total_3 nvarchar(200),mtotal_3 nvarchar(200),bo_admin_3 nvarchar(200),bo_traffic_3 nvarchar(200),
 	money1_3 nvarchar(200),money2_3 nvarchar(200),
-	addh_3 nvarchar(200),addmoney_3 nvarchar(200),add0_3 nvarchar(200),	addm0_3 nvarchar(200),
+	addh_3 nvarchar(200),addmoney_3 nvarchar(200),
+	add2h_3 nvarchar(200),add2money_3 nvarchar(200),
+	add0_3 nvarchar(200),	addm0_3 nvarchar(200),
 	bo_oth_3 nvarchar(200),bo_special_3 nvarchar(200),bo_full_3 nvarchar(200),total3_3 nvarchar(200),
 	ch_labor_3 nvarchar(200),ch_health_3 nvarchar(200),minus_3 nvarchar(200),total5_3 nvarchar(200),
 	memo_3 nvarchar(MAX),typea_3 nvarchar(20),
@@ -351,7 +361,9 @@ create table #tmpa(
 	sssno_4 nvarchar(50),namea_4 nvarchar(50),money_4 nvarchar(200),
 	mi_total_4 nvarchar(200),mtotal_4 nvarchar(200),bo_admin_4 nvarchar(200),bo_traffic_4 nvarchar(200),
 	money1_4 nvarchar(200),money2_4 nvarchar(200),
-	addh_4 nvarchar(200),addmoney_4 nvarchar(200),add0_4 nvarchar(200),	addm0_4 nvarchar(200),
+	addh_4 nvarchar(200),addmoney_4 nvarchar(200),
+	add2h_4 nvarchar(200),add2money_4 nvarchar(200),
+	add0_4 nvarchar(200),	addm0_4 nvarchar(200),
 	bo_oth_4 nvarchar(200),bo_special_4 nvarchar(200),bo_full_4 nvarchar(200),total3_4 nvarchar(200),
 	ch_labor_4 nvarchar(200),ch_health_4 nvarchar(200),minus_4 nvarchar(200),total5_4 nvarchar(200),
 	memo_4 nvarchar(MAX),typea_4 nvarchar(20)
@@ -379,12 +391,14 @@ begin
 		--插入資料行
 		set @gcount=4
 		insert #tmpa(gno,sssno_1 ,namea_1 ,money_1 ,mi_total_1 ,mtotal_1 ,bo_admin_1 ,bo_traffic_1 ,money1_1,money2_1,
-		addh_1 ,addmoney_1 ,add0_1 ,addm0_1 ,bo_oth_1 ,bo_special_1 ,bo_full_1 ,total3_1 ,ch_labor_1 ,ch_health_1 ,minus_1 ,
+		addh_1 ,addmoney_1,add2h_1 ,add2money_1 ,add0_1 ,addm0_1 ,bo_oth_1 ,bo_special_1 ,bo_full_1 ,total3_1 ,ch_labor_1 ,ch_health_1 ,minus_1 ,
 		total5_1 ,memo_1,typea_1)
 		select @gcount,sssno,namea
 		,'$'+dbo.getComma(money,0),'$'+dbo.getComma(mi_total,0),dbo.getComma(days,-1)+'天*$'+dbo.getComma(mtotal,0)
 		,'$'+dbo.getComma(bo_admin,0),'$'+dbo.getComma(bo_traffic,0),dbo.getComma(money1,-1),dbo.getComma(money2,-1)
-		,dbo.getComma(addh,-1)+'H','$'+dbo.getComma(addmoney,0),dbo.getComma(add0,-1)+'H','$'+dbo.getComma(addm0,0)
+		,dbo.getComma(addh,-1)+'H','$'+dbo.getComma(addmoney,0)
+		,dbo.getComma(add2h,-1)+'H','$'+dbo.getComma(add2money,0)
+		,dbo.getComma(add0,-1)+'H','$'+dbo.getComma(addm0,0)
 		,'$'+dbo.getComma(bo_oth,0),'$'+dbo.getComma(bo_special,0),'$'+dbo.getComma(bo_full,0),'$'+dbo.getComma(total3,0)
 		,'$'+dbo.getComma(ch_labor,0),'$'+dbo.getComma(ch_health,0),'$'+dbo.getComma(minus,0),'$'+dbo.getComma(total5,0)
 		,memo,typea
@@ -413,6 +427,8 @@ begin
 			,money2_"+@fcount+" = dbo.getComma(b.money2,-1)
 			,addh_"+@fcount+" = dbo.getComma(b.addh,-1)+'H'
 			,addmoney_"+@fcount+" = '$'+dbo.getComma(b.addmoney,0)
+			,add2h_"+@fcount+" = dbo.getComma(b.add2h,-1)+'H'
+			,add2money_"+@fcount+" = '$'+dbo.getComma(b.add2money,0)
 			,add0_"+@fcount+" = dbo.getComma(b.add0,-1)+'H'
 			,addm0_"+@fcount+" = '$'+dbo.getComma(b.addm0,0)
 			,bo_oth_"+@fcount+" = '$'+dbo.getComma(b.bo_oth,0)

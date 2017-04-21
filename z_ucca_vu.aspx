@@ -52,38 +52,47 @@
             function LoadFinish() {
                 $('#q_report').q_report({
                     fileName : 'z_ucca_vu',
-                    options : [{/*0 [1]*/
-                        type : '0',
+                    options : [{
+                        type : '0', //[1]
                         name : 'accy',
                         value : r_accy
-                    }, {/*1 [2][3]*/
-                        type : '1',
+                    }, {
+                        type : '1', //[2][3]
                         name : 'xdate'
-                    }, {/*2 [4]*/
-                        type : '5',
-                        name : 'xproduct',
-                        value :uccaItem.split(',')
-                    }, {/*3 [5]*/
-                        type : '5',
+                    }, {
+                        type : '2',  //[4][5]
+						name : 'xucca',
+						dbf : 'ucca',
+						index : 'noa,product',
+						src : 'ucca_b.aspx'
+                    }, {
+                        type : '5', //[6]
                         name : 'xtype',
                         value : [' @全部','2@二聯','3@三聯']
-                    }, {/*4 [6]*/
-                        type : '6',
+                    }, {
+                        type : '6', //[7]
                         name : 'xcno'
-                    }, {/*5 [7]*/
-                        type : '6',
+                    }, {
+                        type : '6', //[8]
                         name : 'enddate'
                     }, {
-						type : '0', //[8] 
+						type : '0', //[9] 
 						name : 'xproject',
 						value : q_getPara('sys.project').toUpperCase()
 					}, {
-						type : '0', //[9] 
+						type : '0', //[10] 
 						name : 'xlenm',
 						value : r_lenm
 					}]
                 });
                 
+                /* 106/04/21 改用依產品編號為主(原品名)
+				, {
+					type : '5',
+					name : 'xproduct',
+					value :uccaItem.split(',')
+				}
+                */
                 q_popAssign();
                 q_langShow();
                 

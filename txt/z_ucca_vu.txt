@@ -2,15 +2,17 @@
 SET QUOTED_IDENTIFIER OFF
 declare @t_bdate nvarchar(50)
 declare @t_edate nvarchar(50)
-declare @t_product nvarchar(50)
+declare @t_bproductno nvarchar(50)
+declare @t_eproductno nvarchar(50)
 declare @t_cno nvarchar(50)
 
 set @t_bdate = case when '#non'=[2] then '' else [2] end
 set @t_edate = case when '#non'=[3] then char(255) else [3] end
-set @t_product = case when '#non'=[4] then '' else [4] end
-set @t_cno = case when '#non'=[6] then '' else [6] end
+set @t_bproductno = case when '#non'=[4] then '' else [4] end
+set @t_eproductno = case when '#non'=[5] then CHAR(255) else [5] end
+set @t_cno = case when '#non'=[7] then '' else [7] end
 ----------------------------------------------------------------------
-declare @t_lenm nvarchar(10) = '[9]'
+declare @t_lenm nvarchar(10) = '[10]'
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -34,7 +36,8 @@ create table #tmp(
 	noa nvarchar(50),
 	noq nvarchar(20),
 	datea nvarchar(10),
-	product nvarchar(50),
+	productno nvarchar(50),
+	product nvarchar(100),
 	mount float,
 	price float,
 	total float,
@@ -43,42 +46,42 @@ create table #tmp(
 	qhref nvarchar(100),
 	cust nvarchar(100),
 	tgg nvarchar(100),
-	primary key (datea,tablea,typea,cno,noa,noq,product)
+	primary key (datea,tablea,typea,cno,noa,noq,productno )
 )
 
-CREATE INDEX tmpindex on #tmp (product,datea,typea,cno,noa,noq)
+CREATE INDEX tmpindex on #tmp (productno ,datea,typea,cno,noa,noq)
 CREATE INDEX tmpindex2 on #tmp (tablea,cno,noa,noq)
 
 --盤
 insert #tmp
-select '0','ucca',isnull(b.cno,''),a.noa,b.noq,b.mon+'/01',a.product
-,b.beginmount,case when ISNULL(b.beginmount,0)=0 then 0 else round(b.beginmoney/b.beginmount,2) end
-,b.beginmoney,case when ISNULL(b.beginmount,0)=0 then 0 else round(b.beginmoney/b.beginmount,2) end
-,b.beginmoney,'ucca?noa=$noa','',''
-from ucca a left join uccas b on a.noa=b.noa
-where isnull(a.product,'')!='' 
-and (len(@t_product)=0 or a.product=@t_product) 
+select '0','ucca',isnull(b.cno,''),a.noa,b.noq,a.datea,b.productno,b.product
+,b.mount,case when ISNULL(b.mount,0)=0 then 0 else round(b.money/b.mount,2) end
+,b.money,case when ISNULL(b.mount,0)=0 then 0 else round(b.money/b.mount,2) end
+,b.money,'ucca?noa=$noa','',''
+from uccea a left join ucceas b on a.noa=b.noa
+where isnull(b.productno,'')!='' 
+and isnull(b.productno,'') between @t_bproductno and @t_eproductno
 and (len(@t_cno)=0 or b.cno=@t_cno) 
-and isnull(b.mon+'/01','') <=@t_edate
-and (isnull(b.beginmoney,0)!=0 or isnull(b.beginmount,0)!=0)
+and isnull(a.datea,'') <=@t_edate
+and (isnull(b.money,0)!=0 or isnull(b.mount,0)!=0)
 
 --進
 insert #tmp
-select '1','rc2a',a.cno,a.noa,b.noq,isnull(a.datea,''),b.product
+select '1','rc2a',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
 ,b.mount,b.price,b.money,b.price,b.money,'rc2a?noa=$noa','',a.comp
 from rc2a a left join rc2as b on a.noa=b.noa
-where isnull(b.product,'')!='' 
-and (len(@t_product)=0 or b.product=@t_product) 
+where isnull(b.productno,'')!='' 
+and isnull(b.productno,'') between @t_bproductno and @t_eproductno
 and (len(@t_cno)=0 or a.cno=@t_cno) 
 and isnull(a.datea,'') <=@t_edate
 
 --銷
 insert #tmp
-select '5','vcca',a.cno,a.noa,b.noq,isnull(a.datea,''),b.product
+select '5','vcca',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
 ,b.mount,b.price,b.money,0,0,'vcca?noa=$noa',a.comp,''
 from vcca a left join vccas b on a.noa=b.noa
-where isnull(b.product,'')!='' 
-and (len(@t_product)=0 or b.product=@t_product) 
+where isnull(b.productno,'')!='' 
+and isnull(b.productno,'') between @t_bproductno and @t_eproductno
 and (len(@t_cno)=0 or a.cno=@t_cno) 
 and isnull(a.datea,'') <=@t_edate
 
@@ -87,16 +90,16 @@ and isnull(a.datea,'') <=@t_edate
 create table #tmpb(
 	mon nvarchar(10),
 	cno nvarchar(50), 
-	product nvarchar(50),
+	productno nvarchar(50),
 	mount float,
 	total float,
 	aprice float,
-	primary key (product,cno,mon)
+	primary key (productno,cno,mon)
 )
 
 insert #tmpb
-select LEFT(datea,@t_lenm),cno,product,0,0,0
-from #tmp group by LEFT(datea,@t_lenm),cno,product
+select LEFT(datea,@t_lenm),cno,productno ,0,0,0
+from #tmp group by LEFT(datea,@t_lenm),cno,productno 
 
 --------------------------------------------------------------------
 declare @tablea nvarchar(10)
@@ -106,7 +109,7 @@ declare @t_datea nvarchar(10)
 declare @mon nvarchar(10)
 declare @t_mon nvarchar(10)=''
 declare @cno nvarchar(20)
-declare @product nvarchar(50)
+declare @productno  nvarchar(50)
 declare @mount float
 declare @total float
 declare @aprice float=0
@@ -118,7 +121,7 @@ declare @saprice float
 declare @smount float
 
 declare @tcno nvarchar(50)='#non'
-declare @tproduct nvarchar(50)='#non'
+declare @tproductno  nvarchar(50)='#non'
 declare @tmount float
 declare @ttotal float
 declare @tumount float
@@ -126,11 +129,11 @@ declare @tutotal float
 
 --計算成本
 declare cursor_table cursor for
-select tablea,datea,LEFT(datea,@t_lenm),cno,product,noa,noq,isnull(mount,0),isnull(total,0)
-from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,product
+select tablea,datea,LEFT(datea,@t_lenm),cno,productno ,noa,noq,isnull(mount,0),isnull(total,0)
+from #tmp order by cno,LEFT(datea,@t_lenm),datea,typea,noa,noq,productno 
 open cursor_table
 fetch next from cursor_table
-into @tablea,@datea,@mon,@cno,@product,@noa,@noq,@mount,@total
+into @tablea,@datea,@mon,@cno,@productno ,@noa,@noq,@mount,@total
 while(@@FETCH_STATUS <> -1)
 begin
 	--避免前期超領負數造成金額溢位
@@ -144,20 +147,20 @@ begin
 		end
 	end
 	
-	if(@tproduct!=@product or @tcno!=@cno or @t_mon!=@mon )
+	if(@tproductno !=@productno  or @tcno!=@cno or @t_mon!=@mon )
 	begin
-		if(@tproduct!='#non')
+		if(@tproductno !='#non')
 		begin
 			update #tmpb
 			set mount=@tmount,total=@ttotal,aprice=@aprice
-			where mon>=@t_mon and product=@tproduct  and cno=@tcno
+			where mon>=@t_mon and productno=@tproductno and cno=@tcno
 		end
 		
-		if(@tproduct!=@product or @tcno!=@cno)
+		if(@tproductno !=@productno  or @tcno!=@cno)
 		begin
 			select @tmount=isnull(mount,0),@ttotal=isnull(total,0),@aprice=isnull(aprice,0)
 			from #tmpb
-			where mon=@mon and product=@product and cno=@cno
+			where mon=@mon and productno =@productno  and cno=@cno
 		end
 	end
 
@@ -191,12 +194,12 @@ begin
 	set aprice=@aprice,cost=round(isnull(@aprice,0)*mount,4)
 	where noa=@noa and noq=@noq and tablea=@tablea
 
-	set @tproduct=@product
+	set @tproductno =@productno 
 	set @t_mon=@mon
 	set @tcno=@cno
 	
 	fetch next from cursor_table
-	into @tablea,@datea,@mon,@cno,@product,@noa,@noq,@mount,@total
+	into @tablea,@datea,@mon,@cno,@productno ,@noa,@noq,@mount,@total
 end
 close cursor_table
 deallocate cursor_table
@@ -212,17 +215,17 @@ begin
 	end
 end
 
-if(@tproduct!='#non')
+if(@tproductno !='#non')
 begin
 	update #tmpb
 	set mount=@tmount,total=@ttotal,aprice=@aprice
-	where mon>=@t_mon and product=@tproduct and cno=@tcno
+	where mon>=@t_mon and productno =@tproductno  and cno=@tcno
 end
 
 update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucca'
 ----------------------------------------------------------------
 
-delete #tmp where not((len(@t_product)=0 or isnull(product,'')=@t_product) 
+delete #tmp where not(productno between @t_bproductno and @t_eproductno
   and (len(@t_cno)=0 or isnull(cno,'')=@t_cno) 
 )
 
@@ -237,7 +240,8 @@ create table #tmpa(
 	noa nvarchar(20),
 	noq nvarchar(50),
 	cno nvarchar(20),
-	product nvarchar(50),
+	productno nvarchar(50),
+	product nvarchar(100),
 	datea nvarchar(15),
 	mount float,
 	money float,
@@ -248,37 +252,37 @@ create table #tmpa(
 	tgg nvarchar(100),
 )
 
-CREATE INDEX tmpaindex on #tmpa (product,cno,gno)
+CREATE INDEX tmpaindex on #tmpa (productno,cno,gno)
 
 --插入資料 --期初
-insert #tmpa (gno,cno,product,datea,tablea,typea,mount,money,tmount,tmoney)
-select '0',cno,product,'','期初','',0,0,0,0
+insert #tmpa (gno,cno,productno,product,datea,tablea,typea,mount,money,tmount,tmoney)
+select '0',cno,productno,'','','期初','',0,0,0,0
 from #tmp 
-group by cno,product
+group by cno,productno
 
 --分頁
-insert #tmpa (gno,cno,product,datea,tablea,typea,mount,money,tmount,tmoney)
-select '1',cno,product,CHAR(255),'','',0,0,0,0
+insert #tmpa (gno,cno,productno,product,datea,tablea,typea,mount,money,tmount,tmoney)
+select '1',cno,productno,'',CHAR(255),'','',0,0,0,0
 from #tmp 
-group by cno,product
+group by cno,productno
 
 set @tcno='#non'
-set @tproduct='#non'
+set @tproductno ='#non'
 
 declare @qhref nvarchar(100)
 
-CREATE INDEX tmpindex3 on #tmp (cno,product,datea,typea,noa,noq)
+CREATE INDEX tmpindex3 on #tmp (cno,productno ,datea,typea,noa,noq)
 
 declare cursor_table cursor for
-select tablea,typea,noa,noq,datea,cno,product,isnull(mount,0),isnull(cost,0),qhref,cust,tgg
+select tablea,typea,noa,noq,datea,cno,productno ,isnull(mount,0),isnull(cost,0),qhref,cust,tgg
 from #tmp 
-order by cno,product,datea,typea,noa,noq
+order by cno,productno ,datea,typea,noa,noq
 open cursor_table
 fetch next from cursor_table
-into @tablea,@typea,@noa,@noq,@datea,@cno,@product,@mount,@total,@qhref,@cust,@tgg
+into @tablea,@typea,@noa,@noq,@datea,@cno,@productno ,@mount,@total,@qhref,@cust,@tgg
 while(@@FETCH_STATUS <> -1)
 begin
-	if(@tproduct!=@product or @tcno!=@cno)
+	if(@tproductno !=@productno  or @tcno!=@cno)
 	begin
 		set @tmount=0
 		set @ttotal=0
@@ -322,29 +326,29 @@ begin
 	begin
 		update #tmpa
 		set tmount=@tmount,tmoney=@ttotal
-		where product=@product and cno=@cno and tablea='期初'
+		where productno =@productno  and cno=@cno and tablea='期初'
 	end
 	else
 	begin
-		insert #tmpa(gno,tablea,typea,noa,noq,datea,cno,product,mount,money,tmount,tmoney,qhref,cust,tgg)
-		select '0',@tablea,@typea,@noa,@noq,@datea,@cno,@product,@mount,@total,@tmount,@ttotal,@qhref,@cust,@tgg
+		insert #tmpa(gno,tablea,typea,noa,noq,datea,cno,productno ,mount,money,tmount,tmoney,qhref,cust,tgg)
+		select '0',@tablea,@typea,@noa,@noq,@datea,@cno,@productno ,@mount,@total,@tmount,@ttotal,@qhref,@cust,@tgg
 	end
 	
-	set @tproduct=@product
+	set @tproductno =@productno 
 	set @tcno=@cno
 	
 	fetch next from cursor_table
-	into @tablea,@typea,@noa,@noq,@datea,@cno,@product,@mount,@total,@qhref,@cust,@tgg
+	into @tablea,@typea,@noa,@noq,@datea,@cno,@productno ,@mount,@total,@qhref,@cust,@tgg
 end
 close cursor_table
 deallocate cursor_table
 
 delete a from #tmpa a 
 where exists (select count(*) from #tmpa 
-where product=a.product and  cno=a.cno
+where productno =a.productno  and  cno=a.cno
 and gno='0' and tablea!='期初' having count(*)=0)
 and not exists (select * from #tmpa 
-where product=a.product and cno=a.cno
+where productno =a.productno  and cno=a.cno
 and gno='0' and tablea='期初' and tmount!=0)
 
 update #tmpa
@@ -354,8 +358,12 @@ when tablea='rc2a' then '進項'
 when tablea='vcca' then '銷項'
 else tablea end
 
+update a
+set product=b.product
+from #tmpa a left join ucca b on a.productno=b.noa
+
 select 
-gno,product,cust,tgg
+gno,productno,product,cust,tgg
 ,(select top 1 acomp from acomp where noa=a.cno )acomp
 ,tablea,typea,noa,noq,datea,cno,qhref
 ,dbo.getComma(mount,2) mount
@@ -363,7 +371,7 @@ gno,product,cust,tgg
 ,dbo.getComma(tmount,2) tmount
 ,dbo.getComma(tmoney,2) tmoney
 ,case when isnull(tmount,0)=0 then dbo.getComma(0,2) else dbo.getComma(round(tmoney/tmount,2),2) end tprice
-from #tmpa a order by product,cno,datea,gno,typea,noa,noq
+from #tmpa a order by productno,cno,datea,gno,typea,noa,noq
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -378,21 +386,24 @@ END
 IF OBJECT_ID('tempdb..#tmpa')is not null
 BEGIN
 	drop table #tmpa
-END;
+END
+;
 ----------------------------------------------------------------------------------------------------------------------------------
 z_ucca_vu02:--z_ucca_vu02 成本表
 SET QUOTED_IDENTIFIER OFF
 declare @t_bdate nvarchar(50)
 declare @t_edate nvarchar(50)
-declare @t_product nvarchar(50)
+declare @t_bproductno nvarchar(50)
+declare @t_eproductno nvarchar(50)
 declare @t_cno nvarchar(50)
 
 set @t_bdate = case when '#non'=[2] then '' else [2] end
 set @t_edate = case when '#non'=[3] then char(255) else [3] end
-set @t_product = case when '#non'=[4] then '' else [4] end
-set @t_cno = case when '#non'=[6] then '' else [6] end
+set @t_bproductno = case when '#non'=[4] then '' else [4] end
+set @t_eproductno = case when '#non'=[5] then CHAR(255) else [5] end
+set @t_cno = case when '#non'=[7] then '' else [7] end
 ----------------------------------------------------------------------
-declare @t_lenm nvarchar(10) = '[9]'
+declare @t_lenm nvarchar(10) = '[10]'
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
@@ -411,48 +422,49 @@ create table #tmp(
 	noa nvarchar(50),
 	noq nvarchar(20),
 	datea nvarchar(10),
-	product nvarchar(50),
+	productno nvarchar(50),
+	product nvarchar(100),
 	mount float,
 	price float,
 	total float,
 	aprice float, --均價
 	cost float, --成本
-	primary key (datea,tablea,typea,cno,noa,noq,product)
+	primary key (datea,tablea,typea,cno,noa,noq,productno,product)
 )
 
-CREATE INDEX tmpindex on #tmp (product,datea,typea,cno,noa,noq)
+CREATE INDEX tmpindex on #tmp (productno,product,datea,typea,cno,noa,noq)
 CREATE INDEX tmpindex2 on #tmp (tablea,cno,noa,noq)
 
 --盤
 insert #tmp
-select '0','ucca',isnull(b.cno,''),a.noa,b.noq,b.mon+'/01',a.product
-,b.beginmount,case when ISNULL(b.beginmount,0)=0 then 0 else round(b.beginmoney/b.beginmount,2) end
-,b.beginmoney,case when ISNULL(b.beginmount,0)=0 then 0 else round(b.beginmoney/b.beginmount,2) end
-,b.beginmoney
-from ucca a left join uccas b on a.noa=b.noa
-where isnull(a.product,'')!='' 
-and (len(@t_product)=0 or a.product=@t_product) 
+select '0','ucca',isnull(b.cno,''),a.noa,b.noq,a.datea,b.productno,b.product
+,b.mount,case when ISNULL(b.mount,0)=0 then 0 else round(b.money/b.mount,2) end
+,b.money,case when ISNULL(b.mount,0)=0 then 0 else round(b.money/b.mount,2) end
+,b.money
+from uccea a left join ucceas b on a.noa=b.noa
+where isnull(b.productno,'')!='' 
+and isnull(b.productno,'') between @t_bproductno and @t_eproductno
 and (len(@t_cno)=0 or b.cno=@t_cno) 
-and isnull(b.mon+'/01','') <=@t_edate
-and (isnull(b.beginmoney,0)!=0 or isnull(b.beginmount,0)!=0)
+and isnull(a.datea,'') <=@t_edate
+and (isnull(b.money,0)!=0 or isnull(b.mount,0)!=0)
 
 --進
 insert #tmp
-select '1','rc2a',a.cno,a.noa,b.noq,isnull(a.datea,''),b.product
+select '1','rc2a',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
 ,b.mount,b.price,b.money,b.price,b.money
 from rc2a a left join rc2as b on a.noa=b.noa
-where isnull(b.product,'')!='' 
-and (len(@t_product)=0 or b.product=@t_product) 
+where isnull(b.productno,'')!='' 
+and isnull(b.productno,'') between @t_bproductno and @t_eproductno
 and (len(@t_cno)=0 or a.cno=@t_cno) 
 and isnull(a.datea,'') <=@t_edate
 
 --銷
 insert #tmp
-select '5','vcca',a.cno,a.noa,b.noq,isnull(a.datea,''),b.product
+select '5','vcca',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
 ,b.mount,b.price,b.money,0,0
 from vcca a left join vccas b on a.noa=b.noa
-where isnull(b.product,'')!='' 
-and (len(@t_product)=0 or b.product=@t_product) 
+where isnull(b.productno,'')!='' 
+and isnull(b.productno,'') between @t_bproductno and @t_eproductno 
 and (len(@t_cno)=0 or a.cno=@t_cno) 
 and isnull(a.datea,'') <=@t_edate
 
@@ -461,16 +473,16 @@ and isnull(a.datea,'') <=@t_edate
 create table #tmpb(
 	mon nvarchar(10),
 	cno nvarchar(50), 
-	product nvarchar(50),
+	productno nvarchar(50),
 	mount float,
 	total float,
 	aprice float,
-	primary key (product,cno,mon)
+	primary key (productno,cno,mon)
 )
 
 insert #tmpb
-select LEFT(datea,@t_lenm),cno,product,0,0,0
-from #tmp group by LEFT(datea,@t_lenm),cno,product
+select LEFT(datea,@t_lenm),cno,productno,0,0,0
+from #tmp group by LEFT(datea,@t_lenm),cno,productno
 --------------------------------------------------------------------
 declare @tablea nvarchar(10)
 declare @accy nvarchar(10)
@@ -479,7 +491,7 @@ declare @t_datea nvarchar(10)
 declare @mon nvarchar(10)
 declare @t_mon nvarchar(10)=''
 declare @cno nvarchar(20)
-declare @product nvarchar(50)
+declare @productno nvarchar(50)
 declare @mount float
 declare @total float
 declare @aprice float=0
@@ -491,7 +503,7 @@ declare @saprice float
 declare @smount float
 
 declare @tcno nvarchar(50)='#non'
-declare @tproduct nvarchar(50)='#non'
+declare @tproductno nvarchar(50)='#non'
 declare @tmount float
 declare @ttotal float
 declare @tumount float
@@ -499,11 +511,11 @@ declare @tutotal float
 
 --計算成本
 declare cursor_table cursor for
-select tablea,datea,LEFT(datea,@t_lenm),cno,product,noa,noq,isnull(mount,0),isnull(total,0)
-from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,product
+select tablea,datea,LEFT(datea,@t_lenm),cno,productno,noa,noq,isnull(mount,0),isnull(total,0)
+from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,productno
 open cursor_table
 fetch next from cursor_table
-into @tablea,@datea,@mon,@cno,@product,@noa,@noq,@mount,@total
+into @tablea,@datea,@mon,@cno,@productno,@noa,@noq,@mount,@total
 while(@@FETCH_STATUS <> -1)
 begin
 	--避免前期超領負數造成金額溢位
@@ -517,20 +529,20 @@ begin
 		end
 	end
 	
-	if(@tproduct!=@product or @tcno!=@cno or @t_mon!=@mon )
+	if(@tproductno!=@productno or @tcno!=@cno or @t_mon!=@mon )
 	begin
-		if(@tproduct!='#non')
+		if(@tproductno!='#non')
 		begin
 			update #tmpb
 			set mount=@tmount,total=@ttotal,aprice=@aprice
-			where mon>=@t_mon and product=@tproduct and cno=@tcno
+			where mon>=@t_mon and productno=@tproductno and cno=@tcno
 		end
 		
-		if(@tproduct!=@product or @tcno!=@cno)
+		if(@tproductno!=@productno or @tcno!=@cno)
 		begin
 			select @tmount=isnull(mount,0),@ttotal=isnull(total,0),@aprice=isnull(aprice,0)
 			from #tmpb
-			where mon=@mon and product=@product and cno=@cno
+			where mon=@mon and productno=@productno and cno=@cno
 		end
 	end
 
@@ -564,12 +576,12 @@ begin
 	set aprice=@aprice,cost=round(isnull(@aprice,0)*mount,4)
 	where noa=@noa and noq=@noq and tablea=@tablea
 
-	set @tproduct=@product
+	set @tproductno=@productno
 	set @t_mon=@mon
 	set @tcno=@cno
 	
 	fetch next from cursor_table
-	into @tablea,@datea,@mon,@cno,@product,@noa,@noq,@mount,@total
+	into @tablea,@datea,@mon,@cno,@productno,@noa,@noq,@mount,@total
 end
 close cursor_table
 deallocate cursor_table
@@ -585,24 +597,26 @@ begin
 	end
 end
 
-if(@tproduct!='#non')
+if(@tproductno!='#non')
 begin
 	update #tmpb
 	set mount=@tmount,total=@ttotal,aprice=@aprice
-	where mon>=@t_mon and product=@tproduct and cno=@tcno
+	where mon>=@t_mon and productno=@tproductno and cno=@tcno
 end
 
 update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucca'
+
 ----------------------------------------------------------------
 
-delete #tmp where not((len(@t_product)=0 or isnull(product,'')=@t_product) 
+delete #tmp where not(productno between @t_bproductno and @t_eproductno
   and (len(@t_cno)=0 or isnull(cno,'')=@t_cno) 
 )
 
 declare @tmp table( 
 	gno nvarchar(1), 
 	cno nvarchar(50), 
-	product nvarchar(50), 
+	productno nvarchar(50), 
+	product nvarchar(100), 
 	bmount decimal(25, 4), 
 	bmoney decimal(25, 4), 
 	rcmount decimal(25, 4), 
@@ -617,33 +631,126 @@ declare @tmp table(
 ) 
 
 delete a
-from #tmp a outer apply (select MAX(datea)datea from #tmp where tablea='ucca' and product=a.product and cno=a.cno)b
+from #tmp a outer apply (select MAX(datea)datea from #tmp where tablea='ucca' and productno=a.productno and cno=a.cno)b
 where a.datea<isnull(b.datea,'')
 
-insert @tmp(gno,cno,product,bmount,bmoney)
-select '0',cno,product,0,0 from #tmp group by cno,product
+insert @tmp(gno,cno,productno,bmount,bmoney)
+select '0',cno,productno,0,0 from #tmp group by cno,productno
 
-update a
-set bmount=isnull(b.bm,0),bmoney=isnull(b.bc,0)
-,rcmount=isnull(c.rm,0),rcmoney=isnull(c.rc,0)
-,vcmount=isnull(d.vm,0),vcmoney=isnull(d.vt,0),vccost=isnull(d.vc,0)
-from @tmp a 
-outer apply (select SUM(case when tablea='vcca' then -1 else 1 end*mount)bm
-,SUM(case when tablea='vcca' then -1 else 1 end*cost) bc
-from #tmp where product=a.product and cno=a.cno and datea<@t_bdate)b
-outer apply (select SUM(mount)rm,SUM(cost) rc
-from #tmp where product=a.product and cno=a.cno and tablea='rc2a' and datea between @t_bdate and @t_edate)c
-outer apply (select SUM(mount)vm,SUM(cost) vc,SUM(total)vt
-from #tmp where product=a.product and cno=a.cno and tablea='vcca' and datea between @t_bdate and @t_edate)d
+--update a
+--set bmount=isnull(e.um,0)+isnull(b.bm,0),bmoney=isnull(e.uc,0)+isnull(b.bc,0)
+--,rcmount=isnull(c.rm,0),rcmoney=isnull(c.rc,0)
+--,vcmount=isnull(d.vm,0),vcmoney=isnull(d.vt,0),vccost=isnull(d.vc,0)
+--from @tmp a 
+--outer apply (select SUM(case when tablea='vcca' then -1 else 1 end*mount)bm
+--,SUM(case when tablea='vcca' then -1 else 1 end*cost) bc
+--from #tmp where productno=a.productno and cno=a.cno and tablea!='ucca' and datea<@t_bdate)b
+--outer apply (select SUM(mount)rm,SUM(cost) rc
+--from #tmp where productno=a.productno and cno=a.cno and tablea='rc2a' and datea between @t_bdate and @t_edate)c
+--outer apply (select SUM(mount)vm,SUM(cost) vc,SUM(total)vt
+--from #tmp where productno=a.productno and cno=a.cno and tablea='vcca' and datea between @t_bdate and @t_edate)d
+--outer apply (select SUM(mount)um,SUM(cost) uc,SUM(total)ut
+--from #tmp where productno=a.productno and cno=a.cno and tablea='ucca')e
+
+declare @vtotal float
+declare cursor_table cursor for
+select tablea,noa,noq,datea,cno,productno,isnull(mount,0),isnull(cost,0),isnull(total,0)
+from #tmp 
+order by cno,productno,datea,typea,noa,noq
+open cursor_table
+fetch next from cursor_table
+into @tablea,@noa,@noq,@datea,@cno,@productno,@mount,@total,@vtotal
+while(@@FETCH_STATUS <> -1)
+begin
+	if(@tproductno!=@productno or @tcno!=@cno)
+	begin
+		set @tmount=0
+		set @ttotal=0
+	end
+
+	--盤點
+	if(@tablea='ucca')
+	begin
+		set @tmount=@mount
+		set @ttotal=@total
+	end
+	--進項
+	if(@tablea='rc2a')
+	begin
+		set @tmount=@tmount+@mount
+		set @ttotal=@ttotal+@total
+	end
+	
+	--銷項
+	if(@tablea='vcca' )
+	begin
+		if(@total=0)
+			set @total=@mount*case when @tmount=0 then 0 else @ttotal/@tmount end
+				
+		set @tmount=@tmount-@mount
+		set @ttotal=@ttotal-@total
+	end
+	
+	--避免前期超領負數造成金額溢位
+	if(round(@tmount,0)<=0)
+	begin
+		set @ttotal=0
+		--避免領用有小數點導致無法全部被領用
+		if(round(@tmount,0)=0)
+		begin
+			set @tmount=0
+		end
+	end
+		
+	if(@datea<@t_bdate)
+	begin
+		update @tmp
+		set bmount=@tmount,bmoney=@ttotal,lmount=@tmount,lmoney=@ttotal
+		where productno=@productno and cno=@cno
+	end
+	else
+	begin
+		
+		if(@tablea='rc2a')
+		begin
+			update @tmp
+			set rcmount=ISNULL(rcmount,0)+@mount,rcmoney=ISNULL(rcmoney,0)+@total
+			,lmount=@tmount,lmoney=@ttotal
+			where productno=@productno and cno=@cno
+		end
+		
+		--銷項
+		if(@tablea='vcca' )
+		begin
+			if(@total=0)
+				set @total=@mount*case when @tmount=0 then 0 else @ttotal/@tmount end
+					
+			update @tmp
+			set vcmount=ISNULL(vcmount,0)+@mount,vcmoney=ISNULL(vcmoney,0)+@vtotal
+			,vccost=ISNULL(vccost,0)+@total
+			,lmount=@tmount,lmoney=@ttotal
+			where productno=@productno and cno=@cno
+		end
+				
+	end
+	
+	set @tproductno=@productno 
+	set @tcno=@cno
+	
+	fetch next from cursor_table
+	into @tablea,@noa,@noq,@datea,@cno,@productno ,@mount,@total,@vtotal
+end
+close cursor_table
+deallocate cursor_table
 
 --毛利率 
 update @tmp 
 set profit=case when vcmoney=0 then 0 else ((vcmoney-vccost)/vcmoney)*100 end
 
 --期末 
-update @tmp 
-set lmount=bmount+rcmount-vcmount 
-,lmoney= bmoney+rcmoney-vccost 
+--update @tmp 
+--set lmount=bmount+rcmount-vcmount 
+--,lmoney= bmoney+rcmoney-vccost 
 
 update @tmp set lprice=case when lmount=0 then 0 else lmoney/lmount end 
 
@@ -652,13 +759,17 @@ update @tmp set lprice=case when lmount=0 then 0 else lmoney/lmount end
 delete @tmp where bmount=0 and bmoney=0 and rcmount=0 and rcmoney=0 and vcmount=0 and vcmoney=0 and vccost=0 
 
 insert into @tmp 
-select '1',cno,'',sum(bmount),sum(bmoney) 
+select '1',cno,'','',sum(bmount),sum(bmoney) 
 ,sum(rcmount),sum(rcmoney) 
 ,sum(vcmount),sum(vcmoney),sum(vccost),case when sum(vcmoney)=0 then 0 else ((sum(vcmoney)-sum(vccost))/sum(vcmoney))*100 end 
 ,sum(lmount),0,sum(lmoney) 
 from @tmp group by cno 
 
-select gno,product,cno,(select top 1 acomp from acomp where noa=a.cno )acomp
+update a
+set product=b.product
+from @tmp a left join ucca b on a.productno=b.noa
+
+select gno,productno,product,cno,(select top 1 acomp from acomp where noa=a.cno )acomp
 ,dbo.getComma(bmount,2)bmount
 ,dbo.getComma(bmoney,0)bmoney
 ,dbo.getComma(rcmount,2)rcmount
@@ -670,7 +781,7 @@ select gno,product,cno,(select top 1 acomp from acomp where noa=a.cno )acomp
 ,dbo.getComma(lmount,2)lmount
 ,dbo.getComma(lprice,2)lprice
 ,dbo.getComma(lmoney,0)lmoney
-from @tmp a order by cno,gno,product
+from @tmp a order by cno,gno,productno
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

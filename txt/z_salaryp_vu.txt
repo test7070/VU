@@ -388,6 +388,7 @@ begin
 	
 	if(@fcount='1')
 	begin
+		--106/04/21 因B01和B02屬於辦公室月薪 但 需要使用生產獎金 故將 bo_admin+bo_traffic (辦公室用 銷售獎金+現場用 生產獎金)
 		--插入資料行
 		set @gcount=4
 		insert #tmpa(gno,sssno_1 ,namea_1 ,money_1 ,mi_total_1 ,mtotal_1 ,bo_admin_1 ,bo_traffic_1 ,money1_1,money2_1,
@@ -395,7 +396,7 @@ begin
 		total5_1 ,memo_1,typea_1)
 		select @gcount,sssno,namea
 		,'$'+dbo.getComma(money,0),'$'+dbo.getComma(mi_total,0),dbo.getComma(days,-1)+'天*$'+dbo.getComma(mtotal,0)
-		,'$'+dbo.getComma(bo_admin,0),'$'+dbo.getComma(bo_traffic,0),dbo.getComma(money1,-1),dbo.getComma(money2,-1)
+		,'$'+dbo.getComma(bo_admin+bo_traffic,0),'$'+dbo.getComma(bo_admin+bo_traffic,0),dbo.getComma(money1,-1),dbo.getComma(money2,-1)
 		,dbo.getComma(addh,-1)+'H','$'+dbo.getComma(addmoney,0)
 		,dbo.getComma(add2h,-1)+'H','$'+dbo.getComma(add2money,0)
 		,dbo.getComma(add0,-1)+'H','$'+dbo.getComma(addm0,0)
@@ -421,8 +422,8 @@ begin
 			,money_"+@fcount+" = '$'+dbo.getComma(b.money,0)
 			,mi_total_"+@fcount+" = '$'+dbo.getComma(b.mi_total,0)
 			,mtotal_"+@fcount+" = dbo.getComma(b.days,-1)+'天*$'+dbo.getComma(b.mtotal,0)
-			,bo_admin_"+@fcount+" = '$'+dbo.getComma(b.bo_admin,0)
-			,bo_traffic_"+@fcount+" = '$'+dbo.getComma(b.bo_traffic,0)
+			,bo_admin_"+@fcount+" = '$'+dbo.getComma(b.bo_admin+b.bo_traffic,0)
+			,bo_traffic_"+@fcount+" = '$'+dbo.getComma(b.bo_admin+b.bo_traffic,0)
 			,money1_"+@fcount+" = dbo.getComma(b.money1,-1)
 			,money2_"+@fcount+" = dbo.getComma(b.money2,-1)
 			,addh_"+@fcount+" = dbo.getComma(b.addh,-1)+'H'

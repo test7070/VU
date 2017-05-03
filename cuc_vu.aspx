@@ -9,6 +9,10 @@
 		<script src="../script/qbox.js" type="text/javascript"></script>
 		<script src='../script/mask.js' type="text/javascript"></script>
 		<link href="../qbox.css" rel="stylesheet" type="text/css" />
+		<link href="css/jquery/themes/redmond/jquery.ui.all.css" rel="stylesheet" type="text/css" />
+		<script src="css/jquery/ui/jquery.ui.core.js"> </script>
+		<script src="css/jquery/ui/jquery.ui.widget.js"> </script>
+		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
 		<script type="text/javascript">
 			var q_name = "cuc";
 			aPop = new Array();
@@ -70,6 +74,11 @@
                 $('#textDatea').val(q_date());
                 q_cur=2;
                 document.title='現場裁剪作業';
+                
+                if(r_len==4){                	
+                	$.datepicker.r_len=4;
+                }
+                $('#textDatea').datepicker();
 				
 				//載入案號 資料
                 var t_where = "where=^^ 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 order by b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";
@@ -2511,7 +2520,7 @@
 		<input type='button' id='btnAuthority' name='btnAuthority' style='font-size:16px;' value='權限'/>
 		<a id='logout' class="lbl" style="color: coral;cursor: pointer;font-weight: bolder;float: right;">登出</a>
 		<BR>
-		<a class="lbl">加工日</a>&nbsp;<input id="textDatea"  type="text" class="txt" style="width: 100px;"/>&nbsp;
+		<a class="lbl">加工日</a>&nbsp;<input id="textDatea" type="text" class="txt" style="width: 100px;" readonly="readonly";/>&nbsp;
 		<a class="lbl">人員組別</a>&nbsp;
 			<select id="combMechno" class="txt" style="font-size: medium;"> </select>
 			<!--<input id="textMechno"  type="text" class="txt " style="width: 100px;"/>

@@ -1016,7 +1016,7 @@
 					<td align="center" style="width:90px;display: none;"><a id='lblDateas'> </a></td>
 					<td align="center" style="width:30px;"><a id='lblEndas'> </a></td>
 					<td align="center" style="width:30px;"><a id='lblCancels'> </a></td>
-					<td align="center" style="width:30px;"><a id='lblNouno_s'>領料</a></td>
+					<!--<td align="center" style="width:30px;"><a id='lblNouno_s'>領料</a></td>-->
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>
@@ -1061,7 +1061,7 @@
 					<td style="display: none;"><input id="txtDatea.*" type="text" class="txt c1"/></td>
 					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
 					<td align="center"><input id="chkCancel.*" type="checkbox"/></td>
-					<td align="center"><input id="btnCub_nouno.*" type="button" value="."/></td>
+					<!--<td align="center"><input id="btnCub_nouno.*" type="button" value="."/></td>-->
 				</tr>
 			</table>
 		</div>

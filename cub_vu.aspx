@@ -364,8 +364,8 @@
 									tt_nouno=tt_nouno+t_nouno[i]+"#";
 								}
 							}
-							if(tt_nouno.length>0)
-								q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno)+ ';' + encodeURI('#non')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name));
+							if(tt_nouno.length>0) //106/05/03 預設組別寫入07辦公室
+								q_func('qtxt.query.cubnouno', 'cub.txt,cubnouno_vu,' + encodeURI(r_accy) + ';' + encodeURI(tt_nouno)+ ';' + encodeURI('07')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name));
 						}else{
 							alert("批號不存在!!");
 						}

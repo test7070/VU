@@ -84,6 +84,7 @@
 				
 				//q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
 				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				q_cmbParse("cmbPost2",'@,1@通案,2@慶欣欣專案,3@威致專案,4@工地');
 				
 				var t_where = "where=^^ 1=1 ^^";
 				q_gt('ucc', t_where, 0, 0, 0, "");
@@ -669,6 +670,8 @@
 						<td><span> </span><a id='lblAcomp' class="lbl btn"> </a></td>
 						<td><input id="txtCno" type="text" class="txt c1"/></td>
 						<td colspan="2"><input id="txtAcomp" type="text" class="txt c1"/></td>
+						<td><span> </span><a id='lbl' class="lbl">CMB合約類型</a></td>
+						<td><select id="cmbPost2" class="txt c1"> </select></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblCust' class="lbl btn"> </a></td>

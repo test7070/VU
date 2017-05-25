@@ -6,6 +6,7 @@ declare @t_ecustno nvarchar(20)
 declare @t_option01 nvarchar(10)
 declare @t_option02 nvarchar(10)
 declare @t_xaddr2 nvarchar(100)
+declare @t_xpost2 nvarchar(100)
 
 set @t_bdate = case when '#non'=[7] then '' else [7] end
 set @t_edate = case when '#non'=[8] then char(255) else [8] end
@@ -14,6 +15,7 @@ set @t_ecustno = case when '#non'=[11] then char(255) else [11] end
 set @t_option01 = case when '#non'=[12] then '' else [12] end
 set @t_option02 = case when '#non'=[9] then '' else [9] end
 set @t_xaddr2 = case when '#non'=[13] then '' else [13] end
+set @t_xpost2 = case when '#non'=[14] then '' else [14] end 
 --sel1含明細表--sel2含合約終止--sel3含集團小計
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
@@ -71,6 +73,7 @@ where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0)
 and (a.custno between @t_bcustno and @t_ecustno ) 
 and (a.datea between @t_bdate and @t_edate)
 and (len(@t_xaddr2)=0 or a.addr2 like '%'+@t_xaddr2+'%')
+and (post2=@t_xpost2 or len(@t_xpost2)=0)
 
 if(CHARINDEX('sel3',@t_option02)>0)
 begin

@@ -88,15 +88,25 @@ and (len(@t_part)=0 or b.partno=@t_part)
 group by case when charindex('早班',c.typea)>0 then '2' when charindex('晚班',c.typea)>0 then '3' else '1' end
 ,b.sno,b.namea,c.partno,c.typea
 
+if(@t_xkind='整月')
+begin
+	--小計(分現場(早.晚)與辦公室) 
+	insert #tmp(gno,typea,datea,sssno,a01,a04,a07,a11,a12,a13,a14,a15,a16) 
+	select '3',typea,MAX(datea),CHAR(255) 
+	,SUM(a01),SUM(a04),SUM(a07),SUM(a11),SUM(a12),SUM(a13),SUM(a14),SUM(a15),SUM(a16) 
+	from #tmp where gno='1' 
+	group by typea
+end
+
 if((select count(*) from #tmp)>0)
 begin
 	insert #tmp(gno,typea,sssno)
-	select '3',typea,CHAR(255)
+	select '4',typea,CHAR(255)
 	from #tmp where gno='1' group by typea
 	having typea != (select MAX(typea) from #tmp where gno='1') --最後一個分頁排除
-
+	
 	insert #tmp(gno,typea,datea,sssno,a01,a04,a07,a11,a12,a13,a14,a15,a16)
-	select '4','9',MAX(datea),CHAR(255)
+	select '5','9',MAX(datea),CHAR(255)
 	,SUM(a01),SUM(a04),SUM(a07),SUM(a11),SUM(a12),SUM(a13),SUM(a14),SUM(a15),SUM(a16)
 	from #tmp where gno='1'
 end

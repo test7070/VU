@@ -84,6 +84,10 @@
                     }, {/*2-1 [13]*/
                         type : '6',
                         name : 'xaddr2'
+                    }, {/*2-1 [14]*/
+                        type : '5',//篩選完工未完工//
+						name : 'xpost2',
+						value : [' @全部','1@通案','2@慶欣欣專案','3@威致專案','4@工地']
                     }]
                 });
                 q_popAssign();
@@ -122,6 +126,7 @@
 				$('#chkXoption02').css('width','200px').css('margin-top','5px');
 				$('#chkXoption02 span').css('width','150px');
 				$('#chkXoption02 input').prop('checked',true);
+				$('#Xpost2 .label').css('width','150px');
 			}
 
 			function q_boxClose(s2) {

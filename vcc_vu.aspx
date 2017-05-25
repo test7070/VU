@@ -810,6 +810,20 @@
 						$('#btnMinut__'+n).click();
 					}else{
 						//105/08/12 加上判斷cub 被領料
+						//var t_where = "where=^^ uno='" + $('#txtUno__' + n).val() + "' and (weight<0 or mount<0) ^^";
+						//q_gt('view_cubs', t_where, 0, 0, 0, "getunocubs_"+n);
+						//106/05/23 多判斷get是否出貨
+						var t_where = "where=^^ uno='" + $('#txtUno__' + n).val() + "' and noa!='"+$('#txtNoa').val()+"' ^^";
+						q_gt('view_gett', t_where, 0, 0, 0, "getunogett_"+b_seq);
+					}
+				}else if(t_name.substring(0,10)=='getunogett'){
+					var n=t_name.split('_')[1];
+					var as = _q_appendData('view_gett', '', true);
+					if (as[0] != undefined) {
+						alert('該批號已出貨!!');
+						$('#btnMinut__'+n).click();
+					}else{
+						//105/08/12 加上判斷cub 被領料
 						var t_where = "where=^^ uno='" + $('#txtUno__' + n).val() + "' and (weight<0 or mount<0) ^^";
 						q_gt('view_cubs', t_where, 0, 0, 0, "getunocubs_"+n);
 					}

@@ -670,7 +670,7 @@
 						<td><span> </span><a id='lblAcomp' class="lbl btn"> </a></td>
 						<td><input id="txtCno" type="text" class="txt c1"/></td>
 						<td colspan="2"><input id="txtAcomp" type="text" class="txt c1"/></td>
-						<td><span> </span><a id='lbl' class="lbl">CMB合約類型</a></td>
+						<td><span> </span><a id='lbl' class="lbl">合約類型</a></td>
 						<td><select id="cmbPost2" class="txt c1"> </select></td>
 					</tr>
 					<tr>

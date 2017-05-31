@@ -675,7 +675,7 @@
 				t_deleno=t_deleno.length==0?'#non':t_deleno;
 				t_nordhno=t_nordhno.length==0?'#non':t_nordhno;
 				
-				if(q_cur==3){
+				/*if(q_cur==3){
 					if(t_ordhno != '#non'){
 						q_func('qtxt.query.changeordhsgweight', 'ordh.txt,changeordhs_sf,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(t_ordhno));
 					}
@@ -684,7 +684,7 @@
 					if(t_deleno != '#non' && t_rc2no !=''){
 						q_func('rc2_post.post.ina2rc230', r_accy + ',' + t_rc2no + ',0');
 					}
-				}
+				}*/
 				if (!(q_cur == 1 || q_cur == 2))
 					return false;
 				
@@ -694,7 +694,8 @@
 				t_ordhno='#non';
 				t_nordhno='#non';
 				
-				if(!emp($('#txtNoa').val())){
+				//106/05/31 暫不產生rc2
+				/*if(!emp($('#txtNoa').val())){
 					var today = new Date();
 					var ttime = padL(today.getHours(), '0', 2)+':'+padL(today.getMinutes(),'0',2);
 					if(q_cur==1){
@@ -713,7 +714,7 @@
 						else
 							q_func('qtxt.query.ina2rc2.1', 'ina.txt,ina2rc2_sf,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_rc2'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime));
 					}
-				}
+				}*/
 			}
 
             function bbsSave(as) {
@@ -899,7 +900,7 @@
 						break;
 					case 'changeordhsgweight':
 						break;
-					case 'qtxt.query.ina2rc2.1':
+					/*case 'qtxt.query.ina2rc2.1':
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
 							t_rc2no=as[0].rc2no;
@@ -941,7 +942,7 @@
 								q_func('rc2_post.post.ina2rc231', r_accy + ',' + t_rc2no + ',1');
 							}
 						}
-						break;
+						break;*/
 				}
 				if(t_func.indexOf('qtxt.query.rc2suno_')>-1){
 					var n=t_func.split('_')[1];

@@ -68,6 +68,7 @@ from view_ucce a left join view_ucces b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and b.product!='氧化鐵' and b.product!='廢鐵'
 group by a.accy,a.noa,a.datea,b.storeno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 
 --進
@@ -79,6 +80,7 @@ select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.storeno,b.product,b.ucolor,b.spec
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+and b.product!='氧化鐵' and b.product!='廢鐵'
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 
 --銷
@@ -89,8 +91,8 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.storeno,b.product,b.ucolor,b.spec
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+and b.product!='氧化鐵' and b.product!='廢鐵'
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
-
 
 CREATE INDEX tmpindex0 on #tmp (datea,tablea,typea,noa,noq,storeno,product,spec,size,ucolor,lengthb,class)
 CREATE INDEX tmpindex1 on #tmp (storeno,product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
@@ -837,6 +839,7 @@ from view_ucce a left join view_ucces b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and b.product!='氧化鐵' and b.product!='廢鐵'
 group by a.accy,a.noa,a.datea,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
 
 --進
@@ -848,6 +851,7 @@ select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size,b.
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and b.product!='氧化鐵' and b.product!='廢鐵'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 
 --銷
@@ -858,6 +862,7 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size,b.
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and b.product!='氧化鐵' and b.product!='廢鐵'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 
 --------------------------------------------------------------------

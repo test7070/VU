@@ -1104,7 +1104,7 @@
 						<td> </td>
 						<td><span> </span><a id="lblNoa" class="lbl"> </a></td>
 						<td><input id="txtNoa" type="text" class="txt c1"/></td>
-						<td><input type="button" id="btnCub_nouno" value="條碼領料" style="width:120px;"/></td>
+						<td><input type="button" id="btnCub_nouno" value="條碼領料" style="width:120px;display: none;"/></td><!--106/06/02暫時拿掉-->
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMechno" class="lbl"> </a></td>

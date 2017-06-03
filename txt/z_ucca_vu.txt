@@ -543,7 +543,7 @@ declare @tutotal float
 --計算成本
 declare cursor_table cursor for
 select tablea,datea,LEFT(datea,@t_lenm),cno,productno,noa,noq,isnull(mount,0),isnull(total,0)
-from #tmp where typea!='7' order by LEFT(datea,@t_lenm),datea,typea,noa,noq,productno 
+from #tmp where tablea!='uccea' order by LEFT(datea,@t_lenm),datea,typea,noa,noq,productno 
 open cursor_table
 fetch next from cursor_table
 into @tablea,@datea,@mon,@cno,@productno,@noa,@noq,@mount,@total
@@ -852,9 +852,9 @@ update @tmp set lprice=case when lmount=0 then 0 else lmoney/lmount end
 
 update @tmp set lprice=case when lmount=0 then 0 else lmoney/lmount end
 
-update @tmp set itmount=isnull(bmount,0)+isnull(rcmount,0)-isnull(vcmount,0)-isnull(gmount,0)+isnull(imount,0)
+update @tmp set itmount=case when isnull(imount,0)!=0 or isnull(gmount,0)!=0 then isnull(bmount,0)+isnull(rcmount,0)-isnull(vcmount,0)-isnull(gmount,0)+isnull(imount,0) else null end
 
-update @tmp set itmoney=isnull(bmoney,0)+isnull(rcmoney,0)-isnull(vcmoney,0)+isnull(imoney,0)
+update @tmp set itmoney=case when isnull(imount,0)!=0 or isnull(gmount,0)!=0 then isnull(bmoney,0)+isnull(rcmoney,0)-isnull(vcmoney,0)+isnull(imoney,0) else null end
 
 delete @tmp where bmount=0 and bmoney=0 and rcmount=0 and rcmoney=0 and vcmount=0 and vcmoney=0 and vccost=0 and imount=0 and gmount=0
 
@@ -878,16 +878,15 @@ select gno,productno,product,cno,(select top 1 acomp from acomp where noa=a.cno 
 ,dbo.getComma(vcmoney,0)vcmoney
 ,dbo.getComma(vccost,0)vccost
 ,dbo.getComma(profit,2)profit
-,dbo.getComma(lmount,2)lmount
-,dbo.getComma(lprice,2)lprice
-,dbo.getComma(lmoney,0)lmoney
 ,case when ISNULL(imount,0)!=0 then dbo.getComma(imount,0) else null end imount
 ,case when ISNULL(gmount,0)!=0 then dbo.getComma(gmount,0) else null end gmount
 ,dbo.getComma(itmount,0)itmount
 ,case when ISNULL(imoney,0)!=0 then dbo.getComma(imoney,0) else null end imoney
 ,dbo.getComma(itmoney,0)itmoney
+,dbo.getComma(lmount,2)lmount
+,dbo.getComma(lprice,2)lprice
+,dbo.getComma(lmoney,0)lmoney
 from @tmp a order by cno,gno,productno
-
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	drop table #tmp

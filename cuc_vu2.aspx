@@ -639,6 +639,10 @@
                     }
                 }
                 _bbsAssign();
+                if (q_getPara('sys.project').toUpperCase()=='VU'){
+					$('.isVU').hide();
+					$('.img').hide();
+				}
                 change_check();
                 $('#lblOrdeno_s').text('訂單編號/訂序');
                 $('#lblProduct_s').text('品名');
@@ -668,7 +672,7 @@
 				$('#lblBtime_s').text('顏色1');
 				$('#lblEtime_s').text('顏色2');
 				
-				if($('#btnImg').val()=='圖型關閉顯示'){
+				if($('#btnImg').val()=='圖型關閉'){
 					$('.img').hide();
 				}else{
 					$('.img').show();
@@ -942,6 +946,11 @@
                 } else {
                     $('#txtNoa').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
                 }
+                
+                if (q_getPara('sys.project').toUpperCase()=='VU'){
+					$('.isVU').hide();
+					$('.img').hide();
+				}
             }
 
             function btnMinus(id) {
@@ -1195,9 +1204,9 @@
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl"> </a></td>
 						<td colspan="3"><input id="txtMemo"  type="text" class="txt c1"/></td>
-						<td align="center"><input id="btnPic" type="button" value="成型參數顯示"></td>
-						<td align="center"><input id="btnPic2" type="button" value="續接參數顯示"></td>
-						<td align="center"><input id="btnImg" type="button" value="圖型關閉"></td>
+						<td align="center" class="isVU"><input id="btnPic" type="button" value="成型參數顯示"></td>
+						<td align="center" class="isVU"><input id="btnPic2" type="button" value="續接參數顯示"></td>
+						<td align="center" class="isVU"><input id="btnImg" type="button" value="圖型顯示"></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
@@ -1225,7 +1234,7 @@
 						<td style="width:150px;"><a id='lblUcolor_s'> </a><input class="btn"  id="btnUcolorCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblSpec_s'> </a><input class="btn"  id="btnSpecCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:85px;"><a id='lblSize_s'> </a><input class="btn"  id="btnSizeCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
-						<td style="width:120px;"><a id='lblStyle_s'> </a></td>
+						<td  class="isVU" style="width:120px;"><a id='lblStyle_s'> </a></td>
 						<td style="width:100px;display: none;" class="pic"><a id='lblParaa_s'> </a></td>
 						<td style="width:100px;display: none;" class="pic"><a id='lblParab_s'> </a></td>
 						<td style="width:100px;display: none;" class="pic"><a id='lblParac_s'> </a></td>
@@ -1233,7 +1242,7 @@
 						<td style="width:100px;display: none;" class="pic"><a id='lblParae_s'> </a></td>
 						<td style="width:110px;display: none;" class="pic2"><a id='lblParaf_s'> </a></td>
 						<td style="width:110px;display: none;" class="pic2"><a id='lblParag_s'> </a></td>
-						<td style="width:200px;" class="img"><a id='lblPic_s'> </a></td>
+						<td class="isVU img" style="width:200px;"><a id='lblPic_s'> </a></td>
 						<td style="width:85px;"><a id='lblLengthb_s'> </a></td>
 						<!--<td style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 						<td style="width:85px;"><a id='lblMount1_s'> </a></td>
@@ -1242,11 +1251,11 @@
 						<td style="width:120px;"><a id='lblClass_s'> </a><input class="btn"  id="btnClassCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblMemo_s'> </a><input class="btn"  id="btnMemoCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblSize2_s'> </a><input class="btn"  id="btnSize2Copy" type="button" value='≡' style="font-weight: bold;"  /></td>
-						<td style="width:90px;">
+						<td  class="isVU" style="width:90px;">
 							<a id='lblBtime_s'> </a>
 							<input class="btn" id="btnBtimeCopy" type="button" value='≡' style="font-weight: bold;"  />
 						</td>
-						<td style="width:90px;">
+						<td class="isVU" style="width:90px;">
 							<a id='lblEtime_s'> </a>
 							<input class="btn" id="btnEtimeCopy" type="button" value='≡' style="font-weight: bold;"  />
 						</td>
@@ -1272,7 +1281,7 @@
 							<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td><input id="txtSize.*" type="text" class="txt c1" /></td>
-						<td>
+						<td class="isVU">
 							<input class="txt" id="txtPicno.*" type="text" style="width:95%;"/>
 							<input class="txt" id="txtPicname.*" type="text" style="width:95%;"/>
 							<input class="txt" id="txtPara.*" type="text" style="display:none;"/>
@@ -1287,12 +1296,12 @@
 							<input id="txtParaf.*" type="text" class="txt c1" style="width: 70%;" />
 							<select id="combParaf.*" class="txt" style="width: 20px;"> </select>
 						</td>
-						<td class="pic2" style="display: none;">
+						<td class="pic2 isVU" style="display: none;">
 							<input id="txtParag.*" type="text" class="txt c1" style="width: 70%;"/>
 							<select id="combParag.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td class="img">
-							<canvas id="canvas.*" width="150" height="50"> </canvas>
+							<canvas id="canvas.*" width="150" height="50" class="isVU"> </canvas>
 							<img id="imgPic.*" src="" style="display:none;"/>
 							<textarea id="txtImgorg.*" style="display:none;"> </textarea>
 							<textarea id="txtImgdata.*" style="display:none;"> </textarea>
@@ -1309,8 +1318,8 @@
 						</td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
 						<td><input id="txtSize2.*" type="text" class="txt c1"/></td>
-						<td><select id="cmbBtime.*" class="txt c1"> </select></td>
-						<td><select id="cmbEtime.*" class="txt c1"> </select></td>
+						<td class="isVU"><select id="cmbBtime.*" class="txt c1"> </select></td>
+						<td class="isVU"><select id="cmbEtime.*" class="txt c1"> </select></td>
 						<td>
 							<input id="checkMins.*" type="checkbox"/>
 							<input id="txtMins.*" type="hidden"/>

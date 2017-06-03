@@ -259,3 +259,200 @@ order by years,weeks,rr
 ;
 
 ---------------------------------------------------------------------------------------------------------------
+z_cucp_vu05:--z_cucp_vu05
+SET QUOTED_IDENTIFIER OFF	
+
+declare @t_path nvarchar(max) = '[23]'
+declare @t_bnoa nvarchar(100) = case when '#non'= [1] then '' else [1] end 
+declare @t_enoa nvarchar(100) = case when '#non'= [2] then char(255) else [2] end
+declare @t_spec nvarchar(100) = case when '#non'= [7] then '' else [7] end 
+declare @t_size nvarchar(100) = case when '#non'= [8] then '' else [8] end 
+declare @t_memo nvarchar(100) = case when '#non'= [19] then '' else [19] end
+declare @t_bpicno nvarchar(100) = case when '#non'= '#non' then '' else '#non' end 
+declare @t_epicno nvarchar(100) = case when '#non'= '#non' then char(255) else '#non' end 
+declare @t_order nvarchar(100) = case when '#non'= '#non' then '' else '#non' end  
+declare @t_isparafg nvarchar(100) = case when '#non'= [20] then '' else [20] end 
+declare @t_ispage nvarchar(100) = case when '#non'= [21] then '' else [21] end 
+declare @t_istotal nvarchar(100) = case when '#non'= [22] then '' else [22] end 
+----------------------------------------------------------------------------------------------------------------------------
+
+declare @tmp table(
+	gno nvarchar(1),
+	idno int,
+	noa nvarchar(100),
+	datea nvarchar(10),
+	mech nvarchar(100),
+	cust nvarchar(200),
+	bdate nvarchar(20),
+	amemo nvarchar(MAX),
+	tmemo nvarchar(MAX),
+	smemo nvarchar(MAX),
+	
+	noq nvarchar(100),
+	productno nvarchar(100),
+	product nvarchar(200),
+	ucolor nvarchar(100),
+	spec nvarchar(100),
+	size nvarchar(100),
+	picno nvarchar(100),
+	picno2 nvarchar(100),--加工排序用
+	picname nvarchar(100),
+	imgdata nvarchar(max),
+	paraf nvarchar(50),
+	parag nvarchar(50),
+	lengthb float,
+	lengthc float,
+	mount float,
+	weight float,
+	class nvarchar(50),
+	memo nvarchar(MAX),
+	bsize nvarchar(100)
+)
+
+insert @tmp
+select '0',0,a.noa,a.datea,a.mech,a.cust,a.bdate,a.memo,'',''
+		,b.noq,b.productno,b.product,b.ucolor,b.spec,b.size,b.picno,b.picno,b.picname
+		,b.imgdata,b.paraf,b.parag,b.lengthb,b.mount1,b.mount,b.weight,b.class,b.memo,b.size2
+from  view_cuc a left join view_cucs b on a.noa=b.noa
+where (a.noa between @t_bnoa and @t_enoa)
+and (len(@t_spec)=0 or b.spec=@t_spec)
+and (len(@t_size)=0 or b.size=@t_size)
+and (len(@t_memo)=0 or b.memo=@t_memo)
+and (b.picno between @t_bpicno and @t_epicno)
+
+if(@t_isparafg='1') --需續接
+	delete @tmp where not(isnull(paraf,'')!='' or isnull(parag,'')!='')
+if(@t_isparafg='2') --不需續接
+	delete @tmp where (isnull(paraf,'')!='' or isnull(parag,'')!='')
+
+update a
+set tmemo=stuff((select CHAR(59)+size+'-'+spec+'='+dbo.getComma(SUM(weight),0)+'KG ' from @tmp where noa=a.noa group by size,spec order by cast(dbo.get_num(size) as int),spec FOR XML PATH('')),1,1,'')
+from @tmp a
+
+update a
+set smemo=stuff((select CHAR(59)+para+'-'+dbo.getComma(SUM(lengthc),0)+'個' from (
+select paraf para,SUM(lengthc) lengthc from @tmp where ISNULL(paraf,'')!='' and isnull(lengthb,0)!=0 group by paraf
+union all
+select parag para,SUM(lengthc) lengthc from @tmp where ISNULL(parag,'')!='' and isnull(lengthb,0)!=0 group by parag
+)tmp group by para order by cast(dbo.get_num(para) as int) FOR XML PATH('')),1,1,'')
+from @tmp a
+
+if(@t_istotal='1')
+begin
+	--select * from @tmp
+	insert @tmp
+	select '9',0,noa,datea,mech,cust,bdate,amemo,tmemo,smemo
+	,'',product,product,'' ucolor,spec,size,''picno,''picno2,''picname,''imgdata,''paraf,''parag
+	,lengthb,SUM(lengthc),SUM(mount),SUM(weight),'' class,''memo,'' bsize
+	from @tmp
+	group by noa,datea,mech,cust,bdate,amemo,tmemo,smemo,product,product,spec,size,lengthb
+	
+	delete @tmp where gno='0'
+	update @tmp set gno='0'
+end
+
+if(@t_ispage='1')
+begin
+	if(@t_order='memo')
+	begin
+		insert @tmp(gno,noa,spec,size,idno,weight)
+		select '1',noa,spec,size,MAX(idno)+1,sum(weight) from @tmp group by noa,spec,size
+		
+		update a
+		set idno=rr
+		from (select idno,ROW_NUMBER() over (order by cast(dbo.get_num(size) as int),spec,gno,memo,cast(dbo.get_num(size) as int),spec,lengthb desc,noq)rr from @tmp)a
+		
+	end
+	else if(@t_order='pic')
+	begin
+		--分兩頁
+		update @tmp
+		set picno2=case when picname='直料' then '1' else '2' end
+		
+		insert @tmp(gno,noa,picno2,spec,size,weight)
+		select '1',noa,picno2,spec,size,sum(weight) from @tmp group by noa,picno2,spec,size
+		
+		update a
+		set idno=rr
+		from (select idno,ROW_NUMBER() over (order by picno2,cast(dbo.get_num(size) as int),spec,gno,picno,cast(dbo.get_num(size) as int),spec,lengthb desc,noq)rr from @tmp)a
+	end
+	else if(@t_order='parafg')
+	begin	
+		insert @tmp(gno,noa,spec,size,idno,weight)
+		select '1',noa,spec,size,MAX(idno)+1,sum(weight) from @tmp group by noa,spec,size
+		
+		update a
+		set idno=rr
+		from (select idno,ROW_NUMBER() over (order by cast(dbo.get_num(size) as int),spec,gno
+		,case when isnull(paraf,'')!='' or isnull(parag,'')!='' then 1 else 0 end
+		,cast(dbo.get_num(size) as int),spec,lengthb desc,noq)rr from @tmp)a
+	end
+	else
+	begin
+		insert @tmp(gno,noa,spec,size,idno,weight)
+		select '1',noa,spec,size,MAX(idno)+1,sum(weight) from @tmp group by noa,spec,size
+		
+		update a
+		set idno=rr
+		from (select idno,ROW_NUMBER() over (order by cast(dbo.get_num(size) as int),spec,gno,cast(dbo.get_num(size) as int),spec,lengthb desc,noq)rr from @tmp)a
+	end
+end
+else
+begin
+	if(@t_order='memo')
+	begin
+		insert @tmp(gno,noa,idno,weight)
+		select '1',noa,MAX(idno)+1,sum(weight) from @tmp group by noa
+		
+		update a
+		set idno=rr
+		from (select idno,ROW_NUMBER() over (order by gno,memo,cast(dbo.get_num(size) as int),spec,lengthb desc,noq)rr from @tmp)a
+		
+	end
+	else if(@t_order='pic')
+	begin
+		--分兩頁
+		update @tmp
+		set picno2=case when picname='直料' then '1' else '2' end
+		
+		insert @tmp(gno,noa,picno2,weight)
+		select '1',noa,picno2,sum(weight) from @tmp group by noa,picno2
+		
+		update a
+		set idno=rr
+		from (select idno,ROW_NUMBER() over (order by picno2,gno,picno,cast(dbo.get_num(size) as int),spec,lengthb desc,noq)rr from @tmp)a
+	end
+	else if(@t_order='parafg')
+	begin	
+		insert @tmp(gno,noa,idno,weight)
+		select '1',noa,MAX(idno)+1,sum(weight) from @tmp group by noa
+		
+		update a
+		set idno=rr
+		from (select idno,ROW_NUMBER() over (order by gno
+		,case when isnull(paraf,'')!='' or isnull(parag,'')!='' then 1 else 0 end
+		,cast(dbo.get_num(size) as int),spec,lengthb desc,noq)rr from @tmp)a
+	end
+	else
+	begin
+		insert @tmp(gno,noa,idno,weight)
+		select '1',noa,MAX(idno)+1,sum(weight) from @tmp group by noa
+		
+		update a
+		set idno=rr
+		from (select idno,ROW_NUMBER() over (order by noa,gno,cast(dbo.get_num(size) as int),spec,lengthb desc,noq)rr from @tmp)a
+	end
+end
+
+select
+dbo.getComma(lengthb,2) lengthb,
+dbo.getComma(lengthc,0) lengthc,
+dbo.getComma(mount,0) mount,
+dbo.getComma(weight,0) weight
+,case when len(isnull(imgdata,''))>0 then 
+			'<img src="'+imgdata+'" style="width:140px'+char(59)+'height:50px'+char(59)+'"/>' 
+			else '<span style="display:block'+char(59)+'width:150px'+char(59)+'height:50px'+char(59)+'"></span>' end image1
+,*
+from @tmp
+order by idno
+;

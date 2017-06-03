@@ -40,6 +40,21 @@
 				$.datepicker.setDefaults($.datepicker.regional["zh-TW"]);
             });
         	
+        	function getLocation(){
+            	var parser = document.createElement('a');
+				parser.href = document.URL;
+				return parser.protocol+'//'+parser.host;
+				/*
+				parser.href = "http://example.com:3000/pathname/?search=test#hash";
+				parser.protocol; // => "http:"
+				parser.host;     // => "example.com:3000"
+				parser.hostname; // => "example.com"
+				parser.port;     // => "3000"
+				parser.pathname; // => "/pathname/"
+				parser.hash;     // => "#hash"
+				parser.search;   // => "?search=test"*/			
+			}
+        	
             function q_gfPost() {
 				$('#q_report').q_report({
 					fileName : 'z_cucp_vu',
@@ -87,7 +102,27 @@
                     }, {//[18]
                         type : '6',
                         name : 'xbdate' 
-                    }]
+                    },{
+						type : '5',
+						name : 'xorder',//[19]
+						value :('#non@預設,memo@備註(區域),pic@加工型式,parafg@是否續接').split(',')
+					},{
+						type : '5',
+						name : 'isparafg',//[20]
+						value :('#non@全部,1@需續接,2@不續接').split(',')
+					},{
+						type : '8',
+						name : 'ispage',//[21]
+						value :('1@材質號數分頁').split(',')
+					},{
+						type : '8',
+						name : 'istotalmount',//[22]
+						value :('1@顯示總料').split(',')
+					},{
+						type : '0', //[23]
+						name : 'path',
+						value : getLocation()
+					}]
 				});
                 q_popAssign();
 				q_getFormat();
@@ -136,6 +171,20 @@
                     if ($(this).val() == 'NaN')
                     	$(this).val(99);
                 });
+                
+                $('#Ispage').css('width','300px');
+				$('#chkIspage').css('width','200px');
+				$('#chkIspage span').css('width','150px');
+				$('#Ispage').css('height','30px');
+				$('#chkIspage input').css('margin-top','8px');
+				$('#chkIspage span').css('margin-top','5px');
+				
+				$('#Istotalmount').css('width','300px');
+				$('#chkIstotalmount').css('width','200px');
+				$('#chkIstotalmount span').css('width','150px');
+				$('#Istotalmount').css('height','30px');
+				$('#chkIstotalmount input').css('margin-top','8px');
+				$('#chkIstotalmount span').css('margin-top','5px');
                 
                 var tmp = document.getElementById("txtXspec");
                 var selectbox = document.createElement("select");

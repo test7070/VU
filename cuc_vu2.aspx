@@ -672,7 +672,7 @@
 				$('#lblBtime_s').text('顏色1');
 				$('#lblEtime_s').text('顏色2');
 				
-				if($('#btnImg').val()=='圖型關閉'){
+				if($('#btnImg').val()=='圖型顯示'){
 					$('.img').hide();
 				}else{
 					$('.img').show();

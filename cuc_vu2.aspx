@@ -18,9 +18,9 @@
             q_tables = 's';
             var q_name = "cuc";
             var q_readonly = ['txtWorker', 'txtWorker2','textWeight'];
-            var q_readonlys = [];
+            var q_readonlys = ['txtPicname'];
             var bbmNum = [];
-            var bbsNum = [];
+            var bbsNum = [['txtParaa', 15, 0, 1], ['txtParab', 15, 0, 1], ['txtParac', 15, 0, 1], ['txtParad', 15, 0, 1], ['txtParae', 15, 0, 1]];
             var bbmMask = [];
             var bbsMask = [];
             q_sqlCount = 6;
@@ -30,7 +30,8 @@
             brwKey = 'Noa';
             brwCount2 = 6;
             aPop = new Array(
-            	['txtCustno', 'lblCust', 'cust', 'noa,nick', 'txtCustno,txtCust', 'cust_b.aspx']
+            	['txtCustno', 'lblCust', 'cust', 'noa,nick', 'txtCustno,txtCust', 'cust_b.aspx'],
+            	['txtPicno_', 'btnPicno_', 'img', 'noa,namea', 'txtPicno_,txtPicname_', 'img_b.aspx']
             );
 
             $(document).ready(function() {
@@ -59,6 +60,9 @@
                 bbsMask = [];
                 q_mask(bbmMask);
 				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
+				q_cmbParse("cmbBtime", ',棕,紅,白,黃,綠,灰,藍','s');
+				q_cmbParse("cmbEtime", ',棕,紅,白,黃,綠,灰,藍','s');
+				
 				
 				var t_where = "where=^^ 1=1 ^^";
 				q_gt('ucc', t_where, 0, 0, 0, "");
@@ -101,11 +105,64 @@
                 $('#lblBdate').text('預交日');
                 $('#lblMech').text('工地名稱');
                 $('#lblWeight').text('料單總重量');
+                
+                $('#btnImg').click(function() {
+					if($(this).val()=='圖型顯示'){
+						$(this).val('圖型關閉');
+						$('.img').show();
+					}else{
+						$(this).val('圖型顯示');
+						$('.img').hide();
+					}
+					bbswidth();
+				});
+				
+				$('#btnPic').click(function() {
+					if($(this).val()=='成型參數顯示'){
+						$(this).val('成型參數關閉');
+						$('.pic').show();
+					}else{
+						$(this).val('成型參數顯示');
+						$('.pic').hide();
+					}
+					bbswidth();
+				});
+				
+				$('#btnPic2').click(function() {
+					if($(this).val()=='續接參數顯示'){
+						$(this).val('續接參數關閉');
+						$('.pic2').show();
+					}else{
+						$(this).val('續接參數顯示');
+						$('.pic2').hide();
+					}
+					bbswidth();
+				});
             }
+            
+            function bbswidth() {
+				var t_width=1750;
+				if($('#btnImg').val()=='圖型關閉'){ //圖型顯示
+					t_width=t_width+200;
+				}
+				if($('#btnPic').val()=='成型參數關閉'){ //成型參數顯示
+					t_width=t_width+500;
+				}
+				if($('#btnPic2').val()=='續接參數關閉'){ //續接參數顯示
+					t_width=t_width+220;
+				}
+				$('#tbbs').css("width",t_width+"px");
+				$('.dbbs').css("width",t_width+"px");
+			}
 
             function q_popPost(s1) {
                 switch(s1) {
-
+                	case 'txtPicno_':
+                		var n = b_seq;
+                		t_noa = $('#txtPicno_'+n).val();
+                		//console.log('popPost:'+t_noa);
+                		q_gt('img', "where=^^noa='"+t_noa+"'^^", 0, 0, 0, JSON.stringify({action:"getimg",n:n}),1);
+                	break;
                 }
             }
 
@@ -179,12 +236,165 @@
 						}
 						q_cmbParse("combClass", t_class,'s');
 						break;
+					case 'bbsparafg':
+						var as = _q_appendData("adpro", "", true);
+						var t_product='@';
+						for ( i = 0; i < as.length; i++) {
+							t_product+=","+as[i].product;
+						}
+						q_cmbParse("combParaf", t_product,'s');
+						q_cmbParse("combParag", t_product,'s');
+						break;	
                     case q_name:
                         if (q_cur == 4)
                             q_Seek_gtPost();
                         break;
+                    default:
+                    	try{
+                    		var t_para = JSON.parse(t_name);
+                    		if(t_para.action=="getimg"){
+                    			var n = t_para.n;
+                    			as = _q_appendData("img", "", true);
+                    			if(as[0]!=undefined){
+                    				$('#txtPara_'+n).val(as[0].para);
+                    				$('#txtImgorg_'+n).val(as[0].org);
+                    			}else{
+                    				$('#txtPara_'+n).val('');
+                    				$('#txtImgorg_'+n).val('');
+                    			}
+                    			createImg(n);
+                    		}else if(t_para.action=="createimg" || t_para.action=="createimg_btnOk"){
+                    			alert('錯誤!!');
+							}
+                    	}catch(e){
+                    		Unlock(1);
+                    	}
+                        break;
                 }
             }
+            
+            function createImg(n){
+				var t_picno = $('#txtPicno_'+n).val();
+				var t_para = $('#txtPara_'+n).val();
+                var t_imgorg = $('#txtImgorg_'+n).val();
+				try{
+					t_para = JSON.parse(t_para);
+				}catch(e){
+					console.log('createImg:'+t_para);
+				}
+				if(t_imgorg.length==0)
+					return;
+				//$('#imgPic_'+n).attr('src',t_imgorg);
+				var image = document.getElementById('imgPic_'+n);
+				image.src=t_imgorg;
+                var imgwidth = 300;
+                var imgheight = 100;
+                $('#canvas_'+n).width(imgwidth).height(imgheight);
+                var c = document.getElementById("canvas_"+n);
+				var ctx = c.getContext("2d");		
+				c.width = imgwidth;
+				c.height = imgheight;
+				image.onload = function() {
+					ctx.drawImage($('#imgPic_'+n)[0],0,0,imgwidth,imgheight);
+					var t_length = 0;
+					createImg2(n);
+				}
+			};
+			
+			function createImg2(n){
+				var t_picno = $('#txtPicno_'+n).val();
+				var t_para = $('#txtPara_'+n).val();
+                var t_imgorg = $('#txtImgorg_'+n).val();
+				try{
+					t_para = JSON.parse(t_para);
+				}catch(e){
+					console.log('createImg:'+t_para);
+				}
+				if(t_imgorg.length==0)
+					return;
+				var image = document.getElementById('imgPic_'+n)
+                var imgwidth = 300;
+                var imgheight = 100;
+                var c = document.getElementById("canvas_"+n);
+				$('#imgPic_'+n).attr('src',c.toDataURL());
+				image.onload = function() {
+					//條碼用圖形
+					xx_width = 355;
+					xx_height = 119;						
+					$('#canvas_'+n).width(xx_width).height(xx_height);
+					c.width = xx_width;
+					c.height = xx_height;
+					$('#canvas_'+n)[0].getContext("2d").drawImage($('#imgPic_'+n)[0],0,0,imgwidth,imgheight,0,0,xx_width,xx_height);
+					
+					$('#txtImgbarcode_'+n).val(c.toDataURL());
+					createImg3(n);
+				}
+			};
+			
+			function createImg3(n){
+				var t_picno = $('#txtPicno_'+n).val();
+				var t_para = $('#txtPara_'+n).val();
+                var t_imgorg = $('#txtImgorg_'+n).val();
+				try{
+					t_para = JSON.parse(t_para);
+				}catch(e){
+					console.log('createImg:'+t_para);
+				}
+				if(t_imgorg.length==0)
+					return;
+				var image = document.getElementById('imgPic_'+n);
+				image.src=t_imgorg;
+                var imgwidth = 300;
+                var imgheight = 100;
+                $('#canvas_'+n).width(imgwidth).height(imgheight);
+                var c = document.getElementById("canvas_"+n);
+				var ctx = c.getContext("2d");		
+				c.width = imgwidth;
+				c.height = imgheight;
+				image.onload = function() {
+					ctx.drawImage($('#imgPic_'+n)[0],0,0,imgwidth,imgheight);
+					var t_length = 0;
+					//106/05/10 參數不劃入圖中
+					for(var i=0;i<t_para.length;i++){
+						value = $('#txtPara'+t_para[i].key.toLowerCase()+'_'+n).val();
+						if(value!=0){
+							t_length += value;
+							ctx.font = t_para[i].fontsize+"px Arial";
+							ctx.fillStyle = 'black';
+							ctx.textAlign="center";
+							ctx.fillText(value+'',t_para[i].left,t_para[i].top);
+						}
+					}
+					createImg4(n);
+				}
+			};
+			
+			function createImg4(n){
+				var t_picno = $('#txtPicno_'+n).val();
+				var t_para = $('#txtPara_'+n).val();
+                var t_imgorg = $('#txtImgorg_'+n).val();
+				try{
+					t_para = JSON.parse(t_para);
+				}catch(e){
+					console.log('createImg:'+t_para);
+				}
+				if(t_imgorg.length==0)
+					return;
+				var image = document.getElementById('imgPic_'+n)
+                var imgwidth = 300;
+                var imgheight = 100;
+                var c = document.getElementById("canvas_"+n);
+				$('#imgPic_'+n).attr('src',c.toDataURL());
+				image.onload = function() {
+					//報表用圖形 縮放為150*50
+					$('#canvas_'+n).width(150).height(50);
+					c.width = 150;
+					c.height = 50;
+					$('#canvas_'+n)[0].getContext("2d").drawImage($('#imgPic_'+n)[0],0,0,imgwidth,imgheight,0,0,150,50);
+					$('#txtImgdata_'+n).val(c.toDataURL());	
+					//------------------------------
+				}
+			};
 
             function btnOk() {
                 var t_err = q_chkEmpField([['txtNoa', q_getMsg('lblNoa')], ['txtDatea', q_getMsg('lblDatea')]]);
@@ -215,7 +425,16 @@
                     $('#txtWorker2').val(r_name);
                     wrServer(t_noa);
 				}
-
+				
+				t_bbsordegen=false;
+                var t_ordeno='';
+                
+				for(var i=0;i<q_bbsCount;i++){
+                	createImg(i);
+                	if(t_ordeno.length==0 && !emp($('#txtOrdeno_'+i).val())){
+                		t_ordeno=$('#txtOrdeno_'+i).val();
+                	}
+                }
                 /*
                  11/10 不設定auto手動輸入
                  var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
@@ -238,6 +457,10 @@
 
             function bbsAssign() {
                 for (var j = 0; j < q_bbsCount; j++) {
+                	if($('#canvas_'+j).length>0){
+						$('#imgPic_'+j).attr('src', $('#txtImgdata_'+j).val());
+						showimg(j);
+                	}
                     if (!$('#btnMinus_' + j).hasClass('isAssign')) {
                     	$('#txtOrdeno_' + j).change(function() {
 							t_IdSeq = -1;
@@ -307,6 +530,26 @@
 								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
 						});
 						
+						$('#combParaf_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2){
+								$('#txtParaf_'+b_seq).val($('#combParaf_'+b_seq).find("option:selected").text());
+								createImg(b_seq);
+							}
+						});
+						
+						$('#combParag_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2){
+								$('#txtParag_'+b_seq).val($('#combParag_'+b_seq).find("option:selected").text());
+								createImg(b_seq);
+							}
+						});
+						
 						$('#checkMins_'+j).click(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
@@ -319,6 +562,80 @@
 							}
 							weighttotal();
 						});
+						
+						$('#txtPicno_' + j).bind('contextmenu', function(e) {
+                            /*滑鼠右鍵*/
+                            e.preventDefault();
+                            var n = $(this).attr('id').replace('txtPicno_', '');
+                            $('#btnPicno_'+n).click();
+                            
+                            /*if($('#btnPic').val()=='成型參數顯示'){
+								$('#btnPic').val('成型參數關閉');
+								$('.pic').show();
+								$('#tbbs').css("width","2350px");
+								$('.dbbs').css("width","2350px");
+							}*/
+                        });
+                        
+                        $('#txtParaa_'+j).change(function(e){
+                    		var n = $(this).attr('id').replace('txtParaa_', '');
+                    		createImg(n);
+                    		
+                    		var t_a=dec($('#txtParaa_'+n).val());
+                    		var t_b=dec($('#txtParab_'+n).val());
+                    		var t_c=dec($('#txtParac_'+n).val());
+                    		var t_d=dec($('#txtParad_'+n).val());
+                    		var t_e=dec($('#txtParae_'+n).val());
+                    		$('#txtLengthb_'+n).val(round(q_add(q_add(q_add(q_add(t_a,t_b),t_c),t_d),t_e)/100,2));
+                    	});
+                    	$('#txtParab_'+j).change(function(e){
+                    		var n = $(this).attr('id').replace('txtParab_', '');
+                    		createImg(n);
+                    		var t_a=dec($('#txtParaa_'+n).val());
+                    		var t_b=dec($('#txtParab_'+n).val());
+                    		var t_c=dec($('#txtParac_'+n).val());
+                    		var t_d=dec($('#txtParad_'+n).val());
+                    		var t_e=dec($('#txtParae_'+n).val());
+                    		$('#txtLengthb_'+n).val(round(q_add(q_add(q_add(q_add(t_a,t_b),t_c),t_d),t_e)/100,2));
+                    	});
+                    	$('#txtParac_'+j).change(function(e){
+                    		var n = $(this).attr('id').replace('txtParac_', '');
+                    		createImg(n);
+                    		var t_a=dec($('#txtParaa_'+n).val());
+                    		var t_b=dec($('#txtParab_'+n).val());
+                    		var t_c=dec($('#txtParac_'+n).val());
+                    		var t_d=dec($('#txtParad_'+n).val());
+                    		var t_e=dec($('#txtParae_'+n).val());
+                    		$('#txtLengthb_'+n).val(round(q_add(q_add(q_add(q_add(t_a,t_b),t_c),t_d),t_e)/100,2));
+                    	});
+                    	$('#txtParad_'+j).change(function(e){
+                    		var n = $(this).attr('id').replace('txtParad_', '');
+                    		createImg(n);
+                    		var t_a=dec($('#txtParaa_'+n).val());
+                    		var t_b=dec($('#txtParab_'+n).val());
+                    		var t_c=dec($('#txtParac_'+n).val());
+                    		var t_d=dec($('#txtParad_'+n).val());
+                    		var t_e=dec($('#txtParae_'+n).val());
+                    		$('#txtLengthb_'+n).val(round(q_add(q_add(q_add(q_add(t_a,t_b),t_c),t_d),t_e)/100,2));
+                    	});
+                    	$('#txtParae_'+j).change(function(e){
+                    		var n = $(this).attr('id').replace('txtParae_', '');
+                    		createImg(n);
+                    		var t_a=dec($('#txtParaa_'+n).val());
+                    		var t_b=dec($('#txtParab_'+n).val());
+                    		var t_c=dec($('#txtParac_'+n).val());
+                    		var t_d=dec($('#txtParad_'+n).val());
+                    		var t_e=dec($('#txtParae_'+n).val());
+                    		$('#txtLengthb_'+n).val(round(q_add(q_add(q_add(q_add(t_a,t_b),t_c),t_d),t_e)/100,2));
+                    	});
+                    	$('#txtParaf_'+j).change(function(e){
+                    		var n = $(this).attr('id').replace('txtParae_', '');
+                    		createImg(n);
+                    	});
+                    	$('#txtParag_'+j).change(function(e){
+                    		var n = $(this).attr('id').replace('txtParae_', '');
+                    		createImg(n);
+                    	});
                     }
                 }
                 _bbsAssign();
@@ -339,6 +656,34 @@
                 $('#vewNoa').text('案號');
                 $('#vewCust').text('客戶');
                 $('#lblSize2_s').text('工令');
+                $('#lblStyle_s').text('加工型式');
+				$('#lblParaa_s').text('參數A');
+				$('#lblParab_s').text('參數B');
+				$('#lblParac_s').text('參數C');
+				$('#lblParad_s').text('參數D');
+				$('#lblParae_s').text('參數E');
+				$('#lblParaf_s').text('續接參數F');
+				$('#lblParag_s').text('續接參數G');
+				$('#lblPic_s').text('形狀');
+				$('#lblBtime_s').text('顏色1');
+				$('#lblEtime_s').text('顏色2');
+				
+				if($('#btnImg').val()=='圖型關閉顯示'){
+					$('.img').hide();
+				}else{
+					$('.img').show();
+				}
+				if($('#btnPic').val()=='成型參數顯示'){
+					$('.pic').hide();
+				}else{
+					$('.pic').show();
+				}
+				if($('#btnPic2').val()=='續接參數顯示'){
+					$('.pic2').hide();
+				}else{
+					$('.pic2').show();
+				}
+				bbswidth();
                 
                 //1117複製功能
                 $('#btnProductCopy').click(function() {
@@ -446,6 +791,58 @@
                 		}
                 	}
 				});
+				
+				$('#btnBtimeCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#cmbBtime_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#cmbBtime_'+i).val())){
+	                				$('#cmbBtime_'+i).val($('#cmbBtime_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				$('#btnEtimeCopy').click(function() {
+                	if(q_cur==1 || q_cur==2){
+                		if(!emp($('#cmbEtime_0').val())){
+	                		for (var i = 1; i < q_bbsCount; i++) {
+	                			if(emp($('#cmbEtime_'+i).val())){
+	                				$('#cmbEtime_'+i).val($('#cmbEtime_0').val());
+	                			}
+	                		}
+                		}
+                	}
+				});
+				
+				for (var j = 0; j < q_bbsCount; j++) {
+                	if($('#canvas_'+j).length>0){
+						$('#imgPic_'+j).attr('src', $('#txtImgdata_'+j).val());
+						showimg(j)
+                	}
+                }
+            }
+            
+            function showimg(n){
+            	var image = document.getElementById('imgPic_'+n);
+            	image.onload = function() {
+					var imgwidth = $('#imgPic_'+n).width();
+	                var imgheight = $('#imgPic_'+n).height();
+	                if($("#canvas_"+n)[0]!=undefined)
+						$("#canvas_"+n)[0].getContext("2d").drawImage($('#imgPic_'+n)[0],0,0,imgwidth,imgheight,0,0,150,50);
+				}
+            }
+            
+            function q_bbsLenShow( t_start, t_end){
+            	for(var i=t_start;i<=t_end;i++)
+            	if($('#canvas_'+i).length>0){
+					$('#imgPic_'+i).attr('src', $('#txtImgdata_'+i).val());
+					var imgwidth = $('#imgPic_'+i).width();
+					var imgheight = $('#imgPic_'+i).height();
+					$("#canvas_"+i)[0].getContext("2d").drawImage($('#imgPic_'+i)[0],0,0,imgwidth,imgheight,0,0,150,50);
+					
+            	}
             }
             
             function bbsweight(n) {
@@ -728,7 +1125,7 @@
                 font-size: medium;
             }
             .dbbs {
-                width: 100%;
+                width: 1750px;
             }
             .dbbs .tbbs {
                 margin: 0;
@@ -798,9 +1195,9 @@
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl"> </a></td>
 						<td colspan="3"><input id="txtMemo"  type="text" class="txt c1"/></td>
-						<td> </td>
-						<td> </td>
-						<td> </td>
+						<td align="center"><input id="btnPic" type="button" value="成型參數顯示"></td>
+						<td align="center"><input id="btnPic2" type="button" value="續接參數顯示"></td>
+						<td align="center"><input id="btnImg" type="button" value="圖型關閉"></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
@@ -828,6 +1225,15 @@
 						<td style="width:150px;"><a id='lblUcolor_s'> </a><input class="btn"  id="btnUcolorCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblSpec_s'> </a><input class="btn"  id="btnSpecCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:85px;"><a id='lblSize_s'> </a><input class="btn"  id="btnSizeCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:120px;"><a id='lblStyle_s'> </a></td>
+						<td style="width:100px;display: none;" class="pic"><a id='lblParaa_s'> </a></td>
+						<td style="width:100px;display: none;" class="pic"><a id='lblParab_s'> </a></td>
+						<td style="width:100px;display: none;" class="pic"><a id='lblParac_s'> </a></td>
+						<td style="width:100px;display: none;" class="pic"><a id='lblParad_s'> </a></td>
+						<td style="width:100px;display: none;" class="pic"><a id='lblParae_s'> </a></td>
+						<td style="width:110px;display: none;" class="pic2"><a id='lblParaf_s'> </a></td>
+						<td style="width:110px;display: none;" class="pic2"><a id='lblParag_s'> </a></td>
+						<td style="width:200px;" class="img"><a id='lblPic_s'> </a></td>
 						<td style="width:85px;"><a id='lblLengthb_s'> </a></td>
 						<!--<td style="width:55px;"><a id='lblUnit_s'> </a></td>-->
 						<td style="width:85px;"><a id='lblMount1_s'> </a></td>
@@ -836,6 +1242,14 @@
 						<td style="width:120px;"><a id='lblClass_s'> </a><input class="btn"  id="btnClassCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblMemo_s'> </a><input class="btn"  id="btnMemoCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:150px;"><a id='lblSize2_s'> </a><input class="btn"  id="btnSize2Copy" type="button" value='≡' style="font-weight: bold;"  /></td>
+						<td style="width:90px;">
+							<a id='lblBtime_s'> </a>
+							<input class="btn" id="btnBtimeCopy" type="button" value='≡' style="font-weight: bold;"  />
+						</td>
+						<td style="width:90px;">
+							<a id='lblEtime_s'> </a>
+							<input class="btn" id="btnEtimeCopy" type="button" value='≡' style="font-weight: bold;"  />
+						</td>
 						<td style="width:40px;"><a id='lblMins_s'> </a></td>
 					</tr>
 					<tr  style='background:#cad3ff;'>
@@ -858,6 +1272,32 @@
 							<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
 						</td>
 						<td><input id="txtSize.*" type="text" class="txt c1" /></td>
+						<td>
+							<input class="txt" id="txtPicno.*" type="text" style="width:95%;"/>
+							<input class="txt" id="txtPicname.*" type="text" style="width:95%;"/>
+							<input class="txt" id="txtPara.*" type="text" style="display:none;"/>
+							<input id="btnPicno.*" type="button" style="display:none;">
+						</td>
+						<td class="pic" style="display: none;"><input id="txtParaa.*" type="text" class="txt num c1" /></td>
+						<td class="pic" style="display: none;"><input id="txtParab.*" type="text" class="txt num c1" /></td>
+						<td class="pic" style="display: none;"><input id="txtParac.*" type="text" class="txt num c1" /></td>
+						<td class="pic" style="display: none;"><input id="txtParad.*" type="text" class="txt num c1" /></td>
+						<td class="pic" style="display: none;"><input id="txtParae.*" type="text" class="txt num c1" /></td>
+						<td class="pic2" style="display: none;">
+							<input id="txtParaf.*" type="text" class="txt c1" style="width: 70%;" />
+							<select id="combParaf.*" class="txt" style="width: 20px;"> </select>
+						</td>
+						<td class="pic2" style="display: none;">
+							<input id="txtParag.*" type="text" class="txt c1" style="width: 70%;"/>
+							<select id="combParag.*" class="txt" style="width: 20px;"> </select>
+						</td>
+						<td class="img">
+							<canvas id="canvas.*" width="150" height="50"> </canvas>
+							<img id="imgPic.*" src="" style="display:none;"/>
+							<textarea id="txtImgorg.*" style="display:none;"> </textarea>
+							<textarea id="txtImgdata.*" style="display:none;"> </textarea>
+							<textarea id="txtImgbarcode.*" style="display:none;"> </textarea>
+						</td>
 						<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
 						<!--<td><input id="txtUnit.*" type="text" class="txt c1"/></td>-->
 						<td><input id="txtMount1.*" type="text" class="txt num c1"/></td>
@@ -869,6 +1309,8 @@
 						</td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
 						<td><input id="txtSize2.*" type="text" class="txt c1"/></td>
+						<td><select id="cmbBtime.*" class="txt c1"> </select></td>
+						<td><select id="cmbEtime.*" class="txt c1"> </select></td>
 						<td>
 							<input id="checkMins.*" type="checkbox"/>
 							<input id="txtMins.*" type="hidden"/>

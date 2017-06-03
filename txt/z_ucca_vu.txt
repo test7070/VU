@@ -488,7 +488,6 @@ where isnull(b.productno,'')!=''
 and isnull(b.productno,'') between @t_bproductno and @t_eproductno
 and (len(@t_cno)=0 or b.cno=@t_cno) 
 and isnull(a.datea,'') <=@t_edate
-and (isnull(b.money,0)!=0 or isnull(b.mount,0)!=0)
 
 --領料
 insert #tmp
@@ -499,7 +498,6 @@ where isnull(b.productno,'')!=''
 and isnull(b.productno,'') between @t_bproductno and @t_eproductno
 and (len(@t_cno)=0 or b.cno=@t_cno) 
 and isnull(a.datea,'') <=@t_edate
-and (isnull(b.money,0)!=0 or isnull(b.mount,0)!=0)
 --------------------------------------------------------------------
 --月成本
 create table #tmpb(

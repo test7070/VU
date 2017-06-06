@@ -64,7 +64,6 @@ select '1','vcf','',a.noa,b.noq,a.datea,case when b.storeno='7000A' then '7000' 
 from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-and b.product!='氧化鐵' and b.product!='廢鐵'
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03'
 
@@ -77,7 +76,6 @@ select '1','rc2s',a.accy,a.noa,b.noq,a.datea,case when b.storeno='7000A' then '7
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-and b.product!='氧化鐵' and b.product!='廢鐵'
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03'
 
@@ -89,7 +87,6 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,case when b.storeno='7000A' then '7
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-and b.product!='氧化鐵' and b.product!='廢鐵'
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03'
 
@@ -673,21 +670,21 @@ delete #tmpa where gno='9'
 ----------------------------------------------------------------------------------------------------------
 select 
 gno,product,spec,size
-,dbo.getComma(bw,2)bw
+,dbo.getComma(bw,0)bw
 ,dbo.getComma(bo,0)bo
 ,dbo.getComma(bm,2)bm
-,dbo.getComma(rw,2)rw
+,dbo.getComma(rw,0)rw
 ,dbo.getComma(ro,0)ro
 ,dbo.getComma(rm,0)rm
-,dbo.getComma(vw,2)vw
+,dbo.getComma(vw,0)vw
 ,dbo.getComma(vo,0)vo
 ,dbo.getComma(vc,2)vc
 ,dbo.getComma(vm,0)vm
 ,dbo.getComma(profit,2)profit
-,dbo.getComma(dw,2)dw
+,dbo.getComma(dw,0)dw
 ,dbo.getComma(do,0)do
 ,dbo.getComma(dm,2)dm
-,dbo.getComma(lw,2)lw
+,dbo.getComma(lw,0)lw
 ,dbo.getComma(lo,0)lo
 ,dbo.getComma(lp,2)lp
 ,dbo.getComma(lm,2)lm
@@ -782,7 +779,6 @@ select '0','vcf','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
 from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
-and b.product!='氧化鐵' and b.product!='廢鐵'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and a.datea>='2017/06/03'
 
@@ -795,7 +791,6 @@ select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
-and b.product!='氧化鐵' and b.product!='廢鐵'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and a.datea>='2017/06/03'
 
@@ -807,7 +802,6 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
-and b.product!='氧化鐵' and b.product!='廢鐵'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and a.datea>='2017/06/03'
 
@@ -1100,9 +1094,9 @@ select
 gno,product,spec,size
 ,(select top 1 store from store where noa=a.storeno )store
 ,tablea,typea,noa,noq,datea,storeno,qhref
-,dbo.getComma(weight,2) weight
+,dbo.getComma(weight,0) weight
 ,dbo.getComma(money,2) money
-,dbo.getComma(tweight,2) tweight
+,dbo.getComma(tweight,0) tweight
 ,dbo.getComma(tmoney,2) tmoney
 ,case when isnull(tweight,0)=0 then dbo.getComma(0,2) else dbo.getComma(round(tmoney/tweight,2),2) end tprice
 ,case when isnull(product,'') like '%續接器%' or isnull(product,'') like '%水泥方塊%' or isnull(product,'') like '%太空包%' or isnull(product,'') like '%費' or isnull(product,'') like '%工資%' then '件數' else '重量' end utype

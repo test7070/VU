@@ -362,11 +362,12 @@ from #tmp where gno!='1' and gno!='5' group by page
 
 --1050205 權限9以下 和 無顯示單價的使用者 單價 取消
 --權限8的限制拿掉
-if not(@t_rank='9' or isnull((select top 1 price_show from authority where noa='z_ucc_vu' and sssno=@t_ruserno),0)=1)
-begin
+--106/06/05 不顯示單價和未稅金額
+--if not(@t_rank='9' or isnull((select top 1 price_show from authority where noa='z_ucc_vu' and sssno=@t_ruserno),0)=1)
+--begin
 	update #tmp
 	set gno=CAST(CAST(gno as int)+7 as nvarchar(10))
-end
+--end
 
 declare @totpage int= isnull((select MAX(page) from #tmp),0)
 declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')

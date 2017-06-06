@@ -199,18 +199,229 @@ end
 z_vcc_vu24:--z_vcc_vu24
 declare @t_enddate nvarchar(10)
 set @t_enddate = case when '#non'=[18] then '' else [18] end
+declare @t_lenm nvarchar(10) = '[30]'
+declare @t_len nvarchar(10) = cast(@t_lenm as int)-3
 ------------------------------------------------------------------
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	drop table #tmp
 END
 
+IF OBJECT_ID('tempdb..#xtmp')is not null
+BEGIN
+	drop table #xtmp
+END
+
+IF OBJECT_ID('tempdb..#xtmpb')is not null
+BEGIN
+	drop table #xtmpb
+END
+
+
 if(len(@t_enddate)=0)
 	set @t_enddate=replace(convert(varchar(10),GETDATE(),20),'-','/')
+	
+--J10成本表----------------------------------------------------------
+declare @tablea nvarchar(10)
+declare @accy nvarchar(10)
+declare @datea nvarchar(10)
+declare @t_datea nvarchar(10)
+declare @mon nvarchar(10)
+declare @t_mon nvarchar(10)=''
+declare @t_cdnum float
+declare @product nvarchar(50)
+declare @spec nvarchar(50)
+declare @size nvarchar(20)
+declare @weight float=0
+declare @total float
+declare @aprice float=0
+declare @acost float
+declare @aweight float=0
+declare @noa nvarchar(50)
+declare @noq nvarchar(10)
+declare @saprice float
+declare @sweight float
 
-declare @t_mon nvarchar(10)=left(@t_enddate,7)
-declare @t_pmon nvarchar(10)=left(dbo.q_cdn(left(@t_enddate,7)+'/01',-1),7)
-declare @t_year nvarchar(10)=left(@t_enddate,4)
+declare @tproduct nvarchar(50)='#non'
+declare @tspec nvarchar(50)='#non'
+declare @tsize nvarchar(20)='#non'
+declare @tweight float=0
+declare @ttotal float
+
+if(@t_enddate>='2017/06/03')
+begin
+	create table #xtmp(
+		typea nvarchar(2),
+		tablea nvarchar(10),
+		accy nvarchar(10),
+		noa nvarchar(50),
+		noq nvarchar(20),
+		datea nvarchar(10),
+		product nvarchar(50),
+		spec nvarchar(50),
+		size nvarchar(20),
+		weight float,
+		price float,
+		total float,
+		aprice float, --均價
+		cost float --成本
+	)
+
+	--106/05/24
+	--只看號數和材質,7000和7000A當一個倉庫
+
+	--調整
+	insert #xtmp
+	select '1','vcf','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,b.weight,case when b.weight=0 then 0 else b.money/b.weight end
+	,b.money,case when b.weight=0 then 0 else b.money/b.weight end
+	,b.money
+	from vcf a left join vcfs b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03'
+
+	--進
+	insert #xtmp
+	select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
+	,case when a.typea='2' then -1 else 1 end*b.total,b.price
+	,case when a.typea='2' then -1 else 1 end*b.total
+	from view_rc2 a left join view_rc2s b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03'
+
+	--銷
+	insert #xtmp
+	select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
+	,case when a.typea='2' then -1 else 1 end*b.total,0,0
+	from view_vcc a left join view_vccs b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03'
+
+	CREATE INDEX tmpindex0 on #xtmp (datea,tablea,typea,noa,noq,product,spec,size)
+	CREATE INDEX tmpindex1 on #xtmp (product,spec,size,datea,typea,noa,noq)
+	CREATE INDEX tmpindex2 on #xtmp (tablea,noa,noq)
+	
+	delete #xtmp where spec=''
+	--------------------------------------------------------------------
+	--月成本
+	create table #xtmpb(
+		mon nvarchar(10),
+		product nvarchar(50),
+		spec nvarchar(50),
+		size nvarchar(20),
+		weight float,
+		total float,
+		aprice float,
+		primary key (product,spec,size,mon)
+	)
+	insert #xtmpb
+	select LEFT(datea,@t_lenm),product,spec,size,0,0,0
+	from #xtmp group by LEFT(datea,@t_lenm),product,spec,size
+
+	--------------------------------------------------------------------
+
+	--計算成本
+	declare cursor_table cursor for
+	select tablea,datea,LEFT(datea,@t_lenm),product,spec,size,noa,noq,isnull(weight,0),isnull(total,0)
+	from #xtmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,product,spec,size
+	open cursor_table
+	fetch next from cursor_table
+	into @tablea,@datea,@mon,@product,@spec,@size,@noa,@noq,@weight,@total
+	while(@@FETCH_STATUS <> -1)
+	begin
+		--避免前期超領負數造成金額溢位
+		if(round(@tweight,0)<=0)
+		begin
+			set @ttotal=0
+			--避免領用有小數點導致無法全部被領用
+			if(round(@tweight,0)=0)
+			begin
+				set @tweight=0
+			end
+		end
+		
+		if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @t_mon!=@mon )
+		begin
+			if(@tproduct!='#non')
+			begin
+				update #xtmpb
+				set weight=@tweight,total=@ttotal,aprice=@aprice
+				where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize 
+			end
+			
+			if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size )
+			begin
+				select @tweight=isnull(weight,0),@ttotal=isnull(total,0),@aprice=isnull(aprice,0)
+				from #xtmpb
+				where mon=@mon and product=@product and spec=@spec and size=@size 
+			end
+		end
+		
+		--進貨 --調整
+		if(@tablea='rc2s' or @tablea='vcf')
+		begin
+			if(@ttotal<=0 or @tweight<=0) --處理超領導致金額不正確 以最近進貨的單價作為目前超領的單價
+				set @ttotal=@tweight*case when @weight=0 then 0 else round(@total/@weight,4) end
+				
+			set @tweight=@tweight+@weight
+			set @ttotal=@ttotal+@total
+			set @aprice=case when @tweight=0 then 0 else round(@ttotal/@tweight,4) end
+		end
+		
+		--出貨
+		if(@tablea='vccs')
+		begin
+			set @tweight=@tweight-@weight
+			set @ttotal=@ttotal-round(@weight*@aprice,4)
+		end
+		
+		update #xtmp 
+		set aprice=@aprice,cost=round(isnull(@aprice,0)*weight,4)
+		where noa=@noa and noq=@noq and tablea=@tablea
+		
+		set @tproduct=@product
+		set @tspec=@spec
+		set @tsize=@size
+		set @t_mon=@mon
+		
+		fetch next from cursor_table
+		into @tablea,@datea,@mon,@product,@spec,@size,@noa,@noq,@weight,@total
+	end
+	close cursor_table
+	deallocate cursor_table
+	--最後一筆更新-------------------------------------------------------------
+	--避免前期超領負數造成金額溢位
+	if(round(@tweight,0)<=0)
+	begin
+		set @ttotal=0
+		--避免領用有小數點導致無法全部被領用
+		if(round(@tweight,0)=0)
+		begin
+			set @tweight=0
+		end
+	end
+
+	if(@tproduct!='#non')
+	begin
+		update #xtmpb
+		set weight=@tweight,total=@ttotal,aprice=@aprice
+		where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize
+	end
+	--最後一筆更新-------------------------------------------------------------
+end
+--J10-------------------------------------------------------------------
+
+set @t_mon=left(@t_enddate,@t_lenm)
+declare @t_pmon nvarchar(10)=left(dbo.q_cdn(left(@t_enddate,@t_lenm)+'/01',-1),@t_lenm)
+declare @t_year nvarchar(10)=left(@t_enddate,@t_len)
 declare @t_pyear nvarchar(10)=cast(cast(@t_year as int)-1 as nvarchar(10))
 
 declare @tmp table(
@@ -358,27 +569,26 @@ and isnull(b.productno,'')='' and isnull(b.product,'')!='' --and isnull(b.produc
 and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
 group by b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
 
-declare @tablea nvarchar(100)
+set @tablea=''
 declare @storeno nvarchar(100)
 declare @x_storeno nvarchar(100)
-declare @product nvarchar(100)
+set @product=''
 declare @x_product nvarchar(100)='~!@#$%^&*'
-declare @spec nvarchar(100)
+set @spec=''
 declare @x_spec nvarchar(100)
-declare @size nvarchar(100)
+set @size=''
 declare @x_size nvarchar(100)
 declare @lengthb float
 declare @x_lengthb float
 declare @class nvarchar(100)
 declare @x_class nvarchar(100)
 declare @mount decimal(18, 4)
-declare @weight decimal(18, 4)
+set @weight=0
 declare @money float
 declare @t_money float
 declare @t_mount decimal(18, 4)
 declare @t_weight decimal(18, 4)
 declare @avgweight decimal(18, 4)
-declare @aprice decimal(18, 4)
 declare @stktype float
 set @t_mount=0
 set @t_weight=0
@@ -483,6 +693,16 @@ outer apply(
 	and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
 )b
 
+if(@t_enddate>='2017/06/03')
+begin
+	update xa
+	set sp=xb.aprice,ep=xb.aprice
+	from @tmp xa
+	outer apply (
+	select case when SUM(weight)=0 then 0 else SUM(total)/SUM(weight) end aprice from (select product,spec,size,MAX(mon)mon from #xtmpb group by product,spec,size)a
+	outer apply (select weight,total from #xtmpb where product=a.product and spec=a.spec and size=a.size and mon=a.mon)b) xb
+end
+
 --可用餘量
 update a
 set am=ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)
@@ -535,88 +755,88 @@ from @tmp a
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,7) = @t_mon
+	where left(a.datea,@t_lenm) = @t_mon
 	and isnull(b.uno,'')!='' 
 )b
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,7) = @t_pmon
+	where left(a.datea,@t_lenm) = @t_pmon
 	and isnull(b.uno,'')!='' 
 )c
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,4) = left(@t_mon,4)
+	where left(a.datea,@t_len) = left(@t_mon,@t_len)
 	and isnull(b.uno,'')!='' 
 )d
 
 --左區塊------------------------------------------------------------------------------------------------------------------------------------------------------
 --鋼筋總進貨量
 update @tmp
-set prm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,7)=@t_pmon),0)
-,prp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,7)=@t_pmon),0)
-,rm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,rp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,pyrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,4)=@t_pyear),0)
-,pyrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,4)=@t_pyear),0)
-,yrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,4)=@t_year and datea<=@t_enddate),0)
-,yrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,4)=@t_year and datea<=@t_enddate),0)
+set prm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,prp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,rm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,rp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,pyrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,yrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
 
 --鋼筋總出貨量 
 update @tmp
-set pvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,7)=@t_pmon),0)
-,pvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,7)=@t_pmon),0)
-,vm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,vp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,pyvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,4)=@t_pyear),0)
-,pyvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,4)=@t_pyear),0)
-,yvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,4)=@t_year and datea<=@t_enddate),0)
-,yvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,4)=@t_year and datea<=@t_enddate),0)
+set pvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,pvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,vm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,vp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,pyvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,yvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
 
 --進貨合約
 update @tmp
-set pccm=isnull((select SUM(ordeweight) from cont where left(datea,7)=@t_pmon),0)
-,pccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,7)=@t_pmon),0),3)
-,ccm=isnull((select SUM(ordeweight) from cont where left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,ccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,7)=@t_mon and datea<=@t_enddate),0),3)
-,pyccm=isnull((select SUM(ordeweight) from cont where left(datea,4)=@t_pyear),0)
-,pyccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,4)=@t_pyear),0),3)
-,yccm=isnull((select SUM(ordeweight) from cont where left(datea,4)=@t_year and datea<=@t_enddate),0)
-,yccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,4)=@t_year and datea<=@t_enddate),0),3)
+set pccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_lenm)=@t_pmon),0)
+,pccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_lenm)=@t_pmon),0),3)
+,ccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,ccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0),3)
+,pyccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_len)=@t_pyear),0)
+,pyccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_len)=@t_pyear),0),3)
+,yccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_len)=@t_year and datea<=@t_enddate),0),3)
 
 --銷售合約
 update @tmp
-set pqvm=isnull((select SUM(weight) from view_quat where left(datea,7)=@t_pmon),0)
-,pqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,7)=@t_pmon),0),3)
-,qvm=isnull((select SUM(weight) from view_quat where left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,qvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,7)=@t_mon and datea<=@t_enddate),0),3)
-,pyqvm=isnull((select SUM(weight) from view_quat where left(datea,4)=@t_pyear),0)
-,pyqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,4)=@t_pyear),0),3)
-,yqvm=isnull((select SUM(weight) from view_quat where left(datea,4)=@t_year and datea<=@t_enddate),0)
-,yqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,4)=@t_year and datea<=@t_enddate),0),3)
+set pqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_lenm)=@t_pmon),0)
+,pqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_lenm)=@t_pmon),0),3)
+,qvm=isnull((select SUM(weight) from view_quat where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,qvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0),3)
+,pyqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_len)=@t_pyear),0)
+,pyqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_len)=@t_pyear),0),3)
+,yqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_len)=@t_year and datea<=@t_enddate),0),3)
 
 --廢鐵總出貨量 
 update @tmp
-set pbvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,7)=@t_pmon),0)
-,pbvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,7)=@t_pmon),0)
-,bvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,bvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,pybvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,4)=@t_pyear),0)
-,pybvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,4)=@t_pyear),0)
-,ybvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,4)=@t_year and datea<=@t_enddate),0)
-,ybvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,4)=@t_year and datea<=@t_enddate),0)
+set pbvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,pbvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,bvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,bvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pybvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear),0)
+,pybvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear),0)
+,ybvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,ybvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
 
 --氧化鐵總出貨量 
 update @tmp
-set pivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,7)=@t_pmon),0)
-,pivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,7)=@t_pmon),0)
-,ivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,ivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,7)=@t_mon and datea<=@t_enddate),0)
-,pyivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,4)=@t_pyear),0)
-,pyivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,4)=@t_pyear),0)
-,yivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,4)=@t_year and datea<=@t_enddate),0)
-,yivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,4)=@t_year and datea<=@t_enddate),0)
+set pivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,pivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,ivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,ivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear),0)
+,pyivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear),0)
+,yivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
 
 select gno
 ,dbo.getComma(cm,0) cm,dbo.getComma(cp,-1) cp
@@ -665,6 +885,17 @@ IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	drop table #tmp
 END
+
+IF OBJECT_ID('tempdb..#xtmp')is not null
+BEGIN
+	drop table #xtmp
+END
+
+IF OBJECT_ID('tempdb..#xtmpb')is not null
+BEGIN
+	drop table #xtmpb
+END
+
 ;
 --*************************************************************************************************
 z_vcc_vu25:--z_vcc_vu25

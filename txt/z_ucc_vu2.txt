@@ -95,7 +95,7 @@ CREATE INDEX tmpindex1 on #tmp (storeno,product,spec,size,datea,typea,noa,noq)
 CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 --------------------------------------------------------------------
 --月成本
-create table #tmpb(
+/*create table #tmpb(
 	mon nvarchar(10),
 	storeno nvarchar(50),
 	product nvarchar(50),
@@ -110,7 +110,7 @@ create table #tmpb(
 insert #tmpb
 select LEFT(datea,@t_lenm),storeno,product,spec,size,0,0,0,0
 from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size
-
+*/
 --------------------------------------------------------------------
 declare @tablea nvarchar(10)
 declare @accy nvarchar(10)
@@ -139,7 +139,7 @@ declare @tspec nvarchar(50)='#non'
 declare @tsize nvarchar(20)='#non'
 declare @tweight float=0
 declare @ttotal float
-
+/*
 --計算成本
 declare cursor_table cursor for
 select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,size,noa,noq,isnull(weight,0),isnull(total,0)
@@ -228,7 +228,7 @@ begin
 	set weight=@tweight,total=@ttotal,aprice=@aprice
 	where mon>=@t_mon and storeno=@tstoreno and product=@tproduct and spec=@tspec and size=@tsize
 end
-
+*/
 update a set cost=total from #tmp a where a.tablea='rc2s' or a.tablea='vcf'
 ----------------------------------------------------------------
 
@@ -419,11 +419,11 @@ and (isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水�
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03'
 --------------------------------------------------------------------
-delete #tmpb
+/*delete #tmpb
 
 insert #tmpb
 select LEFT(datea,@t_lenm),storeno,product,spec,size,0,0,0,0
-from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size
+from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size*/
 
 --------------------------------------------------------------------
 declare @mount float=0
@@ -438,7 +438,7 @@ set @tspec='#non'
 set @tsize='#non'
 
 --計算成本
-declare cursor_table cursor for
+/*declare cursor_table cursor for
 select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,size,noa,noq,isnull(mount,0),isnull(total,0)
 from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,storeno,product,spec,size
 open cursor_table
@@ -524,7 +524,7 @@ begin
 	update #tmpb
 	set mount=@tmount,total=@ttotal,aprice=@aprice
 	where mon>=@t_mon and storeno=@tstoreno and product=@tproduct and spec=@tspec and size=@tsize
-end
+end*/
 
 update a set cost=total from #tmp a where a.tablea='rc2s' or a.tablea='vcf'
 ----------------------------------------------------------------
@@ -807,7 +807,7 @@ and a.datea>='2017/06/03'
 
 --------------------------------------------------------------------
 --月成本
-create table #tmpb(
+/*create table #tmpb(
 	mon nvarchar(10),
 	storeno nvarchar(50),
 	product nvarchar(50),
@@ -823,6 +823,7 @@ select LEFT(datea,@t_lenm),storeno,product,spec,size,0,0,0
 from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size
 
 --------------------------------------------------------------------
+*/
 declare @tablea nvarchar(10)
 declare @accy nvarchar(10)
 declare @datea nvarchar(10)
@@ -852,7 +853,7 @@ declare @tweight float=0
 declare @ttotal float
 declare @tuweight float=0
 declare @tutotal float
-
+/*
 --計算成本
 declare cursor_table cursor for
 select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,size,noa,noq,isnull(weight,0),isnull(total,0)
@@ -940,7 +941,7 @@ begin
 	update #tmpb
 	set weight=@tweight,total=@ttotal,aprice=@aprice
 	where mon>=@t_mon and storeno=@tstoreno and product=@tproduct and spec=@tspec and size=@tsize
-end
+end*/
 
 update a set cost=total from #tmp a where a.tablea='rc2s' or a.tablea='vcf'
 ----------------------------------------------------------------
@@ -987,11 +988,11 @@ declare @qhref nvarchar(100)
 
 CREATE INDEX tmpindex3 on #tmp (storeno,product,spec,size,datea,typea,noa,noq)
 
-delete #tmpb
+/*delete #tmpb
 
 insert #tmpb(product,spec,size,storeno,weight,total,mon)
 select product,spec,size,storeno,0,0,'' from #tmp 
-group by product,spec,size,storeno
+group by product,spec,size,storeno*/
 
 declare @kweight float
 declare @ktotal float
@@ -1007,8 +1008,8 @@ while(@@FETCH_STATUS <> -1)
 begin
 	if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @tstoreno!=@storeno )
 	begin
-		set @tweight=isnull((select SUM(weight) from #tmpb where product=@product and spec=@spec and size=@size and storeno=@storeno),0)
-		set @ttotal=isnull((select SUM(total) from #tmpb where product=@product and spec=@spec and size=@size and storeno=@storeno),0)
+		set @tweight=0--isnull((select SUM(weight) from #tmpb where product=@product and spec=@spec and size=@size and storeno=@storeno),0)
+		set @ttotal=0--isnull((select SUM(total) from #tmpb where product=@product and spec=@spec and size=@size and storeno=@storeno),0)
 	end
 
 	--進貨--入庫
@@ -1017,9 +1018,9 @@ begin
 		set @tweight=@tweight+@weight
 		set @ttotal=@ttotal+@total
 		
-		update #tmpb
+		/*update #tmpb
 		set weight=isnull(weight,0)+@weight,total=isnull(total,0)+@total
-		where product=@product and spec=@spec and size=@size and storeno=@storeno
+		where product=@product and spec=@spec and size=@size and storeno=@storeno*/
 	end
 	
 	--領料--出貨
@@ -1031,9 +1032,9 @@ begin
 		set @tweight=@tweight-@weight
 		set @ttotal=@ttotal-@total
 		
-		update #tmpb
+		/*update #tmpb
 		set weight=isnull(weight,0)-@weight,total=isnull(total,0)-@total
-		where product=@product and spec=@spec and size=@size and storeno=@storeno
+		where product=@product and spec=@spec and size=@size and storeno=@storeno*/
 		
 	end
 	

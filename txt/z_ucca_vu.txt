@@ -482,7 +482,7 @@ and isnull(a.datea,'') <=@t_edate
 --入庫
 insert #tmp
 select '6','uccea',isnull(b.cno,''),a.noa,b.noq,a.datea,b.productno,b.product
-,b.imount,b.imoney,0,0,0
+,b.imount,b.imoney,0,0,b.imoney
 from uccea a left join ucceas b on a.noa=b.noa
 where isnull(b.productno,'')!='' 
 and isnull(b.productno,'') between @t_bproductno and @t_eproductno
@@ -878,15 +878,16 @@ select gno,productno,product,cno,(select top 1 acomp from acomp where noa=a.cno 
 ,dbo.getComma(vcmoney,0)vcmoney
 ,dbo.getComma(vccost,0)vccost
 ,dbo.getComma(profit,2)profit
-,case when ISNULL(imount,0)!=0 then dbo.getComma(imount,0) else null end imount
-,case when ISNULL(gmount,0)!=0 then dbo.getComma(gmount,0) else null end gmount
-,dbo.getComma(itmount,0)itmount
-,case when ISNULL(imoney,0)!=0 then dbo.getComma(imoney,0) else null end imoney
-,dbo.getComma(itmoney,0)itmoney
 ,dbo.getComma(lmount,2)lmount
 ,dbo.getComma(lprice,2)lprice
 ,dbo.getComma(lmoney,0)lmoney
+,case when ISNULL(imount,0)!=0 then dbo.getComma(imount,0) else null end imount
+,case when ISNULL(gmount,0)!=0 then dbo.getComma(gmount,0) else null end gmount
+,dbo.getComma(itmount,0)itmount
+,case when ISNULL(imoney,0)!=0 then dbo.getComma(imoney,0) else null end atotal
+,dbo.getComma(itmoney,0)xto
 from @tmp a order by cno,gno,productno
+
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	drop table #tmp
@@ -897,4 +898,5 @@ BEGIN
 	drop table #tmpb
 END
 ;
+
 ----------------------------------------------------------------------------------------------------------------------------------

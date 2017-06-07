@@ -696,7 +696,7 @@ outer apply(
 if(@t_enddate>='2017/06/03')
 begin
 	update xa
-	set sp=xb.aprice,ep=xb.aprice
+	set sp=round(xb.aprice,3),ep=round(xb.aprice,3)
 	from @tmp xa
 	outer apply (
 	select case when SUM(weight)=0 then 0 else SUM(total)/SUM(weight) end aprice from (select product,spec,size,MAX(mon)mon from #xtmpb group by product,spec,size)a

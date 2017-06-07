@@ -187,8 +187,6 @@
                     	$(this).val(99);
                 });
 				
-				$('#txtXstore1a').val('7000').change();
-				$('#txtXstore2a').val('7000A').change();
 			}
 
 			function q_boxClose(s2) {

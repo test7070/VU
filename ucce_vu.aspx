@@ -45,6 +45,7 @@
 				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
 				q_gt('color', '1=1 ', 0, 0, 0, "bbscolor");
 				q_gt('class', '1=1 ', 0, 0, 0, "bbsclass");
+				q_gt('adpro', '1=1 ', 0, 0, 0, "bbspro");
 			});
 
 			function main() {
@@ -90,7 +91,8 @@
 				}
 				b_pop = '';
 			}
-
+			
+			var a_color='@',a_pro='@';
 			function q_gtPost(t_name) {
 				switch (t_name) {
 					case 'ucc':
@@ -114,6 +116,7 @@
 						var t_color='@';
 						for ( i = 0; i < as.length; i++) {
 							t_color+=","+as[i].color;
+							a_color+=","+as[i].color;
 						}
 						q_cmbParse("combUcolor", t_color,'s');
 						break;
@@ -124,6 +127,13 @@
 							t_class+=","+as[i].noa;
 						}
 						q_cmbParse("combClass", t_class,'s');
+						break;
+					case 'bbspro':
+						var as = _q_appendData("adpro", "", true);
+						a_pro='@';
+						for (var i = 0; i < as.length; i++) {
+							a_pro+=","+as[i].product;
+						}
 						break;
 					case q_name:
 						if (q_cur == 4)
@@ -255,8 +265,21 @@
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
-							if(q_cur==1 || q_cur==2)
+							if(q_cur==1 || q_cur==2){
 								$('#txtProduct_'+b_seq).val($('#combProduct_'+b_seq).find("option:selected").text());
+								if(q_getPara('sys.project').toUpperCase()=='SF')
+									chgcombUcolor(b_seq);
+							}
+						});
+						
+						$('#txtProduct_' + j).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2){
+								if(q_getPara('sys.project').toUpperCase()=='SF')
+									chgcombUcolor(b_seq);
+							}
 						});
 					}
 				}
@@ -273,6 +296,24 @@
 				$('#lblWeight_s').text('重量(KG)');
 				$('#lblLengthc_s').text('支數');
 				$('#lblUno_s').text('批號');
+				
+				if(q_cur==1 || q_cur==2){
+					for (var j = 0; j < q_bbsCount; j++) {
+						if(q_getPara('sys.project').toUpperCase()=='SF'){
+							chgcombUcolor(j);
+						}
+					}
+				}
+			}
+			
+			function chgcombUcolor(n) {
+				$('#combUcolor_'+n).text('');
+				if($('#txtProduct_'+n).val().indexOf('續接')>-1 && $('#txtProduct_'+n).val().indexOf('加工費')>-1)
+					q_cmbParse("combUcolor_"+n, ',續接器-直牙(支),續接器-錐牙(支),續接超長5~6M,續接超長6~7M,續接超長7~8M,續接超長(支),組接工資(支),組接超高1.5~1.8M,組接超高1.81~2M,組接超高2M ↑,組接點工');
+				else if($('#txtProduct_'+n).val().indexOf('續接')>-1 || $('#txtProduct_'+n).val().indexOf('組接')>-1)
+					q_cmbParse("combUcolor_"+n, a_pro);
+				else
+					q_cmbParse("combUcolor_"+n, a_color);
 			}
 
 			function btnIns() {

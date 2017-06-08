@@ -410,6 +410,11 @@ BEGIN
 	drop table #tmp
 END
 
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	drop table #tmpa
+END
+
 IF OBJECT_ID('tempdb..#tmpb')is not null
 BEGIN
 	drop table #tmpb
@@ -470,7 +475,21 @@ CREATE INDEX tmpindex0 on #tmp (datea,tablea,typea,noa,noq,cno,productno,product
 CREATE INDEX tmpindex1 on #tmp (cno,productno,product,datea,typea,noa,noq)
 CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 
-update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucceai'
+--月成本
+create table #tmpa(
+	mon nvarchar(10),
+	cno nvarchar(50), 
+	productno nvarchar(50),
+	mount float,
+	total float,
+	aprice float,
+	primary key (productno,cno,mon)
+)
+
+insert #tmpa
+select LEFT(datea,@t_lenm),cno,productno,0,0,0
+from #tmp group by LEFT(datea,@t_lenm),cno,productno
+
 ------------------------------------------------------------------------------------------------
 declare @tablea nvarchar(10) 
 declare @accy nvarchar(10) 
@@ -498,6 +517,95 @@ declare @ttotal float
 declare @tumount float 
 declare @tutotal float
 
+--計算成本
+declare cursor_table cursor for
+select tablea,datea,LEFT(datea,@t_lenm),cno,productno,noa,noq,isnull(mount,0),isnull(total,0)
+from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,productno 
+open cursor_table
+fetch next from cursor_table
+into @tablea,@datea,@mon,@cno,@productno,@noa,@noq,@mount,@total
+while(@@FETCH_STATUS <> -1)
+begin
+	--避免前期超領負數造成金額溢位
+	if(round(@tmount,0)<=0)
+	begin
+		set @ttotal=0
+		--避免領用有小數點導致無法全部被領用
+		if(round(@tmount,0)=0)
+		begin
+			set @tmount=0
+		end
+	end
+	
+	if(@tproductno!=@productno or @tcno!=@cno or @t_mon!=@mon )
+	begin
+		if(@tproductno!='#non')
+		begin
+			update #tmpa
+			set mount=@tmount,total=@ttotal,aprice=@aprice
+			where mon>=@t_mon and productno=@tproductno and cno=@tcno
+		end
+		
+		if(@tproductno!=@productno or @tcno!=@cno)
+		begin
+			select @tmount=isnull(mount,0),@ttotal=isnull(total,0),@aprice=isnull(aprice,0)
+			from #tmpa
+			where mon=@mon and productno=@productno and cno=@cno
+		end
+	end
+
+	--進貨
+	if(@tablea='rc2a' or @tablea='ucceai')
+	begin
+		if(@ttotal<=0 or @tmount<=0) --處理超領導致金額不正確 以最近進貨的單價作為目前超領的單價
+			set @ttotal=@tmount*case when @mount=0 then 0 else round(@total/@mount,4) end
+			
+		set @tmount=@tmount+@mount
+		set @ttotal=@ttotal+@total
+		set @aprice=case when @tmount=0 then 0 else round(@ttotal/@tmount,4) end
+	end
+	
+	--出貨
+	if(@tablea='vcca' or @tablea='ucceag')
+	begin
+		set @tmount=@tmount-@mount
+		set @ttotal=@ttotal-round(@mount*@aprice,4)
+	end
+	
+	update #tmp 
+	set aprice=@aprice,cost=round(isnull(@aprice,0)*mount,4)
+	where noa=@noa and noq=@noq and tablea=@tablea
+
+	set @tproductno=@productno
+	set @t_mon=@mon
+	set @tcno=@cno
+	
+	fetch next from cursor_table
+	into @tablea,@datea,@mon,@cno,@productno,@noa,@noq,@mount,@total
+end
+close cursor_table
+deallocate cursor_table
+--最後一筆更新-------------------------------------------------------------
+--避免前期超領負數造成金額溢位
+if(round(@tmount,0)<=0)
+begin
+	set @ttotal=0
+	--避免領用有小數點導致無法全部被領用
+	if(round(@tmount,0)=0)
+	begin
+		set @tmount=0
+	end
+end
+
+if(@tproductno!='#non')
+begin
+	update #tmpa
+	set mount=@tmount,total=@ttotal,aprice=@aprice
+	where mon>=@t_mon and productno=@tproductno and cno=@tcno
+end
+
+update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucceai'
+------------------------------------------------------------------------------------------
 create table #tmpb( 
 	gno nvarchar(1), 
 	cno nvarchar(50), 
@@ -528,9 +636,6 @@ CREATE INDEX tmpaindex on #tmpb (cno,productno,product,gno)
 set @tproductno='#non'
 
 CREATE INDEX tmpindex3 on #tmp (cno,productno,product,datea,typea,noa,noq)
-
-set @tmount=0 
-set @ttotal=0 
 
 declare @vtotal float 
 declare cursor_table cursor for 
@@ -597,7 +702,7 @@ begin
 	into @tablea,@noa,@noq,@datea,@cno,@productno,@product,@mount,@total,@vtotal 
 end 
 close cursor_table 
-deallocate cursor_table 
+deallocate cursor_table
 
 update #tmp
 set mount=-1*mount
@@ -615,26 +720,35 @@ outer apply (select SUM(mount)mount,SUM(total)total from #tmp where  product=a.p
 
 delete #tmpb where rcmount=0 and rcmount=0 and rcmoney=0 and vcmount=0 and vcmount=0 and imount=0 and atotal=0
 
+insert #tmpb
+select '1',CHAR(255),CHAR(255),CHAR(255),SUM(bmount),SUM(bmoney),SUM(rcmount),SUM(rcmoney),SUM(vcmount)
+,SUM(vcmoney),SUM(vccost),SUM(profit),SUM(imount),SUM(atotal),SUM(lmount),SUM(lprice),SUM(lmoney)
+from #tmpb
 
 select gno,productno,product,cno,(select top 1 acomp from acomp where noa=a.cno )acomp 
-,dbo.getComma(bmount,2)bmount 
-,dbo.getComma(bmoney,0)bmoney 
-,dbo.getComma(rcmount,2)rcmount 
-,dbo.getComma(rcmoney,0)rcmoney 
-,dbo.getComma(vcmount,2)vcmount 
-,dbo.getComma(vcmoney,0)vcmoney 
-,dbo.getComma(vccost,0)vccost 
+,dbo.getComma(bmount,0)bmount 
+,dbo.getComma(bmoney,2)bmoney 
+,dbo.getComma(rcmount,0)rcmount 
+,dbo.getComma(rcmoney,2)rcmoney 
+,dbo.getComma(vcmount,0)vcmount 
+,dbo.getComma(vcmoney,2)vcmoney 
+,dbo.getComma(vccost,2)vccost 
 ,dbo.getComma(profit,2)profit
-,case when ISNULL(imount,0)!=0 then dbo.getComma(imount,0) else null end imount 
-,dbo.getComma(atotal,0)atotal  
-,dbo.getComma(lmount,2)lmount 
+,dbo.getComma(imount,0)imount 
+,dbo.getComma(atotal,2)atotal  
+,dbo.getComma(lmount,0)lmount 
 ,dbo.getComma(lprice,2)lprice 
-,dbo.getComma(lmoney,0)lmoney 
+,dbo.getComma(lmoney,2)lmoney 
 from #tmpb a order by cno,gno,productno 
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	drop table #tmp
+END
+
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	drop table #tmpa
 END
 
 IF OBJECT_ID('tempdb..#tmpb')is not null

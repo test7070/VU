@@ -575,6 +575,10 @@ begin
 	update #tmp 
 	set aprice=@aprice,cost=round(isnull(@aprice,0)*mount,4)
 	where noa=@noa and noq=@noq and tablea=@tablea
+	
+	update #tmp 
+	set price=@aprice,total=round(isnull(@aprice,0)*mount,4)
+	where noa=@noa and noq=@noq and tablea='ucceag'
 
 	set @tproductno=@productno
 	set @t_mon=@mon
@@ -705,7 +709,7 @@ close cursor_table
 deallocate cursor_table
 
 update #tmp
-set mount=-1*mount
+set mount=-1*mount,total=-1*total
 from #tmp where tablea='ucceag'
 
 update #tmpb

@@ -35,7 +35,7 @@
 			$(document).ready(function() {
 				bbmKey = ['noa'];
 				bbsKey = ['noa', 'noq'];
-				brwCount2 = 2;
+				brwCount2 = 3;
 				q_bbsLen = 15;
 				q_brwCount();
 				q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
@@ -523,6 +523,9 @@
 						<td><input id="txtWorker" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
 						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
+					</tr>
+					<tr>
+						<td colspan="3"><a class="lbl" style="color: red;">※件數和重量輸入值若為"正數"即【入庫】，"負數"即【領料】。</a></td>
 					</tr>
 				</table>
 			</div>

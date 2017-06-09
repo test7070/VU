@@ -436,17 +436,18 @@ create table #tmp(
 	cost float, --成本
 	primary key (datea,tablea,typea,cno,noa,noq,productno,product) 
 )
---調整(領料)
+
+--調整(入庫)
 insert #tmp
-select '0','ucceag',cno,a.noa,noq,datea,productno,product,gmount,0,0,0,0
+select '1','ucceai',cno,a.noa,noq,datea,productno,product,imount
+,imoney/nullif(imount,0),imoney,imoney/nullif(imount,0),imoney
 from uccea a left join ucceas b on a.noa=b.noa
 where(a.datea <=@t_edate) and (isnull(imount,0)!=0 or isnull(gmount,0)!=0 or isnull(imoney,0)!=0) 
 and (b.productno between @t_bproductno and @t_eproductno)
 
---調整(入庫)
+--調整(領料)
 insert #tmp
-select '0','ucceai',cno,a.noa,noq,datea,productno,product,imount
-,imoney/nullif(imount,0),imoney,imoney/nullif(imount,0),imoney
+select '2','ucceag',cno,a.noa,noq,datea,productno,product,gmount,0,0,0,0
 from uccea a left join ucceas b on a.noa=b.noa
 where(a.datea <=@t_edate) and (isnull(imount,0)!=0 or isnull(gmount,0)!=0 or isnull(imoney,0)!=0) 
 and (b.productno between @t_bproductno and @t_eproductno)
@@ -576,10 +577,6 @@ begin
 	set aprice=@aprice,cost=round(isnull(@aprice,0)*mount,4)
 	where noa=@noa and noq=@noq and tablea=@tablea
 	
-	update #tmp 
-	set price=@aprice,total=round(isnull(@aprice,0)*mount,4)
-	where noa=@noa and noq=@noq and tablea='ucceag'
-
 	set @tproductno=@productno
 	set @t_mon=@mon
 	set @tcno=@cno
@@ -609,6 +606,8 @@ begin
 end
 
 update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucceai'
+
+select * from #tmp where productno='0004' order by datea
 ------------------------------------------------------------------------------------------
 create table #tmpb( 
 	gno nvarchar(1), 
@@ -661,7 +660,7 @@ begin
 	if(@tablea='rc2a' or @tablea='ucceai')
 	begin
 		set @tmount=@tmount+@mount
-		set @ttotal=@ttotal+@vtotal
+		set @ttotal=@ttotal+@total
 	end
 	
 	--領料--出貨
@@ -671,7 +670,7 @@ begin
 			set @total=@mount*case when @tmount=0 then 0 else @ttotal/@tmount end
 			
 		set @tmount=@tmount-@mount
-		set @ttotal=@ttotal-@vtotal
+		set @ttotal=@ttotal-@total
 	end
 
 	--避免前期超領負數造成金額溢位
@@ -709,18 +708,18 @@ close cursor_table
 deallocate cursor_table
 
 update #tmp
-set mount=-1*mount,total=-1*total
+set mount=-1*mount,cost=-1*cost
 from #tmp where tablea='ucceag'
 
 update #tmpb
 set rcmount=isnull(b.mount,0),rcmoney=isnull(b.cost,0),
 	vcmount=isnull(c.mount,0),vccost=isnull(c.cost,0),
 	vcmoney=isnull(c.total,0),profit=case when isnull(c.cost,0)=0 then 0 else round((isnull(c.total,0)-isnull(c.cost,0))/c.cost*100,2) end,
-	imount=ISNULL(d.mount,0),atotal=isnull(d.total,0)
+	imount=ISNULL(d.mount,0),atotal=isnull(d.cost,0)
 from #tmpb a
 outer apply (select SUM(mount)mount,SUM(cost)cost from #tmp where product=a.product and (tablea='rc2a') and (datea between @t_bdate and @t_edate))b
 outer apply (select SUM(mount)mount,SUM(cost)cost,SUM(total)total from #tmp where product=a.product and (tablea='vcca') and (datea between @t_bdate and @t_edate))c
-outer apply (select SUM(mount)mount,SUM(total)total from #tmp where  product=a.product and  (typea='0') and datea between @t_bdate and @t_edate )d
+outer apply (select SUM(mount)mount,SUM(cost)cost from #tmp where  product=a.product and  (tablea='ucceai' or tablea='ucceag') and datea between @t_bdate and @t_edate )d
 
 delete #tmpb where rcmount=0 and rcmount=0 and rcmoney=0 and vcmount=0 and vcmount=0 and imount=0 and atotal=0
 

@@ -405,6 +405,7 @@ set @t_cno = case when '#non'=[7] then '' else [7] end
 ----------------------------------------------------------------------
 declare @t_lenm nvarchar(10) = '[10]'
 
+
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	drop table #tmp
@@ -607,7 +608,6 @@ end
 
 update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucceai'
 
-select * from #tmp where productno='0004' order by datea
 ------------------------------------------------------------------------------------------
 create table #tmpb( 
 	gno nvarchar(1), 

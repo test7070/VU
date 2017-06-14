@@ -1102,7 +1102,8 @@ declare @result table(
 	totax float,
 	carno nvarchar(50),
 	idno int,
-	page int
+	page int,
+	memo nvarchar(MAX)
 ) 
 
 insert @result (gno,noa,invono)
@@ -1121,7 +1122,7 @@ select '0',b.typea,a.noa,a.invono,c.vccnoq,b.datea,b.mon,b.custno,isnull(d.comp,
 		,f.unit,case when c.mount=0 then NULL else c.mount end,case when c.weight=0 then NULL else c.weight end,c.price,c.money, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+b.accy 
 		,round((b.tax*(case when b.money=0 then 0 else (f.total/b.money) end)),0),f.ucolor,f.spec,f.size,f.lengthb
 		,round((b.tax*(case when b.money=0 then 0 else (f.total/b.money) end)),0)+f.total
-		,b.carno,0,0
+		,b.carno,0,0,f.memo
 from @result a left join view_vcc b on a.noa=b.noa
 left join vccat c on a.invono=c.noa and a.noa=c.vccno
 left join cust d on b.custno=d.noa
@@ -1150,7 +1151,7 @@ select '0',a.typea,r.noa,r.invono,b.noq, a.datea datea, a.mon mon
 		,b.unit,case when b.mount=0 then NULL else b.mount end,case when b.weight=0 then NULL else b.weight end, b.price, b.total, 0 pcount,'vcc'+@qhref_acomp+'?noa=$noa?'+a.accy 
 		,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
 		,round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total
-		,a.carno,0,0
+		,a.carno,0,0,b.memo
 from @result r
 left join view_vccs b on r.noa=b.noa
 left join view_vcc a on a.noa = b.noa
@@ -1224,7 +1225,7 @@ update a set gno='4'
 from @result a outer apply (select MAX(page)xpage from @result where custno=a.custno )b
 where gno='3' and a.page=b.xpage
 
-select gno,idno,page,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odate,xproduct xpdt,invono,unit, qhref 
+select gno,idno,page,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odate,xproduct+case when len(memo)!=0 then '('+memo+')' else '' end xpdt,invono,unit, qhref 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
 ,dbo.getComma(oweight,0) oweight 

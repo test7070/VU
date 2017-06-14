@@ -1029,21 +1029,23 @@
 								t_IdSeq = -1;
 								q_bodyId($(this).attr('id'));
 								b_seq = t_IdSeq;
-								if($('#txtProduct_'+b_seq).val()!='運費'){
-									if($('#txtProduct_'+b_seq).val().indexOf('費')>-1)
+								if($('#txtProduct_'+b_seq).val()!='運費' || $('#txtProduct_'+b_seq).val()!='加工費用'){
+									if($('#txtProduct_'+b_seq).val().indexOf('費')>-1 || $('#txtProduct_'+b_seq).val().indexOf('續接器')>-1 || $('#txtProduct_'+b_seq).val().indexOf('水泥方塊')>-1 || $('#txtProduct_'+b_seq).val().indexOf('組裝工資')>-1)
 										$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), q_float('txtMount_' + b_seq)), 0));
 									else
 										$('#txtTotal_' + b_seq).val(round(q_mul(q_float('txtPrice_' + b_seq), q_float('txtWeight_' + b_seq)), 0));
 								}
 								sum();
 								
-								if($('#txtProduct_'+b_seq).val()=='運費'){
+								if($('#txtProduct_'+b_seq).val()=='運費'  || $('#txtProduct_'+b_seq).val()=='加工費用'){
 									var sot_weight=0;
 									for (var i = 0; i < q_bbsCount; i++) {
 										sot_weight=q_add(sot_weight,dec($('#txtWeight_'+i).val()));
 									}
 									$('#txtTotal_'+b_seq).val(round(q_mul(dec($('#txtPrice_'+b_seq).val()),sot_weight),0));
 								}
+								
+								
 							}
 						});
 						$('#txtTotal_' + i).change(function() {
@@ -1201,6 +1203,7 @@
                 for (var i = 0; i < q_bbsCount; i++) {
 	                sot_mount=q_add(sot_mount,dec($('#txtMount_'+i).val()));
 	                sot_weight=q_add(sot_weight,dec($('#txtWeight_'+i).val()));
+	                
 				}
 				if(sot_mount!=0)
 					$('#lblSot_mount').text(FormatNumber(sot_mount));
@@ -2016,7 +2019,7 @@
 					<td align="center" style="width:85px;"><a id='lblPrice_s'> </a></td>
 					<td align="center" style="width:100px;"><a id='lblTotal_s'> </a></td>
 					<td align="center" style="width:150px;"><a id='lblStore_s'> </a><input class="btn"  id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
-					<td align="center" style="width:200px;"><a id='lblMemo_s'> </a></td>
+					<td align="center" style="width:200px;"><a id=''>對帳單備註</a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td align="center"><input class="btn"  id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" /></td>

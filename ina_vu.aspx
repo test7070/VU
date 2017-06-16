@@ -606,6 +606,26 @@
 							}
 						});
 						
+						$('#btnStore7000_'+j).click(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur!=1 && q_cur!=2){
+								//更換倉庫7000
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgina_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#btnStore7000_'+b_seq).val())+';'+encodeURI('7000')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+							}
+						});
+						
+						$('#btnStore7000A_'+j).click(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur!=1 && q_cur!=2){
+								//更換倉庫7000A
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgina_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#btnStore7000A_'+b_seq).val())+';'+encodeURI('7000A')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+							}
+						});
+						
 						$('#txtLengthc_' + j).focusout(function() {
 							sum();
 						});
@@ -1055,6 +1075,29 @@
                 		alert('刪除批號失敗!!')
                 	}
 				}
+				
+				if(t_func.indexOf('chgstore_')>-1){
+					var n=t_func.split('_')[1];
+                	var as = _q_appendData("tmp0", "", true, true);
+                	if (as[0] != undefined) {
+						if($('#txtNoa').val()==as[0].noa && $('#txtNoq_'+n).val()==as[0].noq){
+							$('#txtStoreno_'+n).val(as[0].storeno);
+							$('#txtStore_'+n).val(as[0].store);
+							for (var j = 0; j < abbs.length; j++) {
+								if (abbs[j]['noa'] == as[0].noa && abbs[j]['noq'] == as[0].noq) {
+									abbs[j]['storeno'] = as[0].storeno;
+									abbs[j]['store'] = as[0].store;
+	                                break;
+								}
+							}
+						}else{
+							//重刷畫面
+							location.href=location.href;
+						}
+                	}else{
+                		alert('互換進貨單號不存在!!')
+                	}
+				}
 			}
 		</script>
 		<style type="text/css">
@@ -1294,12 +1337,12 @@
 				</tr>
 			</table>
 		</div>
-		<div class='dbbs' style="width: 1500px;">
+		<div class='dbbs' style="width: 1400px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:1%;"><input class="btn"  id="btnPlus" type="button" value='＋' style="font-weight: bold;"  /></td>
 					<td align="center" style="width:35px;">項序</td>
-					<td style="width:120px; text-align: center;"><a id="lblUno_st" > </a></td>
+					<td style="width:120px; text-align: center;display: none;"><a id="lblUno_st" > </a></td>
 					<td style="width:120px; text-align: center;">品名</td>
 					<td style="width:150px; text-align: center;">類別</td>
 					<td style="width:110px; text-align: center;">材質</td>
@@ -1321,11 +1364,7 @@
 						<input id="txtNoq.*" type="text" style="display: none;" />
 					</td>
 					<td><a id="lblNo.*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
-					<td>
-						<input id="txtUno.*" type="text" class="txt c1"/>
-						<input id="btnGenuno.*" type="button" value="入庫" style="display: none;"/>
-						<input id="btnDeleuno.*" type="button" value="刪除"/>
-					</td>
+					<td style="display: none;"><input id="txtUno.*" type="text" class="txt c1"/></td>
 					<td>
 						<input id="txtProduct.*" type="text" class="txt c1" style="width: 90px;"/>
 						<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
@@ -1353,7 +1392,13 @@
 						<input class="btn"  id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;" />
 						<input id="txtStore.*" type="text" class="txt c1"/>
 					</td>
-					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtMemo.*" type="text" class="txt c1"/>
+						<input id="btnGenuno.*" type="button" value="入庫" style="display: none;"/>
+						<input id="btnDeleuno.*" type="button" value="刪除" style="display: none;"/>
+						<input id="btnStore7000.*" type="button" value="實體入庫"/>
+						<input id="btnStore7000A.*" type="button" value="取消實體入庫"/>
+					</td>
 				</tr>
 			</table>
 		</div>

@@ -79,6 +79,8 @@
 				$('#txtTax').val(FormatNumber(t_tax));
 				$('#txtTotal').val(FormatNumber(t_total));
 				$('#txtWeight').val(tt_weight);
+				
+				bbssum();
 			}
 
             function mainPost() {
@@ -187,6 +189,7 @@
 							if (!b_ret || b_ret.length == 0 || b_ret[0]==undefined)
 								return;
 							$('#txtOrdeno').val(b_ret[0].noa);
+							$('#txtAddr').val(b_ret[0].addr);
 						}
                 		break;
                     case q_name + '_s':
@@ -386,6 +389,17 @@
 					}
 				}
 				
+				//淨重是否等於重量小計
+				var t_weight=$.trim($('#txtMount').val()).length > 0?$.trim($('#txtMount').val()):0;
+				var sot_weight=0
+				for (var i = 0; i < q_bbsCount; i++) {
+                    sot_weight=q_add(sot_weight,dec($('#txtWeight_'+i).val()));
+                }
+                if(t_weight!=FormatNumber(sot_weight)){
+                        alert('淨重不等於重量小計');
+                        return;
+                }   
+
 				//判斷批號是否已存在
 				if(!check_uno){
 					check_uno_count=0;check_uno_err='';
@@ -598,6 +612,7 @@
                     }
                 }
                 _bbsAssign();
+                 bbssum();
                 
                 //1050126
 				$('#btnStoreCopy').click(function() {
@@ -638,12 +653,32 @@
             	
             	$('#txtWeight_'+n).val(round(q_mul(q_mul(t_weight,t_lengthb),t_mount),0));
             }
+            
+            function bbssum() {
+                var sot_mount=0,sot_weight=0;
+                for (var i = 0; i < q_bbsCount; i++) {
+                    sot_mount=q_add(sot_mount,dec($('#txtMount_'+i).val()));
+                    sot_weight=q_add(sot_weight,dec($('#txtWeight_'+i).val()));
+                }
+                if(sot_mount!=0)
+                    $('#lblSot_mount').text(FormatNumber(sot_mount));
+                else
+                    $('#lblSot_mount').text('');
+                if(sot_weight!=0){
+                    $('#lblSot_weight').text(FormatNumber(sot_weight));
+                }else
+                    $('#lblSot_weight').text('');
+            }
 
             function btnIns() {
                 _btnIns();
 
                 $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val('AUTO');
                 $('#txtDatea').val(q_date());
+                var RightNow = new Date();
+                var dd = ('0'+ RightNow.getHours()).substr(-2);
+                var h= ('0'+RightNow.getMinutes()).substr(-2);
+                $('#txtTranstart').val((dd+":"+h));
                 $('#txtDatea').focus();
                 //105/12/08空白倉庫預設A
 				//$('#txtStoreno').val('A').change();
@@ -1188,6 +1223,10 @@
 						<input id="txtTggno" type="text"  class="txt c2"/>
 						<input id="txtComp" type="text"  class="txt c3"/>
 					</td>
+					<td><span> </span><a id="lblAddr_sf" class="lbl" >交貨工地</a></td>
+                        <td colspan="3">
+                            <input id="txtAddr"type="text" class="txt c1" style="width: 92%;"/>
+                        </td>
 				</tr>
 				<tr>
 					<td><span> </span><a id="lblTranstyle_sf" class="lbl" >空重</a></td>
@@ -1267,11 +1306,13 @@
 					<td style="width:75px; text-align: center;">號數</td>
 					<td style="width:75px; text-align: center;">米數</td>
 					<td style="width:90px; text-align: center;">廠牌</td>
-					<td style="width:70px; text-align: center;">數量(件)</td>
-					<td style="width:80px; text-align: center;">重量kg</td>
+					<td style="width:70px; text-align: center;">數量(件)
+					    <BR><a id='lblSot_mount'> </a></td>
+					<td style="width:80px; text-align: center;">重量kg
+					    <BR><a id='lblSot_weight'> </a></td>
 					<td style="width:80px; text-align: center;">單價</td>
 					<td style="width:100px; text-align: center;">小計</td>
-					<td style="width:100px; text-align: center;">出貨倉庫<input class="btn" id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+					<td style="width:100px; text-align: center;">進貨倉庫<input class="btn" id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 					<td style="text-align: center;">單項備註</td>
 				</tr>
 				<tr  style='background:#cad3ff;'>
@@ -1282,7 +1323,7 @@
 					<td><a id="lblNo.*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
 					<td>
 						<input id="txtUno.*" type="text" class="txt c1"/>
-						<input id="btnGenuno.*" type="button" value="入庫"/>
+						<input id="btnGenuno.*" type="button" value="入庫" style="display: none;"/>
 						<input id="btnDeleuno.*" type="button" value="刪除"/>
 					</td>
 					<td>

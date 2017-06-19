@@ -106,7 +106,7 @@ and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and b.storeno='7000' and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '13','inas',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
+select '13','inas',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
 from view_ina a left join view_inas b on a.noa=b.noa
 outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') --and b.ucolor='板料'
@@ -114,7 +114,7 @@ and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnu
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and a.storeno='7000' and isnull(b.productno,'')=''
+and b.storeno='7000' and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '14','cubt',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
@@ -128,7 +128,7 @@ and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
 and b.storeno='7000' and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '15','gets',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
+select '15','gets',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,0,0,0
 from view_get a left join view_gets b on a.noa=b.noa
 outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') --and b.ucolor='板料'
@@ -136,7 +136,7 @@ and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnu
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and a.storeno='7000' and isnull(b.productno,'')=''
+and b.storeno='7000' and isnull(b.productno,'')=''
 
 --105/08/30 調整 加快速度
 --insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
@@ -492,7 +492,7 @@ and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.stor
 and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '13','inas',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
+select '13','inas',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
 from view_ina a left join view_inas b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
 where a.datea<=@t_edate 
@@ -501,7 +501,7 @@ and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(a.storeno,'') not in ('7000','7000A')
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
 and isnull(b.productno,'')=''
 		
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -532,7 +532,7 @@ and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.stor
 and isnull(b.productno,'')=''
 
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '16','gets',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
+select '16','gets',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,0,0,0
 from view_get a left join view_gets b on a.noa=b.noa
 outer apply(select datea from #tmp where product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and storeno=b.storeno and tablea='ucce')c
 where a.datea<=@t_edate 
@@ -541,7 +541,7 @@ and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(a.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
 and isnull(b.productno,'')=''
 
 declare @tablea nvarchar(100)

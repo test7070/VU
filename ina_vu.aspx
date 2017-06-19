@@ -189,6 +189,7 @@
 							if (!b_ret || b_ret.length == 0 || b_ret[0]==undefined)
 								return;
 							$('#txtOrdeno').val(b_ret[0].noa);
+							$('#txtOrdeno').change();
 							$('#txtAddr').val(b_ret[0].addr);
 						}
                 		break;
@@ -269,6 +270,11 @@
 									$('#chkAtax').prop('checked',true);
 								}else{
 									$('#chkAtax').prop('checked',false);
+								}
+								$('#txtAddr').val(as[0].addr);
+								if(emp($('#txtTggno').val())){
+									$('#txtTggno').val(as[0].tggno);
+									$('#txtComp').val(as[0].nick);
 								}
 								sum();
 								refreshBbm();
@@ -379,29 +385,27 @@
 					return;
 				}
 				
-				//檢查批號重覆
-				for (var i = 0; i < q_bbsCount; i++) {
+				//檢查批號重覆 106/06/14批號不使用
+				/*for (var i = 0; i < q_bbsCount; i++) {
 					for (var j = i + 1; j < q_bbsCount; j++) {
 						if ($.trim($('#txtUno_' + i).val()).length > 0 && $.trim($('#txtUno_' + i).val()) == $.trim($('#txtUno_' + j).val())) {
 							alert('【' + $.trim($('#txtUno_' + i).val()) + '】批號重覆。\n' + (i + 1) + ', ' + (j + 1));
 							return;
 						}
 					}
-				}
+				}*/
 				
-				//淨重是否等於重量小計
-				var t_weight=$.trim($('#txtMount').val()).length > 0?$.trim($('#txtMount').val()):0;
-				var sot_weight=0
-				for (var i = 0; i < q_bbsCount; i++) {
-                    sot_weight=q_add(sot_weight,dec($('#txtWeight_'+i).val()));
+				//106/06/14淨重是否等於合約重量
+				var t_weight=dec($('#txtWeight').val());
+				var t_weight2=dec($('#txtMount').val());
+				if(t_weight!=t_weight2){
+					alert('淨重不等於合約重量!!');
+					return;
                 }
-                if(t_weight!=FormatNumber(sot_weight)){
-                        alert('淨重不等於重量小計');
-                        return;
-                }   
-
+				
+				//106/06/14批號不使用
 				//判斷批號是否已存在
-				if(!check_uno){
+				/*if(!check_uno){
 					check_uno_count=0;check_uno_err='';
 					for (var i = 0; i < q_bbsCount; i++) {
 						if(!emp($('#txtUno_'+i).val())){
@@ -414,7 +418,7 @@
 					}else{
 						check_uno=true;
 					}
-				}
+				}*/
 				
 				//取得UNO
 				//106/04/10 用手動的方式產生
@@ -434,6 +438,19 @@
 				getnewuno=false;
                 check_uno=false;
                 check_ordh=false;
+                
+                for (var i = 0; i < q_bbsCount; i++) {
+					q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+					var as = _q_appendData("store", "", true);
+					var t_storeno='7000A',t_store='智勝-成品';
+					if (as[0] != undefined) {
+						t_store=as[0].store;
+					}
+                	if(emp($('#txtStoreno_'+i).val())){
+                		$('#txtStoreno_'+i).val('7000A');
+                		$('#txtStore_'+i).val(t_store);
+                	}
+                }
                 
                 if (q_cur == 1)
 					$('#txtWorker').val(r_name);
@@ -1267,9 +1284,7 @@
 						<input id="txtComp" type="text"  class="txt c3"/>
 					</td>
 					<td><span> </span><a id="lblAddr_sf" class="lbl" >交貨工地</a></td>
-                        <td colspan="3">
-                            <input id="txtAddr"type="text" class="txt c1" style="width: 92%;"/>
-                        </td>
+					<td colspan="3"><input id="txtAddr"type="text" class="txt c1" style="width: 92%;"/></td>
 				</tr>
 				<tr>
 					<td><span> </span><a id="lblTranstyle_sf" class="lbl" >空重</a></td>

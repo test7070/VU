@@ -203,6 +203,7 @@
 							if (!b_ret || b_ret.length == 0 || b_ret[0]==undefined)
 								return;
 							$('#txtIdno').val(b_ret[0].noa);
+							$('#txtIdno').change();
 							$('#txtAddr').val(b_ret[0].addr);     
 						}
                 		break;
@@ -261,6 +262,11 @@
 									$('#chkAtax').prop('checked',true);
 								}else{
 									$('#chkAtax').prop('checked',false);
+								}
+								$('#txtAddr').val(as[0].addr);
+								if(emp($('#txtTggno').val())){
+									$('#txtCustno').val(as[0].custno);
+									$('#txtComp').val(as[0].cust);
 								}
 								sum();
 								refreshBbm();
@@ -467,19 +473,29 @@
 					return;
 				}
 				
-				//淨重是否等於重量小計
-                var t_weight=$.trim($('#txtMount').val()).length > 0?$.trim($('#txtMount').val()):0;
-                var sot_weight=0
-                for (var i = 0; i < q_bbsCount; i++) {
-                    sot_weight=q_add(sot_weight,dec($('#txtWeight_'+i).val()));
-                }
-                if(t_weight!=FormatNumber(sot_weight)){
-                        alert('淨重不等於重量小計');
-                        return;
+				//106/06/14 淨重是否等於合約重量
+                var t_weight=dec($('#txtWeight').val());
+                var t_weight2=dec($('#txtMount').val());
+                if(t_weight!=t_weight2){
+					alert('淨重不等於合約重量!!');
+					return;
                 }
 				
 				check_ordh=false;
 				t_nordhno=$('#txtIdno').val();
+				
+				for (var i = 0; i < q_bbsCount; i++) {
+					q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+					var as = _q_appendData("store", "", true);
+					var t_storeno='7000A',t_store='智勝-成品';
+					if (as[0] != undefined) {
+						t_store=as[0].store;
+					}
+                	if(emp($('#txtStoreno_'+i).val())){
+                		$('#txtStoreno_'+i).val('7000A');
+                		$('#txtStore_'+i).val(t_store);
+                	}
+                }
 				
 				if (q_cur == 1)
 					$('#txtWorker').val(r_name);
@@ -947,7 +963,7 @@
 					var today = new Date();
 					var ttime = padL(today.getHours(), '0', 2)+':'+padL(today.getMinutes(),'0',2);
 					if(q_cur==1){
-						q_func('qtxt.query.get2vcc.1', 'get.txt,get2vcc_sf,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime));
+						q_func('qtxt.query.get2vcc.1', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime)+ ';' + encodeURI('1')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
 					}else if(q_cur==2){
 						q_gt('view_get', "where=^^noa='"+$('#txtNoa').val()+"'^^ ", 0, 0, 0, "gettranstartno",r_accy,1);
 						var as = _q_appendData("view_get", "", true, true);
@@ -960,7 +976,7 @@
 						if(t_vccno.length>0)
 							q_func('vcc_post.post.get2vcc20', r_accy + ',' + t_vccno + ',0');
 						else{
-							q_func('qtxt.query.get2vcc.1', 'get.txt,get2vcc_sf,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime));
+							q_func('qtxt.query.get2vcc.1', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime)+ ';' + encodeURI('1')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
 						}
 					}
 				}
@@ -1108,6 +1124,9 @@
             }
 			
 			function q_funcPost(t_func, result) {
+				var today = new Date();
+				var ttime = padL(today.getHours(), '0', 2)+':'+padL(today.getMinutes(),'0',2);
+				
 				switch(t_func) {
 					case 'changeordhtgweight':
 						break;
@@ -1123,16 +1142,19 @@
 						}
 						break;
 					case 'vcc_post.post.get2vcc20':
-						q_func('qtxt.query.get2vcc.2', 'get.txt,get2vcc_sf,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime));
+						q_func('qtxt.query.get2vcc.21', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime) + ';' + encodeURI('0')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
 						break;
-					case 'qtxt.query.get2vcc.2':
+					case 'qtxt.query.get2vcc.21':
+						q_func('qtxt.query.get2vcc.22', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime) + ';' + encodeURI('1')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
+						break;
+					case 'qtxt.query.get2vcc.22':
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
 							t_vccno=as[0].vccno;
 							//vcc.post內容
 							if(!emp(t_vccno)){
 								$('#txtTranstartno').val(t_vccno);
-								q_func('vcc_post.post.get2vcc21', r_accy + ',' + t_vccno + ',1');
+								q_func('vcc_post.post.get2vcc23', r_accy + ',' + t_vccno + ',1');
 							}
 						}
 						break;
@@ -1140,18 +1162,14 @@
 						if(t_deleno != '#non'){							
 							var today = new Date();
 							var ttime = padL(today.getHours(), '0', 2)+':'+padL(today.getMinutes(),'0',2);
-							q_func('qtxt.query.get2vcc.3', 'get.txt,get2vcc_sf,' + encodeURI(r_accy) + ';' + encodeURI(t_deleno)+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime));
+							q_func('qtxt.query.get2vcc.31', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI(t_deleno)+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime)+ ';' + encodeURI('2')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
 						}
 						t_deleno='#non';
 						break;
-					case 'qtxt.query.get2vcc.3':
+					case 'qtxt.query.get2vcc.31':
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
 							t_vccno=as[0].vccno;
-							//vcc.post內容
-							if(!emp(t_vccno)){
-								q_func('vcc_post.post.get2vcc31', r_accy + ',' + t_vccno + ',1');
-							}
 						}
 						break;
 				}

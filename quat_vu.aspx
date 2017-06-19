@@ -78,7 +78,7 @@
 				q_getFormat();
 				bbmMask = [['txtDatea', r_picd],['txtBoss', r_picd],['txtConn', r_picd]];
 				q_mask(bbmMask);
-				bbmNum = [['txtTotal', 15, 0, 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtEweight', 15, q_getPara('vcc.weightPrecision'), 1]];
+				bbmNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtTotal', 15, 0, 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtEweight', 15, q_getPara('vcc.weightPrecision'), 1]];
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1]	,
 				['txtPrice', 10, q_getPara('vcc.pricePrecision'), 1], ['txtLengthb', 15, 2, 1],['txtTotal', 15, 0, 1]];
 				
@@ -97,7 +97,7 @@
 				$('#lblWeight').text('合約重量');
 				$('#lblGweight').text('已完成');
 				$('#lblEweight').text('合約餘量');
-				$('#lblAtax').text('含稅');
+				$('#lblAtax').text('外加稅');
 				$('#lblChka1').text('含運');
 				$('#lblChka2').text('自運');
 				$('#lblChka3').text('收費');
@@ -736,6 +736,8 @@
 						<td><input id="txtWorker" type="text" class="txt c1" /></td>
 						<td><span> </span><a id='lblWorker2' class="lbl"> </a></td>
 						<td><input id="txtWorker2" type="text" class="txt c1" /></td>
+						<td class="issf" style="display: none;"><span> </span><a id='' class="lbl">試驗支數</a></td>
+                        <td class="issf" style="display: none;"><input id="txtMount" type="text" class="txt c1 num" /></td>
 					</tr>
 					<tr>
 						<td> </td>

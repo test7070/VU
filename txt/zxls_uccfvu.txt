@@ -1,0 +1,55 @@
+﻿zxls_uccfvu:--zxls_uccfvu 
+----------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+
+declare @cmd nvarchar(max)
+declare @date nvarchar(20)
+declare @uccfnoa nvarchar(20)
+----------------------------------------------------
+--取得當天日期
+set @date = CONVERT(nvarchar(10), GETDATE(), 111)
+
+--當天最大的單據編號
+set @uccfnoa = (select top 1 noa from uccf where noa like '%'+REPLACE(@date,'/','')+'%')
+
+--@uccenoa>>若為空@date+001，否則@uccenoa+1
+set @uccfnoa = case when LEN(ISNULL(@uccfnoa,''))=0 then REPLACE(@date,'/','')+'001' else LEFT(@uccfnoa,8)+RIGHT('000'+CAST(CAST(RIGHT(@uccfnoa,3)as int)+1 as nvarchar(5)),3) end
+
+--產生having條件
+declare @a nvarchar(max)
+declare @str nvarchar(max) = 'having'
+
+declare cursor_table cursor for 
+select a from ztmpxls
+open cursor_table 
+fetch next from cursor_table 
+into @a
+while(@@FETCH_STATUS <> -1) 
+begin
+	set @str = @str+" uno='"+@a+"' or"
+	
+	fetch next from cursor_table 
+	into @a
+end 
+close cursor_table 
+deallocate cursor_table
+
+set @str = LEFT(@str,LEN(@str)-2)
+
+--匯入bbm
+insert into uccf(noa,datea,storeno,store)
+select @uccfnoa,@date,'',''
+--匯入bbs
+set @cmd =
+	"insert into uccfs(noa,noq,uno,product,ucolor,spec,size,lengthb,class,mount,weight)
+	select '"+@uccfnoa+"',RIGHT('000'+CAST(ROW_NUMBER()over(order by a.uno)as nvarchar(5)),3),a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,sum(a.mount)-MAX(isnull(c.mount,0))mount,sum(a.weight)-MAX(isnull(c.weight,0))weight
+	from view_cubs a 
+	outer apply (select SUM(mount)mount,SUM(weight)weight from view_vcct where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)c
+	group by a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class "+@str
+execute sp_executesql @cmd
+
+insert into uccfs(noa,noq,uno,product,ucolor,spec,size,lengthb,class,mount,weight,memo)
+select @uccfnoa,RIGHT('000'+CAST((select count(*) from uccfs where noa=@uccfnoa)+ROW_NUMBER()over(order by UPPER(a))as nvarchar(5)),3) noq
+,UPPER(a)uno,'' product,'' ucolor,'' spec,'' size,'' lengthb,'' class,0 mount,0 weight,'無批號資料' memo
+from ztmpxls a where not exists (select * from uccfs where noa=@uccfnoa and uno=a.a)
+;

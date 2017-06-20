@@ -1,0 +1,66 @@
+﻿rc2toorde:--rc2toorde
+--訂單轉發票
+SET QUOTED_IDENTIFIER OFF
+declare @year nvarchar(20)=[1]--年度[1]
+declare @noa nvarchar(20)=[2]--單據編號[2]
+declare @custno nvarchar(20)=[3]--客戶編號[3]
+declare @quatno nvarchar(20)=[4]--合約編號[4]
+declare @t_err nvarchar(200)=''
+-----------------------------------------------------------------------
+declare @nowdate nvarchar(30) --今天日期
+set @nowdate=CONVERT (VARCHAR(10), GETDATE(),20 )
+set @nowdate=left(@nowdate,4)+'/'+substring(@nowdate,6,2)+'/'+right(@nowdate,2)
+
+declare @cmd nvarchar(max)
+declare @accy nvarchar(20)
+declare @ordeno nvarchar(50)
+declare @t_orde_deli nvarchar(10) = 'E' -----訂單編號前置詞
+
+set @ordeno=isnull((select ordeno from view_rc2 where noa=@noa),'')
+set @accy=isnull((select accy from view_orde where noa=@ordeno),@year)
+
+--刪除已產生的訂單
+if(len(@ordeno)>0)
+begin
+	set @cmd="delete ordes"+@accy+" where noa='"+@ordeno+"' "
+	EXECUTE sp_executesql @cmd
+	
+	set @cmd="delete orde"+@accy+" where noa='"+@ordeno+"' "
+	EXECUTE sp_executesql @cmd
+	set @t_err='modi'
+end
+else
+begin --產生新訂單編號
+	set @ordeno = @t_orde_deli+replace(@nowdate,'/','')
+	set @ordeno = isnull((select max(noa) from view_orde where (left(noa,len(@ordeno))=@ordeno)),'')
+	if(isnull(@ordeno,'')='')
+	begin
+		set @ordeno = @t_orde_deli+replace(@nowdate,'/','')+'001'
+	end
+	else
+	begin
+		set @ordeno = RIGHT(REPLICATE('0', 3) + CAST((cast(right(@ordeno,3) as int)+1) as NVARCHAR(20)), 3)
+		set @ordeno = @t_orde_deli+replace(@nowdate,'/','')+'001'
+	end
+	set @t_err='ins'
+end
+
+--產生訂單資料
+if(@ordeno>0)
+begin
+	EXEC("insert orde"+@accy+" (noa,datea,stype,cno,acomp,custno,comp,nick,[contract],paytype,tel,fax,post,addr,post2,addr2
+	,trantype,salesno,sales,money,tax,atax,total,postname,memo)
+	select '"+@ordeno+"','"+@nowdate+"','1',a.cno,a.acomp,'"+@custno+"',b.comp,b.nick,'"+@quatno+"',b.paytype,b.tel,b.fax,b.zip_home,b.addr_home,'',''
+	,b.trantype,b.salesno,b.sales,a.money,a.tax,a.atax,a.total,a.noa,'','由進貨單'+a.noa+'轉來'
+	from view_rc2 a
+	outer apply (select top 1 * from cust where noa='"+@custno+"')b
+	where a.noa='"+@noa+"' ")
+	
+	EXEC("insert ordes"+@accy+" (noa,no2,style,custno,comp,datea,productno,product,spec,lengthb,unit,weight,mount,price,total,uno,c1,notv)
+	select '"+@ordeno+"',noq,'1','"+@custno+"',(select top 1 comp from cust where noa='"+@custno+"'),'"+@nowdate+"'
+	,productno,spec+product,CAST(dime as nvarchar(50)),lengthb,unit,weight,mount,price,total,uno,0,weight
+	from view_rc2s where noa='"+@noa+"' ")
+end
+
+select @ordeno ordeno,@t_err t_err
+;

@@ -1,0 +1,1457 @@
+﻿﻿z_vcc_vu21:--z_vcc_vu21
+declare @t_bdate nvarchar(10)
+declare @t_edate nvarchar(10)
+declare @t_bsales nvarchar(10)
+declare @t_esales  nvarchar(10)
+declare @t_groupano nvarchar(30)
+declare @t_salesgroupano nvarchar(50)
+
+set @t_bdate = case when '#non'=[7] then '' else [7] end
+set @t_edate = case when '#non'=[8] then char(255) else [8] end
+set @t_bsales = case when '#non'=[31] then '' else [31] end
+set @t_esales = case when '#non'=[32] then char(255) else [32] end
+set @t_groupano = case when '#non'=[16] then '' else (case when [16] = ' ' then '' else [16] end) end
+set @t_salesgroupano = case when '#non'=[17] then '' else (case when [17] = ' ' then '' else [17] end) end
+--------------------------------------------------------------------------------------------------
+declare @tmp table(
+	gno nvarchar(1),
+	salesno nvarchar(MAX),
+	salesname nvarchar(MAX),
+	mount float,
+	weight float,
+	total float,
+	vperscnt float,
+	maori float,
+	perscnt float
+)
+insert into @tmp
+select
+	'0',a.salesno,a.sales
+	,sum((case when a.typea='1' then 1 else -1 end)*b.mount)
+	,sum((case when a.typea='1' then 1 else -1 end)*b.weight)
+	,sum((case when a.typea='1' then 1 else -1 end)*round(b.total/(case when a.taxtype='3' then 1.05 else 1 end),0)),0
+	,sum((case when a.typea='1' then 1 else -1 end)*round(b.total/(case when a.taxtype='3' then 1.05 else 1 end),0)
+	-((case when a.typea='1' then 1 else -1 end)*(case when UPPER(b.unit)='KG' or charindex('斤',b.unit)>0 then b.weight else b.mount end)*isnull(c.price,0))),0
+from view_vcc a
+left join view_vccs b on a.noa = b.noa
+left join view_costs c on b.productno = c.productno and left(a.datea,6) = c.mon
+left join view_ucaucc d on b.productno = d.noa
+left join sss s on a.salesno=s.noa
+where isnull(a.salesno,'') != '' and (a.salesno between @t_bsales and @t_esales) and (a.datea between @t_bdate and @t_edate) and
+		  (len(@t_groupano)=0 or d.groupano = @t_groupano)
+		  and (len(@t_salesgroupano)=0 or @t_salesgroupano=s.salesgroup)   	    	  
+group by a.salesno,a.sales
+order by sum((case when a.typea='1' then 1 else -1 end)*round(b.total/(case when a.taxtype='3' then 1.05 else 1 end),0)) desc,sum((case when a.typea='1' then 1 else -1 end)*b.mount)
+
+insert into @tmp
+	select '1','','',sum(mount),sum(weight),sum(total),0,sum(maori),0 from @tmp
+	
+declare @totTotal float
+--declare @totMoney float
+select @totTotal = (select total from @tmp where gno = '1')
+--select @totMoney = (select maori from @tmp where gno = '1')
+
+--update @tmp set perscnt = case when isnull(@totMoney,0) = 0 then 0 else round((maori/@totMoney)*100,2) end
+
+update @tmp set perscnt =case when total=0 then 0 else round(maori/total*100,2) end 
+,vperscnt = case when isnull(@totTotal,0) = 0 then 0 else round((total/@totTotal)*100,2) end
+
+select
+	gno,ROW_NUMBER()over(order by gno,total desc,maori desc) rankno,salesno,salesname,
+	reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),4,30)) mount,
+	reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),0,30)) weight,
+	reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,total),1)),4,30)) total,
+	reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,maori),1)),4,30)) maori,
+	cast(perscnt as nvarchar) + '%' perscnt,
+	cast(vperscnt as nvarchar) + '%' vperscnt
+from @tmp order by rankno;
+----------------------------------------------------------------------------------------------------------------------------------------------------
+z_vcc_vu22:--z_vcc_vu22
+declare @t_bdate nvarchar(10)
+declare @t_edate nvarchar(10)
+declare @t_bcustno nvarchar(20)
+declare @t_ecustno nvarchar(20)
+declare @t_product nvarchar(90)
+declare @t_custtype nvarchar(90)
+
+set @t_bdate = case when '#non'=[7] then '' else [7] end
+set @t_edate = case when '#non'=[8] then char(255) else [8] end
+set @t_bcustno = case when '#non'=[9] then '' else [9] end
+set @t_ecustno = case when '#non'=[10] then char(255) else [10] end
+set @t_product = case when '#non'=[12] then '' else [12] end
+set @t_custtype = case when '#non'=[13] then '' else [13] end
+--------------------------------------------------------------------------------------------------
+declare @tmp table( 
+	gno  nvarchar(2), 
+	recno int,
+	custno nvarchar(50), 
+	nick nvarchar(50), 
+	aweight float, 
+	atotal float,
+	aprice float, 
+	bweight float, 
+	btotal float,
+	bprice float, 
+	weight float, 
+	total float,
+	price float
+) 
+
+insert @tmp
+select '0' gno,0 recno,a.custno,'' nick
+,sum(case when b.ucolor='板料' then b.weight else 0 end) aweight
+,sum(case when b.ucolor='板料' then b.total else 0 end) atotal
+,case when sum(case when b.ucolor='板料' then b.weight else 0 end)=0 then 0 
+else sum(case when b.ucolor='板料' then b.total else 0 end)/sum(case when b.ucolor='板料' then b.weight else 0 end) end aprice
+,sum(case when b.ucolor!='板料' then b.weight else 0 end) bweight
+,sum(case when b.ucolor!='板料' then b.total else 0 end) btotal
+,case when sum(case when b.ucolor!='板料' then b.weight else 0 end)=0 then 0 
+else sum(case when b.ucolor!='板料' then b.total else 0 end)/sum(case when b.ucolor!='板料' then b.weight else 0 end) end bprice
+,sum(b.weight)weight,sum(b.total)total
+,case when sum(b.weight)=0 then 0 else sum(b.total)/sum(b.weight) end price
+from view_vcc a left join view_vccs b on a.noa=b.noa
+left join cust c on a.custno=c.noa
+where b.product=@t_product
+and a.datea between @t_bdate and @t_edate
+and a.custno between @t_bcustno and @t_ecustno
+and (len(@t_custtype)=0 or c.typea=@t_custtype)
+group by a.custno
+
+update a
+set nick=isnull((select nick from cust where noa=a.custno),'')
+from @tmp a
+
+update a
+set recno=nrecno
+from (select recno,ROW_NUMBER() over (order by total desc) nrecno from @tmp) a
+
+if((select count(*) from @tmp)>0)
+begin
+	insert @tmp
+	select '1',0,'',''
+	,SUM(aweight),SUM(atotal),case when SUM(aweight)=0 then 0 else SUM(atotal)/SUM(aweight) end
+	,SUM(bweight),SUM(btotal),case when SUM(bweight)=0 then 0 else SUM(btotal)/SUM(bweight) end
+	,SUM(weight),SUM(total),case when SUM(weight)=0 then 0 else SUM(total)/SUM(weight) end
+	from @tmp
+end
+
+update @tmp
+set aprice=ROUND(aprice,2),bprice=ROUND(bprice,2),price=ROUND(price,2)
+,atotal=ROUND(atotal,0),btotal=ROUND(btotal,0),total=ROUND(total,0)
+,aweight=ROUND(aweight/1000,2),bweight=ROUND(bweight/1000,2),weight=ROUND(weight/1000,2)
+
+select 
+dbo.getComma(aweight,2) aweight,
+dbo.getComma(atotal,0) atotal,
+dbo.getComma(aprice,2) aprice,
+dbo.getComma(bweight,2) bweight,
+dbo.getComma(btotal,0) btotal,
+dbo.getComma(bprice,2) bprice,
+dbo.getComma(weight,2) weight,
+dbo.getComma(total,0) total,
+dbo.getComma(price,2) price,
+* from @tmp order by gno,recno
+;
+------------------------------------------------------------------------------------------------------------------------------------------------
+z_vcc_vu23:--z_vcc_vu23
+declare @t_custtype nvarchar(90)
+declare @t_bsalesno nvarchar(35)
+declare @t_esalesno nvarchar(35)
+declare @t_lostday nvarchar(90)
+declare @t_lostorder nvarchar(10)
+
+set @t_custtype = case when '#non'=[13] then '' else [13] end
+set @t_lostday = case when '#non'=[14] then '0' else [14] end
+set @t_lostorder = case when '#non'=[15] then '0' else [15] end
+
+declare @now_date nvarchar(10) --今天日期
+set @now_date=CONVERT (VARCHAR(7), GETDATE(),12 )+0890000
+set @now_date=left(@now_date,3)+'/'+substring(@now_date,4,2)+'/'+right(@now_date,2)
+
+declare @tmp table(
+	gno nvarchar(10),
+	noa nvarchar(50),
+	comp nvarchar(200),
+	datea nvarchar(50),
+	tel nvarchar(MAX),
+	fax nvarchar(MAX),
+	mobile nvarchar(MAX),
+	addrcomp nvarchar(MAX),
+	addrconn nvarchar(MAX)
+)
+insert @tmp 
+select '0',noa,comp,isnull((select MAX(datea) from view_vcc where custno=a.noa),'')
+,tel,fax,mobile,addr_comp,addr_home from cust a
+where (len(@t_custtype)=0 or isnull(typea,'')=@t_custtype)
+
+delete @tmp where datea>dbo.q_cdn(@now_date,-1*cast(@t_lostday as int))
+
+if @t_lostorder='0'
+begin
+	select * from @tmp order by datea,noa
+end
+else 
+begin
+	select * from @tmp order by noa,datea
+end
+;
+--*************************************************************************************************
+z_vcc_vu24:--z_vcc_vu24
+declare @t_enddate nvarchar(10)
+set @t_enddate = case when '#non'=[18] then '' else [18] end
+declare @t_lenm nvarchar(10) = '[30]'
+declare @t_len nvarchar(10) = cast(@t_lenm as int)-3
+------------------------------------------------------------------
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	drop table #tmp
+END
+
+IF OBJECT_ID('tempdb..#xtmp')is not null
+BEGIN
+	drop table #xtmp
+END
+
+IF OBJECT_ID('tempdb..#xtmpb')is not null
+BEGIN
+	drop table #xtmpb
+END
+
+
+if(len(@t_enddate)=0)
+	set @t_enddate=replace(convert(varchar(10),GETDATE(),20),'-','/')
+	
+--J10成本表----------------------------------------------------------
+declare @tablea nvarchar(10)
+declare @accy nvarchar(10)
+declare @datea nvarchar(10)
+declare @t_datea nvarchar(10)
+declare @mon nvarchar(10)
+declare @t_mon nvarchar(10)=''
+declare @t_cdnum float
+declare @product nvarchar(50)
+declare @spec nvarchar(50)
+declare @size nvarchar(20)
+declare @weight float=0
+declare @total float
+declare @aprice float=0
+declare @acost float
+declare @aweight float=0
+declare @noa nvarchar(50)
+declare @noq nvarchar(10)
+declare @saprice float
+declare @sweight float
+
+declare @tproduct nvarchar(50)='#non'
+declare @tspec nvarchar(50)='#non'
+declare @tsize nvarchar(20)='#non'
+declare @tweight float=0
+declare @ttotal float
+
+if(@t_enddate>='2017/06/03')
+begin
+	create table #xtmp(
+		typea nvarchar(2),
+		tablea nvarchar(10),
+		accy nvarchar(10),
+		noa nvarchar(50),
+		noq nvarchar(20),
+		datea nvarchar(10),
+		product nvarchar(50),
+		spec nvarchar(50),
+		size nvarchar(20),
+		weight float,
+		price float,
+		total float,
+		aprice float, --均價
+		cost float --成本
+	)
+
+	--106/05/24
+	--只看號數和材質,7000和7000A當一個倉庫
+
+	--調整
+	insert #xtmp
+	select '1','vcf','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,b.weight,case when b.weight=0 then 0 else b.money/b.weight end
+	,b.money,case when b.weight=0 then 0 else b.money/b.weight end
+	,b.money
+	from vcf a left join vcfs b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03'
+
+	--進
+	insert #xtmp
+	select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
+	,case when a.typea='2' then -1 else 1 end*b.total,b.price
+	,case when a.typea='2' then -1 else 1 end*b.total
+	from view_rc2 a left join view_rc2s b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03'
+
+	--銷
+	insert #xtmp
+	select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
+	,case when a.typea='2' then -1 else 1 end*b.total,0,0
+	from view_vcc a left join view_vccs b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03'
+
+	CREATE INDEX tmpindex0 on #xtmp (datea,tablea,typea,noa,noq,product,spec,size)
+	CREATE INDEX tmpindex1 on #xtmp (product,spec,size,datea,typea,noa,noq)
+	CREATE INDEX tmpindex2 on #xtmp (tablea,noa,noq)
+	
+	delete #xtmp where spec=''
+	--------------------------------------------------------------------
+	--月成本
+	create table #xtmpb(
+		mon nvarchar(10),
+		product nvarchar(50),
+		spec nvarchar(50),
+		size nvarchar(20),
+		weight float,
+		total float,
+		aprice float,
+		primary key (product,spec,size,mon)
+	)
+	insert #xtmpb
+	select LEFT(datea,@t_lenm),product,spec,size,0,0,0
+	from #xtmp group by LEFT(datea,@t_lenm),product,spec,size
+
+	--------------------------------------------------------------------
+
+	--計算成本
+	declare cursor_table cursor for
+	select tablea,datea,LEFT(datea,@t_lenm),product,spec,size,noa,noq,isnull(weight,0),isnull(total,0)
+	from #xtmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,product,spec,size
+	open cursor_table
+	fetch next from cursor_table
+	into @tablea,@datea,@mon,@product,@spec,@size,@noa,@noq,@weight,@total
+	while(@@FETCH_STATUS <> -1)
+	begin
+		--避免前期超領負數造成金額溢位
+		if(round(@tweight,0)<=0)
+		begin
+			set @ttotal=0
+			--避免領用有小數點導致無法全部被領用
+			if(round(@tweight,0)=0)
+			begin
+				set @tweight=0
+			end
+		end
+		
+		if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size or @t_mon!=@mon )
+		begin
+			if(@tproduct!='#non')
+			begin
+				update #xtmpb
+				set weight=@tweight,total=@ttotal,aprice=@aprice
+				where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize 
+			end
+			
+			if(@tproduct!=@product or @tspec!=@spec or @tsize!=@size )
+			begin
+				select @tweight=isnull(weight,0),@ttotal=isnull(total,0),@aprice=isnull(aprice,0)
+				from #xtmpb
+				where mon=@mon and product=@product and spec=@spec and size=@size 
+			end
+		end
+		
+		--進貨 --調整
+		if(@tablea='rc2s' or @tablea='vcf')
+		begin
+			if(@ttotal<=0 or @tweight<=0) --處理超領導致金額不正確 以最近進貨的單價作為目前超領的單價
+				set @ttotal=@tweight*case when @weight=0 then 0 else round(@total/@weight,4) end
+				
+			set @tweight=@tweight+@weight
+			set @ttotal=@ttotal+@total
+			set @aprice=case when @tweight=0 then 0 else round(@ttotal/@tweight,4) end
+		end
+		
+		--出貨
+		if(@tablea='vccs')
+		begin
+			set @tweight=@tweight-@weight
+			set @ttotal=@ttotal-round(@weight*@aprice,4)
+		end
+		
+		update #xtmp 
+		set aprice=@aprice,cost=round(isnull(@aprice,0)*weight,4)
+		where noa=@noa and noq=@noq and tablea=@tablea
+		
+		set @tproduct=@product
+		set @tspec=@spec
+		set @tsize=@size
+		set @t_mon=@mon
+		
+		fetch next from cursor_table
+		into @tablea,@datea,@mon,@product,@spec,@size,@noa,@noq,@weight,@total
+	end
+	close cursor_table
+	deallocate cursor_table
+	--最後一筆更新-------------------------------------------------------------
+	--避免前期超領負數造成金額溢位
+	if(round(@tweight,0)<=0)
+	begin
+		set @ttotal=0
+		--避免領用有小數點導致無法全部被領用
+		if(round(@tweight,0)=0)
+		begin
+			set @tweight=0
+		end
+	end
+
+	if(@tproduct!='#non')
+	begin
+		update #xtmpb
+		set weight=@tweight,total=@ttotal,aprice=@aprice
+		where mon>=@t_mon and product=@tproduct and spec=@tspec and size=@tsize
+	end
+	--最後一筆更新-------------------------------------------------------------
+end
+--J10-------------------------------------------------------------------
+
+set @t_mon=left(@t_enddate,@t_lenm)
+declare @t_pmon nvarchar(10)=left(dbo.q_cdn(left(@t_enddate,@t_lenm)+'/01',-1),@t_lenm)
+declare @t_year nvarchar(10)=left(@t_enddate,@t_len)
+declare @t_pyear nvarchar(10)=cast(cast(@t_year as int)-1 as nvarchar(10))
+
+declare @tmp table(
+	gno nvarchar(10),
+	cm float,cp float, --進貨合約 餘量 均價
+	sm float,sp float, --智勝-板料 餘量 均價
+	em float,ep float, --智勝-成品 餘量 均價
+	am float,ap float, --可用餘量 餘量 均價
+	qm float,qp float, --銷售合約 餘量 均價
+	tm float,tp float, --可銷售額度 餘量 均價
+	
+	ucub float,uvcc float, --定尺訂單 未完工 已完工待出貨
+	pgen float,	ngen float,ygen float, --上月 本月 本年 定尺產能
+	
+	prm float,prp float, --總進貨量 上月 數量 均價
+	rm float,rp float,--總進貨量 本月 數量 均價
+	pyrm float,pyrp float,--總進貨量 上年度 數量 均價
+	yrm float,yrp float,--總進出貨量 本年度 數量 均價
+	
+	pvm float,pvp float, --總出貨量 上月 數量 均價
+	vm float,vp float,--總出貨量 本月 數量 均價
+	pyvm float,pyvp float,--總出貨量 上年度 數量 均價
+	yvm float,yvp float,--總出貨量 本年度 數量 均價
+	
+	pccm float,pccp float, --進貨合約  採購量 上月 數量 均價
+	ccm float,ccp float,--進貨合約  採購量 本月 數量 均價
+	pyccm float,pyccp float,--進貨合約  採購量 上年度 數量 均價
+	yccm float,yccp float,--進貨合約  採購量 本年度 數量 均價
+	
+	pqvm float,pqvp float, --銷售合約  成交量 上月 數量 均價
+	qvm float,qvp float,--銷售合約  成交量 本月 數量 均價
+	pyqvm float,pyqvp float,--銷售合約  成交量 上年度 數量 均價
+	yqvm float,yqvp float,--銷售合約  成交量 本年度 數量 均價
+	
+	pbvm float,pbvp float, --廢鋼出貨量 上月 數量 均價
+	bvm float,bvp float,--廢鋼出貨量 本月 數量 均價
+	pybvm float,pybvp float,--廢鋼出貨量 上年度 數量 均價
+	ybvm float,ybvp float,--廢鋼出貨量 本年度 數量 均價
+	
+	pivm float,pivp float, --氧化鐵出貨量 上月 數量 均價
+	ivm float,ivp float,--氧化鐵出貨量 本月 數量 均價
+	pyivm float,pyivp float,--氧化鐵出貨量 上年度 數量 均價
+	yivm float,yivp float--氧化鐵出貨量 本年度 數量 均價
+)
+
+insert @tmp (gno)
+select '0'
+
+--進貨合約
+update  a
+set cm=isnull((select sum(eweight) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
+,cp=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*earnest)/sum(eweight) end from cont where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
+from @tmp a
+
+--銷售合約
+update  a
+set qm=isnull((select sum(eweight) from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0)
+,qp=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*price)/sum(eweight) end from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
+from @tmp a
+
+--智勝-板料
+create table #tmp(
+	gno nvarchar(2),
+	tablea nvarchar(50),
+	datea nvarchar(50),
+	noa nvarchar(50),
+	noq nvarchar(50),
+	product nvarchar(100),
+	spec nvarchar(50),
+	size nvarchar(50),
+	ucolor nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	storeno nvarchar(50),
+	hmount decimal(20,3),
+	mount decimal(20,3),
+	weight decimal(20,3),
+	money float,
+	avgweight decimal(20,3),
+	aprice  decimal(20,3),
+	page int,
+	idno int
+)
+
+CREATE INDEX tmpindex on #tmp (gno,tablea,datea,noa,noq)
+
+insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '11','ucce',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno
+,b.mount,b.weight,b.total,0,0
+from view_ucce a left join view_ucces b on a.noa=b.noa 
+where a.datea<=@t_enddate 
+and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
+
+--刪除多次盤點的資料 只保留最後一次盤點
+delete a
+from #tmp a outer apply (select MAX(datea) datea from #tmp 
+where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
+where a.datea!=b.datea
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
+from view_rc2 a left join view_rc2s b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
+from view_ina a left join view_inas b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and a.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '14','cubt',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
+from view_cub a left join view_cubt b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
+from view_get a left join view_gets b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and a.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
+
+--105/04/20 出貨板料也要扣
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '16','vccs',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
+from view_vcc a left join view_vccs b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
+
+insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
+select '13','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
+from view_cub a left join view_cubs b on a.noa=b.noa
+outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
+where b.ucolor='板料' and  --散把只顯示板料
+not exists (select * from view_vcct where b.uno=uno) and
+a.datea<=@t_enddate and isnull(a.datea,'')>=isnull(c.datea,'')
+--and b.storeno='7000' 
+and isnull(b.productno,'')='' and isnull(b.product,'')!='' --and isnull(b.productno2,'')=''
+and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
+group by b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
+
+set @tablea=''
+declare @storeno nvarchar(100)
+declare @x_storeno nvarchar(100)
+set @product=''
+declare @x_product nvarchar(100)='~!@#$%^&*'
+set @spec=''
+declare @x_spec nvarchar(100)
+set @size=''
+declare @x_size nvarchar(100)
+declare @lengthb float
+declare @x_lengthb float
+declare @class nvarchar(100)
+declare @x_class nvarchar(100)
+declare @mount decimal(18, 4)
+set @weight=0
+declare @money float
+declare @t_money float
+declare @t_mount decimal(18, 4)
+declare @t_weight decimal(18, 4)
+declare @avgweight decimal(18, 4)
+declare @stktype float
+set @t_mount=0
+set @t_weight=0
+set @t_money=0
+set @avgweight=0
+set @aprice=0
+
+--板料倉庫在7000
+declare cursor_table cursor for
+select tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) 
+from #tmp where tablea!='cubs' 
+order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa,noq
+open cursor_table
+fetch next from cursor_table
+into @tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+while(@@FETCH_STATUS <> -1)
+begin
+	
+	if(@x_product!='~!@#$%^&*' and (@x_product!=@product or @x_size!=@size or @x_spec!=@spec or @x_lengthb!=@lengthb or @x_class!=@class))
+	begin
+		insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+		select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,'',@t_mount,@t_weight,@t_money,@avgweight,@aprice
+	
+		set @t_mount=0
+		set @t_weight=0
+		set @t_money=0
+		set @aprice=0
+	end
+	
+	if(@tablea='ucce')
+	begin
+		set @t_mount=@mount
+		set @t_weight=@weight
+		set @t_money=@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
+	end
+	else if(@tablea in ('rc2s','inas'))
+	begin
+		set @t_mount=@t_mount+@mount
+		set @t_weight=@t_weight+@weight
+		set @t_money=@t_money+@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
+	end
+	else
+	begin
+		set @t_mount=@t_mount-@mount
+		set @t_weight=@t_weight-@weight
+		if(@t_weight<0)
+			set @t_money=0
+		else
+			set @t_money=@t_money-round((@weight*@aprice),0)
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
+	end
+	
+	set @x_storeno=@storeno
+	set @x_product=@product
+	set @x_size=@size
+	set @x_spec=@spec
+	set @x_lengthb=@lengthb
+	set @x_class=@class
+	
+	fetch next from cursor_table
+	into @tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+end
+close cursor_table
+deallocate cursor_table
+
+--最後一筆
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,'',@t_mount,@t_weight,@t_money,@avgweight,@aprice
+
+--delete #tmp where mount=0 or weight=0 or gno!='2'
+
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '5','datea','','',char(255),char(255),char(255),999,'ZZZ','',sum(mount),SUM(weight),SUM(money)
+,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
+,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
+from #tmp where not(mount=0 or weight=0 or gno!='2')
+
+--delete #tmp where gno='2'
+
+update  a
+set sm=isnull((select top 1 round(weight,0) from #tmp where gno='5'),0)
++isnull((select SUM(weight) from #tmp where tablea='cubs'),0)
+,sp=isnull((select top 1 round(aprice,3) from #tmp where gno='5'),0)
+from @tmp a
+
+--智勝-成品(含散把板料) 105/07/22 不含散把板料
+update a
+set em=isnull(b.weight,0),ep=sp
+from @tmp a
+outer apply(
+	select sum(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa
+	outer apply (select * from view_orde where noa=b.ordeno) c
+	where a.datea<=@t_enddate and b.uno!='' and b.product!='鐵線' and isnull(b.ucolor,'')!='板料'
+	and (b.mount>0 or b.weight>0) --and (len(isnull(b.ordeno,''))=0)
+	and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
+	and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
+)b
+
+if(@t_enddate>='2017/06/03')
+begin
+	update xa
+	set sp=round(xb.aprice,3),ep=round(xb.aprice,3)
+	from @tmp xa
+	outer apply (
+	select case when SUM(weight)=0 then 0 else SUM(total)/SUM(weight) end aprice from (select product,spec,size,MAX(mon)mon from #xtmpb group by product,spec,size)a
+	outer apply (select weight,total from #xtmpb where product=a.product and spec=a.spec and size=a.size and mon=a.mon)b) xb
+end
+
+--可用餘量
+update a
+set am=ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)
+,ap=case when ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)=0 then 0 else round((ISNULL(cm*cp,0)+ISNULL(sm*sp,0)+ISNULL(em*ep,0))/(ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)),3) end
+from @tmp a
+
+--可銷售額度
+update a
+set tm=ISNULL(am,0)-ISNULL(qm,0)
+,tp=case when ISNULL(am,0)-ISNULL(qm,0)=0 then 0 else round((ISNULL(am*ap,0)-ISNULL(qm*qp,0))/(ISNULL(am,0)-ISNULL(qm,0)),3) end
+from @tmp a
+
+--定尺訂單 未完工 已完工待出貨
+declare @tmpa table(
+	noa nvarchar(40), 
+	bdate nvarchar(20),
+	stand float, 
+	undone float,
+	unfinal float
+)
+insert @tmpa
+select a.noa,a.datea
+,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)
+,case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end 
+,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) 
++(case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end)
+from view_cuc a left join view_cucs b on a.noa=b.noa 
+outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c 
+outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d 
+where a.datea<=@t_enddate 
+group by a.cust,a.noa,a.datea,a.memo,a.gen 
+
+update a set undone=0,unfinal=stand 
+from @tmpa a 
+outer apply(select sum(case when mins=0 then 1 else 0 end) mins from view_cucs where noa=a.noa) b 
+where b.mins=0 
+
+--未結案
+delete @tmpa where unfinal<=0 
+
+update a
+set ucub=b.undone,uvcc=b.stand
+from @tmp a
+outer apply(select SUM(undone) undone,SUM(stand) stand from @tmpa)b
+
+--上月 本月 定尺產能
+update a
+set pgen=isnull(c.weight,0),ngen=isnull(b.weight,0),ygen=isnull(d.weight,0)
+from @tmp a
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_lenm) = @t_mon
+	and isnull(b.uno,'')!='' 
+)b
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_lenm) = @t_pmon
+	and isnull(b.uno,'')!='' 
+)c
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_len) = left(@t_mon,@t_len)
+	and isnull(b.uno,'')!='' 
+)d
+
+--左區塊------------------------------------------------------------------------------------------------------------------------------------------------------
+--鋼筋總進貨量
+update @tmp
+set prm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,prp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,rm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,rp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,pyrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,yrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+
+--鋼筋總出貨量 
+update @tmp
+set pvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,pvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,vm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,vp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,pyvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,yvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+
+--進貨合約
+update @tmp
+set pccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_lenm)=@t_pmon),0)
+,pccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_lenm)=@t_pmon),0),3)
+,ccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,ccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0),3)
+,pyccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_len)=@t_pyear),0)
+,pyccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_len)=@t_pyear),0),3)
+,yccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_len)=@t_year and datea<=@t_enddate),0),3)
+
+--銷售合約
+update @tmp
+set pqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_lenm)=@t_pmon),0)
+,pqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_lenm)=@t_pmon),0),3)
+,qvm=isnull((select SUM(weight) from view_quat where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,qvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0),3)
+,pyqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_len)=@t_pyear),0)
+,pyqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_len)=@t_pyear),0),3)
+,yqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_len)=@t_year and datea<=@t_enddate),0),3)
+
+--廢鐵總出貨量 
+update @tmp
+set pbvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,pbvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,bvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,bvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pybvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear),0)
+,pybvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear),0)
+,ybvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,ybvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+
+--氧化鐵總出貨量 
+update @tmp
+set pivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,pivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,ivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,ivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear),0)
+,pyivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear),0)
+,yivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+
+select gno
+,dbo.getComma(cm,0) cm,dbo.getComma(cp,-1) cp
+,dbo.getComma(sm,0) sm,dbo.getComma(sp,-1) sp
+,dbo.getComma(em,0) em,dbo.getComma(ep,-1) ep
+,dbo.getComma(am,0) am,dbo.getComma(ap,-1) ap
+,dbo.getComma(qm,0) qm,dbo.getComma(qp,-1) qp
+,dbo.getComma(tm,0) tm,dbo.getComma(tp,-1) tp
+
+,dbo.getComma(ucub,0) ucub,dbo.getComma(uvcc,0) uvcc
+,dbo.getComma(pgen,0) pgen,dbo.getComma(ngen,0) ngen,dbo.getComma(ygen,0) ygen
+
+,dbo.getComma(prm,0) prm,dbo.getComma(prp,-1) prp
+,dbo.getComma(rm,0) rm,dbo.getComma(rp,-1) rp
+,dbo.getComma(pyrm,0) pyrm,dbo.getComma(pyrp,-1) pyrp
+,dbo.getComma(yrm,0) yrm,dbo.getComma(yrp,-1) yrp
+
+,dbo.getComma(pvm,0) pvm,dbo.getComma(pvp,-1) pvp
+,dbo.getComma(vm,0) vm,dbo.getComma(vp,-1) vp
+,dbo.getComma(pyvm,0) pyvm,dbo.getComma(pyvp,-1) pyvp
+,dbo.getComma(yvm,0) yvm,dbo.getComma(yvp,-1) yvp
+
+,dbo.getComma(pccm,0) pccm,dbo.getComma(pccp,-1) pccp
+,dbo.getComma(ccm,0) ccm,dbo.getComma(ccp,-1) ccp
+,dbo.getComma(pyccm,0) pyccm,dbo.getComma(pyccp,-1) pyccp
+,dbo.getComma(yccm,0) yccm,dbo.getComma(yccp,-1) yccp
+
+,dbo.getComma(pqvm,0) pqvm,dbo.getComma(pqvp,-1) pqvp
+,dbo.getComma(qvm,0) qvm,dbo.getComma(qvp,-1) qvp
+,dbo.getComma(pyqvm,0) pyqvm,dbo.getComma(pyqvp,-1) pyqvp
+,dbo.getComma(yqvm,0) yqvm,dbo.getComma(yqvp,-1) yqvp
+
+,dbo.getComma(pbvm,0) pbvm,dbo.getComma(pbvp,-1) pbvp
+,dbo.getComma(bvm,0) bvm,dbo.getComma(bvp,-1) bvp
+,dbo.getComma(pybvm,0) pybvm,dbo.getComma(pybvp,-1) pybvp
+,dbo.getComma(ybvm,0) ybvm,dbo.getComma(ybvp,-1) ybvp
+
+,dbo.getComma(pivm,0) pivm,dbo.getComma(pivp,-1) pivp
+,dbo.getComma(ivm,0) ivm,dbo.getComma(ivp,-1) ivp
+,dbo.getComma(pyivm,0) pyivm,dbo.getComma(pyivp,-1) pyivp
+,dbo.getComma(yivm,0) yivm,dbo.getComma(yivp,-1) yivp
+
+from @tmp
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	drop table #tmp
+END
+
+IF OBJECT_ID('tempdb..#xtmp')is not null
+BEGIN
+	drop table #xtmp
+END
+
+IF OBJECT_ID('tempdb..#xtmpb')is not null
+BEGIN
+	drop table #xtmpb
+END
+
+;
+--*************************************************************************************************
+z_vcc_vu25:--z_vcc_vu25
+declare @t_bdate nvarchar(20)
+declare @t_edate nvarchar(20)
+declare @t_btggno nvarchar(20) 
+declare @t_etggno nvarchar(20) 
+declare @rc2typea nvarchar(10)
+declare @t_product nvarchar(max)
+declare @t_spec nvarchar(30)
+declare @t_size nvarchar(10)
+declare @t_class nvarchar(10)
+declare @t_blengthb float
+declare @t_elengthb float 
+declare @t_qno nvarchar(50)
+declare @t_bstoreno nvarchar(20) 
+declare @t_estoreno nvarchar(20)
+------------------------------------------------- 
+set @t_bdate = case when '#non'=[7] then '' else [7] end 
+set @t_edate = case when '#non'=[8] then char(255) else [8] end 
+set @t_btggno = case when '#non'=[19] then '' else [19] end 
+set @t_etggno = case when '#non'=[20] then char(255) else [20]  end
+set @rc2typea = case when '#non' = [21] then '' else [21] end  
+set @t_product = case when '#non'=[12] then '' else [12] end
+set @t_spec = case when '#non'=[22] then '' else [22] end
+set @t_size = case when '#non'=[23] then '' else [23] end
+set @t_class = case when '#non'=[24] then '' else [24] end
+set @t_qno = case when '#non'=[25] then '' else [25] end
+set @t_blengthb = case when '#non'=[26] then 0 else [26] end
+set @t_elengthb = case when '#non'=[27] then 99 else [27] end
+set @t_bstoreno = case when '#non'=[28] then '' else [28] end 
+set @t_estoreno = case when '#non'=[29] then char(255) else [29] end
+--***********************************************************************************
+declare @tmp table( 
+	gno nvarchar(1), 
+	tggno nvarchar(30), 
+	comp nvarchar(90), 
+	mon nvarchar(15), 
+	mount float, 
+	total float, 
+	aprice float,
+	tax float ,
+	weight float,
+	totax float
+) 
+insert into @tmp 
+select '0',a.tggno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end), 
+case when isnull(a.mon,'')!='' then a.mon else left(a.datea,[30]) end
+,sum((case when a.typea='1' then 1 else -1 end)*b.mount)
+,sum((case when a.typea='1' then 1 else -1 end)*b.total) ,0
+,sum((case when a.typea='1' then 1 else -1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)) 
+,sum((case when a.typea='1' then 1 else -1 end)*b.weight)
+,sum((case when a.typea='1' then 1 else -1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)) 
+from view_rc2 a left join view_rc2s b on a.noa = b.noa left join tgg c on a.tggno = c.noa 
+where (a.datea between @t_bdate and @t_edate) and 
+(a.tggno between @t_btggno and @t_etggno)  and
+(b.storeno between @t_bstoreno and @t_estoreno) and
+(len(@rc2typea)=0 or @rc2typea=a.typea) and
+(len(@t_product)=0 or @t_product=b.product)and
+(len(@t_spec)=0 or @t_spec=b.spec) and
+(len(@t_size)=0 or @t_size=b.size) and
+(len(@t_class)=0 or @t_class=b.class) and
+(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) and 
+(len(@t_qno)=0 or dbo.split(dbo.split(a.transtart,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.transtart,'##',1),'@',0) = @t_qno)
+group by a.tggno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,[30]) end
+
+if((select count(*) from @tmp)>0)
+begin
+	insert into @tmp(gno,tggno,comp,mon,mount,total,tax,totax,weight) 
+	select '1',tggno,comp,'9999/99',sum(mount),sum(total),sum(tax),sum(totax),sum(weight) from @tmp group by tggno,comp 
+	
+	insert into @tmp(gno,tggno,mount,total,tax,totax,weight) 
+	select '2','ZZZZ_ZZZ',sum(mount), sum(total), sum(tax), sum(totax),sum(weight) from @tmp where gno='1' 
+end
+
+update @tmp
+set aprice =case when weight=0 then 0 else round(total/weight,2) end 
+
+select gno,tggno,left(comp,10) comp,mon,
+dbo.getComma(mount,0) mount, 
+dbo.getComma(weight,0) weight, 
+dbo.getComma(aprice,2) aprice, 
+dbo.getComma(tax,0) tax,
+dbo.getComma(totax,0) totax , 
+dbo.getComma(total,0) total
+from @tmp order by tggno,mon,gno ;
+---------------------------------------------------------------------------------------------
+--*************************************************************************************************
+z_vcc_sf24:--z_vcc_sf24
+declare @t_enddate nvarchar(10)
+set @t_enddate = case when '#non'=[18] then '' else [18] end
+declare @t_lenm nvarchar(10) = '[30]'
+declare @t_len nvarchar(10) = cast(@t_lenm as int)-3
+------------------------------------------------------------------
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	drop table #tmp
+END
+
+if(len(@t_enddate)=0)
+	set @t_enddate=replace(convert(varchar(10),GETDATE(),20),'-','/')
+
+declare @t_mon nvarchar(10)=left(@t_enddate,@t_lenm)
+declare @t_pmon nvarchar(10)=left(dbo.q_cdn(left(@t_enddate,@t_lenm)+'/01',-1),@t_lenm)
+declare @t_year nvarchar(10)=left(@t_enddate,@t_len)
+declare @t_pyear nvarchar(10)=cast(cast(@t_year as int)-1 as nvarchar(10))
+
+declare @tmp table(
+	gno nvarchar(10),
+	cm float,cp float, --進貨合約 餘量 均價
+	sm float,sp float, --智勝-板料 餘量 均價
+	em float,ep float, --智勝-成品 餘量 均價
+	am float,ap float, --可用餘量 餘量 均價
+	qm float,qp float, --銷售合約 餘量 均價
+	tm float,tp float, --可銷售額度 餘量 均價
+	
+	ucub float,uvcc float, --定尺訂單 未完工 已完工待出貨
+	pgen float,	ngen float,ygen float, --上月 本月 本年 定尺產能
+	
+	prm float,prp float, --總進貨量 上月 數量 均價
+	rm float,rp float,--總進貨量 本月 數量 均價
+	pyrm float,pyrp float,--總進貨量 上年度 數量 均價
+	yrm float,yrp float,--總進出貨量 本年度 數量 均價
+	
+	pvm float,pvp float, --總出貨量 上月 數量 均價
+	vm float,vp float,--總出貨量 本月 數量 均價
+	pyvm float,pyvp float,--總出貨量 上年度 數量 均價
+	yvm float,yvp float,--總出貨量 本年度 數量 均價
+	
+	pccm float,pccp float, --進貨合約  採購量 上月 數量 均價
+	ccm float,ccp float,--進貨合約  採購量 本月 數量 均價
+	pyccm float,pyccp float,--進貨合約  採購量 上年度 數量 均價
+	yccm float,yccp float,--進貨合約  採購量 本年度 數量 均價
+	
+	pqvm float,pqvp float, --銷售合約  成交量 上月 數量 均價
+	qvm float,qvp float,--銷售合約  成交量 本月 數量 均價
+	pyqvm float,pyqvp float,--銷售合約  成交量 上年度 數量 均價
+	yqvm float,yqvp float,--銷售合約  成交量 本年度 數量 均價
+	
+	pbvm float,pbvp float, --廢鋼出貨量 上月 數量 均價
+	bvm float,bvp float,--廢鋼出貨量 本月 數量 均價
+	pybvm float,pybvp float,--廢鋼出貨量 上年度 數量 均價
+	ybvm float,ybvp float,--廢鋼出貨量 本年度 數量 均價
+	
+	pivm float,pivp float, --氧化鐵出貨量 上月 數量 均價
+	ivm float,ivp float,--氧化鐵出貨量 本月 數量 均價
+	pyivm float,pyivp float,--氧化鐵出貨量 上年度 數量 均價
+	yivm float,yivp float--氧化鐵出貨量 本年度 數量 均價
+)
+
+insert @tmp (gno)
+select '0'
+
+--進貨合約
+update  a
+set cm=isnull((select sum(eweight) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
+,cp=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*earnest)/sum(eweight) end from cont where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
+from @tmp a
+
+--銷售合約
+update  a
+set qm=isnull((select sum(eweight) from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0)
+,qp=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*price)/sum(eweight) end from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
+from @tmp a
+
+--智勝-板料
+create table #tmp(
+	gno nvarchar(2),
+	tablea nvarchar(50),
+	datea nvarchar(50),
+	noa nvarchar(50),
+	noq nvarchar(50),
+	product nvarchar(100),
+	spec nvarchar(50),
+	size nvarchar(50),
+	ucolor nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	storeno nvarchar(50),
+	hmount decimal(20,3),
+	mount decimal(20,3),
+	weight decimal(20,3),
+	money float,
+	avgweight decimal(20,3),
+	aprice  decimal(20,3),
+	page int,
+	idno int
+)
+
+CREATE INDEX tmpindex on #tmp (gno,tablea,datea,noa,noq)
+
+insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '11','ucce',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno
+,b.mount,b.weight,b.total,0,0
+from view_ucce a left join view_ucces b on a.noa=b.noa 
+where a.datea<=@t_enddate 
+and b.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
+
+--刪除多次盤點的資料 只保留最後一次盤點
+delete a
+from #tmp a outer apply (select MAX(datea) datea from #tmp 
+where product=a.product and spec=a.spec and size=a.size and lengthb =a.lengthb and class =a.class)b
+where a.datea!=b.datea
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
+from view_rc2 a left join view_rc2s b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and b.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
+from view_ina a left join view_inas b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and a.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '14','cubt',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
+from view_cub a left join view_cubt b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and b.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
+from view_get a left join view_gets b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and a.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
+
+--105/04/20 出貨板料也要扣
+insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '16','vccs',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
+from view_vcc a left join view_vccs b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+and b.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
+
+insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,hmount,mount,weight,money,avgweight,aprice)
+select '13','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),sum(b.hmount),isnull(c.umount,0)+sum(b.mount),isnull(c.uweight,0)+sum(b.weight),null,null,null
+from view_cub a left join view_cubs b on a.noa=b.noa
+outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
+where b.ucolor='板料' and  --散把只顯示板料
+not exists (select * from view_vcct where b.uno=uno) and
+a.datea<=@t_enddate and isnull(a.datea,'')>=isnull(c.datea,'')
+and isnull(b.productno,'')='' and isnull(b.product,'')!=''
+and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
+group by b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,isnull(b.storeno,''),c.umount,c.uweight
+
+declare @tablea nvarchar(100)
+declare @storeno nvarchar(100)
+declare @x_storeno nvarchar(100)
+declare @product nvarchar(100)
+declare @x_product nvarchar(100)='~!@#$%^&*'
+declare @spec nvarchar(100)
+declare @x_spec nvarchar(100)
+declare @size nvarchar(100)
+declare @x_size nvarchar(100)
+declare @lengthb float
+declare @x_lengthb float
+declare @class nvarchar(100)
+declare @x_class nvarchar(100)
+declare @mount decimal(18, 4)
+declare @weight decimal(18, 4)
+declare @money float
+declare @t_money float
+declare @t_mount decimal(18, 4)
+declare @t_weight decimal(18, 4)
+declare @avgweight decimal(18, 4)
+declare @aprice decimal(18, 4)
+declare @stktype float
+set @t_mount=0
+set @t_weight=0
+set @t_money=0
+set @avgweight=0
+set @aprice=0
+
+--板料倉庫在A
+declare cursor_table cursor for
+select tablea,isnull(storeno,''),isnull(product,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) 
+from #tmp where tablea!='cubs' 
+order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa,noq
+open cursor_table
+fetch next from cursor_table
+into @tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+while(@@FETCH_STATUS <> -1)
+begin
+	
+	if(@x_product!='~!@#$%^&*' and (@x_product!=@product or @x_size!=@size or @x_spec!=@spec or @x_lengthb!=@lengthb or @x_class!=@class))
+	begin
+		insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+		select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,'',@t_mount,@t_weight,@t_money,@avgweight,@aprice
+	
+		set @t_mount=0
+		set @t_weight=0
+		set @t_money=0
+		set @aprice=0
+	end
+	
+	if(@tablea='ucce')
+	begin
+		set @t_mount=@mount
+		set @t_weight=@weight
+		set @t_money=@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
+	end
+	else if(@tablea in ('rc2s','inas'))
+	begin
+		set @t_mount=@t_mount+@mount
+		set @t_weight=@t_weight+@weight
+		set @t_money=@t_money+@money
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
+	end
+	else
+	begin
+		set @t_mount=@t_mount-@mount
+		set @t_weight=@t_weight-@weight
+		if(@t_weight<0)
+			set @t_money=0
+		else
+			set @t_money=@t_money-round((@weight*@aprice),0)
+		set @avgweight=case when @t_mount=0 then 0 else round(@t_weight/@t_mount,0) end
+		set @aprice=case when @t_weight=0 then 0 else round(@t_money/@t_weight,3) end
+	end
+	
+	set @x_storeno=@storeno
+	set @x_product=@product
+	set @x_size=@size
+	set @x_spec=@spec
+	set @x_lengthb=@lengthb
+	set @x_class=@class
+	
+	fetch next from cursor_table
+	into @tablea,@storeno,@product,@spec,@size,@lengthb,@class,@mount,@weight,@money
+end
+close cursor_table
+deallocate cursor_table
+
+--最後一筆
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '2','datea',CHAR(255),CHAR(255),@x_product,@x_spec,@x_size,@x_lengthb,@x_class,'',@t_mount,@t_weight,@t_money,@avgweight,@aprice
+
+--delete #tmp where mount=0 or weight=0 or gno!='2'
+
+insert #tmp(gno,tablea,datea,noa,product,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+select '5','datea','','',char(255),char(255),char(255),999,'ZZZ','',sum(mount),SUM(weight),SUM(money)
+,case when sum(mount)=0 then 0 else SUM(weight)/sum(mount) end
+,case when SUM(weight)=0 then 0 else SUM(money)/SUM(weight) end
+from #tmp where not(mount=0 or weight=0 or gno!='2')
+
+--delete #tmp where gno='2'
+
+update  a
+set sm=isnull((select top 1 round(weight,0) from #tmp where gno='5'),0)
++isnull((select SUM(weight) from #tmp where tablea='cubs'),0)
+,sp=isnull((select top 1 round(aprice,3) from #tmp where gno='5'),0)
+from @tmp a
+
+--智勝-成品(含散把板料) 105/07/22 不含散把板料
+update a
+set em=isnull(b.weight,0),ep=sp
+from @tmp a
+outer apply(
+	select sum(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa
+	outer apply (select * from view_orde where noa=b.ordeno) c
+	where a.datea<=@t_enddate and b.uno!='' and b.product!='鐵線' and isnull(b.ucolor,'')!='板料'
+	and (b.mount>0 or b.weight>0) --and (len(isnull(b.ordeno,''))=0)
+	and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
+	and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
+)b
+
+--可用餘量
+update a
+set am=ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)
+,ap=case when ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)=0 then 0 else round((ISNULL(cm*cp,0)+ISNULL(sm*sp,0)+ISNULL(em*ep,0))/(ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)),3) end
+from @tmp a
+
+--可銷售額度
+update a
+set tm=ISNULL(am,0)-ISNULL(qm,0)
+,tp=case when ISNULL(am,0)-ISNULL(qm,0)=0 then 0 else round((ISNULL(am*ap,0)-ISNULL(qm*qp,0))/(ISNULL(am,0)-ISNULL(qm,0)),3) end
+from @tmp a
+
+--定尺訂單 未完工 已完工待出貨
+declare @tmpa table(
+	noa nvarchar(40), 
+	bdate nvarchar(20),
+	stand float, 
+	undone float,
+	unfinal float
+)
+insert @tmpa
+select a.noa,a.datea
+,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)
+,case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end 
+,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) 
++(case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end)
+from view_cuc a left join view_cucs b on a.noa=b.noa 
+outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c 
+outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d 
+where a.datea<=@t_enddate 
+group by a.cust,a.noa,a.datea,a.memo,a.gen 
+
+update a set undone=0,unfinal=stand 
+from @tmpa a 
+outer apply(select sum(case when mins=0 then 1 else 0 end) mins from view_cucs where noa=a.noa) b 
+where b.mins=0 
+
+--未結案
+delete @tmpa where unfinal<=0 
+
+update a
+set ucub=b.undone,uvcc=b.stand
+from @tmp a
+outer apply(select SUM(undone) undone,SUM(stand) stand from @tmpa)b
+
+--上月 本月 定尺產能
+update a
+set pgen=isnull(c.weight,0),ngen=isnull(b.weight,0),ygen=isnull(d.weight,0)
+from @tmp a
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_lenm) = @t_mon
+	and isnull(b.uno,'')!='' 
+)b
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_lenm) = @t_pmon
+	and isnull(b.uno,'')!='' 
+)c
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_len) = left(@t_mon,@t_len)
+	and isnull(b.uno,'')!='' 
+)d
+
+--左區塊------------------------------------------------------------------------------------------------------------------------------------------------------
+--鋼筋總進貨量
+update @tmp
+set prm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,prp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,rm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,rp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,pyrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,yrm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yrp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+
+--鋼筋總出貨量 
+update @tmp
+set pvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,pvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon),0)
+,vm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,vp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,pyvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear),0)
+,yvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+
+--進貨合約
+update @tmp
+set pccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_lenm)=@t_pmon),0)
+,pccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_lenm)=@t_pmon),0),3)
+,ccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,ccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0),3)
+,pyccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_len)=@t_pyear),0)
+,pyccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_len)=@t_pyear),0),3)
+,yccm=isnull((select SUM(ordeweight) from cont where left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yccp=round(isnull((select case when SUM(ordeweight)=0 then 0 else SUM(ordeweight*earnest)/SUM(ordeweight) end from cont where left(datea,@t_len)=@t_year and datea<=@t_enddate),0),3)
+
+--銷售合約
+update @tmp
+set pqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_lenm)=@t_pmon),0)
+,pqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_lenm)=@t_pmon),0),3)
+,qvm=isnull((select SUM(weight) from view_quat where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,qvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0),3)
+,pyqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_len)=@t_pyear),0)
+,pyqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_len)=@t_pyear),0),3)
+,yqvm=isnull((select SUM(weight) from view_quat where left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yqvp=round(isnull((select case when SUM(weight)=0 then 0 else SUM(weight*price)/SUM(weight) end from view_quat where left(datea,@t_len)=@t_year and datea<=@t_enddate),0),3)
+
+--廢鐵總出貨量 
+update @tmp
+set pbvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,pbvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,bvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,bvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pybvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear),0)
+,pybvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear),0)
+,ybvm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,ybvp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+
+--氧化鐵總出貨量 
+update @tmp
+set pivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,pivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon),0)
+,ivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,ivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate),0)
+,pyivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear),0)
+,pyivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear),0)
+,yivm=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+,yivp=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate),0)
+
+select gno
+,dbo.getComma(cm,0) cm,dbo.getComma(cp,-1) cp
+,dbo.getComma(sm,0) sm,dbo.getComma(sp,-1) sp
+,dbo.getComma(em,0) em,dbo.getComma(ep,-1) ep
+,dbo.getComma(am,0) am,dbo.getComma(ap,-1) ap
+,dbo.getComma(qm,0) qm,dbo.getComma(qp,-1) qp
+,dbo.getComma(tm,0) tm,dbo.getComma(tp,-1) tp
+
+,dbo.getComma(ucub,0) ucub,dbo.getComma(uvcc,0) uvcc
+,dbo.getComma(pgen,0) pgen,dbo.getComma(ngen,0) ngen,dbo.getComma(ygen,0) ygen
+
+,dbo.getComma(prm,0) prm,dbo.getComma(prp,-1) prp
+,dbo.getComma(rm,0) rm,dbo.getComma(rp,-1) rp
+,dbo.getComma(pyrm,0) pyrm,dbo.getComma(pyrp,-1) pyrp
+,dbo.getComma(yrm,0) yrm,dbo.getComma(yrp,-1) yrp
+
+,dbo.getComma(pvm,0) pvm,dbo.getComma(pvp,-1) pvp
+,dbo.getComma(vm,0) vm,dbo.getComma(vp,-1) vp
+,dbo.getComma(pyvm,0) pyvm,dbo.getComma(pyvp,-1) pyvp
+,dbo.getComma(yvm,0) yvm,dbo.getComma(yvp,-1) yvp
+
+,dbo.getComma(pccm,0) pccm,dbo.getComma(pccp,-1) pccp
+,dbo.getComma(ccm,0) ccm,dbo.getComma(ccp,-1) ccp
+,dbo.getComma(pyccm,0) pyccm,dbo.getComma(pyccp,-1) pyccp
+,dbo.getComma(yccm,0) yccm,dbo.getComma(yccp,-1) yccp
+
+,dbo.getComma(pqvm,0) pqvm,dbo.getComma(pqvp,-1) pqvp
+,dbo.getComma(qvm,0) qvm,dbo.getComma(qvp,-1) qvp
+,dbo.getComma(pyqvm,0) pyqvm,dbo.getComma(pyqvp,-1) pyqvp
+,dbo.getComma(yqvm,0) yqvm,dbo.getComma(yqvp,-1) yqvp
+
+,dbo.getComma(pbvm,0) pbvm,dbo.getComma(pbvp,-1) pbvp
+,dbo.getComma(bvm,0) bvm,dbo.getComma(bvp,-1) bvp
+,dbo.getComma(pybvm,0) pybvm,dbo.getComma(pybvp,-1) pybvp
+,dbo.getComma(ybvm,0) ybvm,dbo.getComma(ybvp,-1) ybvp
+
+,dbo.getComma(pivm,0) pivm,dbo.getComma(pivp,-1) pivp
+,dbo.getComma(ivm,0) ivm,dbo.getComma(ivp,-1) ivp
+,dbo.getComma(pyivm,0) pyivm,dbo.getComma(pyivp,-1) pyivp
+,dbo.getComma(yivm,0) yivm,dbo.getComma(yivp,-1) yivp
+
+from @tmp
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	drop table #tmp
+END
+;

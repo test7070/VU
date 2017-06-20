@@ -65,7 +65,16 @@ from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
-and a.datea>='2017/06/03'
+and a.datea>='2017/06/03' and b.weight>0
+
+insert #tmp
+select '4','vcft','',a.noa,b.noq,a.datea,case when b.storeno='7000A' then '7000' else b.storeno end,b.product,b.spec,b.size,0
+,-1*b.weight,0,0,0,0
+from vcf a left join vcfs b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and a.datea>='2017/06/03' and b.weight<0
 
 --進
 insert #tmp
@@ -189,7 +198,7 @@ begin
 	end
 	
 	--出貨
-	if(@tablea='vccs')
+	if(@tablea='vccs' or @tablea='vcft')
 	begin
 		set @tweight=@tweight-@weight
 		set @ttotal=@ttotal-round(@weight*@aprice,4)
@@ -287,7 +296,7 @@ begin
 	end
 	
 	--領料--出貨
-	if(@tablea='vccs')
+	if(@tablea='vccs' or @tablea='vcft')
 	begin
 		if(@total=0)
 			set @total=@weight*case when @tweight=0 then 0 else @ttotal/@tweight end
@@ -340,7 +349,7 @@ set rw=isnull(b.weight,0),rm=isnull(b.cost,0),
 from #tmpa a
 outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='rc2s') and datea between @t_bdate and @t_edate)b
 outer apply (select SUM(weight)weight,SUM(cost)cost,SUM(total)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size  and (tablea='vccs') and datea between @t_bdate and @t_edate )c
-outer apply (select SUM(weight)weight,SUM(total)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size  and (tablea='vcf') and datea between @t_bdate and @t_edate )d
+outer apply (select SUM(case when tablea='vcft' then -1 else 1 end*weight)weight,SUM(case when tablea='vcft' then -1 else 1 end*cost)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size  and (tablea='vcf' or tablea='vcft') and datea between @t_bdate and @t_edate )d
 
 --update #tmpa
 --set dw=round(lw-(bw+rw-vw),4)
@@ -394,7 +403,16 @@ from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.mount,0)!=0
 and (isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%')
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
-and a.datea>='2017/06/03'
+and a.datea>='2017/06/03' and b.mount>0
+
+insert #tmp
+select '1','vcft','',a.noa,b.noq,a.datea,b.storeno,b.product,b.spec,b.size
+,-1*b.mount,0,0,0,0,0
+from vcf a left join vcfs b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.mount,0)!=0
+and (isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%')
+and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and a.datea>='2017/06/03' and b.mount<0
 
 --進
 insert #tmp
@@ -486,7 +504,7 @@ begin
 	end
 	
 	--出貨
-	if(@tablea='vccs')
+	if(@tablea='vccs' or @tablea='vcft')
 	begin
 		set @tmount=@tmount-@mount
 		set @ttotal=@ttotal-round(@mount*@aprice,4)
@@ -569,7 +587,7 @@ begin
 	end
 	
 	--領料--出貨
-	if(@tablea='vccs')
+	if(@tablea='vccs' or @tablea='vcft')
 	begin
 		if(@total=0)
 			set @total=@mount*case when @tmount=0 then 0 else @ttotal/@tmount end
@@ -624,7 +642,7 @@ set ro=isnull(b.mount,0),rm=isnull(b.cost,0),
 from #tmpa a
 outer apply (select SUM(mount)mount,SUM(cost)cost from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='rc2s') and datea between @t_bdate and @t_edate)b
 outer apply (select SUM(mount)mount,SUM(cost)cost,SUM(total)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='vccs') and datea between @t_bdate and @t_edate )c
-outer apply (select SUM(mount)mount,SUM(total)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='vcf') and datea between @t_bdate and @t_edate)d
+outer apply (select SUM(case when tablea='vcft' then -1 else 1 end*mount)mount,SUM(case when tablea='vcft' then -1 else 1 end*cost)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='vcf' or tablea='vcft') and datea between @t_bdate and @t_edate)d
 where a.gno>='5'
 
 --update #tmpa
@@ -766,7 +784,7 @@ create table #tmp(
 CREATE INDEX tmpindex on #tmp (product,spec,size,datea,typea,noa,noq)
 CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 
---條
+--調入
 insert #tmp
 select '0','vcf','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end
@@ -780,11 +798,23 @@ from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
 and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
-and a.datea>='2017/06/03'
+and a.datea>='2017/06/03' and case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end>0
+
+--調領
+insert #tmp
+select '1','vcft','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
+,-1*case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end
+,0,0,case when b.storeno='7000A' then '7000' else b.storeno end
+,0,0,'vcf_vu?noa=$noa'
+from vcf a left join vcfs b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
+and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
+and a.datea>='2017/06/03' and case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end<0
 
 --進
 insert #tmp
-select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+select '2','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,case when b.storeno='7000A' then '7000' else b.storeno end,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,'rc2_vu?noa=$noa?'+a.accy
@@ -903,7 +933,7 @@ begin
 	end
 	
 	--出貨
-	if(@tablea='vccs')
+	if(@tablea='vccs' or @tablea='vcft')
 	begin
 		set @tweight=@tweight-@weight
 		set @ttotal=@ttotal-round(@weight*@aprice,4)
@@ -1024,7 +1054,7 @@ begin
 	end
 	
 	--領料--出貨
-	if(@tablea='vccs')
+	if(@tablea='vccs' or @tablea='vcft')
 	begin
 		if(@total=0)
 			set @total=@weight*case when @tweight=0 then 0 else @ttotal/@tweight end
@@ -1085,8 +1115,13 @@ where product=a.product and spec=a.spec and size=a.size and storeno=a.storeno
 and gno='0' and tablea='期初' and tweight!=0)
 
 update #tmpa
+set weight=case when tablea='vcft' then -1 else 1 end*weight
+,money=case when tablea='vcft' then -1 else 1 end*money
+
+update #tmpa
 set tablea=case 
 when tablea='vcf' then '調整' 
+when tablea='vcft' then '調整' 
 when tablea='rc2s' then '進貨' 
 when tablea='vccs' then '出貨'
 else tablea end

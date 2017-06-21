@@ -1135,7 +1135,9 @@
 						if (as[0] != undefined) {
 							t_vccno=as[0].vccno;
 							//vcc.post內容
-							if(!emp(t_vccno)){
+							if(as[0].err.length>0){
+								alert('轉出貨單錯誤，請聯絡工程師!!');
+							}else if(!emp(t_vccno)){
 								$('#txtTranstartno').val(t_vccno);
 								q_func('vcc_post.post.get2vcc11', r_accy + ',' + t_vccno + ',1');
 							}
@@ -1145,14 +1147,23 @@
 						q_func('qtxt.query.get2vcc.21', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime) + ';' + encodeURI('0')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
 						break;
 					case 'qtxt.query.get2vcc.21':
-						q_func('qtxt.query.get2vcc.22', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime) + ';' + encodeURI('1')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
+						var as = _q_appendData("tmp0", "", true, true);
+						if (as[0] != undefined) {
+							if(as[0].err.length>0){
+								alert('轉出貨單錯誤，請聯絡工程師!!');
+							}else{
+								q_func('qtxt.query.get2vcc.22', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI($('#txtNoa').val())+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime) + ';' + encodeURI('1')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
+							}
+						}
 						break;
 					case 'qtxt.query.get2vcc.22':
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
 							t_vccno=as[0].vccno;
 							//vcc.post內容
-							if(!emp(t_vccno)){
+							if(as[0].err.length>0){
+								alert('轉出貨單錯誤，請聯絡工程師!!');
+							}else if(!emp(t_vccno)){
 								$('#txtTranstartno').val(t_vccno);
 								q_func('vcc_post.post.get2vcc23', r_accy + ',' + t_vccno + ',1');
 							}
@@ -1170,6 +1181,9 @@
 						var as = _q_appendData("tmp0", "", true, true);
 						if (as[0] != undefined) {
 							t_vccno=as[0].vccno;
+							if(as[0].err.length>0){
+								alert('轉出貨單錯誤，請聯絡工程師!!');
+							}
 						}
 						break;
 				}

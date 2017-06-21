@@ -740,7 +740,7 @@
 						});*/
                     }
                 }
-                $('#btnVccttoOrde').click(function() {
+                $('#btnGetttoOrde').click(function() {
                 	if(q_cur==1 || q_cur==2){
 	                	/*var t_ordeno="";
 	                	for (var i = 0; i < q_bbtCount; i++) {
@@ -1522,7 +1522,7 @@
 					<td style="width:20px;"> </td>
 					<td style="width:200px;">
 						1.<a id='lblUno_t'> </a>
-						<input id="btnVccttoOrde" type="button" style="font-size: medium; font-weight: bold;" value="2.出貨明細產生"/>
+						<input id="btnGetttoOrde" type="button" style="font-size: medium; font-weight: bold;" value="2.領料明細產生"/>
 					</td>
 					<!--<td style="width:150px;"><a id='lblProductno_t'> </a></td>-->
 					<td style="width:100px;"><a id='lblProduct_t'> </a></td>

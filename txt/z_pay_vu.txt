@@ -665,9 +665,9 @@ insert into @tmp
 	group by a.cardealno,b.comp,a.datea,a.typea,a.custno,c.nick,a.accy
 	union all
 	select
-		'0',a.cardealno,b.comp,'',a.datea,'領',
-		'',a.custno,c.nick,null,sum(a.total),sum(a.tranmoney),0,'getfe'+a.accy
-	from view_get a 
+		'0',a.cardealno,b.comp,'',a.datea,'互進',
+		'',a.custno,c.nick,null,sum(a.total),sum(a.tranmoney),0,'ina_vu'+a.accy
+	from view_ina a 
 	left join cardeal b on (a.cardealno = b.noa)
 	left join cust c on (a.custno = c.noa)
 	where (a.datea between @t_bdate and @t_edate)
@@ -676,25 +676,16 @@ insert into @tmp
 	group by a.cardealno,b.comp,a.datea,a.typea,a.custno,c.nick,a.accy
 	union all
 	select
-		'0',a.cardealno,b.comp,'',a.datea,'調',
-		'','調撥','調撥',null,sum(a.weight),sum(a.tranmoney),0,'cngfe'+a.accy
-	from view_cng a 
+		'0',a.cardealno,b.comp,'',a.datea,'互出',
+		'',a.custno,c.nick,null,sum(a.total),sum(a.tranmoney),0,'get_vu'+a.accy
+	from view_get a 
 	left join cardeal b on (a.cardealno = b.noa)
-	where (a.datea between @t_bdate and @t_edate)
-			 and (a.cardealno between @t_bcardealno and @t_ecardealno)
-			 and (a.tranmoney > 0)
-	group by a.cardealno,b.comp,a.datea,a.accy
-	union all
-	select
-		'0',a.cardealno,b.comp,'',a.datea,'委',
-		'',a.custno,c.nick,null,sum(a.theyout),sum(a.tranmoney),0,'cut'+a.accy
-	from view_cut a 
-	left join cardeal b on (a.cardealno = b.noa)
-	left join tgg c on (a.tggno = c.noa)
+	left join cust c on (a.custno = c.noa)
 	where (a.datea between @t_bdate and @t_edate)
 			 and (a.cardealno between @t_bcardealno and @t_ecardealno)
 			 and (a.tranmoney > 0)
 	group by a.cardealno,b.comp,a.datea,a.typea,a.custno,c.nick,a.accy
+	
 	
 if(@t_showmemos = 'detail')
 begin
@@ -723,9 +714,9 @@ begin
 				 and (a.tranmoney > 0)
 		union all
 		select
-			'1',a.cardealno,b.comp,a.carno+'<br>倉庫：'+d.store,a.datea,'領',
-			a.noa,a.custno,c.nick,a.price,a.total,a.tranmoney,0,'getfe'+a.accy
-		from view_get a 
+			'1',a.cardealno,b.comp,a.carno,a.datea,'互進',
+			a.noa,a.custno,c.nick,a.price,a.total,a.tranmoney,0,'ina_vu'+a.accy
+		from view_ina a 
 		left join cardeal b on (a.cardealno = b.noa)
 		left join cust c on (a.custno = c.noa)
 		left join store d on (a.storeno = d.noa)
@@ -733,24 +724,17 @@ begin
 				 and (a.cardealno between @t_bcardealno and @t_ecardealno)
 				 and (a.tranmoney > 0)
 		union all
-			select
-				'1',a.cardealno,b.comp,a.carno+'<br>調出：'+a.store+'<br>調入：'+a.storein,a.datea,'調',
-				a.noa,'調撥','調撥',a.price,a.weight,a.tranmoney,0,'cngfe'+a.accy
-			from view_cng a 
-			left join cardeal b on (a.cardealno = b.noa)
-			where (a.datea between @t_bdate and @t_edate)
-					 and (a.cardealno between @t_bcardealno and @t_ecardealno)
-					 and (a.tranmoney > 0)
-		union all
 		select
-			'1',a.cardealno,b.comp,a.carno,a.datea,'委',
-			a.noa,a.custno,c.nick,a.price,a.theyout,a.tranmoney,0,'cut'+a.accy
-		from view_cut a 
+			'1',a.cardealno,b.comp,a.carno,a.datea,'互出',
+			a.noa,a.custno,c.nick,a.price,a.total,a.tranmoney,0,'get_vu'+a.accy
+		from view_get a 
 		left join cardeal b on (a.cardealno = b.noa)
-		left join tgg c on (a.tggno = c.noa)
+		left join cust c on (a.custno = c.noa)
+		left join store d on (a.storeno = d.noa)
 		where (a.datea between @t_bdate and @t_edate)
 				 and (a.cardealno between @t_bcardealno and @t_ecardealno)
 				 and (a.tranmoney > 0)
+		
 	insert into @tmp(gno,datea,custno,cardealno,cardeals,weight,tranmoney)
 		select
 			'2',datea,char(255),cardealno,cardeals,sum(weight),sum(tranmoney) 

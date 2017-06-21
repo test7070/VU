@@ -17,8 +17,8 @@
 
 			q_tables = 't';
 			var q_name = "get";
-			var q_readonly = ['txtNoa', 'txtWorker','txtWorker2','txtTranstartno','txtStoreno','txtStore'];
-			var q_readonlys = [];
+			var q_readonly = ['txtNoa', 'txtWorker','txtWorker2','txtTranstartno'];
+			var q_readonlys = ['txtStoreno','txtStore'];
 			var q_readonlyt = [];
 			var bbmNum = [];
 			var bbsNum = [];
@@ -607,6 +607,26 @@
                             }
 						});
 						
+						$('#btnStore7000_'+j).click(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur!=1 && q_cur!=2){
+								//更換倉庫7000
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgget_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#btnStore7000_'+b_seq).val())+';'+encodeURI('7000')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+							}
+						});
+						
+						$('#btnStore7000A_'+j).click(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur!=1 && q_cur!=2){
+								//更換倉庫7000A
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgget_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#btnStore7000A_'+b_seq).val())+';'+encodeURI('7000A')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+							}
+						});
+						
 						$('#txtLengthc_' + j).focusout(function() {
 							sum();
 						});
@@ -614,6 +634,21 @@
 				}
 				_bbsAssign();
 				refreshBbs();
+				
+				if(q_cur==1 || q_cur==2){
+                	for (var i = 0; i < q_bbsCount; i++) {
+						q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+						var as = _q_appendData("store", "", true);
+						var t_storeno='7000A',t_store='智勝-成品';
+						if (as[0] != undefined) {
+							t_store=as[0].store;
+						}
+	                	if(emp($('#txtStoreno_'+i).val())){
+	                		$('#txtStoreno_'+i).val('7000A');
+	                		$('#txtStore_'+i).val(t_store);
+	                	}
+	                }
+                }
 				
 				//1050126
 				$('#btnStoreCopy').click(function() {
@@ -915,6 +950,21 @@
 				$('#txtDatea').focus();
 				//105/12/08空白倉庫預設A
 				//$('#txtStoreno').val('A').change();
+				
+				if(q_cur==1 || q_cur==2){
+                	for (var i = 0; i < q_bbsCount; i++) {
+						q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+						var as = _q_appendData("store", "", true);
+						var t_storeno='7000A',t_store='智勝-成品';
+						if (as[0] != undefined) {
+							t_store=as[0].store;
+						}
+	                	if(emp($('#txtStoreno_'+i).val())){
+	                		$('#txtStoreno_'+i).val('7000A');
+	                		$('#txtStore_'+i).val(t_store);
+	                	}
+	                }
+                }
 			}
 
 			function btnModi() {
@@ -1210,6 +1260,29 @@
                 	}
                 	sum();
 				}
+				
+				if(t_func.indexOf('chgstore_')>-1){
+					var n=t_func.split('_')[1];
+                	var as = _q_appendData("tmp0", "", true, true);
+                	if (as[0] != undefined) {
+						if($('#txtNoa').val()==as[0].noa && $('#txtNoq_'+n).val()==as[0].noq){
+							$('#txtStoreno_'+n).val(as[0].storeno);
+							$('#txtStore_'+n).val(as[0].store);
+							for (var j = 0; j < abbs.length; j++) {
+								if (abbs[j]['noa'] == as[0].noa && abbs[j]['noq'] == as[0].noq) {
+									abbs[j]['storeno'] = as[0].storeno;
+									abbs[j]['store'] = as[0].store;
+	                                break;
+								}
+							}
+						}else{
+							//重刷畫面
+							location.href=location.href;
+						}
+                	}else{
+                		alert('互換出貨單號不存在!!')
+                	}
+				}
 			}
 		</script>
 		<style type="text/css">
@@ -1470,14 +1543,14 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="width: 1260px;">
+		<div class='dbbs' style="width: 1430px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1' >
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:40px;"><input class="btn"  id="btnPlus" type="button" value='＋' style="font-weight: bold;"  /></td>
 					<td align="center" style="width:55px;">項序</td>
-					<td style="width:150px; text-align: center;">品名</td>
+					<td style="width:120px; text-align: center;">品名</td>
 					<td style="width:160px; text-align: center;">類別</td>
-					<td style="width:150px; text-align: center;">材質</td>
+					<td style="width:110px; text-align: center;">材質</td>
 					<td style="width:100px; text-align: center;">號數</td>
 					<td style="width:100px; text-align: center;">米數</td>
 					<td style="width:100px; text-align: center;">廠牌</td>
@@ -1487,8 +1560,8 @@
 					    <BR><a id='lblSot_weight'> </a></td>
 					<td style="width:85px; text-align: center;">單價</td>
 					<td style="width:100px; text-align: center;">小計</td>
-					<td style="width:150px; text-align: center;">出貨倉庫<input class="btn" id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
-					<td style="width:200px; text-align: center;">單項備註</td>
+					<td style="width:100px; text-align: center;">出貨倉庫<input class="btn" id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;display: none;"  /></td>
+					<td style="width:210px; text-align: center;">單項備註</td>
 				</tr>
 				<tr  style='background:#cad3ff;'>
 					<td>
@@ -1519,12 +1592,15 @@
 					<td><input id="txtMweight.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtLengthc.*" type="text" class="txt num c1"/></td>
 					<td>
-						<input id="txtStoreno.*" type="text" class="txt c1" style="width: 65%"/>
-						<input class="btn"  id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;" />
+						<input id="txtStoreno.*" type="text" class="txt c1"/>
+						<input class="btn"  id="btnStoreno.*" type="button" value='.' style=" font-weight: bold; display: none;" />
 						<input id="txtStore.*" type="text" class="txt c1"/>
 						<input id="txtNor.*" type="hidden"/>
 					</td>
-					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
+					<td><input id="txtMemo.*" type="text" class="txt c1"/>
+						<input id="btnStore7000.*" type="button" value="實體入庫"/>
+						<input id="btnStore7000A.*" type="button" value="取消實體入庫"/>
+					</td>
 				</tr>
 			</table>
 		</div>

@@ -1029,3 +1029,27 @@ EXECUTE sp_executesql @cmd
 
 select noa,noq,storeno,store from view_inas where noa=@noa and noq=@noq
 ;
+
+-------------------------------------------------------------------------------------------------------------------------
+chgget_store:--chgget_store
+--變更倉庫代號
+SET QUOTED_IDENTIFIER OFF
+declare @accy nvarchar(MAX) = [1]
+declare @noa nvarchar(MAX) = [2]
+declare @noq nvarchar(MAX) = [3]
+declare @ostoreno nvarchar(MAX) = [4] --原倉庫代號
+declare @cstoreno nvarchar(MAX) = [5] --變動倉庫代號
+declare @userno nvarchar(max) = [6]
+declare @namea nvarchar(max) = [7]
+declare @cmd nvarchar(max) = ''
+
+declare @taccy nvarchar(MAX) = (select top 1 accy from view_gets where noa=@noa and noq=@noq)
+
+set @cmd="update gets"+@taccy+"
+set storeno='"+@cstoreno+"',store=isnull((select  top 1 store from store where noa='"+@cstoreno+"'),'')
+where noa='"+@noa+"' and noq='"+@noq+"'"
+
+EXECUTE sp_executesql @cmd
+
+select noa,noq,storeno,store from view_gets where noa=@noa and noq=@noq
+;

@@ -18,7 +18,7 @@
             q_tables = 's';
             var q_name = "ina";
             var q_readonly = ['txtNoa','txtWorker','txtWorker2','txtTranstartno'];
-            var q_readonlys = [];
+            var q_readonlys = ['txtStoreno','txtStore'];
             var bbmNum = [];
             var bbsNum = [];
             var bbmMask = [['txtTranstart','99:99']];
@@ -29,8 +29,8 @@
             brwNowPage = 0;
             brwKey = 'Datea';
             aPop = new Array(
-	            ['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx']
-	            , ['txtTggno', 'lblTgg', 'tgg', 'noa,comp', 'txtTggno,txtComp', 'tgg_b.aspx']
+	            //['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'],
+	            ['txtTggno', 'lblTgg', 'tgg', 'noa,comp', 'txtTggno,txtComp', 'tgg_b.aspx']
 	           	, ['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx']
             );
             $(document).ready(function() {
@@ -649,7 +649,22 @@
                     }
                 }
                 _bbsAssign();
-                 bbssum();
+                bbssum();
+                
+                if(q_cur==1 || q_cur==2){
+                	for (var i = 0; i < q_bbsCount; i++) {
+						q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+						var as = _q_appendData("store", "", true);
+						var t_storeno='7000A',t_store='智勝-成品';
+						if (as[0] != undefined) {
+							t_store=as[0].store;
+						}
+	                	if(emp($('#txtStoreno_'+i).val())){
+	                		$('#txtStoreno_'+i).val('7000A');
+	                		$('#txtStore_'+i).val(t_store);
+	                	}
+	                }
+                }
                 
                 //1050126
 				$('#btnStoreCopy').click(function() {
@@ -719,6 +734,21 @@
                 $('#txtDatea').focus();
                 //105/12/08空白倉庫預設A
 				//$('#txtStoreno').val('A').change();
+				
+				if(q_cur==1 || q_cur==2){
+                	for (var i = 0; i < q_bbsCount; i++) {
+						q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+						var as = _q_appendData("store", "", true);
+						var t_storeno='7000A',t_store='智勝-成品';
+						if (as[0] != undefined) {
+							t_store=as[0].store;
+						}
+	                	if(emp($('#txtStoreno_'+i).val())){
+	                		$('#txtStoreno_'+i).val('7000A');
+	                		$('#txtStore_'+i).val(t_store);
+	                	}
+	                }
+                }
             }
 
             function btnModi() {
@@ -1370,7 +1400,7 @@
 					    <BR><a id='lblSot_weight'> </a></td>
 					<td style="width:80px; text-align: center;">單價</td>
 					<td style="width:100px; text-align: center;">小計</td>
-					<td style="width:100px; text-align: center;">進貨倉庫<input class="btn" id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
+					<td style="width:100px; text-align: center;">進貨倉庫<input class="btn" id="btnStoreCopy" type="button" value='≡' style="font-weight: bold;display: none;"  /></td>
 					<td style="text-align: center;">單項備註</td>
 				</tr>
 				<tr  style='background:#cad3ff;'>
@@ -1403,8 +1433,8 @@
 					<td><input id="txtMweight.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtLengthc.*" type="text" class="txt num c1"/></td>
 					<td>
-						<input id="txtStoreno.*" type="text" class="txt c1" style="width: 65%"/>
-						<input class="btn"  id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;" />
+						<input id="txtStoreno.*" type="text" class="txt c1"/>
+						<input class="btn"  id="btnStoreno.*" type="button" value='.' style=" font-weight: bold;display: none;" />
 						<input id="txtStore.*" type="text" class="txt c1"/>
 					</td>
 					<td>

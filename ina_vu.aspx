@@ -116,7 +116,7 @@
 				
 				$('#btnUnoprint').click(function() {
 					if(!emp($('#txtNoa').val()) && !emp($('#combMechno').val())){
-						q_func( 'barvu.genBar','ina,'+$('#txtNoa').val()+','+$('#combMechno').val())
+						q_func( 'barvu.genBar','ina,'+$('#txtNoa').val()+','+$('#combMechno').val()+',')
 					}else{
 						alert('請選擇列印機台!!')
 					}
@@ -629,7 +629,7 @@
 							b_seq = t_IdSeq;
 							if(q_cur!=1 && q_cur!=2){
 								//更換倉庫7000
-								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgina_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#btnStore7000_'+b_seq).val())+';'+encodeURI('7000')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgina_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#txtStoreno_'+b_seq).val())+';'+encodeURI('7000')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
 							}
 						});
 						
@@ -639,7 +639,7 @@
 							b_seq = t_IdSeq;
 							if(q_cur!=1 && q_cur!=2){
 								//更換倉庫7000A
-								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgina_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#btnStore7000A_'+b_seq).val())+';'+encodeURI('7000A')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgina_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#txtStoreno_'+b_seq).val())+';'+encodeURI('7000A')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
 							}
 						});
 						
@@ -650,6 +650,7 @@
                 }
                 _bbsAssign();
                 bbssum();
+                refreshBbs();
                 
                 if(q_cur==1 || q_cur==2){
                 	for (var i = 0; i < q_bbsCount; i++) {
@@ -835,27 +836,38 @@
 
             function refresh(recno) {
                 _refresh(recno);
+                refreshBbs();
             }
 
             function readonly(t_para, empty) {
                 _readonly(t_para, empty);
-                if(t_para){
-                	$('#btnUnoprint').removeAttr('disabled');
-                	for (var i = 0; i < q_bbsCount; i++) {
-                		$('#combProduct_'+i).attr('disabled', 'disabled');
-                		$('#combUcolor_'+i).attr('disabled', 'disabled');
-                		$('#combSpec_'+i).attr('disabled', 'disabled');
-                		$('#combClass_'+i).attr('disabled', 'disabled');
-                	}
-                }else{
-                	$('#btnUnoprint').attr('disabled', 'disabled');
+                refreshBbs();
+            }
+            
+            function refreshBbs() {
+            	if(q_cur==1 || q_cur==2){
+	            	$('#combAccount').removeAttr('disabled');
                 	for (var i = 0; i < q_bbsCount; i++) {
                 		$('#combProduct_'+i).removeAttr('disabled');
                 		$('#combUcolor_'+i).removeAttr('disabled');
                 		$('#combSpec_'+i).removeAttr('disabled');
                 		$('#combClass_'+i).removeAttr('disabled');
+                		
+                		$('#btnStore7000_'+i).attr('disabled', 'disabled');
+                		$('#btnStore7000A_'+i).attr('disabled', 'disabled');
                 	}
-                }
+            	}else{
+            		$('#combAccount').attr('disabled', 'disabled');
+                	for (var i = 0; i < q_bbsCount; i++) {
+                		$('#combProduct_'+i).attr('disabled', 'disabled');
+                		$('#combUcolor_'+i).attr('disabled', 'disabled');
+                		$('#combSpec_'+i).attr('disabled', 'disabled');
+                		$('#combClass_'+i).attr('disabled', 'disabled');
+                		
+                		$('#btnStore7000_'+i).removeAttr('disabled');
+                		$('#btnStore7000A_'+i).removeAttr('disabled');
+                	}
+            	}
             }
 
             function btnMinus(id) {

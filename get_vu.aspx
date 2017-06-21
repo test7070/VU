@@ -613,7 +613,7 @@
 							b_seq = t_IdSeq;
 							if(q_cur!=1 && q_cur!=2){
 								//更換倉庫7000
-								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgget_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#btnStore7000_'+b_seq).val())+';'+encodeURI('7000')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgget_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#txtStoreno_'+b_seq).val())+';'+encodeURI('7000')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
 							}
 						});
 						
@@ -623,7 +623,7 @@
 							b_seq = t_IdSeq;
 							if(q_cur!=1 && q_cur!=2){
 								//更換倉庫7000A
-								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgget_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#btnStore7000A_'+b_seq).val())+';'+encodeURI('7000A')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgget_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#txtStoreno_'+b_seq).val())+';'+encodeURI('7000A')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
 							}
 						});
 						
@@ -703,6 +703,28 @@
 	            			$('#txtStore_'+i).removeAttr('disabled');
 	            		}
 	            	}
+	            	
+	            	$('#combAccount').removeAttr('disabled');
+                	for (var i = 0; i < q_bbsCount; i++) {
+                		$('#combProduct_'+i).removeAttr('disabled');
+                		$('#combUcolor_'+i).removeAttr('disabled');
+                		$('#combSpec_'+i).removeAttr('disabled');
+                		$('#combClass_'+i).removeAttr('disabled');
+                		
+                		$('#btnStore7000_'+i).attr('disabled', 'disabled');
+                		$('#btnStore7000A_'+i).attr('disabled', 'disabled');
+                	}
+            	}else{
+            		$('#combAccount').attr('disabled', 'disabled');
+                	for (var i = 0; i < q_bbsCount; i++) {
+                		$('#combProduct_'+i).attr('disabled', 'disabled');
+                		$('#combUcolor_'+i).attr('disabled', 'disabled');
+                		$('#combSpec_'+i).attr('disabled', 'disabled');
+                		$('#combClass_'+i).attr('disabled', 'disabled');
+                		
+                		$('#btnStore7000_'+i).removeAttr('disabled');
+                		$('#btnStore7000A_'+i).removeAttr('disabled');
+                	}
             	}
             }
             
@@ -971,6 +993,34 @@
 				t_ordhno=$('#txtIdno').val();
 				if (emp($('#txtNoa').val()))
 					return;
+					
+				q_gt('view_get', "where=^^noa='"+$('#txtNoa').val()+"'^^ ", 0, 0, 0, "gettranstartno",r_accy,1);
+				var as = _q_appendData("view_get", "", true, true);
+				if (as[0] != undefined) {
+					$('#txtTranstartno').val(as[0].transtartno);
+					t_vccno=as[0].transtartno;
+				}
+				
+				//已產生出貨單 檢查是否已收款
+				if(t_vccno.length>0){
+					var t_where = " where=^^ vccno='" + t_vccno + "'^^";
+					q_gt('umms', t_where, 0, 0, 0, 'btnDele', r_accy,1);
+					
+					var as = _q_appendData("umms", "", true);
+					if (as[0] != undefined) {
+						var z_msg = "", t_paysale = 0;
+						for (var i = 0; i < as.length; i++) {
+							t_paysale = parseFloat(as[i].paysale.length == 0 ? "0" : as[i].paysale);
+							if (t_paysale != 0)
+								z_msg += String.fromCharCode(13) + '收款單號【' + as[i].noa + '】 ' + FormatNumber(t_paysale);
+						}
+						if (z_msg.length > 0) {
+							alert('已沖帳:' + z_msg +' 禁止修改!!');
+							return;
+						}
+					}
+				}
+					
 				_btnModi();
 			}
 
@@ -997,6 +1047,9 @@
 					t_ordhno='#non';
 					
 					if(t_deleno != '#non' && t_vccno!=''){
+						Lock(1, {
+							opacity : 0
+						});
 						q_func('vcc_post.post.get2vcc30', r_accy + ',' + t_vccno + ',0');
 					}
 				}
@@ -1067,23 +1120,6 @@
 
 			function readonly(t_para, empty) {
 				_readonly(t_para, empty);
-				if(t_para){
-                	$('#combAccount').attr('disabled', 'disabled');
-                	for (var i = 0; i < q_bbsCount; i++) {
-                		$('#combProduct_'+i).attr('disabled', 'disabled');
-                		$('#combUcolor_'+i).attr('disabled', 'disabled');
-                		$('#combSpec_'+i).attr('disabled', 'disabled');
-                		$('#combClass_'+i).attr('disabled', 'disabled');
-                	}
-                }else{
-                	$('#combAccount').removeAttr('disabled');
-                	for (var i = 0; i < q_bbsCount; i++) {
-                		$('#combProduct_'+i).removeAttr('disabled');
-                		$('#combUcolor_'+i).removeAttr('disabled');
-                		$('#combSpec_'+i).removeAttr('disabled');
-                		$('#combClass_'+i).removeAttr('disabled');
-                	}
-                }
                 refreshBbs();
 			}
 
@@ -1141,6 +1177,26 @@
 				if (as[0] != undefined) {
 					$('#txtTranstartno').val(as[0].transtartno);
 					t_vccno=as[0].transtartno;
+				}
+				
+				//已產生出貨單 檢查是否已收款
+				if(t_vccno.length>0){
+					var t_where = " where=^^ vccno='" + t_vccno + "'^^";
+					q_gt('umms', t_where, 0, 0, 0, 'btnDele', r_accy,1);
+					
+					var as = _q_appendData("umms", "", true);
+					if (as[0] != undefined) {
+						var z_msg = "", t_paysale = 0;
+						for (var i = 0; i < as.length; i++) {
+							t_paysale = parseFloat(as[i].paysale.length == 0 ? "0" : as[i].paysale);
+							if (t_paysale != 0)
+								z_msg += String.fromCharCode(13) + '收款單號【' + as[i].noa + '】 ' + FormatNumber(t_paysale);
+						}
+						if (z_msg.length > 0) {
+							alert('已沖帳:' + z_msg +' 禁止刪除!!');
+							return;
+						}
+					}
 				}
 				_btnDele();
 			}
@@ -1220,12 +1276,13 @@
 						}
 						break;
 					case 'vcc_post.post.get2vcc30':
-						if(t_deleno != '#non'){							
+						if(t_deleno != '#non'){
 							var today = new Date();
 							var ttime = padL(today.getHours(), '0', 2)+':'+padL(today.getMinutes(),'0',2);
 							q_func('qtxt.query.get2vcc.31', 'get.txt,get2vcc_vu,' + encodeURI(r_accy) + ';' + encodeURI(t_deleno)+ ';' + encodeURI(q_getPara('sys.key_vcc'))+ ';' + encodeURI(q_date())+ ';' + encodeURI(ttime)+ ';' + encodeURI('2')+ ';' + encodeURI(r_userno)+ ';' + encodeURI(r_name)+ ';' + encodeURI(t_vccno));
 						}
 						t_deleno='#non';
+						Unlock(1);
 						break;
 					case 'qtxt.query.get2vcc.31':
 						var as = _q_appendData("tmp0", "", true, true);
@@ -1598,8 +1655,8 @@
 						<input id="txtNor.*" type="hidden"/>
 					</td>
 					<td><input id="txtMemo.*" type="text" class="txt c1"/>
-						<input id="btnStore7000.*" type="button" value="實體入庫"/>
-						<input id="btnStore7000A.*" type="button" value="取消實體入庫"/>
+						<input id="btnStore7000.*" type="button" value="7000出貨"/>
+						<input id="btnStore7000A.*" type="button" value="7000A出貨"/>
 					</td>
 				</tr>
 			</table>

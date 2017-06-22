@@ -115,7 +115,7 @@
 					var t_where1="1=0^^";//cont
 					var t_where2="where[1]=^^1=0^^";//ordhs
 					var t_where3="where[2]=^^1=0^^";//quat
-					var t_where4="where[3]=^^tggno='"+$('#txtCustno').val()+"' and f9>0 and isnull(enda,0)=0 order by datea,noa ^^";//ordbht
+					var t_where4="where[3]=^^custno='"+$('#txtCustno').val()+"' and f9>0 and isnull(enda,0)=0 order by datea,noa ^^";//ordbht
 					
 					q_box("cont_sf_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where1+t_where2+t_where3+t_where4, 'ordh_b', "600px", "700px", '互換合約');					
 				});
@@ -255,7 +255,7 @@
 							}else if(dec(as[0].f9)<=0){
 								alert($('#txtIdno').val()+'互換合約已互換出貨完畢!');
 							}else if(!emp($('#txtCustno').val()) && $('#txtCustno').val()!=as[0].custno){
-								alert('互換合約廠商與互換出貨廠商不同!!');
+								alert('互換合約客戶與互換出貨客戶不同!!');
 							}else{
 								$('#txtAddr').val(as[0].addr);
 								if(as[0].atax=="true"){
@@ -264,7 +264,7 @@
 									$('#chkAtax').prop('checked',false);
 								}
 								$('#txtAddr').val(as[0].addr);
-								if(emp($('#txtTggno').val())){
+								if(emp($('#txtCustno').val())){
 									$('#txtCustno').val(as[0].custno);
 									$('#txtComp').val(as[0].cust);
 								}
@@ -280,7 +280,7 @@
 						if (as[0] != undefined) {
 							ordh_weight=dec(as[0].f7);
 							if(as[0].custno!=$('#txtCustno').val()){
-								alert('互換合約廠商與互換出貨廠商不同!!');
+								alert('互換合約客戶與互換出貨客戶不同!!');
 							}else{
 								var t_where = "where=^^ idno='"+$('#txtIdno').val()+"' ^^"; //and noa!='"+$('#txtNoa').val()+"'
 								q_gt('view_get', t_where, 0, 0, 0, "ordh_view_get", r_accy);	

@@ -663,7 +663,7 @@ insert into @result
 select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,b.noq,a.invono, a.datea
 		,a.tggno,isnull(e.comp,''),isnull(e.addr_invo,''),a.addr2,isnull(e.tel,'')
 		,c.datea,c.ordeweight,d.price,b.productno
-		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,''), b.unit 
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+isnull(convert(nvarchar,b.lengthb),'')+'M '+isnull(b.ucolor,'')+case when len(b.memo)!=0 then '('+b.memo+')' else '' end, b.unit 
 		,(case when a.typea='2' then -1 else 1 end)*b.mount,(case when a.typea='2' then -1 else 1 end)*b.weight 
 		,b.price ,(case when a.typea='2' then -1 else 1 end)*b.total
 		,(case when a.typea='2' then -1 else 1 end)*round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)

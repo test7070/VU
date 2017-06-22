@@ -22,7 +22,7 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
 -------------------------------------------------- 
-set @qhref_acomp='_sf'
+set @qhref_acomp='_vu'
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -286,7 +286,7 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4
 declare @total_decimal int = 4 
 -------------------------------------------------- 
-set @qhref_acomp='_sf'
+set @qhref_acomp='_vu'
 --*********************************************************************************** 
 
 declare @result table( 
@@ -530,7 +530,7 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
 -------------------------------------------------- 
-set @qhref_acomp='_sf'
+set @qhref_acomp='_vu'
 ------------------------------------------------- 
 
 declare @result table( 
@@ -745,7 +745,7 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
 -------------------------------------------------- 
-set @qhref_acomp='_sf' 
+set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 
 declare @result table( 
@@ -969,7 +969,7 @@ declare @weight_decimal int = 4
 declare @price_decimal int = 4 
 declare @total_decimal int = 4 
 -------------------------------------------------- 
-set @qhref_acomp='_sf' 
+set @qhref_acomp='_vu' 
 ------------------------------------------------- 
 declare @result table( 
 	gno nvarchar(1), 
@@ -1014,7 +1014,7 @@ group by a.noa
 insert @result
 select '0',a.noa,b.addr,f.noq,b.datea,b.custno,isnull(d.comp,'')
 		,e.noa,e.datea,e.weight,e.f10,
-		f.product+' '+isnull(f.size,'')+' '+isnull(f.spec,'')+' '+case when (isnull(convert(nvarchar,f.lengthb),'')='' or isnull(convert(nvarchar,f.lengthb),'') = '0') then '' else isnull(convert(nvarchar,f.lengthb),'')+'M ' end + isnull(f.ucolor,'')+' '+isnull(f.class,'')
+		f.product+' '+isnull(f.size,'')+' '+isnull(f.spec,'')+' '+case when (isnull(convert(nvarchar,f.lengthb),'')='' or isnull(convert(nvarchar,f.lengthb),'') = '0') then '' else isnull(convert(nvarchar,f.lengthb),'')+'M ' end + isnull(f.ucolor,'')+' '+isnull(f.class,'')+case when len(b.memo)!=0 then '('+b.memo+')' else '' end
 		,f.unit,f.mount,f.weight,f.mweight,f.lengthc, 0 pcount,'get'+@qhref_acomp+'?noa=$noa?'+b.accy 
 		,round((b.tax*(case when b.money=0 then 0 else (f.lengthc/b.money) end)),0),f.ucolor,f.spec,f.size,f.lengthb
 		,round((b.tax*(case when b.money=0 then 0 else (f.lengthc/b.money) end)),0)+f.lengthc

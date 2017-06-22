@@ -31,7 +31,7 @@ set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
 --------------------------------------------------------------------------------------------------------------  
-set @qhref_acomp='_sf' 
+set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
 declare @result table( 
 	gno nvarchar(1), 
@@ -151,7 +151,7 @@ set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
 -------------------------------------------------------------------------------------------------------------- 
-set @qhref_acomp='_sf' 
+set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
 declare @result table( 
 	gno nvarchar(1), 
@@ -271,7 +271,7 @@ set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
 -----------------------------------------------------------
-set @qhref_acomp='_sf' 
+set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
 declare @result table( 
 	gno nvarchar(1), 
@@ -394,7 +394,7 @@ set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
 --------------------------------------------------------------------------------------------------------
-set @qhref_acomp='_sf' 
+set @qhref_acomp='_vu' 
 --------------------------------------------------------------------------------------------------------------- 
 declare @result table( 
 	gno nvarchar(1), 
@@ -564,7 +564,7 @@ declare @t_btggno nvarchar(20)
 declare @t_etggno nvarchar(20) 
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20) 
-declare @t_product nvarchar(50) 
+declare @t_product nvarchar(max)
 declare @t_qno nvarchar(max)
 declare @qhref_acomp nvarchar(10) ='' 
 --********************************************************************* 
@@ -573,11 +573,12 @@ set @t_bdate = case when '#non'=[4] then '' else [4] end
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
 set @t_btggno = case when '#non'=[6] then '' else [6] end 
 set @t_etggno = case when '#non'=[7] then char(255) else [7]  end
+set @t_product = case when '#non'=[8] then '' else [8] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
 -----------------------------------------------------------
-set @qhref_acomp='_sf' 
+set @qhref_acomp='_vu' 
 
 declare @result table( 
 	gno nvarchar(10), 
@@ -608,22 +609,22 @@ declare @result table(
 	page int
 ) 
 insert into @result 
-select '0' gno,a.noa,b.noq,a.datea
-		,a.tggno,isnull(e.comp,''),c.datea,c.weight,d.price
-		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when b.lengthb=0 then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end+isnull(b.ucolor,''), b.unit 
-		,b.mount,b.weight,b.mweight ,b.lengthc
-		,round((a.tax*(case when a.money=0 then 0 else (b.lengthc/a.money) end)),0)
-		,(round((a.tax*(case when a.money=0 then 0 else (b.lengthc/a.money) end)),0)+b.lengthc)
-		,0 pcount,'ina'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb,a.ordeno,0,0
-from view_inas b left join view_ina a on a.noa = b.noa
-left join ordh c on a.ordeno=c.noa
-outer apply (select  top 1 * from ordhs where noa=c.noa order by noq desc) d 
-left join tgg e on a.tggno = e.noa
+select '0' gno,a.noa,b.noq,a.datea 
+,a.tggno,isnull(e.comp,''),c.datea,c.weight,d.price 
+,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when b.lengthb=0 then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end+isnull(b.ucolor,'')+case when len(b.memo)!=0 then '('+b.memo+')' else '' end
+, b.unit ,b.mount,b.weight,b.mweight ,b.lengthc 
+,round((a.tax*(case when a.money=0 then 0 else (b.lengthc/a.money) end)),0) 
+,(round((a.tax*(case when a.money=0 then 0 else (b.lengthc/a.money) end)),0)+b.lengthc) 
+,0 pcount,'ina'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb,a.ordeno,0,0 
+from view_inas b left join view_ina a on a.noa = b.noa 
+left join ordh c on a.ordeno=c.noa 
+outer apply (select top 1 * from ordhs where noa=c.noa order by noq desc) d 
+left join tgg e on a.tggno = e.noa 
 where (a.datea between @t_bdate and @t_edate) 
 and (a.tggno between @t_btggno and @t_etggno) 
 and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) 
-and (len(@t_product)=0 or b.product=@t_product) 
-and (len(@t_qno)=0 or a.ordeno = @t_qno)
+and (len(@t_product)=0 or b.product=@t_product)
+and (len(@t_qno)=0 or a.ordeno = @t_qno) 
 order by a.tggno,a.datea,a.noa 
 
 if((select count(*) from @result)>0)

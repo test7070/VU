@@ -781,11 +781,12 @@ from view_cubs a where noa=@noa and (mount>=0 or weight>=0)
 
 --更新剩餘數量和重量
 update a
-set mount=isnull(b.mount,0)-ISNULL(c.mount,0)
-,weight=isnull(b.weight,0)-ISNULL(c.weight,0)
+set mount=isnull(b.mount,0)-ISNULL(c.mount,0)-ISNULL(d.mount,0)
+,weight=isnull(b.weight,0)-ISNULL(c.weight,0)-ISNULL(d.weight,0)
 from #bbs a
 outer apply (select SUM(mount)mount,SUM(weight)weight from view_cubs where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)b
 outer apply (select SUM(mount)mount,SUM(weight)weight from view_vcct where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)c
+outer apply (select SUM(mount)mount,SUM(weight)weight from view_gett where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)d
 
 --刪除已領料完畢的批號
 delete #bbs where mount<=0 and weight<=0 
@@ -1000,10 +1001,11 @@ cubdate:--cubdate --讀取批號出貨領料資訊
 declare @noa nvarchar(MAX) = [1]
 
 select a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class,a.mount,a.weight,a.hmount
-,b.mount bmount ,b.weight bweight,isnull(c.mount,0) vmount,isnull(c.weight,0) vweight
+,b.mount bmount ,b.weight bweight,isnull(c.mount,0)+isnull(d.mount,0) vmount,isnull(c.weight,0)+isnull(d.weight,0) vweight
 from view_cubs a 
 outer apply (select SUM(mount)mount,SUM(weight)weight from view_cubs where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)b
 outer apply (select SUM(mount)mount,SUM(weight)weight from view_vcct where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)c
+outer apply (select SUM(mount)mount,SUM(weight)weight from view_gett where uno=a.uno and product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class)d
 where noa=@noa
 ;
 -------------------------------------------------------------------------------------------------------------------------

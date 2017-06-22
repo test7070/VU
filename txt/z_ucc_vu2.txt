@@ -57,46 +57,46 @@ create table #tmp(
 
 --調整
 insert #tmp
-select '1','vcf','',a.noa,b.noq,a.datea,case when b.storeno='7000A' then '7000' else b.storeno end,b.product,b.spec,b.size,0
+select '1','vcf','',a.noa,b.noq,a.datea,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end,b.product,b.spec,b.size,0
 ,b.weight,case when b.weight=0 then 0 else b.money/b.weight end
 ,b.money,case when b.weight=0 then 0 else b.money/b.weight end
 ,b.money
 from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03' and b.weight>0
 
 insert #tmp
-select '4','vcft','',a.noa,b.noq,a.datea,case when b.storeno='7000A' then '7000' else b.storeno end,b.product,b.spec,b.size,0
+select '4','vcft','',a.noa,b.noq,a.datea,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end,b.product,b.spec,b.size,0
 ,-1*b.weight,0,0,0,0
 from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03' and b.weight<0
 
 --進
 insert #tmp
-select '1','rc2s',a.accy,a.noa,b.noq,a.datea,case when b.storeno='7000A' then '7000' else b.storeno end,b.product,b.spec,b.size,0
+select '1','rc2s',a.accy,a.noa,b.noq,a.datea,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end,b.product,b.spec,b.size,0
 ,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03'
 
 --銷
 insert #tmp
-select '5','vccs',a.accy,a.noa,b.noq,a.datea,case when b.storeno='7000A' then '7000' else b.storeno end,b.product,b.spec,b.size,0
+select '5','vccs',a.accy,a.noa,b.noq,a.datea,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end,b.product,b.spec,b.size,0
 ,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,0,0
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03'
 
 CREATE INDEX tmpindex0 on #tmp (datea,tablea,typea,noa,noq,storeno,product,spec,size)
@@ -402,7 +402,7 @@ select '1','vcf','',a.noa,b.noq,a.datea,b.storeno,b.product,b.spec,b.size
 from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.mount,0)!=0
 and (isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%')
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03' and b.mount>0
 
 insert #tmp
@@ -411,7 +411,7 @@ select '1','vcft','',a.noa,b.noq,a.datea,b.storeno,b.product,b.spec,b.size
 from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.mount,0)!=0
 and (isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%')
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03' and b.mount<0
 
 --進
@@ -423,7 +423,7 @@ select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.storeno,b.product,b.spec,b.size
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.mount,0)!=0
 and (isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%')
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03'
 
 --銷
@@ -434,7 +434,7 @@ select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.storeno,b.product,b.spec,b.size
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.mount,0)!=0
 and (isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%')
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and a.datea>='2017/06/03'
 --------------------------------------------------------------------
 delete #tmpb
@@ -790,13 +790,13 @@ select '0','vcf','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end
 ,case when case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end=0 then 0 else 
 (b.money/case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end) end
-,b.money,case when b.storeno='7000A' then '7000' else b.storeno end
+,b.money,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end
 ,case when case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end=0 then 0 else 
 (b.money/case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end) end
 ,b.money,'vcf_vu?noa=$noa'
 from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and a.datea>='2017/06/03' and case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end>0
 
@@ -804,11 +804,11 @@ and a.datea>='2017/06/03' and case when isnull(b.product,'') like '%續接器%' 
 insert #tmp
 select '1','vcft','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,-1*case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end
-,0,0,case when b.storeno='7000A' then '7000' else b.storeno end
+,0,0,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end
 ,0,0,'vcf_vu?noa=$noa'
 from vcf a left join vcfs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and a.datea>='2017/06/03' and case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end<0
 
@@ -816,11 +816,11 @@ and a.datea>='2017/06/03' and case when isnull(b.product,'') like '%續接器%' 
 insert #tmp
 select '2','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end,b.price
-,case when a.typea='2' then -1 else 1 end*b.total,case when b.storeno='7000A' then '7000' else b.storeno end,b.price
+,case when a.typea='2' then -1 else 1 end*b.total,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,'rc2_vu?noa=$noa?'+a.accy
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and a.datea>='2017/06/03'
 
@@ -828,10 +828,10 @@ and a.datea>='2017/06/03'
 insert #tmp
 select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end,b.price
-,case when a.typea='2' then -1 else 1 end*b.total,case when b.storeno='7000A' then '7000' else b.storeno end,0,0,'vcc_vu?noa=$noa?'+a.accy
+,case when a.typea='2' then -1 else 1 end*b.total,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end,0,0,'vcc_vu?noa=$noa?'+a.accy
 from view_vcc a left join view_vccs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
-and case when b.storeno='7000A' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
+and case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end between @t_bstoreno and @t_estoreno
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and a.datea>='2017/06/03'
 
@@ -1084,7 +1084,7 @@ begin
 		update #tmpa
 		set tweight=@tweight,tmoney=@ttotal
 		where product=@product and spec=@spec and size=@size 
-		and storeno=case when @storeno='7000A' then '7000' else @storeno end
+		and storeno=case when @storeno='7000A' or @storeno='7000B' then '7000' else @storeno end
 		and tablea='期初'
 	end
 	else

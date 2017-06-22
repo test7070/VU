@@ -467,7 +467,8 @@ and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnu
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) 
+and isnull(b.storeno,'') !='7000' and isnull(b.storeno,'') !='7000A'
 and isnull(b.productno,'')=''
 --group by a.datea,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno
 
@@ -488,7 +489,8 @@ and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) 
+and isnull(b.storeno,'') !='7000' and isnull(b.storeno,'') !='7000A'
 and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -501,7 +503,8 @@ and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000') --106/06/21 開放7000A 要看臨時庫存用 
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) 
+and isnull(b.storeno,'') !='7000' and isnull(b.storeno,'') !='7000A' 
 and isnull(b.productno,'')=''
 		
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -515,7 +518,8 @@ and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) 
+and isnull(b.storeno,'') !='7000' and isnull(b.storeno,'') !='7000A'
 and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -528,7 +532,8 @@ and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) 
+and isnull(b.storeno,'') !='7000' and isnull(b.storeno,'') !='7000A'
 and isnull(b.productno,'')=''
 
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -541,7 +546,8 @@ and a.datea>=isnull(c.datea,'')
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and ((@t_blengthb='' and  @t_elengthb=char(255))  or isnull(b.lengthb,0) between cast(@t_blengthb as float) and cast(@t_elengthb as float))
 and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
-and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) and isnull(b.storeno,'') not in ('7000','7000A')
+and (isnull(b.storeno,'') between @t_bstoreno and @t_estoreno) 
+and isnull(b.storeno,'') !='7000' and isnull(b.storeno,'') !='7000A'
 and isnull(b.productno,'')=''
 
 declare @tablea nvarchar(100)

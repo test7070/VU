@@ -449,14 +449,14 @@
                 check_ordh=false;
                 
                 for (var i = 0; i < q_bbsCount; i++) {
-					q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+					q_gt('store', "where=^^noa='7000B'^^", 0, 0, 0, "getstoreno",r_accy,1);
 					var as = _q_appendData("store", "", true);
-					var t_storeno='7000A',t_store='智勝-成品';
+					var t_storeno='7000B',t_store='智勝-成品';
 					if (as[0] != undefined) {
 						t_store=as[0].store;
 					}
                 	if(emp($('#txtStoreno_'+i).val())){
-                		$('#txtStoreno_'+i).val('7000A');
+                		$('#txtStoreno_'+i).val('7000B');
                 		$('#txtStore_'+i).val(t_store);
                 	}
                 }
@@ -642,13 +642,13 @@
 							}
 						});
 						
-						$('#btnStore7000A_'+j).click(function() {
+						$('#btnStore7000B_'+j).click(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							if(q_cur!=1 && q_cur!=2){
-								//更換倉庫7000A
-								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgina_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#txtStoreno_'+b_seq).val())+';'+encodeURI('7000A')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
+								//更換倉庫7000B
+								q_func('qtxt.query.chgstore_'+b_seq, 'cuc_vu.txt,chgina_store,'+encodeURI(r_accy)+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'+encodeURI($('#txtStoreno_'+b_seq).val())+';'+encodeURI('7000B')+';'+encodeURI(r_userno)+';'+encodeURI(r_name));
 							}
 						});
 						
@@ -663,14 +663,14 @@
                 
                 if(q_cur==1 || q_cur==2){
                 	for (var i = 0; i < q_bbsCount; i++) {
-						q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+						q_gt('store', "where=^^noa='7000B'^^", 0, 0, 0, "getstoreno",r_accy,1);
 						var as = _q_appendData("store", "", true);
-						var t_storeno='7000A',t_store='智勝-成品';
+						var t_storeno='7000B',t_store='智勝-成品';
 						if (as[0] != undefined) {
 							t_store=as[0].store;
 						}
 	                	if(emp($('#txtStoreno_'+i).val())){
-	                		$('#txtStoreno_'+i).val('7000A');
+	                		$('#txtStoreno_'+i).val('7000B');
 	                		$('#txtStore_'+i).val(t_store);
 	                	}
 	                }
@@ -747,14 +747,14 @@
 				
 				if(q_cur==1 || q_cur==2){
                 	for (var i = 0; i < q_bbsCount; i++) {
-						q_gt('store', "where=^^noa='7000A'^^", 0, 0, 0, "getstoreno",r_accy,1);
+						q_gt('store', "where=^^noa='7000B'^^", 0, 0, 0, "getstoreno",r_accy,1);
 						var as = _q_appendData("store", "", true);
-						var t_storeno='7000A',t_store='智勝-成品';
+						var t_storeno='7000B',t_store='智勝-成品';
 						if (as[0] != undefined) {
 							t_store=as[0].store;
 						}
 	                	if(emp($('#txtStoreno_'+i).val())){
-	                		$('#txtStoreno_'+i).val('7000A');
+	                		$('#txtStoreno_'+i).val('7000B');
 	                		$('#txtStore_'+i).val(t_store);
 	                	}
 	                }
@@ -781,7 +781,7 @@
                 _btnOk(key_value, bbmKey[0], bbsKey[1], '', 2);
             }
             
-            var t_deleno='',t_rc2no='';
+            var t_deleno='',t_rc2no='',t_nordhno='';
             function q_stPost() {
 				t_ordhno=t_ordhno.length==0?'#non':t_ordhno;
 				t_deleno=t_deleno.length==0?'#non':t_deleno;
@@ -870,7 +870,7 @@
                 		$('#combClass_'+i).removeAttr('disabled');
                 		
                 		$('#btnStore7000_'+i).attr('disabled', 'disabled');
-                		$('#btnStore7000A_'+i).attr('disabled', 'disabled');
+                		$('#btnStore7000B_'+i).attr('disabled', 'disabled');
                 	}
             	}else{
             		$('#combAccount').attr('disabled', 'disabled');
@@ -881,7 +881,7 @@
                 		$('#combClass_'+i).attr('disabled', 'disabled');
                 		
                 		$('#btnStore7000_'+i).removeAttr('disabled');
-                		$('#btnStore7000A_'+i).removeAttr('disabled');
+                		$('#btnStore7000B_'+i).removeAttr('disabled');
                 	}
             	}
             }
@@ -1472,7 +1472,7 @@
 						<input id="btnGenuno.*" type="button" value="入庫" style="display: none;"/>
 						<input id="btnDeleuno.*" type="button" value="刪除" style="display: none;"/>
 						<input id="btnStore7000.*" type="button" value="實體入庫"/>
-						<input id="btnStore7000A.*" type="button" value="取消實體入庫"/>
+						<input id="btnStore7000B.*" type="button" value="取消實體入庫"/>
 					</td>
 				</tr>
 			</table>

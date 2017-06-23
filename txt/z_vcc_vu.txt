@@ -1225,7 +1225,8 @@ update a set gno='4'
 from @result a outer apply (select MAX(page)xpage from @result where custno=a.custno )b
 where gno='3' and a.page=b.xpage
 
-select gno,idno,page,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odate,xproduct+case when len(memo)!=0 then '('+memo+')' else '' end xpdt,invono,unit, qhref 
+select gno,idno,page,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odate
+,dbo.charbr(xproduct+case when len(memo)!=0 then '('+memo+')' else '' end,25) xpdt,invono,unit, qhref 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,mount),1)),@mount_decimal,30)) mount 
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,weight),1)),@weight_decimal,30)) weight 
 ,dbo.getComma(oweight,0) oweight 

@@ -611,7 +611,7 @@ declare @result table(
 insert into @result 
 select '0' gno,a.noa,b.noq,a.datea 
 ,a.tggno,isnull(e.comp,''),c.datea,c.weight,d.price 
-,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when b.lengthb=0 then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end+isnull(b.ucolor,'')+case when len(b.memo)!=0 then '('+b.memo+')' else '' end
+,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when b.lengthb=0 then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end+isnull(b.ucolor,'')
 , b.unit ,b.mount,b.weight,b.mweight ,b.lengthc 
 ,round((a.tax*(case when a.money=0 then 0 else (b.lengthc/a.money) end)),0) 
 ,(round((a.tax*(case when a.money=0 then 0 else (b.lengthc/a.money) end)),0)+b.lengthc) 

@@ -117,7 +117,7 @@
 					var t_where3="where[2]=^^1=0^^";//quat
 					var t_where4="where[3]=^^custno='"+$('#txtCustno').val()+"' and f9>0 and isnull(enda,0)=0 order by datea,noa ^^";//ordbht
 					
-					q_box("cont_sf_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where1+t_where2+t_where3+t_where4, 'ordh_b', "600px", "700px", '互換合約');					
+					q_box("cont_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where1+t_where2+t_where3+t_where4, 'ordh_b', "800px", "700px", '互換合約');					
 				});
 				
 				$('#txtIdno').change(function() {

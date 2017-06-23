@@ -226,7 +226,7 @@
 					var t_where="custno='"+$('#txtCustno').val()+"' and eweight>0 and isnull(enda,0)=0 ";
 					if(q_cur==1 || q_cur==2)
 						t_where=t_where+" and noa!='"+$('#textQno2').val()+"'";
-					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat1_b', "600px", "700px", '出貨合約');
+					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat1_b', "800px", "700px", '出貨合約');
 				});
 				
 				$('#textQno1').change(function() {
@@ -240,7 +240,7 @@
 					var t_where="custno='"+$('#txtCustno').val()+"' and eweight>0 and isnull(enda,0)=0 ";
 					if(q_cur==1 || q_cur==2)
 						t_where=t_where+" and noa!='"+$('#textQno1').val()+"'";
-					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat2_b', "600px", "700px", '出貨合約');
+					q_box("quat_vu_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'quat2_b', "800px", "700px", '出貨合約');
 				});
 				
 				$('#textQno2').change(function() {

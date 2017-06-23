@@ -280,10 +280,10 @@ insert @result
 select '0',left(a.cust,4),a.noa,a.bdate
 		,isnull(SUM(b.weight),0)
 		,isnull(SUM(c.bweight),0)
-		,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) 
+		,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) -isnull(SUM(e.gweight),0) 
 		--,isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) 
 		,case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end
-		,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0))
+		,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) -isnull(SUM(e.gweight),0) 
 		--+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0))
 		+(case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end)
 		,a.memo,a.gen
@@ -291,6 +291,7 @@ select '0',left(a.cust,4),a.noa,a.bdate
 from view_cuc a left join view_cucs b on a.noa=b.noa
 outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c
 outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d
+outer apply (select SUM(weight) gweight from view_gett where ordeno=b.ordeno and no2=b.no2)e
 where left(a.datea,7) between @t_bmon and @t_emon
 group by a.cust,a.noa,a.bdate,a.memo,a.gen
 

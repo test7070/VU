@@ -805,6 +805,7 @@ and (len(isnull(b.ordeno,''))=(case when @t_ordeshow='0' then 0 else len(isnull(
 and (b.mount>0 or b.weight>0) 
 and not exists (select * from view_vcct va left join view_vcc vb on va.noa=vb.noa where va.uno=b.uno and vb.datea<=@t_edate) --排除已出貨
 and not exists (select * from view_cubs ca left join view_cub cb on ca.noa=cb.noa where ca.uno=b.uno and (ca.mount<0 or ca.weight<0) and cb.datea<=@t_edate ) --排除已領料
+and not exists (select * from view_gett ga left join view_get gb on ga.noa=gb.noa where ga.uno=b.uno and gb.datea<=@t_edate) --排除已領料
 and isnull(c.custno,'') between @t_bcustno and @t_ecustno
 and (isnull(b.ucolor,'')!='板料' or @t_sheet='Y')
 "

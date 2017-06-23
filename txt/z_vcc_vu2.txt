@@ -563,6 +563,7 @@ from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
 where b.ucolor='板料' and  --散把只顯示板料
 not exists (select * from view_vcct where b.uno=uno) and
+not exists (select * from view_gett where b.uno=uno) and
 a.datea<=@t_enddate and isnull(a.datea,'')>=isnull(c.datea,'')
 --and b.storeno='7000' 
 and isnull(b.productno,'')='' and isnull(b.product,'')!='' --and isnull(b.productno2,'')=''
@@ -690,6 +691,7 @@ outer apply(
 	where a.datea<=@t_enddate and b.uno!='' and b.product!='鐵線' and isnull(b.ucolor,'')!='板料'
 	and (b.mount>0 or b.weight>0) --and (len(isnull(b.ordeno,''))=0)
 	and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
+	and not exists (select * from view_gett where uno=b.uno) --排除已領料
 	and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
 )b
 
@@ -725,13 +727,14 @@ declare @tmpa table(
 )
 insert @tmpa
 select a.noa,a.datea
-,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)
+,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) -isnull(SUM(e.gweight),0)
 ,case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end 
-,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) 
+,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) -isnull(SUM(e.gweight),0)
 +(case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end)
 from view_cuc a left join view_cucs b on a.noa=b.noa 
 outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c 
-outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d 
+outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d
+outer apply (select SUM(weight) gweight from view_gett where ordeno=b.ordeno and no2=b.no2)e  
 where a.datea<=@t_enddate 
 group by a.cust,a.noa,a.datea,a.memo,a.gen 
 
@@ -1142,6 +1145,7 @@ from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
 where b.ucolor='板料' and  --散把只顯示板料
 not exists (select * from view_vcct where b.uno=uno) and
+not exists (select * from view_gett where b.uno=uno) and
 a.datea<=@t_enddate and isnull(a.datea,'')>=isnull(c.datea,'')
 and isnull(b.productno,'')='' and isnull(b.product,'')!=''
 and ISNULL(b.ordeno,'')='' --1050126 不顯示訂單的批號
@@ -1269,6 +1273,7 @@ outer apply(
 	where a.datea<=@t_enddate and b.uno!='' and b.product!='鐵線' and isnull(b.ucolor,'')!='板料'
 	and (b.mount>0 or b.weight>0) --and (len(isnull(b.ordeno,''))=0)
 	and not exists (select * from view_vcct where uno=b.uno) --排除已出貨
+	and not exists (select * from view_gett where uno=b.uno) --排除已領料
 	and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
 )b
 
@@ -1294,13 +1299,14 @@ declare @tmpa table(
 )
 insert @tmpa
 select a.noa,a.datea
-,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)
+,isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0) -isnull(SUM(e.gweight),0)
 ,case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end 
-,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) 
+,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) -isnull(SUM(e.gweight),0)
 +(case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end)
 from view_cuc a left join view_cucs b on a.noa=b.noa 
 outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c 
-outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d 
+outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d
+outer apply (select SUM(weight) gweight from view_gett where ordeno=b.ordeno and no2=b.no2)e  
 where a.datea<=@t_enddate 
 group by a.cust,a.noa,a.datea,a.memo,a.gen 
 

@@ -476,6 +476,7 @@ where uno!=''
 --and a.date2 <= @t_edate 
 and (a.mount>0 or a.weight>0)
 and not exists (select * from view_vcct where uno=a.uno)
+and not exists (select * from view_gett where uno=a.uno)
 and not exists (select * from view_cubs where uno=a.uno and (mount<0 or weight<0) )
 
 --分開 where條件 加快速度

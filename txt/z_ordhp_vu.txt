@@ -211,67 +211,68 @@ begin
 	--已進貨
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '1','','','',tggno,nick,'',sum(weight),''
-	,sum(isnull(a,0)),sum(isnull(b,0)),sum(isnull(c,0)),sum(isnull(d,0)),sum(isnull(e,0)),sum(isnull(f,0))
-	,sum(isnull(g,0)),sum(isnull(h,0)),sum(isnull(i,0)),sum(isnull(j,0)),sum(isnull(k,0)),sum(isnull(l,0))
-	,sum(isnull(m,0)),sum(isnull(n,0)),sum(isnull(o,0))
-	,sum(isnull(a,0)+isnull(b,0)+isnull(c,0)+isnull(d,0)+isnull(e,0)+isnull(f,0)
-	+isnull(g,0)+isnull(h,0)+isnull(i,0)+isnull(j,0)+isnull(k,0)+isnull(l,0)
-	+isnull(m,0)+isnull(n,0)+isnull(o,0))
-	from ordh a outer apply (
-		select sum(case when ib.size='#3' and ib.spec='SD280' then ib.weight else 0 end)a
-		,sum(case when ib.size='#3' and ib.spec='SD280W' then ib.weight else 0 end)b
-		,sum(case when ib.size='#3' and ib.spec='SD420W' then ib.weight else 0 end)c
-		,sum(case when ib.size='#4' and ib.spec='SD280' then ib.weight else 0 end)d
-		,sum(case when ib.size='#4' and ib.spec='SD280W' then ib.weight else 0 end)e
-		,sum(case when ib.size='#4' and ib.spec='SD420W' then ib.weight else 0 end)f
-		,sum(case when ib.size='#5' and ib.spec='SD280' then ib.weight else 0 end)g
-		,sum(case when ib.size='#5' and ib.spec='SD280W' then ib.weight else 0 end)h
-		,sum(case when ib.size='#5' and ib.spec='SD420W' then ib.weight else 0 end)i
-		,sum(case when ib.size='#6' and ib.spec='SD420W' then ib.weight else 0 end)j
-		,sum(case when ib.size='#7' and ib.spec='SD420W' then ib.weight else 0 end)k
-		,sum(case when ib.size='#8' and ib.spec='SD420W' then ib.weight else 0 end)l
-		,sum(case when ib.size='#9' and ib.spec='SD420W' then ib.weight else 0 end)m
-		,sum(case when ib.size='#10' and ib.spec='SD420W' then ib.weight else 0 end)n
-		,sum(case when ib.size='#11' and ib.spec='SD420W' then ib.weight else 0 end)o
-		from view_ina ia left join view_inas ib on ia.noa=ib.noa where ia.ordeno=a.noa
-	)xb
-	where (datea between @t_bdate and @t_edate) and (len(@t_typea)=0 or typea=@t_typea)
-	and (tggno between @t_btggno and @t_etggno) and (len(@t_noa)=0 or noa=@t_noa)
-	group by a.tggno,a.nick
-
+	select '1','','',''
+	,case when isnull(a.tggno,'')!='' then a.tggno else ia.tggno end
+	,case when isnull(a.tggno,'')!='' then a.nick else ia.comp end
+	,'',null,''
+	,sum(case when ib.size='#3' and ib.spec='SD280' then ib.weight else 0 end)a
+	,sum(case when ib.size='#3' and ib.spec='SD280W' then ib.weight else 0 end)b
+	,sum(case when ib.size='#3' and ib.spec='SD420W' then ib.weight else 0 end)c
+	,sum(case when ib.size='#4' and ib.spec='SD280' then ib.weight else 0 end)d
+	,sum(case when ib.size='#4' and ib.spec='SD280W' then ib.weight else 0 end)e
+	,sum(case when ib.size='#4' and ib.spec='SD420W' then ib.weight else 0 end)f
+	,sum(case when ib.size='#5' and ib.spec='SD280' then ib.weight else 0 end)g
+	,sum(case when ib.size='#5' and ib.spec='SD280W' then ib.weight else 0 end)h
+	,sum(case when ib.size='#5' and ib.spec='SD420W' then ib.weight else 0 end)i
+	,sum(case when ib.size='#6' and ib.spec='SD420W' then ib.weight else 0 end)j
+	,sum(case when ib.size='#7' and ib.spec='SD420W' then ib.weight else 0 end)k
+	,sum(case when ib.size='#8' and ib.spec='SD420W' then ib.weight else 0 end)l
+	,sum(case when ib.size='#9' and ib.spec='SD420W' then ib.weight else 0 end)m
+	,sum(case when ib.size='#10' and ib.spec='SD420W' then ib.weight else 0 end)n
+	,sum(case when ib.size='#11' and ib.spec='SD420W' then ib.weight else 0 end)o
+	,0
+	from view_ina ia left join view_inas ib on ia.noa=ib.noa 
+	left join ordh a on ia.ordeno=a.noa
+	where (a.datea between @t_bdate and @t_edate) and (len(@t_typea)=0 or a.typea=@t_typea)
+	and (a.tggno between @t_btggno and @t_etggno) and (len(@t_noa)=0 or a.noa=@t_noa)
+	group by case when isnull(a.tggno,'')!='' then a.tggno else ia.tggno end
+	,case when isnull(a.tggno,'')!='' then a.nick else ia.comp end
+	
 	--已出貨
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '2','','','',tggno,nick,'',sum(weight),''
-	,sum(isnull(a,0)),sum(isnull(b,0)),sum(isnull(c,0)),sum(isnull(d,0)),sum(isnull(e,0)),sum(isnull(f,0))
-	,sum(isnull(g,0)),sum(isnull(h,0)),sum(isnull(i,0)),sum(isnull(j,0)),sum(isnull(k,0)),sum(isnull(l,0))
-	,sum(isnull(m,0)),sum(isnull(n,0)),sum(isnull(o,0))
-	,sum(isnull(a,0)+isnull(b,0)+isnull(c,0)+isnull(d,0)+isnull(e,0)+isnull(f,0)
+	select '2','','',''
+	,case when isnull(a.tggno,'')!='' then a.tggno else ga.custno end
+	,case when isnull(a.tggno,'')!='' then a.nick else ga.comp end
+	,'',null,''
+	,sum(case when gb.size='#3' and gb.spec='SD280' then gb.weight else 0 end)a
+	,sum(case when gb.size='#3' and gb.spec='SD280W' then gb.weight else 0 end)b
+	,sum(case when gb.size='#3' and gb.spec='SD420W' then gb.weight else 0 end)c
+	,sum(case when gb.size='#4' and gb.spec='SD280' then gb.weight else 0 end)d
+	,sum(case when gb.size='#4' and gb.spec='SD280W' then gb.weight else 0 end)e
+	,sum(case when gb.size='#4' and gb.spec='SD420W' then gb.weight else 0 end)f
+	,sum(case when gb.size='#5' and gb.spec='SD280' then gb.weight else 0 end)g
+	,sum(case when gb.size='#5' and gb.spec='SD280W' then gb.weight else 0 end)h
+	,sum(case when gb.size='#5' and gb.spec='SD420W' then gb.weight else 0 end)i
+	,sum(case when gb.size='#6' and gb.spec='SD420W' then gb.weight else 0 end)j
+	,sum(case when gb.size='#7' and gb.spec='SD420W' then gb.weight else 0 end)k
+	,sum(case when gb.size='#8' and gb.spec='SD420W' then gb.weight else 0 end)l
+	,sum(case when gb.size='#9' and gb.spec='SD420W' then gb.weight else 0 end)m
+	,sum(case when gb.size='#10' and gb.spec='SD420W' then gb.weight else 0 end)n
+	,sum(case when gb.size='#11' and gb.spec='SD420W' then gb.weight else 0 end)o
+	,0
+	from view_get ga left join view_gets gb on ga.noa=gb.noa 
+	left join ordh a on ga.idno=a.noa
+	where (a.datea between @t_bdate and @t_edate) and (len(@t_typea)=0 or a.typea=@t_typea)
+	and (a.tggno between @t_btggno and @t_etggno) and (len(@t_noa)=0 or a.noa=@t_noa)
+	group by case when isnull(a.tggno,'')!='' then a.tggno else ga.custno end
+	,case when isnull(a.tggno,'')!='' then a.nick else ga.comp end
+	
+	update #tmp set total=isnull(a,0)+isnull(b,0)+isnull(c,0)+isnull(d,0)+isnull(e,0)+isnull(f,0)
 	+isnull(g,0)+isnull(h,0)+isnull(i,0)+isnull(j,0)+isnull(k,0)+isnull(l,0)
-	+isnull(m,0)+isnull(n,0)+isnull(o,0))
-	from ordh a outer apply (
-		select sum(case when gb.size='#3' and gb.spec='SD280' then gb.weight else 0 end)a
-		,sum(case when gb.size='#3' and gb.spec='SD280W' then gb.weight else 0 end)b
-		,sum(case when gb.size='#3' and gb.spec='SD420W' then gb.weight else 0 end)c
-		,sum(case when gb.size='#4' and gb.spec='SD280' then gb.weight else 0 end)d
-		,sum(case when gb.size='#4' and gb.spec='SD280W' then gb.weight else 0 end)e
-		,sum(case when gb.size='#4' and gb.spec='SD420W' then gb.weight else 0 end)f
-		,sum(case when gb.size='#5' and gb.spec='SD280' then gb.weight else 0 end)g
-		,sum(case when gb.size='#5' and gb.spec='SD280W' then gb.weight else 0 end)h
-		,sum(case when gb.size='#5' and gb.spec='SD420W' then gb.weight else 0 end)i
-		,sum(case when gb.size='#6' and gb.spec='SD420W' then gb.weight else 0 end)j
-		,sum(case when gb.size='#7' and gb.spec='SD420W' then gb.weight else 0 end)k
-		,sum(case when gb.size='#8' and gb.spec='SD420W' then gb.weight else 0 end)l
-		,sum(case when gb.size='#9' and gb.spec='SD420W' then gb.weight else 0 end)m
-		,sum(case when gb.size='#10' and gb.spec='SD420W' then gb.weight else 0 end)n
-		,sum(case when gb.size='#11' and gb.spec='SD420W' then gb.weight else 0 end)o
-		from view_get ga left join view_gets gb on ga.noa=gb.noa where ga.idno=a.noa
-	)xb
-	where (datea between @t_bdate and @t_edate) and (len(@t_typea)=0 or typea=@t_typea)
-	and (tggno between @t_btggno and @t_etggno) and (len(@t_noa)=0 or noa=@t_noa)
-	group by tggno,nick
-
+	+isnull(m,0)+isnull(n,0)+isnull(o,0)
+	where gno='1' or gno='2'
+	
 	--餘量
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
@@ -293,84 +294,6 @@ begin
 	,sum(case when gno='1' then 1 else -1 end*o)
 	,sum(case when gno='1' then 1 else -1 end*total)
 	from #tmp group by noa,datea,typea,tggno,comp,addr,weight,amemo
-
-	insert #tmp(gno,noa,datea,typea,tggno,comp,weight,amemo
-	,cucnoa,addr,cmemo,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '4','','','',a.tggno,a.nick,sum(a.weight),'','','',''
-	,sum(isnull(a,0)),sum(isnull(b,0)),sum(isnull(c,0)),sum(isnull(d,0)),sum(isnull(e,0)),sum(isnull(f,0))
-	,sum(isnull(g,0)),sum(isnull(h,0)),sum(isnull(i,0)),sum(isnull(j,0)),sum(isnull(k,0)),sum(isnull(l,0))
-	,sum(isnull(m,0)),sum(isnull(n,0)),sum(isnull(o,0))
-	,sum(isnull(a,0)+isnull(b,0)+isnull(c,0)+isnull(d,0)+isnull(e,0)+isnull(f,0)
-	+isnull(g,0)+isnull(h,0)+isnull(i,0)+isnull(j,0)+isnull(k,0)+isnull(l,0)
-	+isnull(m,0)+isnull(n,0)+isnull(o,0))
-	from ordh a left join view_cuc b on a.noa=b.typea
-	outer apply (select 
-	sum(case when size='#3' and spec='SD280' then weight else 0 end)a
-	,sum(case when size='#3' and spec='SD280W' then weight else 0 end)b
-	,sum(case when size='#3' and spec='SD420W' then weight else 0 end)c
-	,sum(case when size='#4' and spec='SD280' then weight else 0 end)d
-	,sum(case when size='#4' and spec='SD280W' then weight else 0 end)e
-	,sum(case when size='#4' and spec='SD420W' then weight else 0 end)f
-	,sum(case when size='#5' and spec='SD280' then weight else 0 end)g
-	,sum(case when size='#5' and spec='SD280W' then weight else 0 end)h
-	,sum(case when size='#5' and spec='SD420W' then weight else 0 end)i
-	,sum(case when size='#6' and spec='SD420W' then weight else 0 end)j
-	,sum(case when size='#7' and spec='SD420W' then weight else 0 end)k
-	,sum(case when size='#8' and spec='SD420W' then weight else 0 end)l
-	,sum(case when size='#9' and spec='SD420W' then weight else 0 end)m
-	,sum(case when size='#10' and spec='SD420W' then weight else 0 end)n
-	,sum(case when size='#11' and spec='SD420W' then weight else 0 end)o
-	from view_cucs xa where noa=b.noa 
-	and not exists (select * from view_gets ya left join view_cubs yb on ya.uno=yb.uno 
-	left join view_get yc on ya.noa=yc.noa
-	where yb.productno2=xa.noa and yb.product2=xa.noq and yc.idno=a.noa)
-	)c	
-	where (a.datea between @t_bdate and @t_edate) and (len(@t_typea)=0 or a.typea=@t_typea)
-	and (a.tggno between @t_btggno and @t_etggno) and (len(@t_noa)=0 or a.noa=@t_noa)
-	and b.noa is not null
-	and a.typea!='委外代工'
-	group by a.tggno,a.nick
-
-	insert #tmp(gno,noa,datea,typea,tggno,comp,weight,amemo
-	,cucnoa,addr,cmemo,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '5','','','',a.tggno,a.nick,sum(a.weight),'','','',''
-	,sum(isnull(a,0)),sum(isnull(b,0)),sum(isnull(c,0)),sum(isnull(d,0)),sum(isnull(e,0)),sum(isnull(f,0))
-	,sum(isnull(g,0)),sum(isnull(h,0)),sum(isnull(i,0)),sum(isnull(j,0)),sum(isnull(k,0)),sum(isnull(l,0))
-	,sum(isnull(m,0)),sum(isnull(n,0)),sum(isnull(o,0))
-	,sum(isnull(a,0)+isnull(b,0)+isnull(c,0)+isnull(d,0)+isnull(e,0)+isnull(f,0)
-	+isnull(g,0)+isnull(h,0)+isnull(i,0)+isnull(j,0)+isnull(k,0)+isnull(l,0)
-	+isnull(m,0)+isnull(n,0)+isnull(o,0))
-	from ordh a left join view_cuc b on a.noa=b.typea
-	outer apply (select 
-	sum(case when size='#3' and spec='SD280' then weight else 0 end)a
-	,sum(case when size='#3' and spec='SD280W' then weight else 0 end)b
-	,sum(case when size='#3' and spec='SD420W' then weight else 0 end)c
-	,sum(case when size='#4' and spec='SD280' then weight else 0 end)d
-	,sum(case when size='#4' and spec='SD280W' then weight else 0 end)e
-	,sum(case when size='#4' and spec='SD420W' then weight else 0 end)f
-	,sum(case when size='#5' and spec='SD280' then weight else 0 end)g
-	,sum(case when size='#5' and spec='SD280W' then weight else 0 end)h
-	,sum(case when size='#5' and spec='SD420W' then weight else 0 end)i
-	,sum(case when size='#6' and spec='SD420W' then weight else 0 end)j
-	,sum(case when size='#7' and spec='SD420W' then weight else 0 end)k
-	,sum(case when size='#8' and spec='SD420W' then weight else 0 end)l
-	,sum(case when size='#9' and spec='SD420W' then weight else 0 end)m
-	,sum(case when size='#10' and spec='SD420W' then weight else 0 end)n
-	,sum(case when size='#11' and spec='SD420W' then weight else 0 end)o
-	from view_cucs xa where noa=b.noa
-	and not exists (select * from view_gets ya left join view_cubs yb on ya.uno=yb.uno 
-	left join view_get yc on ya.noa=yc.noa where yb.productno2=xa.noa and yb.product2=xa.noq and yc.idno=a.noa)
-	)c where (a.datea between @t_bdate and @t_edate) and (len(@t_typea)=0 or a.typea=@t_typea)
-	and (a.tggno between @t_btggno and @t_etggno) and (len(@t_noa)=0 or a.noa=@t_noa)
-	and b.noa is not null
-	and a.typea!='委外代工'
-	group by a.tggno,a.nick
-	
-	update a
-	set a=b.a-a.a,b=b.b-a.b,c=b.c-a.c,d=b.d-a.d,e=b.e-a.e,f=b.f-a.f,g=b.g-a.g,h=b.h-a.h
-	,i=b.i-a.i,j=b.j-a.j,k=b.k-a.k,l=b.l-a.l,m=b.m-a.m,n=b.n-a.n,o=b.o-a.o,total=b.total-a.total
-	from #tmp a outer apply (select * from #tmp where gno='3' and noa=a.noa) b
-	where a.gno='5'
 
 	insert #tmp (gno,tggno)
 	select '6',tggno from #tmp group by tggno
@@ -394,7 +317,6 @@ begin
 	dbo.getComma(o,-1) o,
 	dbo.getComma(total,-1) total,
 	* from #tmp order by tggno,gno
-
 end
 else
 begin

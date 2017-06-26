@@ -429,6 +429,7 @@ declare @tmp table(
 	cm float,cp float, --進貨合約 餘量 均價
 	sm float,sp float, --智勝-板料 餘量 均價
 	em float,ep float, --智勝-成品 餘量 均價
+	fm float,fp float, --互換、委外 餘量 均價
 	am float,ap float, --可用餘量 餘量 均價
 	qm float,qp float, --銷售合約 餘量 均價
 	tm float,tp float, --可銷售額度 餘量 均價
@@ -695,10 +696,17 @@ outer apply(
 	and not exists (select * from view_cubs where uno=b.uno and (mount<0 or weight<0)) --排除已領料
 )b
 
+--互換
+update a
+set fm=fweight,fp=sp
+from @tmp a outer apply (select sum((isnull(f2,0)-isnull(iweight,0))-(isnull(f7,0)-isnull(gweight,0))) fweight from ordh h 
+outer apply (select sum(weight)iweight from view_ina where ordeno=h.noa)i
+outer apply (select sum(weight)gweight from view_get where idno=h.noa)g)b
+
 if(@t_enddate>='2017/06/03')
 begin
 	update xa
-	set sp=round(xb.aprice,3),ep=round(xb.aprice,3)
+	set sp=round(xb.aprice,3),ep=round(xb.aprice,3),fp=round(xb.aprice,3)
 	from @tmp xa
 	outer apply (
 	select case when SUM(weight)=0 then 0 else SUM(total)/SUM(weight) end aprice from (select product,spec,size,MAX(mon)mon from #xtmpb group by product,spec,size)a
@@ -707,8 +715,8 @@ end
 
 --可用餘量
 update a
-set am=ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)
-,ap=case when ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)=0 then 0 else round((ISNULL(cm*cp,0)+ISNULL(sm*sp,0)+ISNULL(em*ep,0))/(ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)),3) end
+set am=ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)+ISNULL(fm,0)
+,ap=case when ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)+ISNULL(fm,0)=0 then 0 else round((ISNULL(cm*cp,0)+ISNULL(sm*sp,0)+ISNULL(em*ep,0)+ISNULL(fm*fp,0))/(ISNULL(cm,0)+ISNULL(sm,0)+ISNULL(em,0)+ISNULL(fm,0)),3) end
 from @tmp a
 
 --可銷售額度
@@ -845,6 +853,7 @@ select gno
 ,dbo.getComma(cm,0) cm,dbo.getComma(cp,-1) cp
 ,dbo.getComma(sm,0) sm,dbo.getComma(sp,-1) sp
 ,dbo.getComma(em,0) em,dbo.getComma(ep,-1) ep
+,dbo.getComma(fm,0) fm,dbo.getComma(fp,-1) fp
 ,dbo.getComma(am,0) am,dbo.getComma(ap,-1) ap
 ,dbo.getComma(qm,0) qm,dbo.getComma(qp,-1) qp
 ,dbo.getComma(tm,0) tm,dbo.getComma(tp,-1) tp

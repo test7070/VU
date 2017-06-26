@@ -58,6 +58,10 @@
                         type : '8',//[7]
                         name : 'xshowtgg',
                         value : "1@廠商統計".split(',')
+                    }, {
+                        type : '8',//[8]
+                        name : 'xshowend',
+                        value : "1@含合約中止".split(',')
                     }]
                 });
                 q_popAssign();
@@ -73,6 +77,10 @@
                 $('#Xshowtgg .label').css('width','0px');
                 $('#chkXshowtgg').css('width', '220px').css('margin-top', '5px');
                 $('#chkXshowtgg span').css('width','180px')
+                $('#Xshowend').css('width', '300px').css('height', '30px');
+                $('#Xshowend .label').css('width','0px');
+                $('#chkXshowend').css('width', '220px').css('margin-top', '5px');
+                $('#chkXshowend span').css('width','180px')
             }
 
             function q_boxClose(s2) {

@@ -1426,7 +1426,7 @@
 					</td>
 					<td><input id="txtTotal" type="text" class="txt num c1 istax"/></td>
 					<td><span> </span><a id="lblPlace_vu" class="lbl btn">發票號碼</a></td>
-					<td><input id="txtPlace" type="text" class="txt num c1"/></td>
+					<td><input id="txtPlace" type="text" class="txt c1"/></td>
 				</tr>
 				<tr>
 					<td><span> </span><a id="lblMemo_vu" class="lbl">備註</a></td>

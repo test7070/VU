@@ -1617,7 +1617,7 @@
 						</td>
 						<td><input id="txtTotal" type="text" class="txt num c1 istax"/></td>
 						<td><span> </span><a id="lblVno_vu" class="lbl btn">發票號碼</a></td>
-						<td><input id="txtVno" type="text" class="txt num c1"/></td>
+						<td><input id="txtVno" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl" > </a></td>

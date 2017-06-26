@@ -1089,7 +1089,7 @@ update a set gno='4'
 from @result a outer apply (select MAX(page)xpage from @result where custno=a.custno and addr2=a.addr2 )b
 where gno='3' and a.page=b.xpage
 
-select gno,idno,page,noa,noq,datea,custno,addr2,comp,onoa,odate,dbo.charbr(xproduct,25) xpdt,unit, qhref 
+select gno,idno,page,noa,noq,datea,custno,addr2,comp,onoa,odate,dbo.charbr(xproduct,30) xpdt,unit, qhref 
 ,dbo.getComma(mount,0) mount 
 ,dbo.getComma(weight,0) weight 
 ,dbo.getComma(oweight,0) oweight 

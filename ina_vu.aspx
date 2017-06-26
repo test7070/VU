@@ -131,7 +131,7 @@
 					}
 				});
 				
-				$('#lblOrdeno_sf').click(function() {
+				$('#lblOrdeno_vu').click(function() {
 					var t_where1="1=0^^";//cont
 					var t_where2="where[1]=^^tggno='"+$('#txtTggno').val()+"' and f4>0 and isnull(enda,0)=0 ^^";//ordhs
 					var t_where3="where[2]=^^1=0^^";//quat
@@ -186,7 +186,13 @@
 				$('#txtCartrips').change(function() {
 					sum();
 				});
-
+				
+				$('#lblPlace_vu').click(function() {
+					if(!emp($('#txtPlace').val()) && q_cur!=1 && q_cur!=2){
+						var t_where="noa='"+$('#txtPlace').val()+"'";
+						q_box("rc2a.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'rc2a', "95%", "95%", '進貨發票');
+					}
+				});
             }
 
             function q_boxClose(s2) {///   q_boxClose 2/4
@@ -485,7 +491,7 @@
                 if (q_cur > 0 && q_cur < 4)// 1-3
                     return;
 
-                q_box('ina_sf_s.aspx', q_name + '_s', "500px", "350px", q_getMsg("popSeek"));
+                q_box('ina_vu_s.aspx', q_name + '_s', "500px", "350px", q_getMsg("popSeek"));
             }
 
             function combPay_chg() {
@@ -813,7 +819,7 @@
             }
 
             function btnPrint() {
-                q_box('z_inap_sf.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtNoa').val()), '', "95%", "650px", q_getMsg("popPrint"));
+                q_box('z_inap_vu.aspx' + "?;;;;" + r_accy + ";noa=" + trim($('#txtNoa').val()), '', "95%", "650px", q_getMsg("popPrint"));
             }
 
             function wrServer(key_value) {
@@ -1350,7 +1356,7 @@
 					<td align="center" style="width:1%"><a id='vewChk'> </a></td>
 					<td align="center" style="width:25%"><a id='vewDatea'> </a></td>
 					<td align="center" style="width:35%"><a id='vewTgg'> </a></td>
-					<td align="center" style="width:35%"><a id='vewOrdeno_sf'>合約號碼</a></td>
+					<td align="center" style="width:35%"><a id='vewOrdeno_vu'>合約號碼</a></td>
 				</tr>
 				<tr>
 					<td><input id="chkBrow.*" type="checkbox" style=' '/></td>
@@ -1370,11 +1376,11 @@
 					<td> </td>
 				</tr>
 				<tr>
-					<td><span> </span><a id="lblDatea_sf" class="lbl">互換進貨日期</a></td>
+					<td><span> </span><a id="lblDatea_vu" class="lbl">互換進貨日期</a></td>
 					<td><input id="txtDatea" type="text" class="txt c1"/></td>
-					<td><span> </span><a id="lblNoa_sf" class="lbl" >互換進貨單號</a></td>
+					<td><span> </span><a id="lblNoa_vu" class="lbl" >互換進貨單號</a></td>
 					<td><input id="txtNoa" type="text" class="txt c1"/></td>
-					<td><span> </span><a id="lblTranstart_sf" class="lbl">入廠時間</a></td>
+					<td><span> </span><a id="lblTranstart_vu" class="lbl">入廠時間</a></td>
 					<td><input id="txtTranstart" type="text" class="txt c1"/></td>
 				</tr>
 				<tr>
@@ -1383,15 +1389,15 @@
 						<input id="txtTggno" type="text"  class="txt c2"/>
 						<input id="txtComp" type="text"  class="txt c3"/>
 					</td>
-					<td><span> </span><a id="lblAddr_sf" class="lbl" >交貨工地</a></td>
+					<td><span> </span><a id="lblAddr_vu" class="lbl" >交貨工地</a></td>
 					<td colspan="3"><input id="txtAddr"type="text" class="txt c1" style="width: 92%;"/></td>
 				</tr>
 				<tr>
-					<td><span> </span><a id="lblTranstyle_sf" class="lbl" >空重</a></td>
+					<td><span> </span><a id="lblTranstyle_vu" class="lbl" >空重</a></td>
 					<td><input id="txtTranstyle" type="text" class="txt num c1"/></td>
-					<td><span> </span><a id="lblTweight_sf" class="lbl">車總重</a></td>
+					<td><span> </span><a id="lblTweight_vu" class="lbl">車總重</a></td>
 					<td><input id="txtTweight" type="text" class="txt num c1"/></td>
-					<td><span> </span><a id="lblMount_sf" class="lbl" >淨重</a></td>
+					<td><span> </span><a id="lblMount_vu" class="lbl" >淨重</a></td>
 					<td><input id="txtMount" type="text" class="txt num c1"/></td>
 				</tr>
 				<tr>
@@ -1405,31 +1411,33 @@
 						<input id="txtCarno" type="text" class="txt" style="width:75%;"/>
 						<select id="combCarno" style="width: 20px;"> </select>
 					</td>
-					<td><span> </span><a id="lblPrice_sf" class="lbl" >應付費用單價</a></td>
+					<td><span> </span><a id="lblPrice_vu" class="lbl" >應付費用單價</a></td>
 					<td><input id="txtPrice" type="text" class="txt num c1" style="width: 80px;"/>/KG</td>
-					<td><span> </span><a id="lblTranmoney_sf" class="lbl" >應付運費</a></td>
+					<td><span> </span><a id="lblTranmoney_vu" class="lbl" >應付運費</a></td>
 					<td><input id="txtTranmoney" type="text" class="txt num c1"/></td>
 				</tr>
 				<tr>
-					<td><span> </span><a id="lblMoney_sf" class="lbl">應收</a></td>
+					<td><span> </span><a id="lblMoney_vu" class="lbl">應收</a></td>
 					<td><input id="txtMoney" type="text" class="txt num c1"/></td>
-					<td><span> </span><a id='lblTax_sf' class="lbl">營業稅</a></td>
+					<td><span> </span><a id='lblTax_vu' class="lbl">營業稅</a></td>
 					<td><input id="txtTax" type="text" class="txt num c1 istax"/></td>
 					<td><input id="chkAtax" type="checkbox" onchange='sum()' />
-						<a id='lblTotal_sf' class="lbl istax">總計<span> </span></a>
+						<a id='lblTotal_vu' class="lbl istax">總計<span> </span></a>
 					</td>
 					<td><input id="txtTotal" type="text" class="txt num c1 istax"/></td>
+					<td><span> </span><a id="lblPlace_vu" class="lbl btn">發票號碼</a></td>
+					<td><input id="txtPlace" type="text" class="txt num c1"/></td>
 				</tr>
 				<tr>
-					<td><span> </span><a id="lblMemo_sf" class="lbl">備註</a></td>
+					<td><span> </span><a id="lblMemo_vu" class="lbl">備註</a></td>
 					<td colspan='5'>
 						<textarea id="txtMemo" cols="10" rows="5" style="width: 99%;height: 50px;"> </textarea>
 					</td>
 				</tr>
 				<tr>
-					<td><span> </span><a id="lblOrdeno_sf" class="lbl btn">合約號碼</a></td>
+					<td><span> </span><a id="lblOrdeno_vu" class="lbl btn">合約號碼</a></td>
 					<td><input id="txtOrdeno" type="text" class="txt c1"/></td>
-					<td><span> </span><a id="lblWeight_sf" class="lbl">合約重量</a></td>
+					<td><span> </span><a id="lblWeight_vu" class="lbl">合約重量</a></td>
 					<td><input id="txtWeight" type="text" class="txt num c1"/></td>
 					<!--<td><span> </span><a id="lblStore" class="lbl btn" > </a></td>
 					<td>
@@ -1438,7 +1446,7 @@
 					</td>-->
 					<td> </td>
 					<td> </td>
-					<td><span> </span><a id="lblMechno_sf" class="lbl">列印機台</a></td>
+					<td><span> </span><a id="lblMechno_vu" class="lbl">列印機台</a></td>
 					<td><select id="combMechno" class="txt c1"> </select></td>
 				</tr>
 				<tr>
@@ -1446,7 +1454,7 @@
 					<td><input id="txtWorker" type="text" class="txt c1"/></td>
 					<td><span> </span><a id="lblWorker2" class="lbl"> </a></td>
 					<td><input id="txtWorker2" type="text" class="txt c1"/></td>
-					<td><span> </span><a id="lblTranstartno_sf" class="lbl">立帳單號</a></td>
+					<td><span> </span><a id="lblTranstartno_vu" class="lbl">立帳單號</a></td>
 					<td><input id="txtTranstartno" type="text" class="txt c1"/></td>
 					<td colspan="2" style="text-align:center;"><input type="button" id="btnUnoprint" value="條碼列印" style="width:120px;"/></td>
 				</tr>

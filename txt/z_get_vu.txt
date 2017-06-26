@@ -128,12 +128,12 @@ update @result set gno='5' where gno='96'
 update @result set gno='6' where gno='97'
 
 select rec, gno, noa, noq, datea, LEFT(datea,7) xdatea, custno, left(comp,10) comp,  xproduct  xpros,unit,qhref 
-,dbo.getComma(mount,@mount_decimal) mount 
-,dbo.getComma(weight,@weight_decimal) weight 
+,dbo.getComma(mount,0) mount 
+,dbo.getComma(weight,0) weight 
 ,dbo.getComma(price,-1) price
-,dbo.getComma(total,@total_decimal) total 
-,dbo.getComma(itax,@total_decimal) itax 
-,dbo.getComma(money,@total_decimal) money
+,dbo.getComma(total,0) total 
+,dbo.getComma(itax,0) itax 
+,dbo.getComma(money,0) money
 ,ucolor,spec,size,lengh,conn cust,memo,carno,quatno,wtname
 from @result order by rec,gno;
 --**********************************************************************************************
@@ -225,10 +225,10 @@ from @tmp where gno='0' group by cno,custnick
 if(@t_check='1')
 begin
 	select gno,products,cno,custnick,size
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(tax,@total_decimal) tax
-	,dbo.getComma(money,@total_decimal) money
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax
+	,dbo.getComma(money,0) money
 	,dbo.getComma(price,2)price
 	,dbo.getComma(weight,0) weight
 	from @tmp order by cno,custnick,gno,size
@@ -236,10 +236,10 @@ end
 else
 begin
 	select gno,products,cno,custnick,size
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(tax,@total_decimal) tax
-	,dbo.getComma(money,@total_decimal) money
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax
+	,dbo.getComma(money,0) money
 	,dbo.getComma(price,2)price
 	,dbo.getComma(weight,0) weight
 	from @tmp order by cno,custnick,gno  
@@ -471,21 +471,21 @@ from @tmp group by products,page,size
 if(@t_check='1')
 begin
 	select gno,products,cno,left(custnick,10) custnick 
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(tax,@total_decimal) tax 
-	,dbo.getComma(totax,@total_decimal) totax 
-	,dbo.getComma(weight,@weight_decimal) weight,recno,page,size
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax 
+	,dbo.getComma(totax,0) totax 
+	,dbo.getComma(weight,0) weight,recno,page,size
 	from @tmp order by size,products,page,gno,cno
 end
 else
 begin
 	select gno,products,cno,left(custnick,10) custnick 
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(tax,@total_decimal) tax 
-	,dbo.getComma(totax,@total_decimal) totax 
-	,dbo.getComma(weight,@weight_decimal) weight,recno,page,size
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax 
+	,dbo.getComma(totax,0) totax 
+	,dbo.getComma(weight,0) weight,recno,page,size
 	from @tmp order by products,page,gno,cno
 end
 ;
@@ -594,24 +594,24 @@ from @result a group by custno
 if(@t_check='1')
 begin
 	select gno,noa,noq,datea,custno,comp,addr,tel,xproduct xpdt,unit, qhref 
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(weight,@weight_decimal) weight 
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(weight,0) weight 
 	,dbo.getComma(price,-1)price 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(tax,@total_decimal) tax
-	,dbo.getComma(totax,@total_decimal) totax  
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax
+	,dbo.getComma(totax,0) totax  
 	,pcount ,ucolor,spec ,size,length,carno
 	from @result order by custno,tsize,gno,datea,noa,noq
 end
 else
 begin
 	select gno,noa,noq,datea,custno,comp,addr,tel,xproduct xpdt,unit, qhref 
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(weight,@weight_decimal) weight 
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(weight,0) weight 
 	,dbo.getComma(price,-1)price 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(tax,@total_decimal) tax
-	,dbo.getComma(totax,@total_decimal) totax  
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax
+	,dbo.getComma(totax,0) totax  
 	,pcount ,ucolor,spec ,size,length,carno
 	from @result order by custno,gno,datea,noa,noq 
 end
@@ -696,11 +696,11 @@ update @tmp
 set aprice =case when weight=0 then 0 else round(total/weight,2) end 
 
 select gno,custno cno,left(custs,10) custs,mon 
-,dbo.getComma(mount,@mount_decimal) mount 
-,dbo.getComma(total,@total_decimal) total
+,dbo.getComma(mount,0) mount 
+,dbo.getComma(total,0) total
 ,dbo.getComma(aprice,2) aprice
-,dbo.getComma(tax,@total_decimal) tax 
-,dbo.getComma(totax,@total_decimal) totax
+,dbo.getComma(tax,0) tax 
+,dbo.getComma(totax,0) totax
 ,dbo.getComma(weight,0) weight
 from @tmp order by custno,mon,gno ;
 
@@ -798,24 +798,24 @@ from @result group by xproduct,size
 if(@t_check='1')
 begin
 	select left(comp,10) comp,xproduct xpdt
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(weight,@weight_decimal) weight 
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(weight,0) weight 
 	,dbo.getComma(price,-1)price 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(money,@total_decimal) money  
-	,dbo.getComma(tax,@total_decimal) tax 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(money,0) money  
+	,dbo.getComma(tax,0) tax 
 	,*
 	from @result a order by size,xproduct,gno,datea,a.comp,noa,noq 
 end
 else
 begin
 	select left(comp,10) comp,xproduct xpdt
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(weight,@weight_decimal) weight 
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(weight,0) weight 
 	,dbo.getComma(price,-1)price 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(money,@total_decimal) money  
-	,dbo.getComma(tax,@total_decimal) tax 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(money,0) money  
+	,dbo.getComma(tax,0) tax 
 	,*
 	from @result order by xproduct,gno,datea,noa,noq 
 end
@@ -906,10 +906,10 @@ end
 if(@t_check='1')
 begin
 	select gno,products,mon,size
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(tax,@total_decimal) tax
-	,dbo.getComma(totax,@total_decimal) totax 
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax
+	,dbo.getComma(totax,0) totax 
 	,dbo.getComma(weight,0) weight
 	from @tmp 
 	order by size,products,mon,gno
@@ -917,10 +917,10 @@ end
 else
 begin
 	select gno,products,mon,size
-	,dbo.getComma(mount,@mount_decimal) mount 
-	,dbo.getComma(total,@total_decimal) total 
-	,dbo.getComma(tax,@total_decimal) tax
-	,dbo.getComma(totax,@total_decimal) totax 
+	,dbo.getComma(mount,0) mount 
+	,dbo.getComma(total,0) total 
+	,dbo.getComma(tax,0) tax
+	,dbo.getComma(totax,0) totax 
 	,dbo.getComma(weight,0) weight
 	from @tmp 
 	order by products,mon,gno

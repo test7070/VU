@@ -87,18 +87,18 @@ create table #tmpa(
 )
 CREATE INDEX tmpa_index ON #tmpa (noa,typea)
 
+--106/06/27 互換出貨和進貨 一律都要關聯到合約 (客戶與廠商編號不同 以廠商編號為主)
 insert #tmpa
-select noa,'get',idno,weight
-from view_get where len(idno)>0
-and (custno between @t_btggno and @t_etggno ) --出貨與合約客戶會一樣
-and datea>= @tt_bdate --會先有合約才會出貨 --避免提早出貨多抓取前1個月的出貨
+select a.noa,'get',a.idno,a.weight
+from view_get a left join ordh b on a.idno=b.noa where len(a.idno)>0
+and (b.tggno between @t_btggno and @t_etggno ) --出貨與合約客戶會一樣
+and a.datea>= @tt_bdate --會先有合約才會出貨 --避免提早出貨多抓取前1個月的出貨
 
 insert #tmpa
-select noa,'ina'
-,ordeno,weight
-from view_ina where len(ordeno)>0
-and (tggno between @t_btggno and @t_etggno ) --出貨與合約客戶會一樣
-and datea>= @tt_bdate --會先有合約才會出貨 --避免提早出貨多抓取前1個月的出貨
+select a.noa,'ina',a.ordeno,a.weight
+from view_ina a left join ordh b on a.ordeno=b.noa where len(a.ordeno)>0
+and (b.tggno between @t_btggno and @t_etggno ) --出貨與合約客戶會一樣
+and a.datea>= @tt_bdate --會先有合約才會出貨 --避免提早出貨多抓取前1個月的出貨
 
 update a
 set f3=isnull(i1.weight,0)
@@ -211,7 +211,7 @@ begin
 	--已進貨
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '1','','','','',ia.comp,'',null,''
+	select '1','','','',a.tggno,a.nick,'',null,''
 	,sum(case when ib.size='#3' and ib.spec='SD280' then ib.weight else 0 end)a
 	,sum(case when ib.size='#3' and ib.spec='SD280W' then ib.weight else 0 end)b
 	,sum(case when ib.size='#3' and ib.spec='SD420W' then ib.weight else 0 end)c
@@ -230,16 +230,14 @@ begin
 	,0
 	from view_ina ia left join view_inas ib on ia.noa=ib.noa 
 	left join ordh a on ia.ordeno=a.noa
-	--where (a.datea between @t_bdate and @t_edate) and (len(@t_typea)=0 or a.typea=@t_typea)
-	--and (a.tggno between @t_btggno and @t_etggno) and (len(@t_noa)=0 or a.noa=@t_noa)
-	--group by case when isnull(a.tggno,'')!='' then a.tggno else ia.tggno end
-	--,case when isnull(a.tggno,'')!='' then a.nick else ia.comp end
-	group by ia.comp
+	where (a.datea between @t_bdate and @t_edate) and (len(@t_typea)=0 or a.typea=@t_typea)
+	and (a.tggno between @t_btggno and @t_etggno) and (len(@t_noa)=0 or a.noa=@t_noa)
+	group by a.tggno,a.nick
 	
 	--已出貨
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '2','','','','',ga.comp,'',null,''
+	select '2','','','',a.tggno,a.nick,'',null,''
 	,sum(case when gb.size='#3' and gb.spec='SD280' then gb.weight else 0 end)a
 	,sum(case when gb.size='#3' and gb.spec='SD280W' then gb.weight else 0 end)b
 	,sum(case when gb.size='#3' and gb.spec='SD420W' then gb.weight else 0 end)c
@@ -258,13 +256,11 @@ begin
 	,0
 	from view_get ga left join view_gets gb on ga.noa=gb.noa 
 	left join ordh a on ga.idno=a.noa
-	--where (ga.datea between @t_bdate and @t_edate) 
-	--and (len(@t_typea)=0 or a.typea=@t_typea)
-	--and (a.tggno between @t_btggno and @t_etggno) 
-	--and (len(@t_noa)=0 or a.noa=@t_noa)
-	--group by case when isnull(a.tggno,'')!='' then a.tggno else ga.custno end
-	--,case when isnull(a.tggno,'')!='' then a.nick else ga.comp end
-	group by ga.comp
+	where (ga.datea between @t_bdate and @t_edate) 
+	and (len(@t_typea)=0 or a.typea=@t_typea)
+	and (a.tggno between @t_btggno and @t_etggno) 
+	and (len(@t_noa)=0 or a.noa=@t_noa)
+	group by a.tggno,a.nick
 	
 	update #tmp set total=isnull(a,0)+isnull(b,0)+isnull(c,0)+isnull(d,0)+isnull(e,0)+isnull(f,0)
 	+isnull(g,0)+isnull(h,0)+isnull(i,0)+isnull(j,0)+isnull(k,0)+isnull(l,0)
@@ -293,8 +289,8 @@ begin
 	,sum(case when gno='1' then 1 else -1 end*total)
 	from #tmp group by noa,datea,typea,tggno,comp,addr,weight,amemo
 
-	insert #tmp (gno,comp)
-	select '6',comp from #tmp group by comp
+	insert #tmp (gno,tggno)
+	select '6',tggno from #tmp group by tggno
 	
 	select 
 	dbo.getComma(weight,-1) weight,
@@ -314,7 +310,7 @@ begin
 	dbo.getComma(n,-1) n,
 	dbo.getComma(o,-1) o,
 	dbo.getComma(total,-1) total,
-	* from #tmp order by comp,gno
+	* from #tmp order by tggno,gno
 end
 else
 begin

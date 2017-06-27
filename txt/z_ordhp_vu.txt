@@ -109,7 +109,7 @@ from #tmp a
 outer apply (select SUM(qweight)weight from #tmpa where qno=a.noa and typea='ina') i1
 outer apply (select SUM(qweight)weight from #tmpa where qno=a.noa and typea='get') g1
 
-update #tmp set fx=isnull(f3,0)-isnull(f8,0)-(isnull(f2,0)-isnull(f7,0))
+update #tmp set fx=(isnull(f3,0)-isnull(f8,0)-(isnull(f2,0)-isnull(f7,0)))*-1 --106/06/27負數=欠對方
 
 if((select count(*) from #tmp)>0)
 begin
@@ -211,7 +211,7 @@ begin
 	--已進貨
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '1','','','',a.tggno,a.nick,'',null,''
+	select '2','','','',a.tggno,a.nick,'',null,''
 	,sum(case when ib.size='#3' and ib.spec='SD280' then ib.weight else 0 end)a
 	,sum(case when ib.size='#3' and ib.spec='SD280W' then ib.weight else 0 end)b
 	,sum(case when ib.size='#3' and ib.spec='SD420W' then ib.weight else 0 end)c
@@ -237,7 +237,7 @@ begin
 	--已出貨
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '2','','','',a.tggno,a.nick,'',null,''
+	select '1','','','',a.tggno,a.nick,'',null,''
 	,sum(case when gb.size='#3' and gb.spec='SD280' then gb.weight else 0 end)a
 	,sum(case when gb.size='#3' and gb.spec='SD280W' then gb.weight else 0 end)b
 	,sum(case when gb.size='#3' and gb.spec='SD420W' then gb.weight else 0 end)c
@@ -317,7 +317,7 @@ begin
 	--已進貨
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '1',noa,datea,typea,tggno,nick,addr,weight,memo
+	select '2',noa,datea,typea,tggno,nick,addr,weight,memo
 	,isnull(a,0),isnull(b,0),isnull(c,0),isnull(d,0),isnull(e,0),isnull(f,0)
 	,isnull(g,0),isnull(h,0),isnull(i,0),isnull(j,0),isnull(k,0),isnull(l,0)
 	,isnull(m,0),isnull(n,0),isnull(o,0)
@@ -348,7 +348,7 @@ begin
 	--已出貨
 	insert #tmp (gno,noa,datea,typea,tggno,comp,addr,weight,amemo
 	,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,total)
-	select '2',noa,datea,typea,tggno,nick,addr,weight,memo
+	select '1',noa,datea,typea,tggno,nick,addr,weight,memo
 	,isnull(a,0),isnull(b,0),isnull(c,0),isnull(d,0),isnull(e,0),isnull(f,0)
 	,isnull(g,0),isnull(h,0),isnull(i,0),isnull(j,0),isnull(k,0),isnull(l,0)
 	,isnull(m,0),isnull(n,0),isnull(o,0)

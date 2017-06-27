@@ -434,8 +434,8 @@
 					var as = _q_appendData('view_cubs', '', true);
 					if (as[0] != undefined) {
 						$('#btnMinut__'+n).click();
-						q_gridAddRow(bbtHtm, 'tbbt', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtUno,txtMemo,txtOrdeno,txtNo2'
-							, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,uno,memo,ordeno,no2', 'txtUno');
+						q_gridAddRow(bbtHtm, 'tbbt', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtUno,txtMemo,txtOrdeno,txtNo2,txtItemno,txtItem'
+							, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,uno,memo,ordeno,no2,noa,noq', 'txtUno');
 						
 						if(dec(n)+as.length>=q_bbtCount){
 							$('#btnPlut').click();
@@ -1773,6 +1773,8 @@
 						<input id="txtMemo..*" type="text" class="txt c1"/>
 						<input id="txtOrdeno..*" type="hidden"/>
 						<input id="txtNo2..*" type="hidden"/>
+						<input id="txtItemno..*" type="hidden"/>
+						<input id="txtItem..*" type="hidden"/>
 					</td>
 				</tr>
 			</table>

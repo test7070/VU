@@ -17,7 +17,7 @@
 
 			q_tables = 't';
 			var q_name = "get";
-			var q_readonly = ['txtNoa', 'txtWorker','txtWorker2','txtTranstartno'];
+			var q_readonly = ['txtNoa', 'txtWorker','txtWorker2','txtTranstartno','txtCardeal'];
 			var q_readonlys = ['txtStoreno','txtStore'];
 			var q_readonlyt = [];
 			var bbmNum = [];
@@ -34,7 +34,8 @@
 
 			aPop = new Array(
 				['txtCustno', 'lblCustno', 'cust', 'noa,comp', 'txtCustno,txtComp', 'cust_b.aspx'],
-				['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'], 
+				['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'],
+				['txtCarno', 'lblCarno', 'cardeals', 'a.carno,a.noa,a.comp', '0txtCarno,txtCardealno,txtCardeal', 'cardeals_b.aspx'], 
 				['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx']
 			);
 

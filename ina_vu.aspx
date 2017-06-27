@@ -17,7 +17,7 @@
 
             q_tables = 's';
             var q_name = "ina";
-            var q_readonly = ['txtNoa','txtWorker','txtWorker2','txtTranstartno'];
+            var q_readonly = ['txtNoa','txtWorker','txtWorker2','txtTranstartno','txtCardeal'];
             var q_readonlys = ['txtStoreno','txtStore'];
             var bbmNum = [];
             var bbsNum = [];
@@ -30,8 +30,9 @@
             brwKey = 'Datea';
             aPop = new Array(
 	            //['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'],
-	            ['txtTggno', 'lblTgg', 'tgg', 'noa,comp', 'txtTggno,txtComp', 'tgg_b.aspx']
-	           	, ['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx']
+	            ['txtCarno', 'lblCarno', 'cardeals', 'a.carno,a.noa,a.comp', '0txtCarno,txtCardealno,txtCardeal', 'cardeals_b.aspx'],
+	            ['txtTggno', 'lblTgg', 'tgg', 'noa,comp', 'txtTggno,txtComp', 'tgg_b.aspx'],
+	            ['txtCardealno', 'lblCardeal', 'cardeal', 'noa,comp', 'txtCardealno,txtCardeal', 'cardeal_b.aspx']
             );
             $(document).ready(function() {
                 bbmKey = ['noa'];

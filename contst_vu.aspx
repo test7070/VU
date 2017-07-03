@@ -583,7 +583,7 @@
 				</table>
 			</div>
 			<div class='dbbm'>
-				<table class="tbbm" id="tbbm" style="width: 872px;">
+				<table class="tbbm" id="tbbm">
 					<tr style="height: 1px;">
 						<td style="width: 108px;"> </td>
 						<td style="width: 108px;"> </td>
@@ -641,7 +641,7 @@
 						<td ><span> </span><a id='lblMemo' class="lbl"> </a></td>
 						<td colspan='5'>
 							<!--<input id="txtMemo" type="text" style="width: 99%;"/>-->
-							<textarea id="txtMemo"  rows='3' cols='3' style="width: 100%; " > </textarea>
+							<textarea id="txtMemo"  rows='3' cols='3' style="width: 99%; " > </textarea>
 							<input id="txtEarnest" type="hidden"/>
 						</td>
 					</tr>

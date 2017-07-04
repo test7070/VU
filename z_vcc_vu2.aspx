@@ -148,6 +148,10 @@
                         dbf : 'sss',
                         index : 'noa,namea',
                         src : 'sss_b.aspx'
+                    }, {
+                        type : '8', //[33]
+                        name : 'xgroup',
+                        value : "1@集團顯示".split(',')
                     }]
                 });
                 q_popAssign();
@@ -181,12 +185,18 @@
                     if ($(this).val() == 'NaN')
                     	$(this).val(0);
                 });
+                
                 $('#txtXlengthb2').addClass('num').val(99).change(function() {
                     $(this).val(dec($(this).val()));
                     if ($(this).val() == 'NaN')
                     	$(this).val(99);
                 });
-				
+                
+				$('#Xgroup').css('width', '300px').css('height', '30px');
+                $('#Xgroup .label').css('width', '0px');
+                $('#chkXgroup').css('width', '220px').css('margin-top', '5px');
+                $('#chkXgroup span').css('width', '180px')
+                $('#chkXgroup').children('input').attr('checked', 'checked');
 			}
 
 			function q_boxClose(s2) {

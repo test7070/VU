@@ -149,6 +149,10 @@
                     },{
                         type : '6', //[23] 
                         name : 'xaddr2'
+                    }, {
+                        type : '5',//[24]
+                        name : 'xucolorItem',//[14]
+                        value : xucolorItem.split(',')
                     }]
                 });
                 q_popAssign();

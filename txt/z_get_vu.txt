@@ -14,7 +14,8 @@ declare @qhref_acomp nvarchar(10) =''
 declare @isspec nvarchar(10)='0'
 declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
-declare @t_estoreno nvarchar(20) 
+declare @t_estoreno nvarchar(20)
+declare @t_ucolor nvarchar(50) 
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -37,6 +38,7 @@ set @t_elengthb = case when '#non'=[14] then 99 else [14] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 --*********************************************************************************** 
 declare @result table( 
 	gno nvarchar(10), 
@@ -79,6 +81,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like isnull(b.spec,'')) and
 	  (len(@t_size)=0 or @t_size like isnull(b.size,'')) and
 	  (len(@t_class)=0 or @t_class like isnull(b.class,'')) and
+	  (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 	  and (len(@t_qno)=0 or a.idno like @t_qno+'%')
 	  and (b.storeno between @t_bstoreno and @t_estoreno)
@@ -155,6 +158,7 @@ declare @t_bstoreno nvarchar(20)
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
 declare @t_qno nvarchar(50)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -170,6 +174,7 @@ set @t_elengthb = case when '#non'=[14] then 99 else [14] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -207,7 +212,8 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
-	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) and
+	  (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,''))
 	  and (len(@t_qno)=0 or a.idno = @t_qno)
 	  and (b.storeno between @t_bstoreno and @t_estoreno)
 order by b.product,a.custno,c.nick,c.comp 
@@ -264,6 +270,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -279,6 +286,7 @@ set @t_elengthb = case when '#non'=[14] then 99 else [14] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -330,7 +338,8 @@ declare @result table(
 	(len(@t_spec)=0 or @t_spec like b.spec) and
 	(len(@t_size)=0 or @t_size like b.size) and
 	(len(@t_class)=0 or @t_class like b.class) and
-	(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+	(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) and
+	(len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,''))
 	and (len(@t_qno)=0 or a.idno = @t_qno)
 	and (b.storeno between @t_bstoreno and @t_estoreno)
 	order by custno,b.product,gno,datea,noa,noq 
@@ -381,6 +390,7 @@ declare @t_estoreno nvarchar(20)
 declare @t_qno nvarchar(50)
 declare @t_atax nvarchar(50)
 declare @t_check nvarchar(50)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -397,6 +407,7 @@ set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
 set @t_atax = case when '#non'=[18] then '' else [18]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 --*********************************************************************************** 
 declare @mount_decimal int = 0
 declare @weight_decimal int = 0 
@@ -433,6 +444,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
+(len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
 and (len(@t_qno)=0 or a.idno = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
@@ -508,6 +520,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -523,6 +536,7 @@ set @t_elengthb = case when '#non'=[14] then 99 else [14] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -576,6 +590,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
+(len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 and (len(@t_qno)=0 or a.idno = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
@@ -634,6 +649,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_qno nvarchar(50)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -648,6 +664,7 @@ set @t_elengthb = case when '#non'=[14] then 99 else [14] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -678,6 +695,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
+(len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 and (len(@t_qno)=0 or a.idno = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
@@ -723,6 +741,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -738,6 +757,7 @@ set @t_elengthb = case when '#non'=[14] then 99 else [14] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -784,6 +804,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
+(len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
 and (len(@t_qno)=0 or a.idno = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
@@ -839,6 +860,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -854,6 +876,7 @@ set @t_elengthb = case when '#non'=[14] then 99 else [14] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -886,6 +909,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
+(len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
 and (len(@t_qno)=0 or a.idno = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
@@ -946,6 +970,7 @@ declare @t_bstoreno nvarchar(20)
 declare @t_estoreno nvarchar(20)
 declare @t_couplers nvarchar(20)
 declare @t_addr2 nvarchar(100)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -962,6 +987,7 @@ set @t_bstoreno = case when '#non'=[16] then '' else [16] end
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
 set @t_couplers = case when '#non'=[19] then '' else [19]  end
 set @t_addr2 = case when '#non'=[20] then '' else [20]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -1029,6 +1055,7 @@ where (b.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like f.spec) and
 (len(@t_size)=0 or @t_size like f.size) and
 (len(@t_class)=0 or @t_class like f.class) and
+(len(@t_ucolor)=0 or @t_ucolor like isnull(f.ucolor,'')) and
 (isnull(f.lengthb,0) between @t_blengthb and @t_elengthb)
 and (len(@t_qno)=0 or b.idno= @t_qno)
 and (f.storeno between @t_bstoreno and @t_estoreno)
@@ -1119,6 +1146,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_qno nvarchar(50)
+declare @t_ucolor nvarchar(50) 
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -1133,6 +1161,7 @@ set @t_elengthb = case when '#non'=[14] then 99 else [14] end
 set @t_qno = case when '#non'=[15] then '' else [15] end
 set @t_bstoreno = case when '#non'=[16] then '' else [16] end 
 set @t_estoreno = case when '#non'=[17] then char(255) else [17]  end
+set @t_ucolor = case when '#non'=[21] then '' else [21] end
 --***********************************************************************************
 declare @tmp table( 
 	gno nvarchar(1), 
@@ -1153,6 +1182,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (len(@t_spec)=0 or @t_spec like b.spec) and
 	  (len(@t_size)=0 or @t_size like b.size) and
 	  (len(@t_class)=0 or @t_class like b.class) and
+	  (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 	  and (len(@t_qno)=0 or a.idno = @t_qno)
 	  and (b.storeno between @t_bstoreno and @t_estoreno)

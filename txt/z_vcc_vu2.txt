@@ -195,6 +195,7 @@ update @tmp
 set aprice=ROUND(aprice,2),bprice=ROUND(bprice,2),price=ROUND(price,2)
 ,atotal=ROUND(atotal,0),btotal=ROUND(btotal,0),total=ROUND(total,0)
 ,aweight=ROUND(aweight/1000,2),bweight=ROUND(bweight/1000,2),weight=ROUND(weight/1000,2)
+,cweight=ROUND(cweight/1000,2)
 
 select
 case when @t_product='鋼筋' then '板料&盤元鋼筋' else '板料' end title,

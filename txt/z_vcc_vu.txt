@@ -15,7 +15,8 @@ declare @vcctypea nvarchar(10) =''
 declare @isspec nvarchar(10)='0'
 declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
-declare @t_estoreno nvarchar(20) 
+declare @t_estoreno nvarchar(20)
+declare @t_ucolor nvarchar(50)
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -41,6 +42,7 @@ set @t_elengthb = case when '#non'=[17] then 99 else [17] end
 set @t_qno = case when '#non'=[18] then '' else [18] end
 set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
 set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_ucolor = case when '#non'=[24] then '' else [24] end
 --*********************************************************************************** 
 declare @result table( 
 	gno nvarchar(10), 
@@ -93,6 +95,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (a.custno between @t_bcustno and @t_ecustno)  and
 	  (len(@vcctypea)=0 or @vcctypea=a.typea)and
 	  (len(@t_product)=0 or @t_product like isnull(b.product,''))and
+	  (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) and
 	  (len(@t_spec)=0 or @t_spec like isnull(b.spec,'')) and
 	  (len(@t_size)=0 or @t_size like isnull(b.size,'')) and
 	  (len(@t_class)=0 or @t_class like isnull(b.class,'')) and
@@ -201,6 +204,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -218,6 +222,7 @@ declare @t_qno nvarchar(50)
 set @t_qno = case when '#non'=[18] then '' else [18] end
 set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
 set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_ucolor = case when '#non'=[24] then '' else [24] end
 --***********************************************************************************
 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
@@ -262,6 +267,7 @@ where (a.datea between @t_bdate and @t_edate) and
 	  (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 	  and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 	  and (b.storeno between @t_bstoreno and @t_estoreno)
+	  and (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,''))
 order by b.product,a.custno,c.nick,c.comp 
 
 insert into @tmp 
@@ -317,6 +323,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -333,6 +340,7 @@ set @t_elengthb = case when '#non'=[17] then 99 else [17] end
 set @t_qno = case when '#non'=[18] then '' else [18] end
 set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
 set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_ucolor = case when '#non'=[24] then '' else [24] end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -394,6 +402,7 @@ declare @result table(
 	(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 	and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 	and (b.storeno between @t_bstoreno and @t_estoreno)
+	and (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,''))
 	order by custno,productno,gno,datea,noa,noq 
 
 --*********************************************************************** 
@@ -443,6 +452,7 @@ declare @t_estoreno nvarchar(20)
 declare @t_qno nvarchar(50)
 declare @t_atax nvarchar(50)
 declare @t_check nvarchar(50)
+declare @t_ucolor nvarchar(50)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -460,6 +470,7 @@ set @t_qno = case when '#non'=[18] then '' else [18] end
 set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
 set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
 set @t_atax = case when '#non'=[21] then '' else [21]  end
+set @t_ucolor = case when '#non'=[24] then '' else [24] end
 --*********************************************************************************** 
 declare @mount_decimal int = 0
 declare @weight_decimal int = 0 
@@ -498,7 +509,8 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_spec)=0 or @t_spec like b.spec) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
-(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+(isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+and (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,'')) 
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
 order by b.product,a.custno,c.nick,c.comp 
@@ -574,6 +586,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -590,6 +603,7 @@ set @t_elengthb = case when '#non'=[17] then 99 else [17] end
 set @t_qno = case when '#non'=[18] then '' else [18] end
 set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
 set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_ucolor = case when '#non'=[24] then '' else [24] end
 -------------------------------------------------- 
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -649,6 +663,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
+and (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,''))
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
 order by custno,gno,mon,datea,noa,noq 
@@ -710,6 +725,7 @@ declare @isspec nvarchar(10)='0'
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_qno nvarchar(50)
+declare @t_ucolor nvarchar(50)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -725,6 +741,7 @@ set @t_elengthb = case when '#non'=[17] then 99 else [17] end
 set @t_qno = case when '#non'=[18] then '' else [18] end
 set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
 set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_ucolor = case when '#non'=[24] then '' else [24] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -763,6 +780,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb)
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
+and (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,''))
 group by a.custno,c.nick,c.comp,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end
 
 if((select count(*) from @tmp)>0)
@@ -806,6 +824,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -822,6 +841,7 @@ set @t_elengthb = case when '#non'=[17] then 99 else [17] end
 set @t_qno = case when '#non'=[18] then '' else [18] end
 set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
 set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_ucolor = case when '#non'=[24] then '' else [24] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -877,6 +897,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (len(@t_size)=0 or @t_size like b.size) and
 (len(@t_class)=0 or @t_class like b.class) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
+and (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,''))
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
 order by gno,datea,noa,noq 
@@ -933,6 +954,7 @@ declare @t_qno nvarchar(50)
 declare @t_bstoreno nvarchar(20) 
 declare @t_estoreno nvarchar(20)
 declare @t_check nvarchar(20)
+declare @t_ucolor nvarchar(50)
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -949,6 +971,7 @@ set @t_elengthb = case when '#non'=[17] then 99 else [17] end
 set @t_qno = case when '#non'=[18] then '' else [18] end
 set @t_bstoreno = case when '#non'=[19] then '' else [19] end 
 set @t_estoreno = case when '#non'=[20] then char(255) else [20]  end
+set @t_ucolor = case when '#non'=[24] then '' else [24] end
 --***********************************************************************************
 --設定小數點--4表示無小數點--2表示小數點1位---0表示小數點2位-- 
 declare @mount_decimal int = 4 
@@ -988,6 +1011,7 @@ where (a.datea between @t_bdate and @t_edate) and
 (isnull(b.lengthb,0) between @t_blengthb and @t_elengthb) 
 and (len(@t_qno)=0 or dbo.split(dbo.split(a.apvmemo,'##',0),'@',0) = @t_qno or dbo.split(dbo.split(a.apvmemo,'##',1),'@',0) = @t_qno)
 and (b.storeno between @t_bstoreno and @t_estoreno)
+and (len(@t_ucolor)=0 or @t_ucolor like isnull(b.ucolor,''))
 group by b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')  
 ,case when isnull(a.mon,'')!='' then a.mon else left(a.datea,7) end ,size
 		

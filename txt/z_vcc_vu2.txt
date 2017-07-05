@@ -101,58 +101,45 @@ declare @tmp table(
 	total float,
 	price float
 )
-if(@t_product='鋼筋')
-begin
-	insert @tmp
-	select case when @t_group='1' then '9' else '0' end gno,0 recno,a.custno,'' nick
-	,sum(case when b.ucolor='板料' and (b.product=@t_product or b.product='盤元鋼筋') then b.weight else 0 end) aweight
-	,sum(case when b.ucolor='板料' and (b.product=@t_product or b.product='盤元鋼筋') then b.total else 0 end) atotal
-	,case when sum(case when b.ucolor='板料' and (b.product=@t_product or b.product='盤元鋼筋') then b.weight else 0 end)=0 then 0 
-	else sum(case when b.ucolor='板料' then b.total else 0 end)/sum(case when b.ucolor='板料' then b.weight else 0 end) end aprice
-	,sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and (b.product=@t_product) then b.weight else 0 end) bweight
-	,sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and (b.product=@t_product)  then b.total else 0 end) btotal
-	,case when sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and (b.product=@t_product) then b.weight else 0 end)=0 then 0 
-	else sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and (b.product=@t_product) then b.total else 0 end)/sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and (b.product=@t_product) then b.weight else 0 end) end bprice
-	,sum(case when b.ucolor='成型加工' and (b.product=@t_product) then b.weight else 0 end) cweight
-	,sum(case when b.ucolor='成型加工' and (b.product=@t_product) then b.total else 0 end) ctotal
-	,case when sum(case when b.ucolor='成型加工' and (b.product=@t_product) then b.weight else 0 end)=0 then 0 
-	else sum(case when b.ucolor='成型加工' and (b.product=@t_product) then b.total else 0 end)/sum(case when b.ucolor='成型加工' and (b.product=@t_product) then b.weight else 0 end) end cprice
-	,sum(b.weight)weight,sum(b.total)total
-	,case when sum(b.weight)=0 then 0 else sum(b.total)/sum(b.weight) end price
-	from view_vcc a left join view_vccs b on a.noa=b.noa
-	left join cust c on a.custno=c.noa
-	where b.product like '%'+@t_product+'%'
-	and a.datea between @t_bdate and @t_edate
-	and a.custno between @t_bcustno and @t_ecustno
-	and (len(@t_custtype)=0 or c.typea=@t_custtype)
-	group by a.custno
-end
-else
-begin
-	insert @tmp
-	select case when @t_group='1' then '9' else '0' end gno,0 recno,a.custno,'' nick
-	,sum(case when b.ucolor='板料' then b.weight else 0 end) aweight
-	,sum(case when b.ucolor='板料' then b.total else 0 end) atotal
-	,case when sum(case when b.ucolor='板料' then b.weight else 0 end)=0 then 0 
-	else sum(case when b.ucolor='板料' then b.total else 0 end)/sum(case when b.ucolor='板料' then b.weight else 0 end) end aprice
-	,sum(case when b.ucolor!='板料' then b.weight else 0 end) bweight
-	,sum(case when b.ucolor!='板料' then b.total else 0 end) btotal
-	,case when sum(case when b.ucolor!='板料' then b.weight else 0 end)=0 then 0 
-	else sum(case when b.ucolor!='板料' then b.total else 0 end)/sum(case when b.ucolor!='板料' then b.weight else 0 end) end bprice
-	,sum(case when b.ucolor='成型加工' then b.weight else 0 end) cweight
-	,sum(case when b.ucolor='成型加工' then b.total else 0 end) ctotal
-	,case when sum(case when b.ucolor='成型加工' then b.weight else 0 end)=0 then 0 
-	else sum(case when b.ucolor='成型加工' then b.total else 0 end)/sum(case when b.ucolor='成型加工' then b.weight else 0 end) end cprice
-	,sum(b.weight)weight,sum(b.total)total
-	,case when sum(b.weight)=0 then 0 else sum(b.total)/sum(b.weight) end price
-	from view_vcc a left join view_vccs b on a.noa=b.noa
-	left join cust c on a.custno=c.noa
-	where b.product=@t_product
-	and a.datea between @t_bdate and @t_edate
-	and a.custno between @t_bcustno and @t_ecustno
-	and (len(@t_custtype)=0 or c.typea=@t_custtype)
-	group by a.custno
-end
+
+insert @tmp
+select case when @t_group='1' then '9' else '0' end gno,0 recno,a.custno,'' nick
+,sum(case when b.ucolor='板料' or b.product='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.weight else 0 end) aweight
+,sum(case when b.ucolor='板料' or b.product='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.total else 0 end) atotal
+,case when sum(case when b.ucolor='板料' or b.product='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.weight else 0 end)=0 then 0 
+else sum(case when b.ucolor='板料' or b.product='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.total else 0 end)/
+sum(case when b.ucolor='板料' or b.product='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.weight else 0 end) end aprice
+
+,sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.weight else 0 end) bweight
+,sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.total else 0 end) btotal
+,case when sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.weight else 0 end)=0 then 0 
+else sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.total else 0 end)/
+sum(case when (left(b.ucolor,2)='定尺' or b.ucolor='工地尺吋') and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.weight else 0 end) end bprice
+
+,sum(case when b.ucolor='成型加工' and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.weight else 0 end) cweight
+,sum(case when b.ucolor='成型加工' and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.total else 0 end) ctotal
+,case when sum(case when b.ucolor='成型加工' and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.weight else 0 end)=0 then 0 
+else sum(case when b.ucolor='成型加工' and b.product!='盤元鋼筋' then case when a.typea='2' then -1 else 1 end*b.total else 0 end)/
+sum(case when b.ucolor='成型加工' and b.product!='盤元鋼筋' then b.weight else 0 end) end cprice
+
+--早期有些單子 沒有打類別會導致 前面加總不等於後面總計 這是正常現象
+,sum(case when a.typea='2' then -1 else 1 end*b.weight)weight,sum(case when a.typea='2' then -1 else 1 end*b.total)total
+,case when sum(case when a.typea='2' then -1 else 1 end*b.weight)=0 then 0 
+else sum(case when a.typea='2' then -1 else 1 end*b.total)/sum(case when a.typea='2' then -1 else 1 end*b.weight) end price
+
+from view_vcc a left join view_vccs b on a.noa=b.noa
+left join cust c on a.custno=c.noa
+where (len(@t_product)=0 or isnull(b.product,'')=@t_product)
+and isnull(a.datea,'') between @t_bdate and @t_edate
+and isnull(a.custno,'') between @t_bcustno and @t_ecustno
+and (len(@t_custtype)=0 or isnull(c.typea,'')=@t_custtype)
+group by a.custno
+
+--update @tmp
+--set weight=isnull(aweight,0)+isnull(bweight,0)+isnull(cweight,0)
+--,total=isnull(atotal,0)+isnull(btotal,0)+isnull(ctotal,0)
+--,price=case when isnull(aweight,0)+isnull(bweight,0)+isnull(cweight,0)=0 then 0 
+--else (isnull(aweight,0)+isnull(bweight,0)+isnull(cweight,0))/(isnull(aweight,0)+isnull(bweight,0)+isnull(cweight,0)) end
 
 if(@t_group='1')
 begin
@@ -194,11 +181,10 @@ end
 update @tmp
 set aprice=ROUND(aprice,2),bprice=ROUND(bprice,2),price=ROUND(price,2)
 ,atotal=ROUND(atotal,0),btotal=ROUND(btotal,0),total=ROUND(total,0)
-,aweight=ROUND(aweight/1000,2),bweight=ROUND(bweight/1000,2),weight=ROUND(weight/1000,2)
-,cweight=ROUND(cweight/1000,2)
+,aweight=ROUND(aweight/1000,2),bweight=ROUND(bweight/1000,2),cweight=ROUND(cweight/1000,2)
+,weight=ROUND(weight/1000,2)
 
 select
-case when @t_product='鋼筋' then '板料&盤元鋼筋' else '板料' end title,
 dbo.getComma(aweight,2) aweight,
 dbo.getComma(atotal,0) atotal,
 dbo.getComma(aprice,2) aprice,

@@ -95,7 +95,7 @@
 				$('#lblOrdeweight').text('合約重量');
 				$('#lblGweight').text('已完成');
 				$('#lblEweight').text('合約餘量');
-				$('#lblAtax').text('含稅');
+				$('#lblAtax').text('稅外加');
 				$('#lblChka1').text('含運');
 				$('#lblTotal').text('合約金額');
 				$('#lblEnda').text('終止');

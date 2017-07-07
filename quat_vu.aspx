@@ -84,7 +84,13 @@
 				
 				//q_cmbParse("combUcolor", q_getPara('vccs_vu.typea'),'s');
 				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
-				q_cmbParse("cmbPost2",'@,1@通案,2@慶欣欣專案,3@威致專案,4@工地');
+				//q_cmbParse("cmbPost2",'@,1@通案,2@慶欣欣專案,3@威致專案,4@工地');
+				
+				if(q_getPara('sys.project').toUpperCase()=='VU'){
+					q_cmbParse("cmbPost2",',通案,慶欣欣專案,威致專案,工地');
+				}else{
+					q_cmbParse("cmbPost2",'@');
+				}
 				
 				var t_where = "where=^^ 1=1 ^^";
 				q_gt('ucc', t_where, 0, 0, 0, "");
@@ -97,7 +103,7 @@
 				$('#lblWeight').text('合約重量');
 				$('#lblGweight').text('已完成');
 				$('#lblEweight').text('合約餘量');
-				$('#lblAtax').text('外加稅');
+				$('#lblAtax').text('稅外加');
 				$('#lblChka1').text('含運');
 				$('#lblChka2').text('自運');
 				$('#lblChka3').text('收費');

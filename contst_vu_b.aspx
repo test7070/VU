@@ -69,8 +69,6 @@
 					<th align="center" style='color:Blue;' ><a id='lblNoa'> </a></th>
 					<!--<th align="center" style='color:Blue;' ><a id='lblComp'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblDatea'> </a></th>-->
-					<th align="center" style='color:Blue;' ><a id='lblTypea'> </a></th>
-					<th align="center" style='color:Blue;' ><a id='lblAddr'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblEarnest'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblEweight'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblMemo'> </a></th>
@@ -80,8 +78,6 @@
 					<td style="width:15%;"><input class="txt" id="txtNoa.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<!--<td style="width:45%;"><input class="txt" id="txtComp.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<td style="width:20%;"><input class="txt" id="txtDatea.*" type="text" style="width:98%;"  readonly="readonly" /></td>-->
-					<td style="width:10%;"><input class="txt" id="txtTypea.*" type="text" style="width:98%;"  readonly="readonly" /></td>
-					<td style="width:20%;"><input class="txt" id="txtAddr.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
 					<td style="width:15%;"><input class="txt" id="txtEarnest.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
 					<td style="width:15%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
 					<td style="width:24%;">

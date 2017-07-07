@@ -10,7 +10,7 @@
 		<script src="../script/qbox.js" type="text/javascript"> </script>
     	<link href="../qbox.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
-            var q_name = 'quat', t_content = ' field=noa,datea,comp,price,eweight,memo,atax,salesno,sales,addr2', bbsKey = ['noa'], as;
+            var q_name = 'quat', t_content = ' field=noa,datea,comp,price,eweight,memo,atax,salesno,sales,addr2,post2', bbsKey = ['noa'], as;
             var isBott = false;
             /// 是否已按過 最後一頁
             var txtfield = [], afield, t_data, t_htm, t_bbsTag = 'tbbs';
@@ -41,8 +41,8 @@
 				$('#lblPrice').text('單價');
 				$('#lblEweight').text('合約餘量');
 				$('#lblMemo').text('備註');
-				$('#lblTypea').text('合約類型');
-				$('#lblAddr').text('工地');
+				$('#lblPost2').text('合約類型');
+				$('#lblAddr2').text('工地');
             }
             
             function bbsAssign() {  /// checked 
@@ -54,8 +54,8 @@
 			$('#lblPrice').text('單價');
 			$('#lblEweight').text('合約餘量');
 			$('#lblMemo').text('備註');
-			$('#lblTypea').text('合約類型');
-			$('#lblAddr').text('工地');
+			$('#lblPost2').text('合約類型');
+			$('#lblAddr2').text('工地');
 		}
 		</script>
 		<style type="text/css">
@@ -69,8 +69,8 @@
 					<th align="center" style='color:Blue;' ><a id='lblNoa'> </a></th>
 					<!--<th align="center" style='color:Blue;' ><a id='lblComp'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblDatea'> </a></th>-->
-					<th align="center" style='color:Blue;' ><a id='lblTypea'> </a></th>
-					<th align="center" style='color:Blue;' ><a id='lblAddr'> </a></th>
+					<th align="center" style='color:Blue;' ><a id='lblPost2'> </a></th>
+					<th align="center" style='color:Blue;' ><a id='lblAddr2'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblPrice'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblEweight'> </a></th>
 					<th align="center" style='color:Blue;' ><a id='lblMemo'> </a></th>
@@ -80,8 +80,8 @@
 					<td style="width:15%;"><input class="txt" id="txtNoa.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<!--<td style="width:45%;"><input class="txt" id="txtComp.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<td style="width:20%;"><input class="txt" id="txtDatea.*" type="text" style="width:98%;"  readonly="readonly" /></td>-->
-					<td style="width:10%;"><input class="txt" id="txtTypea.*" type="text" style="width:98%;"  readonly="readonly" /></td>
-					<td style="width:20%;"><input class="txt" id="txtAddr.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
+					<td style="width:10%;"><input class="txt" id="txtPost2.*" type="text" style="width:98%;"  readonly="readonly" /></td>
+					<td style="width:20%;"><input class="txt" id="txtAddr2.*" type="text" style="width:98%;text-align: left;"  readonly="readonly" /></td>
 					<td style="width:15%;"><input class="txt" id="txtPrice.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
 					<td style="width:15%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
 					<td style="width:24%;">

@@ -1283,6 +1283,13 @@ update a set cost=total from #tmp a where a.tablea='rc2s' or a.tablea='ucce'
 declare @uweight float=0
 declare @utotal float=0
 
+delete a
+from #tmp a outer apply (select MAX(datea)mdate,product,ucolor,spec,size,lengthb,class,uno,storeno
+from #tmp where tablea='ucce' group by product,ucolor,spec,size,lengthb,class,uno,storeno)b
+where a.datea<isnull(b.mdate,'') and a.product=b.product and a.ucolor=b.ucolor
+and a.spec=b.spec and a.size=b.size and a.lengthb=b.lengthb and a.class=b.class 
+and a.uno=b.uno and a.storeno=b.storeno
+
 create table #tmpa(
 	gno nvarchar(10),
 	storeno nvarchar(20),

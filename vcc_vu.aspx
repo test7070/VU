@@ -885,9 +885,10 @@
 						for (var i = 0; i < q_bbtCount; i++) {
 							var t_cubsnoa=$('#txtItemno__'+i).val();
 							var t_cubsnoq=$('#txtItem__'+i).val();
+							var t_uno=$('#txtUno__'+i).val();
 							if(t_cubsnoa.length>0){
 								for (var j = i+1; j < q_bbtCount; j++) {
-									if(t_cubsnoa==$('#txtItemno__'+j).val() &&t_cubsnoq==$('#txtItem__'+j).val()){
+									if(t_cubsnoa==$('#txtItemno__'+j).val() &&t_cubsnoq==$('#txtItem__'+j).val() && t_uno==$('#txtUno__'+j).val()){
 										t_repeat=true;
 										$('#btnMinut__'+j).click();
 									}

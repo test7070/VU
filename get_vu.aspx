@@ -446,9 +446,10 @@
 						for (var i = 0; i < q_bbtCount; i++) {
 							var t_cubsnoa=$('#txtOrdeno__'+i).val();
 							var t_cubsnoq=$('#txtNo2__'+i).val();
+							var t_uno=$('#txtUno__'+i).val();
 							if(t_cubsnoa.length>0){
 								for (var j = i+1; j < q_bbtCount; j++) {
-									if(t_cubsnoa==$('#txtOrdeno__'+j).val() &&t_cubsnoq==$('#txtNo2__'+j).val()){
+									if(t_cubsnoa==$('#txtOrdeno__'+j).val() && t_cubsnoq==$('#txtNo2__'+j).val() && t_uno==$('#txtUno__'+j).val()){
 										t_repeat=true;
 										$('#btnMinut__'+j).click();
 									}

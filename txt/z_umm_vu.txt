@@ -72,6 +72,8 @@ z_umm_vu01:--z_umm_vu01 ref. z_ummst01
 	)a
 	order by a.custno,a.datea,a.noa,a.noq
 	
+	CREATE INDEX tmpindex on #tmp (custno,datea,vccno,recno)
+	
 	--沖帳
 	declare cursor_table cursor for
 	select b.custno,b.datea,a.vccno,a.paysale
@@ -909,14 +911,14 @@ z_umm_vu05:--z_umm_vu05
 	
 	--應收金額 --沖帳金額
 	insert #tmp(gno,custno,noa,sale,paysale,opay,unopay)
-	select '9',a.custno,left(a.apvmemo,charindex('@',a.apvmemo)-1)
+	select '9',a.custno,left(a.apvmemo,case when CHARINDEX('@',a.apvmemo)=0 then LEN(a.apvmemo) else charindex('@',a.apvmemo)-1 end)
 	,isnull(sum((case when a.typea!='1' then -1 else 1 end) *a.total),0),isnull(sum(b.paysale),0),0,0
 	from view_vcc a outer apply (select SUM(paysale)paysale from umms where vccno=a.noa)b
 	where a.datea between @t_bdate and @t_edate
-	and exists (select * from #tmp where noa=left(a.apvmemo,charindex('@',a.apvmemo)-1))
+	and exists (select * from #tmp where noa=left(a.apvmemo,case when CHARINDEX('@',a.apvmemo)=0 then LEN(a.apvmemo) else charindex('@',a.apvmemo)-1 end))
 	--and a.custno between @t_bcustno and @t_ecustno
 	--and left(a.apvmemo,charindex('@',a.apvmemo)-1)!=''
-	group by a.custno,left(a.apvmemo,charindex('@',a.apvmemo)-1)
+	group by a.custno,left(a.apvmemo,case when CHARINDEX('@',a.apvmemo)=0 then LEN(a.apvmemo) else charindex('@',a.apvmemo)-1 end)
 	
 	--預收金額 --預收沖帳
 	insert #tmp(gno,custno,noa,opay,unopay,sale,paysale)
@@ -943,11 +945,11 @@ z_umm_vu05:--z_umm_vu05
 	if LEN(@t_detail)>0
 	begin
 		insert #tmp(gno,custno,noa,vccno,sale,paysale,opay,unopay,ghref)
-		select '1',a.custno,left(a.apvmemo,charindex('@',a.apvmemo)-1),a.noa
+		select '1',a.custno,left(a.apvmemo,case when CHARINDEX('@',a.apvmemo)=0 then LEN(a.apvmemo) else charindex('@',a.apvmemo)-1 end),a.noa
 		,(case when a.typea!='1' then -1 else 1 end) *isnull(a.total,0),isnull(b.paysale,0),null,null,'vcc_vu?noa=$vccno'
 		from view_vcc a outer apply (select SUM(paysale)paysale from umms where vccno=a.noa)b
 		where a.datea between @t_bdate and @t_edate
-		and exists (select * from #tmp where noa=left(a.apvmemo,charindex('@',a.apvmemo)-1))
+		and exists (select * from #tmp where noa=left(a.apvmemo,case when CHARINDEX('@',a.apvmemo)=0 then LEN(a.apvmemo) else charindex('@',a.apvmemo)-1 end))
 		--and a.custno between @t_bcustno and @t_ecustno
 		--and left(a.apvmemo,charindex('@',a.apvmemo)-1)!=''
 	end
@@ -961,7 +963,7 @@ z_umm_vu05:--z_umm_vu05
 	from view_vcc a outer apply (select SUM(paysale)paysale from umms where vccno=a.noa)b
 	where a.datea between @t_bdate and @t_edate
 	and a.custno between @t_bcustno and @t_ecustno
-	and left(a.apvmemo,charindex('@',a.apvmemo)-1)=''
+	and left(a.apvmemo,case when  CHARINDEX('@',a.apvmemo)=0 then LEN(a.apvmemo) else charindex('@',a.apvmemo)-1 end)=''
 	
 	insert #tmp(gno,custno,noa,datea,opay,unopay,sale,paysale,unpay,qhref)
 	select '0',custno,noa,datea,isnull(opay,0),isnull(unopay,0),0,0,0-isnull(opay,0)+isnull(unopay,0)

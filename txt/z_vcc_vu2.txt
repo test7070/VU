@@ -1146,27 +1146,28 @@ declare @ttotal float
 	)
 
 	--只看號數和材質
-
+	--106/07/20 根據品名的單位去顯示 (*最後一次調整)
+	
 	--成入
 	insert #xtmp
 	select '0','ucce',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 	,b.weight,case when b.weight=0 then 0 else b.total/b.weight end,b.total
 	,case when b.weight=0 then 0 else b.total/b.weight end,b.total
 	from view_ucce a left join view_ucces b on a.noa=b.noa
+	left join ucc d on b.product=d.product
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
-	and not(isnull(b.product,'') like '續接%' or isnull(b.product,'') like '水泥方塊%' or isnull(b.product,'') like '%費' 
-	or isnull(b.product,'') like '組接%'  or isnull(b.product,'') like '其它%')
-	and (b.storeno='A' or b.storeno='A1') and b.weight>0
+	and UPPER(isnull(d.unit,''))='KG'
+	and (b.storeno='A') and b.weight>0
 
 	--成領
 	insert #xtmp
 	select '1','uccet',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 	,-1*b.weight,0,0,0,0
 	from view_ucce a left join view_ucces b on a.noa=b.noa
+	left join ucc d on b.product=d.product
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
-	and not(isnull(b.product,'') like '續接%' or isnull(b.product,'') like '水泥方塊%' or isnull(b.product,'') like '%費' 
-	or isnull(b.product,'') like '組接%'  or isnull(b.product,'') like '其它%')
-	and (b.storeno='A' or b.storeno='A1') and b.weight<0
+	and UPPER(isnull(d.unit,''))='KG'
+	and (b.storeno='A') and b.weight<0
 
 	--進
 	insert #xtmp
@@ -1175,11 +1176,10 @@ declare @ttotal float
 	,case when a.typea='2' then -1 else 1 end*b.total,b.price
 	,case when a.typea='2' then -1 else 1 end*b.total
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
+	left join ucc d on b.product=d.product
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
-	and not(isnull(b.product,'') like '續接%' or isnull(b.product,'') like '水泥方塊%' or isnull(b.product,'') like '%費' 
-	or isnull(b.product,'') like '組接%'  or isnull(b.product,'') like '其它%')
-	and (b.storeno='A' or b.storeno='A1')
-	and a.datea>='2017/06/03'
+	and UPPER(isnull(d.unit,''))='KG'
+	and (b.storeno='A')
 
 	--銷
 	insert #xtmp
@@ -1187,11 +1187,10 @@ declare @ttotal float
 	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 	,case when a.typea='2' then -1 else 1 end*b.total,0,0
 	from view_vcc a left join view_vccs b on a.noa=b.noa
+	left join ucc d on b.product=d.product
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
-	and not(isnull(b.product,'') like '續接%' or isnull(b.product,'') like '水泥方塊%' or isnull(b.product,'') like '%費' 
-	or isnull(b.product,'') like '組接%'  or isnull(b.product,'') like '其它%')
-	and (b.storeno='A' or b.storeno='A1')
-	and a.datea>='2017/06/03'
+	and UPPER(isnull(d.unit,''))='KG'
+	and (b.storeno='A')
 
 	CREATE INDEX tmpindex0 on #xtmp (datea,tablea,typea,noa,noq,product,spec,size)
 	CREATE INDEX tmpindex1 on #xtmp (product,spec,size,datea,typea,noa,noq)

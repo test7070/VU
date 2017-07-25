@@ -37,7 +37,7 @@ declare @tmp1 table(
 )
 
 insert into @tmp1
-select '0',a.noa,a.datea,a.tggno,a.comp,a.addr,a.ordeno,a.total,cast(replace(a.transtyle,',','') as float),a.mount,a.memo,
+select '0',a.noa,a.datea,a.tggno,a.comp,a.addr,a.ordeno,a.tweight,cast(replace(a.transtyle,',','') as float),a.mount,a.memo,
 	   b.ucolor,b.spec,b.product,b.size,b.lengthb,b.weight,b.memo,
 	   a.trantype,a.transtart,a.cardeal,b.store,a.carno,a.typea
 from view_ina a

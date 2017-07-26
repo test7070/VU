@@ -1408,21 +1408,22 @@ from view_ucce a left join view_ucces b on a.noa=b.noa
 where a.datea<=@t_enddate 
 and b.storeno='A' and isnull(b.productno,'')='' and b.weight<0
 
+--106/07/26 暫時先將委外的部分排除 後面要等戴先生再修正
 --調入(全部都當成板料)
-insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '11','vcf',a.datea,a.noa,b.noq,b.product,b.spec,b.size,'' ucolor,0 lengthb,'' class,b.storeno
-,b.mount,b.weight,b.money,0,0
-from vcf a left join vcfs b on a.noa=b.noa
-where a.datea<=@t_enddate 
-and b.storeno='A' and isnull(b.productno,'')='' and b.weight>0
+--insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+--select '11','vcf',a.datea,a.noa,b.noq,b.product,b.spec,b.size,'' ucolor,0 lengthb,'' class,b.storeno
+--,b.mount,b.weight,b.money,0,0
+--from vcf a left join vcfs b on a.noa=b.noa
+--where a.datea<=@t_enddate 
+--and b.storeno='A' and isnull(b.productno,'')='' and b.weight>0
 
 --調領(全部都當成板料)
-insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '12','vcft',a.datea,a.noa,b.noq,b.product,b.spec,b.size,'' ucolor,0 lengthb,'' class,b.storeno
-,-1*b.mount,-1*b.weight,0,0,0
-from vcf a left join vcfs b on a.noa=b.noa
-where a.datea<=@t_enddate 
-and b.storeno='A' and isnull(b.productno,'')='' and b.weight<0
+--insert #tmp (gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+--select '12','vcft',a.datea,a.noa,b.noq,b.product,b.spec,b.size,'' ucolor,0 lengthb,'' class,b.storeno
+--,-1*b.mount,-1*b.weight,0,0,0
+--from vcf a left join vcfs b on a.noa=b.noa
+--where a.datea<=@t_enddate 
+--and b.storeno='A' and isnull(b.productno,'')='' and b.weight<0
 
 --進
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -1435,12 +1436,12 @@ outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec
 where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
 and b.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
 	
-insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '15','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
-from view_ina a left join view_inas b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
-where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
-and a.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
+--insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+--select '15','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
+--from view_ina a left join view_inas b on a.noa=b.noa
+--outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+--where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+--and a.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '17','cubt',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
@@ -1449,12 +1450,12 @@ outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec
 where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
 and b.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
 	
-insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '18','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
-from view_get a left join view_gets b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
-where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
-and a.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
+--insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
+--select '18','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
+--from view_get a left join view_gets b on a.noa=b.noa
+--outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+--where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
+--and a.storeno='A' and isnull(b.productno,'')='' and b.ucolor='板料'
 
 --105/04/20 出貨板料也要扣
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)

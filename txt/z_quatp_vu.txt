@@ -35,6 +35,7 @@ END
 create table #tmp(
 	gno nvarchar(2),
 	recno nvarchar(10),
+	accy nvarchar(10),
 	datea nvarchar(50),
 	noa nvarchar(50),
 	cno nvarchar(50),
@@ -60,7 +61,7 @@ create table #tmp(
 CREATE INDEX tmp_index ON #tmp (noa)
 
 insert #tmp
-select '0',row_number() over(order by a.custno,a.datea,a.noa),a.datea,a.noa
+select '0',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
 ,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end,'','','',isnull(b.price,0),0,a.weight,a.eweight
 --,isnull(b.price,0)*a.eweight
 ,0
@@ -77,7 +78,7 @@ and (post2=@t_xpost2 or len(@t_xpost2)=0)
 
 if(CHARINDEX('sel3',@t_option02)>0)
 begin
-	update #tmp 	set grpno=custno,grpname=comp 	where isnull(grpno,'')=''
+	update #tmp set grpno=custno,grpname=comp where isnull(grpno,'')=''
 	update a set recno=rr 	from (select recno,ROW_NUMBER() over(order by grpno,custno,datea,noa) rr from #tmp) a
 end
 
@@ -246,7 +247,7 @@ begin
 	dbo.getComma(emoney,0)emoney,
 	dbo.getComma(opay,0)opay,
 	dbo.getComma(vmoney,0)vmoney,
-	'quat_vu?noa=$noa?' qhrefa,
+	'quat_vu?noa=$noa?'+a.accy qhrefa,
 	"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 	case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
 	* from #tmp a
@@ -260,7 +261,7 @@ begin
 	dbo.getComma(emoney,0)emoney,
 	dbo.getComma(opay,0)opay,
 	dbo.getComma(vmoney,0)vmoney,
-	'quat_vu?noa=$noa?' qhrefa, 
+	'quat_vu?noa=$noa?'+a.accy qhrefa, 
 	"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 	'' grpname,
 	* from #tmp a

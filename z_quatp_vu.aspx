@@ -13,7 +13,7 @@
 		<link href="css/jquery/themes/redmond/jquery.ui.all.css" rel="stylesheet" type="text/css" />
 		<script src="css/jquery/ui/jquery.ui.core.js"></script>
 		<script src="css/jquery/ui/jquery.ui.widget.js"></script>
-		<script src="css/jquery/ui/jquery.ui.datepicker.js"></script>
+		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"></script>
 		<script type="text/javascript">
 			var custtypeItem = '';
 			var xuccItem ='';
@@ -88,16 +88,23 @@
                         type : '5',//篩選完工未完工//
 						name : 'xpost2',
 						value : [' @全部','通案','慶欣欣專案','威致專案','工地']
+                    }, {/*2-1 [15] SF用*/
+                        type : '5',//排序
+						name : 'xorder',
+						value : ['custno@客戶編號','edate@完工日']
                     }]
                 });
                 q_popAssign();
 				q_getFormat();
 				q_langShow();
+				
+				if(r_len==4){                	
+                	$.datepicker.r_len=4;
+					//$.datepicker.setDefaults($.datepicker.regional["ENG"]);
+                }
 
 				$('#txtDate1').mask(r_picd);
                 $('#txtDate2').mask(r_picd);
-                $('#txtDate1').datepicker({dateFormat : 'yy/mm/dd'});
-                $('#txtDate2').datepicker({dateFormat : 'yy/mm/dd'});
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();

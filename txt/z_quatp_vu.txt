@@ -7,6 +7,7 @@ declare @t_option01 nvarchar(10)
 declare @t_option02 nvarchar(10)
 declare @t_xaddr2 nvarchar(100)
 declare @t_xpost2 nvarchar(100)
+declare @t_xorder nvarchar(100)
 
 set @t_bdate = case when '#non'=[7] then '' else [7] end
 set @t_edate = case when '#non'=[8] then char(255) else [8] end
@@ -16,6 +17,7 @@ set @t_option01 = case when '#non'=[12] then '' else [12] end
 set @t_option02 = case when '#non'=[9] then '' else [9] end
 set @t_xaddr2 = case when '#non'=[13] then '' else [13] end
 set @t_xpost2 = case when '#non'=[14] then '' else [14] end 
+set @t_xorder = case when '#non'=[15] then 'custno' else [15] end 
 --sel1含明細表--sel2含合約終止--sel3含集團小計
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
@@ -208,64 +210,98 @@ begin
 		set grpno=custno,grpname=comp
 		where isnull(grpno,'')=''
 	
-		insert into #tmp(gno,grpno,grpname,custno,noa,datea,weight,eweight,price,emoney,opay,vmoney)
-		select '1',grpno,MAX(grpname),MAX(custno),MAX(noa),MAX(datea),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
+		insert into #tmp(gno,grpno,grpname,custno,noa,datea,enddate,weight,eweight,price,emoney,opay,vmoney)
+		select '1',grpno,MAX(grpname),MAX(custno),MAX(noa),MAX(datea),MAX(enddate),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
 		,sum(emoney),sum(opay),sum(vmoney) 
 		from #tmp where gno = '0' group by grpno
 			
-		insert #tmp (gno,noa,memo,custno,datea,grpno) 
-		select '4',noa,memo,custno,datea,grpno from #tmp where gno = '0' group by noa,memo,custno,datea,grpno
+		insert #tmp (gno,noa,memo,custno,datea,enddate,grpno) 
+		select '4',noa,memo,custno,datea,enddate,grpno from #tmp where gno = '0' group by noa,memo,custno,datea,enddate,grpno
 	end
 	else
 	begin
-		insert into #tmp(gno,custno,noa,datea,weight,eweight,price,emoney,opay,vmoney)
-		select '1',custno,MAX(noa),MAX(datea),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
+		insert into #tmp(gno,custno,noa,datea,enddate,weight,eweight,price,emoney,opay,vmoney)
+		select '1',custno,MAX(noa),MAX(datea),MAX(enddate),sum(weight),sum(eweight),case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
 		,sum(emoney),sum(opay),sum(vmoney) 
 		from #tmp where gno = '0' group by custno
 		
-		insert #tmp (gno,noa,memo,custno,datea) 
-		select '4',noa,memo,custno,datea from #tmp where gno = '0' group by noa,memo,custno,datea
+		insert #tmp (gno,noa,memo,custno,datea,enddate) 
+		select '4',noa,memo,custno,datea,enddate from #tmp where gno = '0' group by noa,memo,custno,datea,enddate
 	end
 	
-	insert into #tmp(gno,custno,grpno,datea,weight,eweight,price,qprice,emoney,opay,vmoney)
-	select '3',char(255),CHAR(255),char(255),sum(weight),sum(eweight)
+	insert into #tmp(gno,custno,grpno,datea,enddate,weight,eweight,price,qprice,emoney,opay,vmoney)
+	select '3',char(255),CHAR(255),char(255),char(255),sum(weight),sum(eweight)
 	,case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
 	,case when sum(weight)=0 then 0 else round(sum(weight*price)/sum(weight),2) end
 	,sum(emoney),sum(opay),sum(vmoney)
 	from #tmp where gno = '0'
 	
 	--1050307 一頁十行
-	insert #tmp(gno,custno,noa,datea,recno,grpno,grpname)
-	select '5',custno,noa,datea,recno,grpno,grpname from #tmp where gno='0' and recno%10=0 
+	insert #tmp(gno,custno,noa,datea,enddate,recno,grpno,grpname)
+	select '5',custno,noa,datea,enddate,recno,grpno,grpname from #tmp where gno='0' and recno%10=0 
 end
 
 if(CHARINDEX('sel3',@t_option02)>0) --集團排序
 begin
-	select 
-	dbo.getComma(weight,[5])+' KG' weight,
-	dbo.getComma(eweight,[5]) eweight,
-	dbo.getComma(emoney,0)emoney,
-	dbo.getComma(opay,0)opay,
-	dbo.getComma(vmoney,0)vmoney,
-	'quat_vu?noa=$noa?'+a.accy qhrefa,
-	"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
-	case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
-	* from #tmp a
-	order by grpno,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
+	if(@t_xorder='edate')
+	begin
+		select 
+		dbo.getComma(weight,[5])+' KG' weight,
+		dbo.getComma(eweight,[5]) eweight,
+		dbo.getComma(emoney,0)emoney,
+		dbo.getComma(opay,0)opay,
+		dbo.getComma(vmoney,0)vmoney,
+		'quat_vu?noa=$noa?'+a.accy qhrefa,
+		"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
+		* from #tmp a
+		order by grpno,enddate,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
+	end
+	else
+	begin
+		select 
+		dbo.getComma(weight,[5])+' KG' weight,
+		dbo.getComma(eweight,[5]) eweight,
+		dbo.getComma(emoney,0)emoney,
+		dbo.getComma(opay,0)opay,
+		dbo.getComma(vmoney,0)vmoney,
+		'quat_vu?noa=$noa?'+a.accy qhrefa,
+		"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
+		* from #tmp a
+		order by grpno,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
+	end
 end
 else
 begin
-	select 
-	dbo.getComma(weight,[5])+' KG' weight,
-	dbo.getComma(eweight,[5]) eweight,
-	dbo.getComma(emoney,0)emoney,
-	dbo.getComma(opay,0)opay,
-	dbo.getComma(vmoney,0)vmoney,
-	'quat_vu?noa=$noa?'+a.accy qhrefa, 
-	"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
-	'' grpname,
-	* from #tmp a
-	order by custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
+	if(@t_xorder='edate')
+	begin
+		select 
+		dbo.getComma(weight,[5])+' KG' weight,
+		dbo.getComma(eweight,[5]) eweight,
+		dbo.getComma(emoney,0)emoney,
+		dbo.getComma(opay,0)opay,
+		dbo.getComma(vmoney,0)vmoney,
+		'quat_vu?noa=$noa?'+a.accy qhrefa, 
+		"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		'' grpname,
+		* from #tmp a
+		order by enddate,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
+	end
+	else
+	begin
+		select 
+		dbo.getComma(weight,[5])+' KG' weight,
+		dbo.getComma(eweight,[5]) eweight,
+		dbo.getComma(emoney,0)emoney,
+		dbo.getComma(opay,0)opay,
+		dbo.getComma(vmoney,0)vmoney,
+		'quat_vu?noa=$noa?'+a.accy qhrefa, 
+		"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		'' grpname,
+		* from #tmp a
+		order by custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
+	end
 end
 
 IF OBJECT_ID('tempdb..#tmpa')is not null

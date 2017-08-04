@@ -54,6 +54,11 @@ create table #tmp(
 
 --106/05/24
 --只看號數和材質,7000和7000A當一個倉庫
+--106/06/22
+--增加7000B
+--106/08/03
+--鋼筋成本只看材質 如三泰 但 仍要顯示明細重量進銷存
+
 
 --調整
 insert #tmp
@@ -117,8 +122,8 @@ create table #tmpb(
 	primary key (storeno,product,spec,size,mon)
 )
 insert #tmpb
-select LEFT(datea,@t_lenm),storeno,product,spec,size,0,0,0,0
-from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size
+select LEFT(datea,@t_lenm),storeno,product,spec,'' size,0,0,0,0
+from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec
 
 --------------------------------------------------------------------
 declare @tablea nvarchar(10)
@@ -151,7 +156,7 @@ declare @ttotal float
 
 --計算成本
 declare cursor_table cursor for
-select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,size,noa,noq,isnull(weight,0),isnull(total,0)
+select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,'' size,noa,noq,isnull(weight,0),isnull(total,0)
 from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,storeno,product,spec,size
 open cursor_table
 fetch next from cursor_table
@@ -256,11 +261,11 @@ create table #tmpa(
 
 --插入資料
 insert #tmpa (gno,storeno,product,spec,size,bw,bm,lw,lp,lm)
-select '9',storeno,product,spec,size,0,0,0,0,0
+select '9',storeno,product,spec,'' size,0,0,0,0,0
 from #tmp 
 where (len(@t_pno)=0 or isnull(product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
-group by storeno,product,spec,size
+group by storeno,product,spec
 
 CREATE INDEX tmpaindex on #tmpa (storeno,product,spec,size,gno)
 
@@ -272,7 +277,7 @@ set @tsize='#non'
 CREATE INDEX tmpindex3 on #tmp (storeno,product,spec,size,datea,typea,noa,noq)
 
 declare cursor_table cursor for
-select tablea,datea,storeno,product,spec,size,isnull(weight,0),isnull(cost,0)
+select tablea,datea,storeno,product,spec,'' size,isnull(weight,0),isnull(cost,0)
 from #tmp where
 (len(@t_pno)=0 or isnull(product,'')=@t_pno) 
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
@@ -347,9 +352,9 @@ set rw=isnull(b.weight,0),rm=isnull(b.cost,0),
 	vm=isnull(c.total,0),profit=case when isnull(c.cost,0)=0 then 0 else round((isnull(c.total,0)-isnull(c.cost,0))/c.cost*100,2) end,
 	dw=ISNULL(d.weight,0),dm=isnull(d.total,0)
 from #tmpa a
-outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='rc2s') and datea between @t_bdate and @t_edate)b
-outer apply (select SUM(weight)weight,SUM(cost)cost,SUM(total)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size  and (tablea='vccs') and datea between @t_bdate and @t_edate )c
-outer apply (select SUM(case when tablea='vcft' then -1 else 1 end*weight)weight,SUM(case when tablea='vcft' then -1 else 1 end*cost)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size  and (tablea='vcf' or tablea='vcft') and datea between @t_bdate and @t_edate )d
+outer apply (select SUM(weight)weight,SUM(cost)cost from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and (tablea='rc2s') and datea between @t_bdate and @t_edate)b
+outer apply (select SUM(weight)weight,SUM(cost)cost,SUM(total)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec  and (tablea='vccs') and datea between @t_bdate and @t_edate )c
+outer apply (select SUM(case when tablea='vcft' then -1 else 1 end*weight)weight,SUM(case when tablea='vcft' then -1 else 1 end*cost)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec  and (tablea='vcf' or tablea='vcft') and datea between @t_bdate and @t_edate )d
 
 --update #tmpa
 --set dw=round(lw-(bw+rw-vw),4)
@@ -358,26 +363,17 @@ outer apply (select SUM(case when tablea='vcft' then -1 else 1 end*weight)weight
 delete #tmpa where bw=0 and rw=0 and vw=0 and dw=0 and lw=0
 
 insert #tmpa (gno,product,spec,size,bw,bm,rw,rm,vw,vc,vm,profit,dw,dm,lw,lp,lm)
-select '2'gno,product,spec,size
+select '3'gno,product,spec,size
 ,sum(bw),sum(bm),sum(rw),sum(rm)
 ,sum(vw),sum(vc),sum(vm)
 ,case when isnull(sum(vc),0)=0 then 0 else round((isnull(sum(vm),0)-isnull(sum(vc),0))/sum(vc)*100,2) end
 ,sum(dw),sum(dm),sum(lw),case when sum(lw)=0 then 0 else round(sum(lm)/sum(lw),4) end,sum(lm)
 from #tmpa where gno='9' group by product,spec,size
 
-if((select count(*) from #tmpa where gno='2')>0)
+if((select count(*) from #tmpa where gno='3')>0)
 begin
 	insert #tmpa (gno)
 	select '1'gno
-	
-	insert #tmpa (gno,product,spec,bw,bm,rw,rm,vw,vc,vm,profit,dw,dm,lw,lp,lm)
-	select '3'gno,CHAR(255),spec
-	,sum(bw),sum(bm),sum(rw),sum(rm)
-	,sum(vw),sum(vc),sum(vm)
-	,case when isnull(sum(vc),0)=0 then 0 else round((isnull(sum(vm),0)-isnull(sum(vc),0))/sum(vc)*100,2) end
-	,sum(dw),sum(dm),sum(lw),case when sum(lw)=0 then 0 else round(sum(lm)/sum(lw),4) end,sum(lm)
-	from #tmpa where gno='9' 
-	group by spec
 	
 	insert #tmpa (gno,product,spec,size,bw,bm,rw,rm,vw,vc,vm,profit,dw,dm,lw,lp,lm)
 	select '4'gno,CHAR(255),CHAR(255),CHAR(255)
@@ -386,6 +382,26 @@ begin
 	,case when isnull(sum(vc),0)=0 then 0 else round((isnull(sum(vm),0)-isnull(sum(vc),0))/sum(vc)*100,2) end
 	,sum(dw),sum(dm),sum(lw),case when sum(lw)=0 then 0 else round(sum(lm)/sum(lw),4) end,sum(lm)
 	from #tmpa where gno='9' 
+	
+	--插入 材質號數數量小計資料 成本不帶入
+	insert #tmpa (gno,product,spec,size,bw)
+	select '2',product,spec,size,
+	sum(case when datea>=@t_bdate then 0 when tablea='rc2s' or tablea='vcf' then 1 else -1 end* weight)
+	from #tmp where (len(@t_pno)=0 or isnull(product,'')=@t_pno)
+	and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
+	group by product,spec,size
+	
+	update a
+	set rw=isnull(b.rw,0),vw=isnull(b.vw,0),dw=isnull(b.dw,0)
+	,lw=isnull(bw,0)+isnull(b.rw,0)-isnull(b.vw,0)+isnull(b.dw,0)
+	from #tmpa a outer apply (select 
+	sum(case when tablea='rc2s' then 1 else 0 end * weight) rw,
+	sum(case when tablea='vccs' then 1 else 0 end * weight) vw,
+	SUM(case when tablea='vcf' then 1 when tablea='vcft' then -1 else 0 end*weight) dw
+	from #tmp where product=a.product and spec=a.spec and size=a.size and datea between @t_bdate and @t_edate)b
+	where gno='2'
+	
+	delete #tmpa where bw=0 and rw=0 and vw=0 and dw=0 and lw=0 and gno='2'
 end
 
 delete #tmpa where gno='9'
@@ -461,8 +477,8 @@ and a.datea>='2017/06/03'
 delete #tmpb
 
 insert #tmpb
-select LEFT(datea,@t_lenm),storeno,product,spec,size,0,0,0,0
-from #tmp group by LEFT(datea,@t_lenm),storeno,product,spec,size
+select LEFT(datea,@t_lenm),storeno,product,'' spec,size,0,0,0,0
+from #tmp group by LEFT(datea,@t_lenm),storeno,product,size
 
 --------------------------------------------------------------------
 declare @mount float=0
@@ -478,7 +494,7 @@ set @tsize='#non'
 
 --計算成本
 declare cursor_table cursor for
-select tablea,datea,LEFT(datea,@t_lenm),storeno,product,spec,size,noa,noq,isnull(mount,0),isnull(total,0)
+select tablea,datea,LEFT(datea,@t_lenm),storeno,product,'' spec,size,noa,noq,isnull(mount,0),isnull(total,0)
 from #tmp order by LEFT(datea,@t_lenm),datea,typea,noa,noq,storeno,product,spec,size
 open cursor_table
 fetch next from cursor_table
@@ -496,7 +512,7 @@ begin
 		end
 	end
 	
-	if(@tstoreno!=@storeno or @tproduct!=@product or @tspec!=@spec or @tsize!=@size  or @t_mon!=@mon )
+	if(@tstoreno!=@storeno or @tproduct!=@product or @tspec!=@spec or @tsize!=@size or @t_mon!=@mon )
 	begin
 		if(@tproduct!='#non')
 		begin
@@ -572,11 +588,11 @@ delete #tmpa where gno>='5'
 
 --插入資料
 insert #tmpa (gno,storeno,product,spec,size,bo,bm,lo,lp,lm)
-select '9',storeno,product,spec,size,0,0,0,0,0
+select '9',storeno,product,'' spec,size,0,0,0,0,0
 from #tmp 
 where (len(@t_pno)=0 or isnull(product,'')=@t_pno) 
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
-group by storeno,product,spec,size
+group by storeno,product,size
 
 set @tstoreno='#non'
 set @tproduct='#non'
@@ -584,7 +600,7 @@ set @tspec='#non'
 set @tsize='#non'
 
 declare cursor_table cursor for
-select tablea,datea,storeno,product,spec,size,isnull(mount,0),isnull(cost,0)
+select tablea,datea,storeno,product,'' spec,size,isnull(mount,0),isnull(cost,0)
 from #tmp where
 (len(@t_pno)=0 or isnull(product,'')=@t_pno) 
 and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
@@ -661,9 +677,9 @@ set ro=isnull(b.mount,0),rm=isnull(b.cost,0),
 	vm=isnull(c.total,0),profit=case when isnull(c.cost,0)=0 then 0 else round((isnull(c.total,0)-isnull(c.cost,0))/c.cost*100,2) end,
 	do=ISNULL(d.mount,0),dm=ISNULL(d.total,0)
 from #tmpa a
-outer apply (select SUM(mount)mount,SUM(cost)cost from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='rc2s' or tablea='inas') and datea between @t_bdate and @t_edate)b
-outer apply (select SUM(mount)mount,SUM(cost)cost,SUM(total)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='vccs' or tablea='gets') and datea between @t_bdate and @t_edate )c
-outer apply (select SUM(case when tablea='vcft' then -1 else 1 end*mount)mount,SUM(case when tablea='vcft' then -1 else 1 end*cost)total from #tmp where storeno=a.storeno and product=a.product and spec=a.spec and size=a.size and (tablea='vcf' or tablea='vcft') and datea between @t_bdate and @t_edate)d
+outer apply (select SUM(mount)mount,SUM(cost)cost from #tmp where storeno=a.storeno and product=a.product and size=a.size and (tablea='rc2s' or tablea='inas') and datea between @t_bdate and @t_edate)b
+outer apply (select SUM(mount)mount,SUM(cost)cost,SUM(total)total from #tmp where storeno=a.storeno and product=a.product and size=a.size and (tablea='vccs' or tablea='gets') and datea between @t_bdate and @t_edate )c
+outer apply (select SUM(case when tablea='vcft' then -1 else 1 end*mount)mount,SUM(case when tablea='vcft' then -1 else 1 end*cost)total from #tmp where storeno=a.storeno and product=a.product and size=a.size and (tablea='vcf' or tablea='vcft') and datea between @t_bdate and @t_edate)d
 where a.gno>='5'
 
 --update #tmpa
@@ -674,26 +690,17 @@ where a.gno>='5'
 delete #tmpa where bo=0 and ro=0 and vo=0 and do=0 and lo=0 and gno='9'
 
 insert #tmpa (gno,product,spec,size,bo,bm,ro,rm,vo,vc,vm,profit,do,dm,lo,lp,lm)
-select '6'gno,product,spec,size
+select '7'gno,product,spec,size
 ,sum(bo),sum(bm),sum(ro),sum(rm)
 ,sum(vo),sum(vc),sum(vm)
 ,case when isnull(sum(vc),0)=0 then 0 else round((isnull(sum(vm),0)-isnull(sum(vc),0))/sum(vc)*100,2) end
 ,sum(do),sum(dm),sum(lo),case when sum(lo)=0 then 0 else round(sum(lm)/sum(lo),4) end,sum(lm)
 from #tmpa where gno='9' group by product,spec,size
 
-if((select count(*) from #tmpa where gno='6')>0)
+if((select count(*) from #tmpa where gno='7')>0)
 begin
 	insert #tmpa (gno)
 	select '5'gno
-	
-	insert #tmpa (gno,product,spec,bo,bm,ro,rm,vo,vc,vm,profit,do,dm,lo,lp,lm)
-	select '7'gno,CHAR(255),spec
-	,sum(bo),sum(bm),sum(ro),sum(rm)
-	,sum(vo),sum(vc),sum(vm)
-	,case when isnull(sum(vc),0)=0 then 0 else round((isnull(sum(vm),0)-isnull(sum(vc),0))/sum(vc)*100,2) end
-	,sum(do),sum(dm),sum(lo),case when sum(lo)=0 then 0 else round(sum(lm)/sum(lo),4) end,sum(lm)
-	from #tmpa where gno='9' 
-	group by spec
 	
 	insert #tmpa (gno,product,spec,size,bo,bm,ro,rm,vo,vc,vm,profit,do,dm,lo,lp,lm)
 	select '8'gno,CHAR(255),CHAR(255),CHAR(255)
@@ -702,6 +709,26 @@ begin
 	,case when isnull(sum(vc),0)=0 then 0 else round((isnull(sum(vm),0)-isnull(sum(vc),0))/sum(vc)*100,2) end
 	,sum(do),sum(dm),sum(lo),case when sum(lo)=0 then 0 else round(sum(lm)/sum(lo),4) end,sum(lm)
 	from #tmpa where gno='9' 
+	
+	--插入 材質號數數量小計資料 成本不帶入
+	insert #tmpa (gno,product,spec,size,bm)
+	select '6',product,spec,size,
+	sum(case when datea>=@t_bdate then 0 when tablea='rc2s' or tablea='vcf' or tablea='inas' then 1 else -1 end* mount)
+	from #tmp where (len(@t_pno)=0 or isnull(product,'')=@t_pno)
+	and (len(@t_spec)=0 or isnull(spec,'')=@t_spec) and (len(@t_size)=0 or isnull(size,'')=@t_size)
+	group by product,spec,size
+	
+	update a
+	set rm=isnull(b.rm,0),vm=isnull(b.vm,0),dm=isnull(b.dm,0)
+	,lm=isnull(bm,0)+isnull(b.rm,0)-isnull(b.vm,0)+isnull(b.dm,0)
+	from #tmpa a outer apply (select 
+	sum(case when tablea='rc2s' or tablea='inas' then 1 else 0 end * mount) rm,
+	sum(case when tablea='vccs' or tablea='gets' then 1 else 0 end * mount) vm,
+	SUM(case when tablea='vcf' then 1 when tablea='vcft' then -1 else 0 end*mount) dm
+	from #tmp where product=a.product and spec=a.spec and size=a.size and datea between @t_bdate and @t_edate)b
+	where gno='6'
+	
+	delete #tmpa where bm=0 and rm=0 and vm=0 and dm=0 and lm=0 and gno='6'
 end
 
 delete #tmpa where gno='9'

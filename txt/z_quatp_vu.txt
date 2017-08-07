@@ -236,6 +236,22 @@ begin
 	,sum(emoney),sum(opay),sum(vmoney)
 	from #tmp where gno = '0'
 	
+	if(@t_xorder='edate')
+	begin
+		if(CHARINDEX('sel3',@t_option02)>0) --集團小計
+		begin
+			update a
+			set recno=rr
+			from (select recno,row_number() over(order by grpno,enddate,custno,datea,noa)rr from #tmp where gno='0') a
+		end
+		else
+		begin
+			update a
+			set recno=rr
+			from (select recno,row_number() over(order by enddate,custno,datea,noa)rr from #tmp where gno='0') a
+		end
+	end
+	
 	--1050307 一頁十行
 	insert #tmp(gno,custno,noa,datea,enddate,recno,grpno,grpname)
 	select '5',custno,noa,datea,enddate,recno,grpno,grpname from #tmp where gno='0' and recno%10=0 

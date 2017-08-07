@@ -357,6 +357,7 @@ begin
 	CREATE INDEX tmpindex2 on #xtmp (tablea,noa,noq)
 	
 	delete #xtmp where spec=''
+	update #xtmp set size=''
 	--------------------------------------------------------------------
 	--月成本
 	create table #xtmpb(

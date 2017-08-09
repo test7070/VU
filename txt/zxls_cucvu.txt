@@ -34,7 +34,8 @@ create table #z_cucvu(
 	[weight] float,
 	bmemo nvarchar(200),
 	btime nvarchar(10),
-	etime nvarchar(10)
+	etime nvarchar(10),
+	picno nvarchar(50)
 )
 declare @a nvarchar(max)
 declare @b nvarchar(max)
@@ -48,6 +49,7 @@ declare @i nvarchar(max)
 declare @j nvarchar(max)
 declare @k nvarchar(max) --SF 顏色1
 declare @l nvarchar(max) --SF 顏色2
+declare @m nvarchar(max) --SF 加工型式
 
 declare	@isexist int=0
 declare	@accy nvarchar(10)
@@ -73,6 +75,7 @@ declare	@weight float
 declare	@bmemo nvarchar(200)
 declare	@btime nvarchar(10) --SF 顏色1
 declare	@etime nvarchar(10) --SF 顏色2
+declare	@picno nvarchar(10) --SF 加工型式
 declare @no int = 0
 
 set @noa = isnull((select c from ztmpxls where CAST(noa as int) = 2),'')
@@ -98,10 +101,10 @@ else
 if(LEN(@noa)>0)
 begin
 	declare cursor_table cursor for
-	select a,b,c,d,e,f,g,h,i,j,k,l from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
+	select a,b,c,d,e,f,g,h,i,j,k,l,m from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
 	open cursor_table
 	fetch next from cursor_table
-	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l
+	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m
 	while(@@FETCH_STATUS <> -1)
 	begin
 			
@@ -140,16 +143,17 @@ begin
 		set @size2 = @j
 		set @btime=left(@k,10)
 		set @etime=left(@l,10)
+		set @picno=@m
 		
 		--set @isexist = case when (LEN(ISNULL((select noa from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 ),''))=0) then 0 else 1 end
 		--if(@isexist=1)
 		--	set @noq = (select top 1 noq from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 )
 		
 		insert into #z_cucvu
-		select @isexist,@accy,@noa,@memo,@datea,@bdate,@noq,@ordeno,@no2,@custno,@cust,@product,@ucolor,@class,@size,@size2,@spec,@lengthb,@mount1,@mount,@weight,@bmemo,@btime,@etime
+		select @isexist,@accy,@noa,@memo,@datea,@bdate,@noq,@ordeno,@no2,@custno,@cust,@product,@ucolor,@class,@size,@size2,@spec,@lengthb,@mount1,@mount,@weight,@bmemo,@btime,@etime,@picno
 	
 		fetch next from cursor_table
-		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l
+		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m
 	end
 	close cursor_table
 	deallocate cursor_table
@@ -173,9 +177,11 @@ begin
 					from #z_cucvu'
 		execute sp_executesql @cmd
 		
-		set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2,btime,etime)
-					select noa,noq,ordeno,right("000"+no2,3)no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,bmemo,size2,btime,etime
-					from #z_cucvu'
+		set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2,btime,etime
+					,picno,picname,imgorg,imgdata,imgbarcode,para)
+					select a.noa,a.noq,a.ordeno,right("000"+a.no2,3)no2,a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2,a.btime,a.etime
+					,a.picno,b.namea,b.org,b.org,b.org,b.para
+					from #z_cucvu a left join img b on a.picno=b.noa '
 		execute sp_executesql @cmd
 	end
 	else
@@ -188,17 +194,22 @@ begin
 		update a
 		set product=b.product,ucolor=b.ucolor,spec=b.spec,size=b.size,lengthb=b.lengthb,class=b.class
 		,mount1=b.mount1,mount=b.mount,weight=b.weight,memo=b.bmemo,size2=b.size2,btime=b.btime,etime=b.etime
+		,picno=b.picno,picname=c.namea,imgorg=c.org,imgdata=c.org,imgbarcode=c.org,para=c.para
 		from cucs"+@accy+" a left join #z_cucvu b on a.ordeno=b.ordeno and a.no2=b.no2
+		left join img c on b.picno=c.noa 
 		where a.noa='"+@noa+"' and isnull(b.noa,'')!=''")
 			
 		set @no=isnull(cast((select MAX(noq) from view_cucs where noa=@noa)as int),0)
 		
 		--插入未存在的表身
 		EXEC(" 
-			insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2,btime,etime) 
-			select noa,right('000'+cast(ROW_NUMBER() over (order by noq,ordeno,no2)+cast(isnull((select MAX(noq) from view_cucs where noa='"+@noa+"'),0) as int) as nvarchar(50)),3) 
-			,ordeno,right('000'+no2,3),product,ucolor,class,size,spec,lengthb,mount1,mount,weight,bmemo,size2,btime,etime
-			from #z_cucvu a where not exists(select * from view_cucs where noa='"+@noa+"' and ordeno=a.ordeno and no2=a.no2) 
+			insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2,btime,etime
+			,picno,picname,imgorg,imgdata,imgbarcode,para) 
+			select a.noa,right('000'+cast(ROW_NUMBER() over (order by a.noq,a.ordeno,a.no2)+cast(isnull((select MAX(noq) from view_cucs where noa='"+@noa+"'),0) as int) as nvarchar(50)),3) 
+			,a.ordeno,right('000'+a.no2,3),a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2,a.btime,a.etime
+			,a.picno,b.namea,b.org,b.org,b.org,b.para
+			from #z_cucvu a  left join img b on a.picno=b.noa
+			where not exists(select * from view_cucs where noa='"+@noa+"' and ordeno=a.ordeno and no2=a.no2) 
 		") 
 	end
 end

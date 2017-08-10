@@ -37,6 +37,7 @@
             $(document).ready(function() {
                 bbmKey = ['noa'];
                 bbsKey = ['noa', 'noq'];
+                q_bbsLen = 30; //106/08/09
                 q_brwCount();
                 q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
                 q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");

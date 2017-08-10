@@ -1642,28 +1642,29 @@ set l019=l015-l016-l017-l018
 
 --106/07/18 三泰 排除早期106/06/30之前非三泰倉的進出,因含來料加工等其他單
 --106/08/01 不分倉
+--106/08/10 早期 106/6/30 之前以A倉為主
 
 --鋼筋總進貨量
 update @tmp
-set r001=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r002=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r003=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r004=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r005=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r006=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r007=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r008=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r001=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r002=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r003=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r004=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r005=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r006=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r007=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r008=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_rc2s where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
 --鋼筋總出貨量 
 update @tmp
-set r009=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r010=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r011=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r012=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r013=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r014=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r015=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r016=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r009=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r010=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r011=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r012=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r013=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r014=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r015=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r016=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%鋼筋%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
 --進貨合約
 update @tmp
@@ -1689,32 +1690,32 @@ set r025=isnull((select SUM(weight) from view_quat where left(datea,@t_lenm)=@t_
 
 --廢鐵總出貨量 
 update @tmp
-set r033=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r034=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r035=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r036=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r037=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r038=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r039=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r040=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r033=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r034=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r035=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r036=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r037=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r038=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r039=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r040=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%廢鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
 --氧化鐵總出貨量 
 update @tmp
-set r041=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r042=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r043=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r044=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r045=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r046=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r047=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r048=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r041=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r042=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r043=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r044=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r045=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r046=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r047=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r048=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
 --成型出貨-銷售
 update @tmp
-set r049=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r050=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r051=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r052=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r049=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r050=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r051=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r052=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
 --成型出貨-互換
 update @tmp
@@ -1732,17 +1733,17 @@ set r057=r049+r053
 
 --成型進貨-採購
 update @tmp
-set r061=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r062=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r063=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r064=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r061=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r062=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r063=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r064=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
 --成型進貨-互換
 update @tmp
-set r065=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r066=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r067=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r068=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r065=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r066=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r067=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r068=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
 
 --成型進貨-合計
 update @tmp
@@ -1753,10 +1754,10 @@ set r069=r061+r065
 
 --定尺出貨-銷售
 update @tmp
-set r073=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r074=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r075=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r076=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r073=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r074=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r075=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r076=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
 --定尺出貨-互換
 update @tmp
@@ -1774,17 +1775,17 @@ set r081=r073+r077
 
 --定尺進貨-採購
 update @tmp
-set r085=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r086=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r087=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r088=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r085=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r086=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r087=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+,r088=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
 --定尺進貨-互換
 update @tmp
-set r089=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r090=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r091=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r092=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r089=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r090=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r091=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r092=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
 
 --定尺進貨-合計
 update @tmp

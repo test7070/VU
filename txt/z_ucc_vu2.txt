@@ -887,7 +887,7 @@ and a.datea>='2017/06/03'
 --互進
 insert #tmp
 select '3','inas',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
-,case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end
+,case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else 0 end
 ,b.mweight,b.lengthc,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end,b.mweight,b.lengthc,'ina_vu?noa=$noa?'+a.accy
 from view_ina a left join view_inas b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate
@@ -898,7 +898,7 @@ and a.datea>='2017/06/03'
 --互銷
 insert #tmp
 select '6','gets',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
-,case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else b.weight end
+,case when isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%' then b.mount else 0 end
 ,b.mweight,b.lengthc,case when b.storeno='7000A' or b.storeno='7000B' then '7000' else b.storeno end,0,0,'get_vu?noa=$noa?'+a.accy
 from view_get a left join view_gets b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate

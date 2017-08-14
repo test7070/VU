@@ -50,6 +50,8 @@ declare @j nvarchar(max)
 declare @k nvarchar(max) --SF 顏色1
 declare @l nvarchar(max) --SF 顏色2
 declare @m nvarchar(max) --SF 加工型式
+declare @n nvarchar(max) --SF 品名
+declare @o nvarchar(max) --SF 類別
 
 declare	@isexist int=0
 declare	@accy nvarchar(10)
@@ -101,10 +103,10 @@ else
 if(LEN(@noa)>0)
 begin
 	declare cursor_table cursor for
-	select a,b,c,d,e,f,g,h,i,j,k,l,m from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
+	select a,b,c,d,e,f,g,h,i,j,k,l,m,n,o from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
 	open cursor_table
 	fetch next from cursor_table
-	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m
+	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o
 	while(@@FETCH_STATUS <> -1)
 	begin
 			
@@ -112,8 +114,16 @@ begin
 		set @noq = REPLICATE('0',3-LEN(CAST(@no as varchar(3))))+CAST(@no as varchar(3))
 		set @ordeno = @noa
 		set @no2 = right('000'+@a,3)
-		set @product = (select product from view_ordes where noa = @ordeno and no2 = @no2)
-		set @ucolor = (select ucolor from view_ordes where noa = @ordeno and no2 = @no2)
+		if((select count(*) from acomp where acomp like '%三泰%')>0)
+		begin
+			set @product = @n
+			set @ucolor = @o
+		end
+		else
+		begin
+			set @product = (select product from view_ordes where noa = @ordeno and no2 = @no2)
+			set @ucolor = (select ucolor from view_ordes where noa = @ordeno and no2 = @no2)
+		end
 		set @class = @h
 		set @size = case when len(@c)>0 then '#'+@c else '' end
 		set @spec = @b
@@ -153,7 +163,7 @@ begin
 		select @isexist,@accy,@noa,@memo,@datea,@bdate,@noq,@ordeno,@no2,@custno,@cust,@product,@ucolor,@class,@size,@size2,@spec,@lengthb,@mount1,@mount,@weight,@bmemo,@btime,@etime,@picno
 	
 		fetch next from cursor_table
-		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m
+		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o
 	end
 	close cursor_table
 	deallocate cursor_table
@@ -177,7 +187,7 @@ begin
 					from #z_cucvu'
 		execute sp_executesql @cmd
 		
-		if((select count(*) from acomp where acomp like '%三泰%')=1)
+		if((select count(*) from acomp where acomp like '%三泰%')>0)
 		begin
 			set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2,btime,etime
 						,picno,picname,imgorg,imgdata,imgbarcode,para)
@@ -200,7 +210,7 @@ begin
 		set @accy=ISNULL((select top 1 accy from view_cuc where noa=@noa),@accy)
 		
 		--更新表身
-		if((select count(*) from acomp where acomp like '%三泰%')=1)
+		if((select count(*) from acomp where acomp like '%三泰%')>0)
 		begin
 			EXEC("
 			update a
@@ -224,7 +234,7 @@ begin
 		set @no=isnull(cast((select MAX(noq) from view_cucs where noa=@noa)as int),0)
 		
 		--插入未存在的表身
-		if((select count(*) from acomp where acomp like '%三泰%')=1)
+		if((select count(*) from acomp where acomp like '%三泰%')>0)
 		begin
 			EXEC(" 
 				insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2,btime,etime

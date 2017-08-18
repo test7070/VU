@@ -102,8 +102,6 @@
 					$('#q_report').find('span.radio').eq(t_index).parent().click();	
 					$('#txtXnoa').attr('disabled','disabled');
 					$("#btnOk").click();
-				}else{
-					$('#q_report div div').eq(t_index).hide();
 				}
             }
 

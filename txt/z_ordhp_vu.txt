@@ -579,15 +579,15 @@ if((select count(*) from @result)>0)
 begin
 	insert into @result(gno,custno,pcount,mount,total,totax,weight) 
 	select '1',CHAR(255), count(*), 
-		sum((case typea when 'ina' then mount else (-1)*mount end)), 
-		sum((case typea when 'ina' then total else (-1)*total end)),
-		sum((case typea when 'ina' then totax else (-1)*totax end)),
-		sum((case typea when 'ina' then weight else (-1)*weight end))  
+		sum((case typea when 'get' then mount else (-1)*mount end)), 
+		sum((case typea when 'get' then total else (-1)*total end)),
+		sum((case typea when 'get' then totax else (-1)*totax end)),
+		sum((case typea when 'get' then weight else (-1)*weight end))  
 	from @result a 
 
 	update @result set typea = (case typea when 'ina' then '互進' else '互出' end) where typea ='ina' or typea = 'get' 
 
-	update @result set mount=mount*-1,total=total*-1 ,totax=totax*-1,weight=weight*-1,tax=tax*-1 where typea='互出' 
+	update @result set mount=mount*-1,total=total*-1 ,totax=totax*-1,weight=weight*-1,tax=tax*-1 where typea='互進' 
 
 	declare @pageline int =43
 	declare @custno nvarchar(50) 

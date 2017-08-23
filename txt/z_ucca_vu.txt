@@ -107,7 +107,7 @@ insert #tmp
 select '7','vccb1',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
 ,-1*b.mount,b.price,-1*b.total,b.price,-1*b.total,'vccb?noa=$noa',a.comp,''
 from vccb a left join vccbs b on a.noa=b.noa
-where (a.typea='3' or a.typea='4') and isnull(b.productno,'')!='' 
+where (a.typea='1' or a.typea='2') and isnull(b.productno,'')!='' 
 and isnull(b.productno,'') between @t_bproductno and @t_eproductno
 and (len(@t_cno)=0 or a.cno=@t_cno) 
 and isnull(a.datea,'') <=@t_edate

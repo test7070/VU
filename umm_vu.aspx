@@ -162,8 +162,9 @@
                 		alert('請先輸入'+q_getMsg('lblCust')+'!!');
                 		return;
                 	}
-                	//11/12 拿掉月份判斷
-                	t_mon=r_picd;
+                	//105/11/12 拿掉月份判斷
+                	if(q_getPara('sys.project').toUpperCase()=='VU')
+                		t_mon=r_picd;
                 	
                 	q_gt('umm_import',"where=^^['"+t_noa+"','"+t_custno+"','"+t_custno2+"','"+t_mon+"','"+q_getPara('sys.project').toUpperCase()+"#"+t_payc+"#"+q_getPara('sys.d4taxtype')+"')^^", 0, 0, 0, "umm_import");
                 	
@@ -418,7 +419,8 @@
 		                if (as[0] != undefined) {
 		                    var t_item = "@";
 		                    for (i = 0; i < as.length; i++) {
-		                        t_item = t_item + (t_item.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].acomp;
+		                    	if(q_getPara('sys.project').toUpperCase()!='SF' || as[i].noa=='ST') //106/08/23 SF 只要 ST收款
+		                        	t_item = t_item + (t_item.length > 0 ? ',' : '') + as[i].noa + '@' + as[i].acomp;
 		                    }
 		                    q_cmbParse("cmbCno", t_item);
 		                }

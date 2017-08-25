@@ -198,8 +198,20 @@
  				$('#Xenda').css('width', '300px').css('height', '30px');
 				$('#Xenda .label').css('width','0px');
 				$('#chkXenda').css('width', '220px').css('margin-top', '5px');
-				$('#chkXenda span').css('width','180px')	
- 				
+				$('#chkXenda span').css('width','180px');
+				
+				if(q_getPara('sys.project').toUpperCase()=='SF'){
+					var t_index=-1;
+					for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
+						if($('#q_report').data('info').reportData[i].report!='z_cubp_vu08'){
+							$('#q_report div div').eq(i).hide();
+						}else{
+							t_index=i;
+						}
+					}
+					$('#q_report').find('span.radio').eq(t_index).parent().click();	
+					$('#txtXnoa').attr('disabled','disabled');
+				}
 			}
 			
             function q_boxClose(s2) {

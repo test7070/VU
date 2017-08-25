@@ -1189,35 +1189,38 @@ declare @t_mon nvarchar(10)=''
 		price float,
 		total float,
 		aprice float, --均價
-		cost float --成本
+		cost float, --成本
+		lengthb float,
+		class nvarchar(50),
+		storeno nvarchar(50)
 	)
 
 	--只看號數和材質
 	--106/07/20 根據品名的單位去顯示 (*最後一次調整)
 	
 	--成入
-	insert #xtmp
-	select '0','ucce',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
-	,b.weight,case when b.weight=0 then 0 else b.total/b.weight end,b.total
-	,case when b.weight=0 then 0 else b.total/b.weight end,b.total
-	from view_ucce a left join view_ucces b on a.noa=b.noa
+	insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost)
+	select '0','vcf','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,b.weight,case when b.weight=0 then 0 else b.money/b.weight end,b.money
+	,case when b.weight=0 then 0 else b.money/b.weight end,b.money
+	from vcf a left join vcfs b on a.noa=b.noa
 	left join ucc d on b.product=d.product
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
 	and UPPER(isnull(d.unit,''))='KG'
-	and (b.storeno='A') and b.weight>0
+	and (b.storeno='A' or b.storeno='A2' or b.storeno='A3') and b.weight>0
 
 	--成領
-	insert #xtmp
-	select '1','uccet',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost)
+	select '1','vcft','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
 	,-1*b.weight,0,0,0,0
-	from view_ucce a left join view_ucces b on a.noa=b.noa
+	from vcf a left join vcfs b on a.noa=b.noa
 	left join ucc d on b.product=d.product
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
 	and UPPER(isnull(d.unit,''))='KG'
-	and (b.storeno='A') and b.weight<0
+	and (b.storeno='A' or b.storeno='A2' or b.storeno='A3') and b.weight<0
 
 	--進
-	insert #xtmp
+	insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost)
 	select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 	,case when a.typea='2' then -1 else 1 end*b.total,b.price
@@ -1226,10 +1229,10 @@ declare @t_mon nvarchar(10)=''
 	left join ucc d on b.product=d.product
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and UPPER(isnull(d.unit,''))='KG'
-	and (b.storeno='A')
+	and (b.storeno='A' or b.storeno='A2' or b.storeno='A3')
 
 	--銷
-	insert #xtmp
+	insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost)
 	select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 	,case when a.typea='2' then -1 else 1 end*b.total,0,0
@@ -1237,7 +1240,7 @@ declare @t_mon nvarchar(10)=''
 	left join ucc d on b.product=d.product
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and UPPER(isnull(d.unit,''))='KG'
-	and (b.storeno='A')
+	and (b.storeno='A' or b.storeno='A2' or b.storeno='A3')
 
 	CREATE INDEX tmpindex0 on #xtmp (datea,tablea,typea,noa,noq,product,spec,size)
 	CREATE INDEX tmpindex1 on #xtmp (product,spec,size,datea,typea,noa,noq)
@@ -1282,14 +1285,14 @@ declare @t_mon nvarchar(10)=''
 		from #xtmpb a 
 		outer apply (select weight,total from #xtmpb where mon=@t_pmon and product=a.product and spec=a.spec)b
 		outer apply (select sum(weight)weight,SUM(cost)cost from #xtmp where product=a.product and spec=a.spec
-		and LEFT(datea,@t_lenm)=@t_mon and (tablea='ucce' or tablea='rc2s')) r
+		and LEFT(datea,@t_lenm)=@t_mon and (tablea='vcf' or tablea='rc2s')) r
 		where mon=@t_mon
 		
 		--更新出貨成本
 		update a
 		set cost=a.weight*b.aprice
 		from #xtmp a left join #xtmpb b on a.product=b.product and a.spec=b.spec and LEFT(datea,@t_lenm)=b.mon
-		where LEFT(datea,@t_lenm)=@t_mon and not(tablea='ucce' or tablea='rc2s')
+		where LEFT(datea,@t_lenm)=@t_mon and not(tablea='vcf' or tablea='rc2s')
 		
 		--更新當月期末成本
 		update a
@@ -1297,7 +1300,7 @@ declare @t_mon nvarchar(10)=''
 		,total=isnull(a.total,0)-isnull(v.cost,0)
 		from #xtmpb a 
 		outer apply (select sum(weight)weight,SUM(cost)cost from #xtmp where product=a.product and spec=a.spec
-		and LEFT(datea,@t_lenm)=@t_mon and not(tablea='ucce' or tablea='rc2s')) v
+		and LEFT(datea,@t_lenm)=@t_mon and not(tablea='vcf' or tablea='rc2s')) v
 		where mon=@t_mon	
 		
 		set @t_pmon=LEFT(dbo.q_cdn(@t_pmon+'/01',35),@t_lenm)
@@ -1423,97 +1426,81 @@ set l014=isnull((select sum(fx) from #xordhtmp),0)
 --E6三泰庫存表-------------------------------------------------------------------------------
 delete #xtmp
 
---成入
-insert #xtmp
+--盤點
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
 select '0','ucce',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,b.weight,case when b.weight=0 then 0 else b.total/b.weight end
 ,b.total,case when b.weight=0 then 0 else b.total/b.weight end,b.total
+,b.lengthb,b.class,b.storeno
 from view_ucce a left join view_ucces b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
 and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
-and b.storeno='A' and b.weight>0
+and (b.storeno='A' or b.storeno='A2')
 
---成領
-insert #xtmp
-select '1','uccet',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
-,-1*b.weight,0,0,0,0
-from view_ucce a left join view_ucces b on a.noa=b.noa
-left join ucc d on b.product=d.product
-where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
-and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
-and b.storeno='A' and b.weight<0
-
---調入
-insert #xtmp
-select '0','vcf','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
-,b.weight,case when b.weight=0 then 0 else b.money/b.weight end
-,b.money,case when b.weight=0 then 0 else b.money/b.weight end,b.money
-from vcf a left join vcfs b on a.noa=b.noa
-left join ucc d on b.product=d.product
-where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
-and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
-and b.storeno='A' and b.weight>0
-
---調領
-insert #xtmp
-select '1','vcft','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
-,-1*b.weight,0,0,0,0
-from vcf a left join vcfs b on a.noa=b.noa
-left join ucc d on b.product=d.product
-where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
-and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
-and b.storeno='A' and b.weight<0
+delete a
+from #xtmp a outer apply (select MAX(datea) datea from #xtmp 
+where product=a.product and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class and storeno=a.storeno)b
+where a.datea!=b.datea
 
 --進
-insert #xtmp
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
 select '2','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total
+,b.lengthb,b.class,b.storeno
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate
 and isnull(b.weight,0)!=0
 and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
-and b.storeno='A'
+and (b.storeno='A' or b.storeno='A2')
 
 --銷
-insert #xtmp
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
 select '4','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,0,0
+,b.lengthb,b.class,b.storeno
 from view_vcc a left join view_vccs b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate 
 and isnull(b.weight,0)!=0
 and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
-and b.storeno='A'
+and (b.storeno='A' or b.storeno='A2')
 
 --互換
 --入
-insert #xtmp
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
 select '3','inas',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,b.weight,b.mweight
 ,b.weight*b.mweight,b.mweight,b.weight*b.mweight
+,b.lengthb,b.class,a.storeno
 from view_ina a left join view_inas b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate 
 and isnull(b.weight,0)!=0
 and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
-and a.storeno='A'
+and (a.storeno='A' or a.storeno='A2')
 
 --出
-insert #xtmp
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
 select '6','gets',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 ,b.weight,b.mweight
 ,b.weight*b.mweight,b.mweight,b.weight*b.mweight
+,b.lengthb,b.class,a.storeno
 from view_get a left join view_gets b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate 
 and isnull(b.weight,0)!=0
 and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
-and a.storeno='A'
+and (a.storeno='A' or a.storeno='A2')
+
+delete a
+from #xtmp a
+outer apply(select top 1 datea from #xtmp where product=a.product and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class and storeno=a.storeno and tablea='ucce' order by datea desc)b
+where tablea!='ucce' and a.datea<isnull(b.datea,'')
 
 --uno----------------------1
 create table #xunotmp( 
@@ -1624,7 +1611,7 @@ delete #xunotmp where product!='鋼筋'
 
 --A帳上鋼筋總庫存
 update @tmp
-set l015=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='ucce' or tablea='vcf' then 1 else -1 end*weight) from #xtmp),0)
+set l015=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='ucce' then 1 else -1 end*weight) from #xtmp),0)
 --B板料庫存-批號統計
 update @tmp
 set l016=isnull((select SUM(weight) from #xunotmp where ucolor='板料'),0)

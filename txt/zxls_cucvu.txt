@@ -92,13 +92,13 @@ if(LEN(@custno)='')
 
 if(len(@datea)=8)
 	set @datea=left(@datea,4)+'/'+left(right(@datea,4),2)+'/'+right(@datea,2)
-else
-	set @datea=left(@datea,4)+'/'+right(left(@datea,6),2)+'/'+right(left(@datea,8),2)
+else if len(@datea)>0
+	set @datea=left(replace(@datea,'/',''),4)+'/'+right(left(replace(@datea,'/',''),6),2)+'/'+right(left(replace(@datea,'/',''),8),2)
 	
 if(len(@bdate)=8)
 	set @bdate=left(@bdate,4)+'/'+left(right(@bdate,4),2)+'/'+right(@bdate,2)
-else
-	set @bdate=left(@bdate,4)+'/'+right(left(@bdate,6),2)+'/'+right(left(@bdate,8),2)
+else if len(@bdate)>0
+	set @bdate=left(replace(@bdate,'/',''),4)+'/'+right(left(replace(@bdate,'/',''),6),2)+'/'+right(left(replace(@bdate,'/',''),8),2)
 
 if(LEN(@noa)>0)
 begin

@@ -408,11 +408,11 @@ and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(
 and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
-select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0
+select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.lengthc,0
 from view_ina a left join view_inas b on a.noa=b.noa
 outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
 where a.datea between isnull(c.datea,'') and @t_edate
-and a.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and b.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and isnull(b.productno,'')=''
 	
@@ -426,11 +426,11 @@ and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(
 and isnull(b.productno,'')=''
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,lengthb,class,storeno,mount,weight,money,aprice)
-select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0
+select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,0,0
 from view_get a left join view_gets b on a.noa=b.noa
 outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
 where a.datea between isnull(c.datea,'') and @t_edate
-and a.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and b.storeno='7000' and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
 and isnull(b.productno,'')=''
 

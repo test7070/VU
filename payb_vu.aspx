@@ -19,7 +19,7 @@
             q_tables = 's';
             var q_name = "payb";
             var q_readonly = ['txtVccno','txtAccno','txtNoa', 'txtMoney', 'txtTax', 'txtDiscount', 'txtTotal', 'txtWorker','txtWorker2'];
-            var q_readonlys = ['txtTotal','txtMoney'];
+            var q_readonlys = ['txtTotal'];//106/09/08 陳 'txtMoney'
             var bbmNum = [['txtMoney', 10, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 10, 0, 1], ['txtDiscount', 10, 0, 1]];
             var bbsNum = [['txtPrice', 10, 2, 1], ['txtDiscount', 10, 0, 1], ['txtMount', 10, 1, 1], ['txtMoney', 10, 0, 1], ['txtTax', 10, 0, 1], ['txtTotal', 10, 0, 1]];
             var bbmMask = [];

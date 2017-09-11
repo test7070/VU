@@ -170,7 +170,7 @@
 				});
 				
 				$('#txtXstore1a').val('7000').change();
-				$('#txtXstore2a').val('7000B').change();
+				$('#txtXstore2a').val('7000A').change();
             }
 
             function q_popPost(s1) {

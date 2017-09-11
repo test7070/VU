@@ -316,6 +316,9 @@ begin
 
 	--106/05/24
 	--只看號數和材質,7000和7000A當一個倉庫
+	
+	--106/09/11趙
+	--全部只要撈7000~7000A 互換要看板料
 
 	--調整
 	insert #xtmp
@@ -327,11 +330,20 @@ begin
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
 	and (b.storeno='7000' or b.storeno='7000A')
-	and a.datea>='2017/06/03'
+	and a.datea>='2017/06/03' and b.weight>0
+	
+	insert #xtmp
+	select '4','vcft','',a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,-1*b.weight,0,0,0,0
+	from vcf a left join vcfs b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03' and b.weight<0
 
 	--進
 	insert #xtmp
-	select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	select '2','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
 	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 	,case when a.typea='2' then -1 else 1 end*b.total,b.price
 	,case when a.typea='2' then -1 else 1 end*b.total
@@ -347,6 +359,26 @@ begin
 	,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 	,case when a.typea='2' then -1 else 1 end*b.total,0,0
 	from view_vcc a left join view_vccs b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03'
+	
+	--銷
+	insert #xtmp
+	select '3','inas',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,b.weight,b.mweight,b.lengthc,0,0
+	from view_ina a left join view_inas b on a.noa=b.noa
+	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	and (b.storeno='7000' or b.storeno='7000A')
+	and a.datea>='2017/06/03'
+	
+	--銷
+	insert #xtmp
+	select '6','gets',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	,b.weight,b.mweight,b.lengthc,0,0
+	from view_get a left join view_gets b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
 	and (b.storeno='7000' or b.storeno='7000A')
@@ -414,7 +446,7 @@ begin
 		end
 		
 		--進貨 --調整
-		if(@tablea='rc2s' or @tablea='vcf')
+		if(@tablea='rc2s' or @tablea='vcf' or @tablea='inas')
 		begin
 			if(@ttotal<=0 or @tweight<=0) --處理超領導致金額不正確 以最近進貨的單價作為目前超領的單價
 				set @ttotal=@tweight*case when @weight=0 then 0 else round(@total/@weight,4) end
@@ -425,7 +457,7 @@ begin
 		end
 		
 		--出貨
-		if(@tablea='vccs')
+		if(@tablea='vccs' or @tablea='vcft' or @tablea='gets')
 		begin
 			set @tweight=@tweight-@weight
 			set @ttotal=@ttotal-round(@weight*@aprice,4)

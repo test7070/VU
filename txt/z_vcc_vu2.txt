@@ -329,7 +329,7 @@ begin
 	from vcf a left join vcfs b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A')
+	and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
 	and a.datea>='2017/06/03' and b.weight>0
 	
 	insert #xtmp
@@ -338,7 +338,7 @@ begin
 	from vcf a left join vcfs b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A')
+	and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
 	and a.datea>='2017/06/03' and b.weight<0
 
 	--進
@@ -350,7 +350,7 @@ begin
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A')
+	and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
 	and a.datea>='2017/06/03'
 
 	--銷
@@ -361,28 +361,28 @@ begin
 	from view_vcc a left join view_vccs b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A')
+	and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
 	and a.datea>='2017/06/03'
 	
-	--銷
-	insert #xtmp
-	select '3','inas',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
-	,b.weight,b.mweight,b.lengthc,0,0
-	from view_ina a left join view_inas b on a.noa=b.noa
-	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
-	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A')
-	and a.datea>='2017/06/03'
+	--互進
+	--insert #xtmp
+	--select '3','inas',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	--,b.weight,b.mweight,b.lengthc,0,0
+	--from view_ina a left join view_inas b on a.noa=b.noa
+	--where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	--and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	--and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
+	--and a.datea>='2017/06/03'
 	
-	--銷
-	insert #xtmp
-	select '6','gets',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
-	,b.weight,b.mweight,b.lengthc,0,0
-	from view_get a left join view_gets b on a.noa=b.noa
-	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
-	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A')
-	and a.datea>='2017/06/03'
+	--互銷
+	--insert #xtmp
+	--select '6','gets',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+	--,b.weight,b.mweight,b.lengthc,0,0
+	--from view_get a left join view_gets b on a.noa=b.noa
+	--where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+	--and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
+	--and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
+	--and a.datea>='2017/06/03'
 
 	CREATE INDEX tmpindex0 on #xtmp (datea,tablea,typea,noa,noq,product,spec,size)
 	CREATE INDEX tmpindex1 on #xtmp (product,spec,size,datea,typea,noa,noq)

@@ -223,7 +223,7 @@ begin
 			set product=b.product,ucolor=b.ucolor,spec=b.spec,size=b.size,lengthb=b.lengthb,class=b.class
 			,mount1=b.mount1,mount=b.mount,weight=b.weight,memo=b.bmemo,size2=b.size2,btime=b.btime,etime=b.etime
 			,picno=b.picno,picname=c.namea,imgorg=c.org,imgdata=c.imgdata,imgbarcode=c.barcode,para=c.para
-			,mechno=a.mehcno,mech=a.mech
+			,mechno=a.mechno,mech=a.mech
 			from cucs"+@accy+" a left join #z_cucvu b on a.ordeno=b.ordeno and a.no2=b.no2
 			left join img c on b.picno=c.noa 
 			where a.noa='"+@noa+"' and isnull(b.noa,'')!=''")

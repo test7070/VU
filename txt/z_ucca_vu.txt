@@ -860,7 +860,9 @@ from #tmpb a left join ucca b on a.productno=b.noa
 
 insert #tmpb
 select '1',CHAR(255),CHAR(255),CHAR(255),SUM(bmount),SUM(bmoney),SUM(rcmount),SUM(rcmoney),SUM(vcmount)
-,SUM(vcmoney),SUM(vccost),SUM(profit),SUM(imount),SUM(atotal),SUM(lmount),SUM(lprice),SUM(lmoney)
+,SUM(vcmoney),SUM(vccost),case when SUM(vccost)=0 then 0 else round((SUM(vcmoney)-SUM(vccost))/SUM(vccost)*100,2) end
+,SUM(imount),SUM(atotal),SUM(lmount)
+,case when SUM(lmount)>0 then  round(SUM(lmoney)/SUM(lmount),2) else 0 end,SUM(lmoney)
 from #tmpb
 
 select gno,productno,product,cno,(select top 1 acomp from acomp where noa=a.cno )acomp 

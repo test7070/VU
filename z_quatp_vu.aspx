@@ -84,14 +84,18 @@
                     }, {/*2-1 [13]*/
                         type : '6',
                         name : 'xaddr2'
-                    }, {/*2-1 [14]*/
+                    }, {/*2-2 [14]*/
                         type : '5',//篩選完工未完工//
 						name : 'xpost2',
 						value : [' @全部','通案','慶欣欣專案','威致專案','工地']
-                    }, {/*2-1 [15] SF用*/
+                    }, {/*2-3 [15] SF用*/
                         type : '5',//排序
 						name : 'xorder',
 						value : ['custno@客戶編號','edate@完工日']
+                    }, {/*2-4 [16] SF用*/
+                        type : '8',
+						name : 'xoption012',
+						value : ['sel2@含合約終止']
                     }]
                 });
                 q_popAssign();
@@ -134,6 +138,23 @@
 				$('#chkXoption02 span').css('width','150px');
 				$('#chkXoption02 input').prop('checked',true);
 				$('#Xpost2 .label').css('width','150px');
+				
+				
+				if(q_getPara('sys.project').toUpperCase()!='SF'){
+					var t_index=-1;
+					for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
+						if($('#q_report').data('info').reportData[i].report=='z_quatp_vu02'){
+							t_index=i;
+							break;	
+						}
+					}
+					if(t_index>-1){
+						$('#q_report div div').eq(i).hide();
+					}
+				}
+				$('#Xoption012').css('width','300px').css('height','30px');
+				$('#chkXoption012').css('width','200px').css('margin-top','5px');
+				$('#chkXoption012 span').css('width','150px');
 			}
 
 			function q_boxClose(s2) {

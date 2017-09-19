@@ -332,3 +332,347 @@ BEGIN
 	EXECUTE sp_executesql @cmd
 END
 ;
+-----------------------------------------------------------------------------------------
+z_quatp_vu02:--z_quatp_vu02 --SF使用
+declare @t_bdate nvarchar(10)
+declare @t_edate nvarchar(10)
+declare @t_bcustno nvarchar(20)
+declare @t_ecustno nvarchar(20)
+declare @t_option01 nvarchar(10)
+declare @t_xaddr2 nvarchar(100)
+declare @t_xpost2 nvarchar(100)
+
+set @t_bdate = case when '#non'=[7] then '' else [7] end
+set @t_edate = case when '#non'=[8] then char(255) else [8] end
+set @t_bcustno = case when '#non'=[10] then '' else [10] end
+set @t_ecustno = case when '#non'=[11] then char(255) else [11] end
+set @t_option01 = case when '#non'=[16] then '' else [16] end
+set @t_xaddr2 = case when '#non'=[13] then '' else [13] end
+set @t_xpost2 = case when '#non'=[14] then '' else [14] end 
+--sel2含合約終止
+---------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max)
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	set @cmd = 'drop table #tmpa'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #tmp(
+	gno nvarchar(2),
+	recno nvarchar(10),
+	accy nvarchar(10),
+	datea nvarchar(50),
+	noa nvarchar(50),
+	cno nvarchar(50),
+	acomp nvarchar(100),
+	custno  nvarchar(50),
+	comp nvarchar(100),
+	pno nvarchar(50),
+	product nvarchar(50),
+	spec nvarchar(50),
+	price float, --單價
+	qprice float, --銷售合約總量均價
+	weight float, --數量
+	eweight float, --餘量
+	emoney float, --應收餘額
+	opay float, --已收
+	vmoney float, --應收
+	teweight float, --數量合計
+	temoney float, --金額合計
+	tprice float, --成型單價
+	enddate nvarchar(50),
+	memo nvarchar(MAX),
+	addr2 nvarchar(MAX), --工地名稱
+)	
+CREATE INDEX tmp_index ON #tmp (noa)
+
+insert #tmp
+select '0',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
+,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end
+,'','','',isnull(b.price,0),0,a.weight,a.eweight
+,0--,isnull(b.price,0)*a.eweight
+,isnull(c.opay,0),0,0,0,e.price,a.conn,replace(a.memo,'chr(10)',' '),a.addr2
+from view_quat a left join cust d on a.custno=d.noa
+outer apply (select top 1 price from view_quats where noa=a.noa order by no3 )b
+outer apply (select sum(opay-unopay) opay from umm where payc=a.noa) c
+outer apply (select sum(price) price from view_quats where noa=a.noa and product='鋼筋' and (ucolor='板料' or ucolor='成型加工'))e
+where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
+and (a.custno between @t_bcustno and @t_ecustno ) 
+and (a.datea between @t_bdate and @t_edate)
+and (len(@t_xaddr2)=0 or a.addr2 like '%'+@t_xaddr2+'%')
+and (post2=@t_xpost2 or len(@t_xpost2)=0)
+
+--處理應收比例
+declare @noa nvarchar(50)
+declare @apvmemo nvarchar(MAX)
+declare @qno1 nvarchar(MAX)
+declare @qweight1 nvarchar(MAX)
+declare @qno2 nvarchar(MAX)
+declare @qweight2 nvarchar(MAX)
+declare @tweight float
+declare @weight float
+declare @total float
+declare @ttotal float
+declare @payed float
+declare @tpayed float
+declare @tt_bdate nvarchar(10)
+
+--先處理減少cursor的計算量
+create table #tmpa(
+	noa nvarchar(50),
+	apvmemo nvarchar(MAX),
+	total float,
+	payed float,
+	qno1 nvarchar(50),
+	qweight1 float,
+	qno2 nvarchar(50),
+	qweight2 float
+)
+CREATE INDEX tmpa_index ON #tmpa (noa)
+
+if(LEN(@t_bdate)>0)
+	set @tt_bdate=dbo.q_cdn(@t_bdate,-31)
+
+insert #tmpa
+select noa,apvmemo,(case when typea='1' then 1 else -1 end)*total,(case when typea='1' then 1 else -1 end)*payed
+,left(apvmemo,charindex('@',apvmemo)-1)
+,(case when typea='1' then 1 else -1 end)*cast(SUBSTRING(apvmemo,charindex('@',apvmemo)+1,charindex('##',apvmemo)-charindex('@',apvmemo)-1) as float)
+,left(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)),CHARINDEX('@',SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)))-1)
+,(case when typea='1' then 1 else -1 end)*cast(SUBSTRING(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)),charindex('@',SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)))+1,len(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo))))as float)
+from view_vcc where len(apvmemo)>0
+and (custno between @t_bcustno and @t_ecustno ) --出貨與合約客戶會一樣
+and datea>= @tt_bdate --會先有合約才會出貨 --避免提早出貨多抓取前1個月的出貨
+
+declare cursor_table cursor for
+select noa from #tmp
+open cursor_table
+fetch next from cursor_table
+into @noa
+while(@@FETCH_STATUS <> -1)
+begin
+	set @ttotal=0
+	set @tpayed=0
+	
+	declare cursor_table2 cursor for
+	select apvmemo,qno1,qweight1,qno2,qweight2,total,payed from #tmpa where qno1=@noa or qno2=@noa
+	open cursor_table2
+	fetch next from cursor_table2
+	into @apvmemo,@qno1,@qweight1,@qno2,@qweight2,@total,@payed
+	while(@@FETCH_STATUS <> -1)
+	begin
+		set @weight=0
+		set @tweight=0
+
+		if(len(@qno1)>0 and @qno1=@noa)
+		begin
+			set @weight=@qweight1
+		end
+		
+		set @tweight=@tweight+@qweight1
+		
+		if(len(@qno2)>0 and @qno2=@noa)
+		begin
+			set @weight=@qweight2
+		end
+		
+		set @tweight=@tweight+@qweight2
+		
+		if(@tweight=0 and (@qno1='' or @qno2=''))
+		begin
+			set @ttotal=@ttotal+@total
+			set @tpayed=@tpayed+@payed
+		end
+		else
+		begin
+			set @ttotal=@ttotal+case when @tweight=0 then 0 else (@total*@weight/@tweight) end
+			set @tpayed=@tpayed+case when @tweight=0 then 0 else (@payed*@weight/@tweight) end
+		end
+		
+		fetch next from cursor_table2
+		into @apvmemo,@qno1,@qweight1,@qno2,@qweight2,@total,@payed
+	end
+	close cursor_table2
+	deallocate cursor_table2
+	
+	update #tmp
+	set vmoney=@ttotal,opay=opay+@tpayed,emoney=@ttotal-(opay+@tpayed)
+	where noa=@noa
+	
+	fetch next from cursor_table
+	into @noa
+end
+close cursor_table
+deallocate cursor_table
+
+if((select count(*) from #tmp )>0)
+begin
+	update a
+	set teweight=b.eweight,temoney=b.emoney
+	from #tmp a outer apply (select SUM(eweight)eweight,SUM(emoney)emoney from #tmp where custno=a.custno)b
+
+	insert into #tmp(gno,custno,datea,enddate,weight,eweight,price,qprice,emoney,opay,vmoney)
+	select '2',char(255),char(255),char(255),sum(weight),sum(eweight)
+	,case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
+	,case when sum(weight)=0 then 0 else round(sum(weight*price)/sum(weight),2) end
+	,sum(emoney),sum(opay),sum(vmoney)
+	from #tmp where gno = '0'
+	
+	--顯示客戶小計
+	update a
+	set gno='1'
+	from #tmp a outer apply (select MAX(recno)recno from #tmp where custno=a.custno)b
+	where a.recno=b.recno
+end
+
+--系統自動抓最近一個星期銷售的合約
+--取目前系統日期
+declare @now_date nvarchar(10)--現在日期
+declare @bndate nvarchar(10)
+declare @endate nvarchar(10)
+set @now_date=replace(CONVERT(VARCHAR(10), GETDATE(),20 ),'-','/')
+set @bndate=dbo.q_cdn(@now_date,-8)
+set @endate=dbo.q_cdn(@now_date,-1)
+--判斷資料是否已有抓取
+if(@t_bdate<=@bndate and @endate<=@t_edate)
+begin
+	insert #tmp (gno,recno,accy,datea,noa,cno,acomp,custno,comp,pno,product,spec,price,qprice,weight,eweight,emoney,opay,vmoney,teweight,temoney,tprice,enddate,memo,addr2)
+	select '4',ROW_NUMBER() over (order by custno,datea,noa),accy,datea,noa,cno,acomp,custno,comp,pno,product,spec,price,qprice,weight,eweight,emoney,opay,vmoney,0,0,tprice,enddate,memo,addr2
+	from #tmp where (gno='0' or gno='1') and (datea between @bndate and @endate)
+end
+else
+begin
+	insert #tmp
+	select '4',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
+	,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end
+	,'','','',isnull(b.price,0),0,a.weight,a.eweight
+	,0--,isnull(b.price,0)*a.eweight
+	,isnull(c.opay,0),0,0,0,e.price,a.conn,replace(a.memo,'chr(10)',' '),a.addr2
+	from view_quat a left join cust d on a.custno=d.noa
+	outer apply (select top 1 price from view_quats where noa=a.noa order by no3 )b
+	outer apply (select sum(opay-unopay) opay from umm where payc=a.noa) c
+	outer apply (select sum(price) price from view_quats where noa=a.noa and product='鋼筋' and (ucolor='板料' or ucolor='成型加工'))e
+	where (isnull(a.enda,0)=0 or CHARINDEX('sel2',@t_option01)>0) 
+	and (a.custno between @t_bcustno and @t_ecustno ) 
+	and (a.datea between @bndate and @endate)
+	and (len(@t_xaddr2)=0 or a.addr2 like '%'+@t_xaddr2+'%')
+	and (post2=@t_xpost2 or len(@t_xpost2)=0)
+	
+	delete #tmpa
+	
+	if(LEN(@bndate)>0)
+	set @tt_bdate=dbo.q_cdn(@bndate,-31)
+
+	insert #tmpa
+	select noa,apvmemo,(case when typea='1' then 1 else -1 end)*total,(case when typea='1' then 1 else -1 end)*payed
+	,left(apvmemo,charindex('@',apvmemo)-1)
+	,(case when typea='1' then 1 else -1 end)*cast(SUBSTRING(apvmemo,charindex('@',apvmemo)+1,charindex('##',apvmemo)-charindex('@',apvmemo)-1) as float)
+	,left(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)),CHARINDEX('@',SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)))-1)
+	,(case when typea='1' then 1 else -1 end)*cast(SUBSTRING(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)),charindex('@',SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo)))+1,len(SUBSTRING(apvmemo,charindex('##',apvmemo)+2,len(apvmemo))))as float)
+	from view_vcc where len(apvmemo)>0
+	and (custno between @t_bcustno and @t_ecustno ) --出貨與合約客戶會一樣
+	and datea>= @tt_bdate --會先有合約才會出貨 --避免提早出貨多抓取前1個月的出貨
+
+	declare cursor_table cursor for
+	select noa from #tmp where gno='4'
+	open cursor_table
+	fetch next from cursor_table
+	into @noa
+	while(@@FETCH_STATUS <> -1)
+	begin
+		set @ttotal=0
+		set @tpayed=0
+		
+		declare cursor_table2 cursor for
+		select apvmemo,qno1,qweight1,qno2,qweight2,total,payed from #tmpa where qno1=@noa or qno2=@noa
+		open cursor_table2
+		fetch next from cursor_table2
+		into @apvmemo,@qno1,@qweight1,@qno2,@qweight2,@total,@payed
+		while(@@FETCH_STATUS <> -1)
+		begin
+			set @weight=0
+			set @tweight=0
+
+			if(len(@qno1)>0 and @qno1=@noa)
+			begin
+				set @weight=@qweight1
+			end
+			
+			set @tweight=@tweight+@qweight1
+			
+			if(len(@qno2)>0 and @qno2=@noa)
+			begin
+				set @weight=@qweight2
+			end
+			
+			set @tweight=@tweight+@qweight2
+			
+			if(@tweight=0 and (@qno1='' or @qno2=''))
+			begin
+				set @ttotal=@ttotal+@total
+				set @tpayed=@tpayed+@payed
+			end
+			else
+			begin
+				set @ttotal=@ttotal+case when @tweight=0 then 0 else (@total*@weight/@tweight) end
+				set @tpayed=@tpayed+case when @tweight=0 then 0 else (@payed*@weight/@tweight) end
+			end
+			
+			fetch next from cursor_table2
+			into @apvmemo,@qno1,@qweight1,@qno2,@qweight2,@total,@payed
+		end
+		close cursor_table2
+		deallocate cursor_table2
+		
+		update #tmp
+		set vmoney=@ttotal,opay=opay+@tpayed,emoney=@ttotal-(opay+@tpayed)
+		where noa=@noa and gno='4'
+		
+		fetch next from cursor_table
+		into @noa
+	end
+	close cursor_table
+	deallocate cursor_table
+	
+end
+
+if((select count(*) from #tmp where gno='4')>0)
+begin
+	insert #tmp(gno)
+	select '3'
+end
+
+select 
+dbo.getComma(weight,[5]) weight,
+dbo.getComma(eweight,[5]) eweight,
+dbo.getComma(emoney,0)emoney,
+dbo.getComma(opay,0)opay,
+dbo.getComma(vmoney,0)vmoney,
+dbo.getComma(teweight,[5])teweight,
+dbo.getComma(temoney,0)temoney,
+'quat_vu?noa=$noa?'+a.accy qhrefa, 
+"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhref,
+"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" ghref,
+right(@bndate,5) bndate,right(@endate,5) endate,
+* from #tmp a
+order by case when gno>'2' then 1 else 0 end,custno,datea,noa,gno,recno
+
+IF OBJECT_ID('tempdb..#tmpa')is not null
+BEGIN
+	set @cmd = 'drop table #tmpa'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+;

@@ -1143,17 +1143,22 @@ if(len(@t_enddate)=0)
 	
 declare @tmp table(
 	gno nvarchar(10),
-	l001 float,l002 float,l020 float, --1進貨合約  餘量 均價
-	l003 float,l004 float,l021 float, --2成本庫存 餘量 均價
-	l005 float,l006 float,l022 float, --A可用餘量(1+2) 餘量 均價
-	l007 float,l008 float,l023 float, --B銷售合約 餘量 均價
-	l009 float,l010 float, --可銷售額度(A-B) 餘量 保留
+	l001 float,l002 float,l003 float, --1進貨合約  餘量 均價
+	l004 float,l005 float,l006 float, --2成本庫存 餘量 均價
+	l007 float,l008 float,l009 float, --3互換、委外餘量 均價
+	l010 float,l011 float,l012 float, --A可用餘量(1+2) 餘量 均價
+	l013 float,l014 float,l015 float, --B銷售合約 餘量 均價
+	l016 float,l017 float, --可銷售額度(A-B) 餘量 保留
 	
-	l011 float,l012 float,l013 float,l014 float, --互換合約,委外代工,來料加工,待交 合計
+	l018 float,l019 float,l020 float,l021 float, --互換合約,委外代工,來料加工,待交 合計
 	
-	l015 float,--A帳上鋼筋總庫存
-	l016 float,l017 float,l018 float,--B板料庫存,定尺庫存,亂尺庫存
-	l019 float,--A-B 預估在製與成型成品
+	l022 float,--A帳上鋼筋總庫存
+	l023 float,l024 float,l025 float,--B板料庫存,定尺庫存,亂尺庫存
+	l026 float,--A-B 預估在製與成型成品
+	
+	l027 float, l028 float, --上月定尺1,2剪
+	l029 float, l030 float, --本月定尺1,2剪
+	l031 float, l032 float, --本年度定尺1,2剪
 	
 	r001 float,r002 float, --總進貨量 上月 重量 均價
 	r003 float,r004 float,--總進貨量 本月 重量 均價
@@ -1185,18 +1190,17 @@ declare @tmp table(
 	r045 float,r046 float,--氧化鐵出貨量 上年度 重量 均價
 	r047 float,r048 float,--氧化鐵出貨量 本年度 重量 均價
 	
-	r049 float,r050 float,r051 float,r052 float, --成型出貨-銷售 上月,本月,上年度,本年度 重量
-	r053 float,r054 float,r055 float,r056 float, --成型出貨-互換 上月,本月,上年度,本年度 重量
-	r057 float,r058 float,r059 float,r060 float, --成型出貨-合計 上月,本月,上年度,本年度 重量
-	r061 float,r062 float,r063 float,r064 float, --成型進貨-銷售 上月,本月,上年度,本年度 重量
-	r065 float,r066 float,r067 float,r068 float, --成型進貨-互換 上月,本月,上年度,本年度 重量
-	r069 float,r070 float,r071 float,r072 float, --成型進貨-合計 上月,本月,上年度,本年度 重量
-	r073 float,r074 float,r075 float,r076 float, --定尺出貨-銷售 上月,本月,上年度,本年度 重量
-	r077 float,r078 float,r079 float,r080 float, --定尺出貨-互換 上月,本月,上年度,本年度 重量
-	r081 float,r082 float,r083 float,r084 float, --定尺出貨-合計 上月,本月,上年度,本年度 重量
-	r085 float,r086 float,r087 float,r088 float, --定尺進貨-銷售 上月,本月,上年度,本年度 重量
-	r089 float,r090 float,r091 float,r092 float, --定尺進貨-互換 上月,本月,上年度,本年度 重量
-	r093 float,r094 float,r095 float,r096 float --定尺進貨-合計 上月,本月,上年度,本年度 重量
+	r049 float,r050 float,r051 float,r052 float, --銷售-板料出貨 上月,本月,上年度,本年度 重量
+	r053 float,r054 float,r055 float,r056 float, --銷售-成型出貨 上月,本月,上年度,本年度 重量
+	r057 float,r058 float,r059 float,r060 float, --銷售-定尺出貨 上月,本月,上年度,本年度 重量
+	r061 float,r062 float,r063 float,r064 float, --銷售合計 上月,本月,上年度,本年度 重量
+	r065 float,r066 float,r067 float,r068 float, --代工-成型出貨 上月,本月,上年度,本年度 重量
+	r069 float,r070 float,r071 float,r072 float, --代工-定尺出貨 上月,本月,上年度,本年度 重量
+	r073 float,r074 float,r075 float,r076 float, --代工合計 上月,本月,上年度,本年度 重量
+	r077 float,r078 float,r079 float,r080 float, --銷售+代工-板料出貨 上月,本月,上年度,本年度 重量
+	r081 float,r082 float,r083 float,r084 float, --銷售+代工-成型出貨 上月,本月,上年度,本年度 重量
+	r085 float,r086 float,r087 float,r088 float, --銷售+代工-定尺出貨 上月,本月,上年度,本年度 重量
+	r089 float,r090 float,r091 float,r092 float  --總出貨量 上月,本月,上年度,本年度 重量
 )
 
 insert @tmp (gno)
@@ -1350,36 +1354,45 @@ declare @t_pyear nvarchar(10)=cast(cast(@t_year as int)-1 as nvarchar(10))
 update  a
 set l001=isnull((select sum(eweight) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
 ,l002=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*earnest)/sum(eweight) end from cont where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
-,l020=isnull((select sum(eweight*earnest) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
+,l003=isnull((select sum(eweight*earnest) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
 from @tmp a
 
 --B銷售合約
 update  a
-set l007=isnull((select sum(eweight) from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0)
-,l008=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*price)/sum(eweight) end from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
-,l023=isnull((select sum(eweight*earnest) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
+set l013=isnull((select sum(eweight) from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0)
+,l014=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*price)/sum(eweight) end from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
+,l015=isnull((select sum(eweight*earnest) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
 from @tmp a
 
 --2成本庫存
 update a
-set l003=isnull(b.weight,0)
-,l004=isnull(case when isnull(b.weight,0)=0 then 0 else round(isnull(b.total,0) /isnull(b.weight,0),3) end,0)
-,l021=isnull(b.total,0)
+set l004=isnull(b.weight,0)
+,l005=isnull(case when isnull(b.weight,0)=0 then 0 else round(isnull(b.total,0) /isnull(b.weight,0),3) end,0)
+,l006=isnull(b.total,0)
 from @tmp a
 outer apply(
 select SUM(weight)weight,SUM(total)total from (select product,spec,MAX(mon)mon from #xtmpb group by product,spec)xa
 outer apply (select top 1 weight,total,aprice from #xtmpb where product=xa.product and spec=xa.spec and mon=xa.mon)xb
 )b
 
---A可用餘量(1+2)
+--3互換、委外餘量
+update a
+set l007=fweight,l008=l005,l009=fweight*l005
+from @tmp a outer apply (select sum((isnull(f2,0)-isnull(iweight,0))-(isnull(f7,0)-isnull(gweight,0))) fweight from ordh h 
+outer apply (select sum(weight)iweight from view_ina where ordeno=h.noa and datea<=@t_enddate)i
+outer apply (select sum(weight)gweight from view_get where idno=h.noa and datea<=@t_enddate)g
+where h.datea<=@t_enddate and (typea='委外代工' or typea='互換')
+)b
+
+--A可用餘量(1+2+3)
 update @tmp
-set l005=l001+l003
-,l006=case when l001+l003=0 then 0 else round((l020+l021)/(l001+l003),3) end
-,l022=l020+l021
+set l010=l001+l004+l007
+,l011=case when l001+l004+l007=0 then 0 else round((l003+l006+l009)/(l001+l004+l007),3) end
+,l012=l003+l006+l009
 
 --可銷售額度(A-B)
 update @tmp
-set l009=l005-l007,l010=l022-l023
+set l016=l010-l013,l017=l012-l015
 
 --互換合約-------------------------------------------------------------------------------------
 create table #xordhtmp(
@@ -1444,16 +1457,16 @@ update #xordhtmp set fx=isnull(f3,0)-isnull(f8,0)-(isnull(f2,0)-isnull(f7,0))
 
 --互換合約
 update @tmp
-set l011=isnull((select sum(fx) from #xordhtmp where typea='互換'),0)
+set l018=isnull((select sum(fx) from #xordhtmp where typea='互換'),0)
 --委外代工
 update @tmp
-set l012=isnull((select sum(fx) from #xordhtmp where typea='委外代工'),0)
+set l019=isnull((select sum(fx) from #xordhtmp where typea='委外代工'),0)
 --來料加工
 update @tmp
-set l013=isnull((select sum(fx) from #xordhtmp where typea='來料加工'),0)
+set l020=isnull((select sum(fx) from #xordhtmp where typea='來料加工'),0)
 --待交 合計
 update @tmp
-set l014=isnull((select sum(fx) from #xordhtmp),0)
+set l021=isnull((select sum(fx) from #xordhtmp),0)
 
 --E6三泰庫存表-------------------------------------------------------------------------------
 delete #xtmp
@@ -1663,19 +1676,65 @@ delete #xunotmp where product!='鋼筋'
 
 --A帳上鋼筋總庫存
 update @tmp
-set l015=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='ucce' then 1 else -1 end*weight) from #xtmp),0)
+set l022=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='ucce' then 1 else -1 end*weight) from #xtmp),0)
 --B板料庫存-批號統計
 update @tmp
-set l016=isnull((select SUM(weight) from #xunotmp where ucolor='板料'),0)
+set l023=isnull((select SUM(weight) from #xunotmp where ucolor='板料'),0)
 --B定尺庫存-批號統計
 update @tmp
-set l017=isnull((select SUM(weight) from #xunotmp where ucolor like '%定尺品%' or ucolor like '%工地尺寸%'),0)
+set l024=isnull((select SUM(weight) from #xunotmp where ucolor like '%定尺品%' or ucolor like '%工地尺寸%'),0)
 --B亂尺庫存-批號統計
 update @tmp
-set l018=isnull((select SUM(weight) from #xunotmp where ucolor='亂尺'),0)
+set l025=isnull((select SUM(weight) from #xunotmp where ucolor='亂尺'),0)
 --A-B 預估在製與成型成品 
 update @tmp
-set l019=l015-l016-l017-l018
+set l026=l022-l023-l024-l025
+
+-----------------------------------------------------------------------------------------
+--1剪 上月 本月 本年度 定尺產能
+update a
+set l027=isnull(c.weight,0),l029=isnull(b.weight,0),l031=isnull(d.weight,0)
+from @tmp a
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_lenm) = @t_mon
+	and isnull(b.uno,'')!='' and mechno='C1'
+)b
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_lenm) = @t_pmon
+	and isnull(b.uno,'')!=''  and mechno='C1'
+)c
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_len) = left(@t_mon,@t_len)
+	and isnull(b.uno,'')!=''  and mechno='C1'
+)d
+--2剪 上月 本月 本年度 定尺產能
+update a
+set l028=isnull(c.weight,0),l030=isnull(b.weight,0),l032=isnull(d.weight,0)
+from @tmp a
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_lenm) = @t_mon
+	and isnull(b.uno,'')!='' and mechno='C2'
+)b
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_lenm) = @t_pmon
+	and isnull(b.uno,'')!=''  and mechno='C2'
+)c
+outer apply(
+	select SUM(b.weight) weight
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(a.datea,@t_len) = left(@t_mon,@t_len)
+	and isnull(b.uno,'')!=''  and mechno='C2'
+)d
 ------------------------------------------------------------------------------------------
 --左區塊------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1749,102 +1808,99 @@ set r041=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) fro
 ,r047=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 ,r048=isnull((select case when SUM(case when typea!='1' then -1 else 1 end *weight)=0 then 0 else round(SUM(case when typea!='1' then -1 else 1 end *total)/SUM(case when typea!='1' then -1 else 1 end *weight),3) end from view_vccs where product like '%氧化鐵%' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
 
---成型出貨-銷售
-update @tmp
-set r049=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r050=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r051=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r052=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+----------------------------------------------------------------------------------------------------------
 
---成型出貨-互換
+--銷售-板料出貨
 update @tmp
-set r053=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r054=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r055=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r056=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r049=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and b.ucolor='板料' and left(a.datea,@t_lenm)=@t_pmon and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r050=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and b.ucolor='板料' and left(a.datea,@t_lenm)=@t_mon and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r051=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and b.ucolor='板料' and left(a.datea,@t_len)=@t_pyear and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r052=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and b.ucolor='板料' and left(a.datea,@t_len)=@t_year and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
 
---成型出貨-合計
+--銷售-成型出貨
 update @tmp
-set r057=r049+r053
-,r058=r050+r054
-,r059=r051+r055
-,r060=r052+r056
+set r053=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and b.ucolor='成型加工' and left(a.datea,@t_lenm)=@t_pmon and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r054=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and b.ucolor='成型加工' and left(a.datea,@t_lenm)=@t_mon and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r055=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and b.ucolor='成型加工' and left(a.datea,@t_len)=@t_pyear and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r056=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and b.ucolor='成型加工' and left(a.datea,@t_len)=@t_year and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
 
---成型進貨-採購
+--銷售-定尺出貨
 update @tmp
-set r061=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r062=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r063=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r064=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+set r057=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and (b.ucolor='工地尺寸' or b.ucolor like '定尺品%') and left(a.datea,@t_lenm)=@t_pmon and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r058=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and (b.ucolor='工地尺寸' or b.ucolor like '定尺品%') and left(a.datea,@t_lenm)=@t_mon and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r059=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and (b.ucolor='工地尺寸' or b.ucolor like '定尺品%') and left(a.datea,@t_len)=@t_pyear and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
+,r060=isnull((select SUM(case when a.typea!='1' then -1 else 1 end*b.weight) from view_vcc a left join view_vccs b on a.noa=b.noa left join ucc d on b.product=d.product where not exists(select noa from view_get where noa=a.noa) and UPPER(isnull(d.unit,''))='KG' and (b.ucolor='工地尺寸' or b.ucolor like '定尺品%') and left(a.datea,@t_len)=@t_year and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' or b.storeno='A' then 1 else 0 end=1 )),0)
 
---成型進貨-互換
+--銷售合計
 update @tmp
-set r065=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r066=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r067=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r068=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and ucolor='成型加工' and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r061=r049+r053+r057
+,r062=r050+r054+r058
+,r063=r051+r055+r059
+,r064=r052+r056+r060
 
---成型進貨-合計
+--代工-成型出貨
 update @tmp
-set r069=r061+r065
-,r070=r062+r066
-,r071=r063+r067
-,r072=r064+r068
+set r065=isnull((select SUM(b.weight) from view_get a left join view_gets b on a.noa=b.noa left join ordh d on a.idno=d.noa left join ucc e on b.product=e.product where d.typea='來料加工' and UPPER(isnull(e.unit,''))='KG' and b.ucolor='成型加工' and left(a.datea,@t_lenm)=@t_pmon and (case when a.datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r066=isnull((select SUM(b.weight) from view_get a left join view_gets b on a.noa=b.noa left join ordh d on a.idno=d.noa left join ucc e on b.product=e.product where d.typea='來料加工' and UPPER(isnull(e.unit,''))='KG' and b.ucolor='成型加工' and left(a.datea,@t_lenm)=@t_mon and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r067=isnull((select SUM(b.weight) from view_get a left join view_gets b on a.noa=b.noa left join ordh d on a.idno=d.noa left join ucc e on b.product=e.product where d.typea='來料加工' and UPPER(isnull(e.unit,''))='KG' and b.ucolor='成型加工' and left(a.datea,@t_len)=@t_pyear and (case when a.datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r068=isnull((select SUM(b.weight) from view_get a left join view_gets b on a.noa=b.noa left join ordh d on a.idno=d.noa left join ucc e on b.product=e.product where d.typea='來料加工' and UPPER(isnull(e.unit,''))='KG' and b.ucolor='成型加工' and left(a.datea,@t_len)=@t_year and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' then 1 else 0 end=1 )),0)
 
---定尺出貨-銷售
+--代工-定尺出貨
 update @tmp
-set r073=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r074=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r075=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r076=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_vccs where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+set r069=isnull((select SUM(b.weight) from view_get a left join view_gets b on a.noa=b.noa left join ordh d on a.idno=d.noa left join ucc e on b.product=e.product where d.typea='來料加工' and UPPER(isnull(e.unit,''))='KG' and (b.ucolor='工地尺寸' or b.ucolor like '定尺品%') and left(a.datea,@t_lenm)=@t_pmon and (case when a.datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r070=isnull((select SUM(b.weight) from view_get a left join view_gets b on a.noa=b.noa left join ordh d on a.idno=d.noa left join ucc e on b.product=e.product where d.typea='來料加工' and UPPER(isnull(e.unit,''))='KG' and (b.ucolor='工地尺寸' or b.ucolor like '定尺品%') and left(a.datea,@t_lenm)=@t_mon and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r071=isnull((select SUM(b.weight) from view_get a left join view_gets b on a.noa=b.noa left join ordh d on a.idno=d.noa left join ucc e on b.product=e.product where d.typea='來料加工' and UPPER(isnull(e.unit,''))='KG' and (b.ucolor='工地尺寸' or b.ucolor like '定尺品%') and left(a.datea,@t_len)=@t_pyear and (case when a.datea>'2017/06/30' then 1 else 0 end=1 )),0)
+,r072=isnull((select SUM(b.weight) from view_get a left join view_gets b on a.noa=b.noa left join ordh d on a.idno=d.noa left join ucc e on b.product=e.product where d.typea='來料加工' and UPPER(isnull(e.unit,''))='KG' and (b.ucolor='工地尺寸' or b.ucolor like '定尺品%') and left(a.datea,@t_len)=@t_year and a.datea<=@t_enddate and (case when a.datea>'2017/06/30' then 1 else 0 end=1 )),0)
 
---定尺出貨-互換
+--代工合計
 update @tmp
-set r077=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r078=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r079=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r080=isnull((select SUM(weight) from view_gets where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r073=r065+r069
+,r074=r066+r070
+,r075=r067+r071
+,r076=r068+r072
 
---定尺出貨-合計
+--銷售+代工-板料出貨
 update @tmp
-set r081=r073+r077
-,r082=r074+r078
-,r083=r075+r079
-,r084=r076+r080
+set r077=r049
+,r078=r050
+,r079=r051
+,r080=r052
 
---定尺進貨-採購
+--銷售+代工-成型出貨
 update @tmp
-set r085=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r086=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r087=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
-,r088=isnull((select SUM(case when typea!='1' then -1 else 1 end *weight) from view_rc2s where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' or storeno='A' then 1 else 0 end=1 )),0)
+set r081=r053+r065
+,r082=r054+r066
+,r083=r055+r067
+,r084=r056+r068
 
---定尺進貨-互換
+--銷售+代工-定尺出貨
 update @tmp
-set r089=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_pmon and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r090=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_lenm)=@t_mon and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r091=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_pyear and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
-,r092=isnull((select SUM(weight) from view_inas where product like '%鋼筋%' and (ucolor like '%定尺品%' or ucolor like '%工地尺寸%') and left(datea,@t_len)=@t_year and datea<=@t_enddate and (case when datea>'2017/06/30' then 1 else 0 end=1 )),0)
+set r085=r057+r069
+,r086=r058+r070
+,r087=r059+r071
+,r088=r060+r072
 
---定尺進貨-合計
+--總出貨量
 update @tmp
-set r093=r085+r089
-,r094=r086+r090
-,r095=r087+r091
-,r096=r088+r092
+set r089=r061+r073
+,r090=r062+r074
+,r091=r063+r075
+,r092=r064+r076
+
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 select gno 
-,dbo.getComma(l001,0)l001,dbo.getComma(l002,3)l002
-,dbo.getComma(l003,0)l003,dbo.getComma(l004,3)l004
-,dbo.getComma(l005,0)l005,dbo.getComma(l006,3)l006
-,dbo.getComma(l007,0)l007,dbo.getComma(l008,3)l008
-,dbo.getComma(l009,0)l009
-,dbo.getComma(l011,0)l011,dbo.getComma(l012,0)l012,dbo.getComma(l013,0)l013
-,dbo.getComma(l014,0)l014
-,dbo.getComma(l015,0)l015
-,dbo.getComma(l016,0)l016,dbo.getComma(l017,0)l017,dbo.getComma(l018,0)l018
-,dbo.getComma(l019,0)l019
+,dbo.getComma(l001,0)l001,dbo.getComma(l002,3)l002,dbo.getComma(l003,0)l003
+,dbo.getComma(l004,0)l004,dbo.getComma(l005,3)l005,dbo.getComma(l006,0)l006
+,dbo.getComma(l007,0)l007,dbo.getComma(l008,3)l008,dbo.getComma(l009,0)l009
+,dbo.getComma(l010,0)l010,dbo.getComma(l011,3)l011,dbo.getComma(l012,0)l012
+,dbo.getComma(l013,0)l013,dbo.getComma(l014,3)l014,dbo.getComma(l015,0)l015
+,dbo.getComma(l016,0)l016,dbo.getComma(l017,0)l017
+,dbo.getComma(l018,0)l018,dbo.getComma(l019,0)l019,dbo.getComma(l020,0)l020,dbo.getComma(l021,0)l021
+,dbo.getComma(l022,0)l022,dbo.getComma(l023,0)l023,dbo.getComma(l024,0)l024,dbo.getComma(l025,0)l025,dbo.getComma(l026,0)l026
+,dbo.getComma(l027,0)l027,dbo.getComma(l028,0)l028
+,dbo.getComma(l029,0)l029,dbo.getComma(l030,0)l030
+,dbo.getComma(l031,0)l031,dbo.getComma(l032,0)l032
 
 ,dbo.getComma(r001,0)r001,dbo.getComma(r002,3)r002
 ,dbo.getComma(r003,0)r003,dbo.getComma(r004,3)r004
@@ -1893,8 +1949,7 @@ select gno
 ,dbo.getComma(r087,0)r087,dbo.getComma(r088,0)r088
 ,dbo.getComma(r089,0)r089,dbo.getComma(r090,0)r090
 ,dbo.getComma(r091,0)r091,dbo.getComma(r092,0)r092
-,dbo.getComma(r093,0)r093,dbo.getComma(r094,0)r094
-,dbo.getComma(r095,0)r095,dbo.getComma(r096,0)r096
+
 from @tmp
 
 IF OBJECT_ID('tempdb..#xtmp')is not null

@@ -1676,7 +1676,7 @@ delete #xunotmp where product!='鋼筋'
 
 --A帳上鋼筋總庫存
 update @tmp
-set l022=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='ucce' then 1 else -1 end*weight) from #xtmp),0)
+set l022=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp),0)
 --B板料庫存-批號統計
 update @tmp
 set l023=isnull((select SUM(weight) from #xunotmp where ucolor='板料'),0)

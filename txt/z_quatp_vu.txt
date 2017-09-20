@@ -351,6 +351,8 @@ set @t_xaddr2 = case when '#non'=[13] then '' else [13] end
 set @t_xpost2 = case when '#non'=[14] then '' else [14] end 
 --sel2含合約終止
 ---------------------------------------------------------------------------------
+declare @pagel float=50
+---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
 IF OBJECT_ID('tempdb..#tmp')is not null
@@ -391,15 +393,17 @@ create table #tmp(
 	enddate nvarchar(50),
 	memo nvarchar(MAX),
 	addr2 nvarchar(MAX), --工地名稱
+	pageno int,
+	precno int,
 )	
 CREATE INDEX tmp_index ON #tmp (noa)
 
 insert #tmp
-select '0',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
+select '2',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
 ,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end
 ,'','','',isnull(b.price,0),0,a.weight,a.eweight
 ,0--,isnull(b.price,0)*a.eweight
-,isnull(c.opay,0),0,0,0,e.price,a.conn,replace(a.memo,'chr(10)',' '),a.addr2
+,isnull(c.opay,0),0,0,0,e.price,a.conn,replace(a.memo,'chr(10)',' '),a.addr2,0,0
 from view_quat a left join cust d on a.custno=d.noa
 outer apply (select top 1 price from view_quats where noa=a.noa order by no3 )b
 outer apply (select sum(opay-unopay) opay from umm where payc=a.noa) c
@@ -519,17 +523,26 @@ begin
 	from #tmp a outer apply (select SUM(eweight)eweight,SUM(emoney)emoney from #tmp where custno=a.custno)b
 
 	insert into #tmp(gno,custno,datea,enddate,weight,eweight,price,qprice,emoney,opay,vmoney)
-	select '2',char(255),char(255),char(255),sum(weight),sum(eweight)
+	select '4',char(255),char(255),char(255),sum(weight),sum(eweight)
 	,case when sum(eweight)=0 then 0 else round(sum(eweight*price)/sum(eweight),2) end
 	,case when sum(weight)=0 then 0 else round(sum(weight*price)/sum(weight),2) end
 	,sum(emoney),sum(opay),sum(vmoney)
-	from #tmp where gno = '0'
+	from #tmp where gno = '2'
 	
 	--顯示客戶小計
 	update a
-	set gno='1'
+	set gno='3'
 	from #tmp a outer apply (select MAX(recno)recno from #tmp where custno=a.custno)b
-	where a.recno=b.recno
+	where a.recno=b.recno and gno='2'
+	
+	--插入表頭
+	update a
+	set pageno=ceiling(rr/@pagel),precno=rr
+	from (select ROW_NUMBER()over(order by custno,datea,noa,gno,recno)rr,pageno,precno from #tmp)a
+	
+	insert #tmp(gno,pageno,precno)
+	select '1',pageno,MIN(precno) from #tmp group by pageno
+	
 end
 
 --系統自動抓最近一個星期銷售的合約
@@ -544,17 +557,17 @@ set @endate=dbo.q_cdn(@now_date,-1)
 if(@t_bdate<=@bndate and @endate<=@t_edate)
 begin
 	insert #tmp (gno,recno,accy,datea,noa,cno,acomp,custno,comp,pno,product,spec,price,qprice,weight,eweight,emoney,opay,vmoney,teweight,temoney,tprice,enddate,memo,addr2)
-	select '4',ROW_NUMBER() over (order by custno,datea,noa),accy,datea,noa,cno,acomp,custno,comp,pno,product,spec,price,qprice,weight,eweight,emoney,opay,vmoney,0,0,tprice,enddate,memo,addr2
-	from #tmp where (gno='0' or gno='1') and (datea between @bndate and @endate)
+	select '7',ROW_NUMBER() over (order by custno,datea,noa),accy,datea,noa,cno,acomp,custno,comp,pno,product,spec,price,qprice,weight,eweight,emoney,opay,vmoney,0,0,tprice,enddate,memo,addr2
+	from #tmp where (gno='2' or gno='3') and (datea between @bndate and @endate)
 end
 else
 begin
 	insert #tmp
-	select '4',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
+	select '7',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
 	,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end
 	,'','','',isnull(b.price,0),0,a.weight,a.eweight
 	,0--,isnull(b.price,0)*a.eweight
-	,isnull(c.opay,0),0,0,0,e.price,a.conn,replace(a.memo,'chr(10)',' '),a.addr2
+	,isnull(c.opay,0),0,0,0,e.price,a.conn,replace(a.memo,'chr(10)',' '),a.addr2,0,0
 	from view_quat a left join cust d on a.custno=d.noa
 	outer apply (select top 1 price from view_quats where noa=a.noa order by no3 )b
 	outer apply (select sum(opay-unopay) opay from umm where payc=a.noa) c
@@ -581,7 +594,7 @@ begin
 	and datea>= @tt_bdate --會先有合約才會出貨 --避免提早出貨多抓取前1個月的出貨
 
 	declare cursor_table cursor for
-	select noa from #tmp where gno='4'
+	select noa from #tmp where gno='7'
 	open cursor_table
 	fetch next from cursor_table
 	into @noa
@@ -633,7 +646,7 @@ begin
 		
 		update #tmp
 		set vmoney=@ttotal,opay=opay+@tpayed,emoney=@ttotal-(opay+@tpayed)
-		where noa=@noa and gno='4'
+		where noa=@noa and gno='7'
 		
 		fetch next from cursor_table
 		into @noa
@@ -643,10 +656,36 @@ begin
 	
 end
 
-if((select count(*) from #tmp where gno='4')>0)
+if((select count(*) from #tmp where gno='7')>0)
 begin
-	insert #tmp(gno)
-	select '3'
+	if((select count(*) from #tmp where gno='2' or gno='3' or gno='4')%cast(@pagel as int)!=0)
+	begin
+		--插入空白行
+		insert #tmp(gno)
+		select '5'
+	end
+	
+	--只剩下一行空白補滿
+	if(@pagel-((select count(*) from #tmp where gno='2' or gno='3' or gno='4' or gno='5')%cast(@pagel as int))=1)
+	begin
+		insert #tmp(gno) select '5'
+	end
+	else
+	begin
+		--插入表頭
+		insert #tmp(gno) select '6'
+	end
+	
+	update a
+	set pageno=ceiling(rr/@pagel),precno=rr
+	from (select ROW_NUMBER()over(order by case when gno>'4' then 1 else 0 end,custno,datea,noa,gno,recno)rr,pageno,precno from #tmp
+	where gno='2' or gno='3' or gno='4' or gno='5' or gno='6' or gno='7'
+	)a
+	
+	insert #tmp(gno,pageno,precno)
+	select '6',pageno,MIN(precno) from #tmp a
+	where gno='7' and not exists (select * from #tmp where gno='6' and pageno=a.pageno)
+	group by pageno
 end
 
 select 
@@ -657,12 +696,11 @@ dbo.getComma(opay,0)opay,
 dbo.getComma(vmoney,0)vmoney,
 dbo.getComma(teweight,[5])teweight,
 dbo.getComma(temoney,0)temoney,
-'quat_vu?noa=$noa?'+a.accy qhrefa, 
-"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhref,
+'quat_vu?noa=$noa?'+a.accy ghrefa,
 "z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" ghref,
 right(@bndate,5) bndate,right(@endate,5) endate,
 * from #tmp a
-order by case when gno>'2' then 1 else 0 end,custno,datea,noa,gno,recno
+order by pageno,precno,custno,datea,noa,gno,recno
 
 IF OBJECT_ID('tempdb..#tmpa')is not null
 BEGIN

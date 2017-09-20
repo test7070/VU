@@ -155,6 +155,7 @@
 				$('#Xoption012').css('width','300px').css('height','30px');
 				$('#chkXoption012').css('width','200px').css('margin-top','5px');
 				$('#chkXoption012 span').css('width','150px');
+				$('#frameReport').css('white-space','nowrap');
 			}
 
 			function q_boxClose(s2) {

@@ -351,7 +351,7 @@ set @t_xaddr2 = case when '#non'=[13] then '' else [13] end
 set @t_xpost2 = case when '#non'=[14] then '' else [14] end 
 --sel2含合約終止
 ---------------------------------------------------------------------------------
-declare @pagel float=50
+declare @pagel float=46 --xls
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -369,7 +369,7 @@ END
 
 create table #tmp(
 	gno nvarchar(2),
-	recno nvarchar(10),
+	recno int,
 	accy nvarchar(10),
 	datea nvarchar(50),
 	noa nvarchar(50),
@@ -402,8 +402,9 @@ insert #tmp
 select '2',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
 ,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end
 ,'','','',isnull(b.price,0),0,a.weight,a.eweight
-,0--,isnull(b.price,0)*a.eweight
-,isnull(c.opay,0),0,0,0,isnull(b.price,0)+isnull(e.price,0) --基價+成型單價
+,isnull(b.price,0)*a.eweight
+,isnull(c.opay,0),0,0,0
+,case when isnull(e.price,0)>0 then isnull(b.price,0)+isnull(e.price,0) else null end --基價+成型單價
 ,a.conn,replace(a.memo,'chr(10)',' '),a.addr2,0,0
 from view_quat a left join cust d on a.custno=d.noa
 outer apply (select top 1 no3,price from view_quats where noa=a.noa order by no3 )b
@@ -508,7 +509,7 @@ begin
 	deallocate cursor_table2
 	
 	update #tmp
-	set vmoney=@ttotal,opay=opay+@tpayed,emoney=@ttotal-(opay+@tpayed)
+	set vmoney=@ttotal,opay=opay+@tpayed--,emoney=@ttotal-(opay+@tpayed)
 	where noa=@noa
 	
 	fetch next from cursor_table
@@ -567,8 +568,9 @@ begin
 	select '7',row_number() over(order by a.custno,a.datea,a.noa),a.accy,a.datea,a.noa
 	,a.cno,a.acomp,a.custno,case when isnull(d.nick,'')!='' then d.nick else a.nick end
 	,'','','',isnull(b.price,0),0,a.weight,a.eweight
-	,0--,isnull(b.price,0)*a.eweight
-	,isnull(c.opay,0),0,0,0,isnull(b.price,0)+isnull(e.price,0)
+	,isnull(b.price,0)*a.eweight
+	,isnull(c.opay,0),0,0,0
+	,case when isnull(e.price,0)>0 then isnull(b.price,0)+isnull(e.price,0) else null end
 	,a.conn,replace(a.memo,'chr(10)',' '),a.addr2,0,0
 	from view_quat a left join cust d on a.custno=d.noa
 	outer apply (select top 1 no3,price from view_quats where noa=a.noa order by no3 )b
@@ -647,7 +649,7 @@ begin
 		deallocate cursor_table2
 		
 		update #tmp
-		set vmoney=@ttotal,opay=opay+@tpayed,emoney=@ttotal-(opay+@tpayed)
+		set vmoney=@ttotal,opay=opay+@tpayed--,emoney=@ttotal-(opay+@tpayed)
 		where noa=@noa and gno='7'
 		
 		fetch next from cursor_table
@@ -691,6 +693,7 @@ begin
 end
 
 select 
+left(comp,5)comp ,left(addr2,4)addr2,
 dbo.getComma(weight,[5]) weight,
 dbo.getComma(eweight,[5]) eweight,
 dbo.getComma(emoney,0)emoney,

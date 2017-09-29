@@ -1670,7 +1670,7 @@ where a.gno='0'
 
 delete #xunotmp where gno!='0' 
 delete #xunotmp where mount<=0 and weight<=0
-delete #xunotmp where storeno!='A'
+delete #xunotmp where storeno!='A2'
 delete #xunotmp where product!='鋼筋' 
 -----------------------------------------------------------------------------------------
 
@@ -1682,7 +1682,7 @@ update @tmp
 set l023=isnull((select SUM(weight) from #xunotmp where ucolor='板料'),0)
 --B定尺庫存-批號統計
 update @tmp
-set l024=isnull((select SUM(weight) from #xunotmp where ucolor like '%定尺品%' or ucolor like '%工地尺寸%'),0)
+set l024=isnull((select SUM(weight) from #xunotmp where ucolor like '%定尺%' or ucolor like '%工地尺寸%'),0)
 --B亂尺庫存-批號統計
 update @tmp
 set l025=isnull((select SUM(weight) from #xunotmp where ucolor='亂尺'),0)

@@ -1228,7 +1228,8 @@ declare @t_mon nvarchar(10)=''
 		cost float, --成本
 		lengthb float,
 		class nvarchar(50),
-		storeno nvarchar(50)
+		storeno nvarchar(50),
+		ucolor nvarchar(50)
 	)
 
 	--只看號數和材質
@@ -1472,8 +1473,8 @@ set l021=isnull((select sum(fx) from #xordhtmp),0)
 delete #xtmp
 
 --盤點
-insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
-select '0','ucce',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,ucolor,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
+select '0','ucce',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size
 ,b.weight,case when b.weight=0 then 0 else b.total/b.weight end
 ,b.total,case when b.weight=0 then 0 else b.total/b.weight end,b.total
 ,b.lengthb,b.class,b.storeno
@@ -1485,12 +1486,12 @@ and (b.storeno='A' or b.storeno='A2')
 
 delete a
 from #xtmp a outer apply (select MAX(datea) datea from #xtmp 
-where product=a.product and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class and storeno=a.storeno)b
+where product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class and storeno=a.storeno)b
 where a.datea!=b.datea
 
 --進
-insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
-select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,ucolor,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
+select '1','rc2s',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total
@@ -1503,8 +1504,8 @@ and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
 and (b.storeno='A' or b.storeno='A2')
 
 --銷
-insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
-select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,ucolor,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
+select '5','vccs',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size
 ,case when a.typea='2' then -1 else 1 end*b.weight,b.price
 ,case when a.typea='2' then -1 else 1 end*b.total,0,0
 ,b.lengthb,b.class,b.storeno
@@ -1516,8 +1517,8 @@ and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
 and (b.storeno='A' or b.storeno='A2')
 
 --領
-insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
-select '4','cubt',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size,b.gweight,0,0,0,0,b.lengthb,b.class,b.storeno
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,ucolor,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
+select '4','cubt',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size,b.gweight,0,0,0,0,b.lengthb,b.class,b.storeno
 from view_cub a left join view_cubt b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and b.noq is not null 
@@ -1526,8 +1527,8 @@ and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
 and (b.storeno='A' or b.storeno='A2')
 
 --產
-insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
-select '2','cubs',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size,b.weight,0,0,0,0,b.lengthb,b.class,b.storeno
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,ucolor,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
+select '2','cubs',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size,b.weight,0,0,0,0,b.lengthb,b.class,b.storeno
 from view_cub a left join view_cubs b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and b.noq is not null 
@@ -1537,8 +1538,8 @@ and (b.storeno='A' or b.storeno='A2')
 
 --互換
 --入
-insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
-select '3','inas',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,ucolor,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
+select '3','inas',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size
 ,b.weight,b.mweight
 ,b.weight*b.mweight,b.mweight,b.weight*b.mweight
 ,b.lengthb,b.class,a.storeno
@@ -1550,8 +1551,8 @@ and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
 and (a.storeno='A' or a.storeno='A2')
 
 --出
-insert #xtmp(typea,tablea,accy,noa,noq,datea,product,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
-select '6','gets',a.accy,a.noa,b.noq,a.datea,b.product,b.spec,b.size
+insert #xtmp(typea,tablea,accy,noa,noq,datea,product,ucolor,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno)
+select '6','gets',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size
 ,b.weight,b.mweight
 ,b.weight*b.mweight,b.mweight,b.weight*b.mweight
 ,b.lengthb,b.class,a.storeno
@@ -1564,7 +1565,7 @@ and (a.storeno='A' or a.storeno='A2')
 
 delete a
 from #xtmp a
-outer apply(select top 1 datea from #xtmp where product=a.product and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class and storeno=a.storeno and tablea='ucce' order by datea desc)b
+outer apply(select top 1 datea from #xtmp where product=a.product and ucolor=a.ucolor and spec=a.spec and size=a.size and lengthb=a.lengthb and class=a.class and storeno=a.storeno and tablea='ucce' order by datea desc)b
 where tablea!='ucce' and a.datea<isnull(b.datea,'')
 
 --uno----------------------1
@@ -1679,13 +1680,16 @@ update @tmp
 set l022=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp),0)
 --B板料庫存-批號統計
 update @tmp
-set l023=isnull((select SUM(weight) from #xunotmp where ucolor='板料'),0)
+set l023=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp where ucolor='板料'),0)
+--set l023=isnull((select SUM(weight) from #xunotmp where ucolor='板料'),0)
 --B定尺庫存-批號統計
 update @tmp
-set l024=isnull((select SUM(weight) from #xunotmp where ucolor like '%定尺%' or ucolor like '%工地尺寸%'),0)
+set l024=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp where ucolor like '%定尺%' or ucolor like '%工地尺寸%' or ucolor like '%成型%'),0)
+--set l024=isnull((select SUM(weight) from #xunotmp where ucolor like '%定尺%' or ucolor like '%工地尺寸%' or ucolor like '%成型%'),0)
 --B亂尺庫存-批號統計
 update @tmp
-set l025=isnull((select SUM(weight) from #xunotmp where ucolor='亂尺'),0)
+set l025=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp where ucolor='亂尺' or ucolor='籃料'),0)
+--set l025=isnull((select SUM(weight) from #xunotmp where ucolor='亂尺' or ucolor='籃料'),0)
 --A-B 預估在製與成型成品 
 update @tmp
 set l026=l022-l023-l024-l025

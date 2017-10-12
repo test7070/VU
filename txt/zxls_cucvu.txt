@@ -94,6 +94,12 @@ set @custno=isnull((select top 1 noa from cust where comp like '%'+@cust+'%'),''
 if(LEN(@custno)='')
 	set @custno=isnull((select custno from view_orde where noa=@noa),'')
 
+if((select count(*) from acomp where acomp like '%三泰%')>0)
+begin
+	set @custno = isnull((select c from ztmpxls where CAST(noa as int) = 3),'')
+	set @cust = isnull((select top 1 nick from cust where noa=@custno),'')
+end
+
 if(len(@datea)=8)
 	set @datea=left(@datea,4)+'/'+left(right(@datea,4),2)+'/'+right(@datea,2)
 else if len(@datea)>0

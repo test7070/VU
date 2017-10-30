@@ -1696,6 +1696,7 @@ set l026=l022-l023-l024-l025
 
 -----------------------------------------------------------------------------------------
 --1剪 上月 本月 本年度 定尺產能
+--106/10/30 不分AB剪 27,29,31
 update a
 set l027=isnull(c.weight,0),l029=isnull(b.weight,0),l031=isnull(d.weight,0)
 from @tmp a
@@ -1703,19 +1704,19 @@ outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
 	where left(a.datea,@t_lenm) = @t_mon
-	and isnull(b.uno,'')!='' and a.mechno='C1' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )b
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
 	where left(a.datea,@t_lenm) = @t_pmon
-	and isnull(b.uno,'')!='' and a.mechno='C1' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )c
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
 	where left(a.datea,@t_len) = left(@t_mon,@t_len)
-	and isnull(b.uno,'')!='' and a.mechno='C1' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )d
 --2剪 上月 本月 本年度 定尺產能
 update a

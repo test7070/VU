@@ -1522,7 +1522,7 @@ select '4','cubt',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size,b.
 from view_cub a left join view_cubt b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and b.noq is not null 
-and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+and isnull(a.datea,'') <=@t_enddate and isnull(b.gweight,0)!=0
 and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
 and (b.storeno='A' or b.storeno='A2')
 

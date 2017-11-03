@@ -1362,7 +1362,7 @@ from @tmp a
 update  a
 set l013=isnull((select sum(eweight) from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0)
 ,l014=round(isnull((select case when sum(eweight)=0 then 0 else sum(eweight*price)/sum(eweight) end from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0),3)
-,l015=isnull((select sum(eweight*earnest) from cont where datea<=@t_enddate and isnull(enda,0)!=1),0)
+,l015=isnull((select sum(eweight*price) from view_quat where datea<=@t_enddate and isnull(enda,0)!=1),0)
 from @tmp a
 
 --2成本庫存

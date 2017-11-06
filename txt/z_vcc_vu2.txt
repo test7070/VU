@@ -1532,11 +1532,11 @@ and (b.storeno='A' or b.storeno='A2')
 
 --產
 insert #xtmp(typea,tablea,accy,noa,noq,datea,product,ucolor,spec,size,weight,price,total,aprice,cost,lengthb,class,storeno,memo,productno2)
-select '2','cubs',a.accy,a.noa,b.noq,a.datea,b.product,b.ucolor,b.spec,b.size,b.weight,0,0,0,0,b.lengthb,b.class,b.storeno,b.memo,b.productno2
+select '2','cubs',a.accy,a.noa,b.noq,b.date2,b.product,b.ucolor,b.spec,b.size,b.weight,0,0,0,0,b.lengthb,b.class,b.storeno,b.memo,b.productno2
 from view_cub a left join view_cubs b on a.noa=b.noa
 left join ucc d on b.product=d.product
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and b.noq is not null 
-and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
+and isnull(b.date2,'') <=@t_enddate and isnull(b.weight,0)!=0
 and UPPER(isnull(d.unit,''))='KG' and b.product='鋼筋'
 and (b.storeno='A' or b.storeno='A2')
 
@@ -1605,10 +1605,10 @@ from view_rc2 a left join view_rc2s b on a.noa = b.noa
 where a.typea!='2' and len(b.uno)>0 and a.datea<=@t_enddate 
 
 insert #xunotmp
-select '6',a.accy,'cubs' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+select '6',a.accy,'cubs' tablea,a.noa,b.noq,b.date2,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
 ,b.mount,b.weight,b.lengthc,b.storeno,b.store,b.memo,b.custno,b.comp,b.ordeno
 from view_cub a left join view_cubs b on a.noa=b.noa
-where len(b.uno)>0 and a.datea<=@t_enddate 
+where len(b.uno)>0 and b.date2<=@t_enddate 
 
 insert #xunotmp
 select '6',a.accy,'inas' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
@@ -1725,19 +1725,19 @@ from @tmp a
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,@t_lenm) = @t_mon
+	where left(b.date2,@t_lenm) = @t_mon
 	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )b
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,@t_lenm) = @t_pmon
+	where left(b.date2,@t_lenm) = @t_pmon
 	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )c
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,@t_len) = left(@t_mon,@t_len)
+	where left(b.date2,@t_len) = left(@t_mon,@t_len)
 	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )d
 --2剪 上月 本月 本年度 定尺產能
@@ -1747,19 +1747,19 @@ from @tmp a
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,@t_lenm) = @t_mon
+	where left(b.date2,@t_lenm) = @t_mon
 	and isnull(b.uno,'')!='' and a.mechno='C2' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )b
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,@t_lenm) = @t_pmon
+	where left(b.date2,@t_lenm) = @t_pmon
 	and isnull(b.uno,'')!='' and a.mechno='C2' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )c
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(a.datea,@t_len) = left(@t_mon,@t_len)
+	where left(b.date2,@t_len) = left(@t_mon,@t_len)
 	and isnull(b.uno,'')!='' and a.mechno='C2' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )d
 ------------------------------------------------------------------------------------------

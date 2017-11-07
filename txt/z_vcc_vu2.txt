@@ -1674,8 +1674,8 @@ from #xunotmp where uno=a.uno and product=a.product and spec=a.spec and size=a.s
 where a.gno='0'
 
 delete #xunotmp where gno!='0' 
-delete #xunotmp where mount<=0 and weight<=0
-delete #xunotmp where storeno!='A2'
+delete #xunotmp where weight<=0 --and mount<=0
+delete #xunotmp where not(storeno='A2' or storeno='A')
 delete #xunotmp where product!='鋼筋' 
 -----------------------------------------------------------------------------------------
 
@@ -1698,24 +1698,27 @@ update @tmp
 set l025=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp where ucolor='亂尺' or ucolor='籃料'),0)
 --set l025=isnull((select SUM(weight) from #xunotmp where ucolor='亂尺' or ucolor='籃料'),0)
 
---A-B 預估在製與成型成品 
-update @tmp
-set l026=l022-l023-l024-l025
-
 --106/11/06
-update #xtmp
-set memo=left(ISNULL(memo,''),1),productno2=ISNULL(productno2,'')
+update #xunotmp
+set memo=left(ISNULL(memo,''),1),ordeno=ISNULL(ordeno,'')
 
 --定尺庫存
 update @tmp
-set l033=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp where (ucolor like '%定尺%' or ucolor like '%工地尺寸%' or ucolor like '%成型%') and (productno2='' or (productno2!='' and memo!='直' and memo!='彎')) ),0)
+set l033=isnull((select SUM(weight) from #xunotmp where (ucolor like '%定尺%' or ucolor like '%工地尺寸%' or ucolor like '%成型%') and (ordeno='' or (ordeno!='' and memo!='直' and memo!='彎')) ),0)
 --定尺直料
 update @tmp
-set l034=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp where (ucolor like '%定尺%' or ucolor like '%工地尺寸%' or ucolor like '%成型%') and productno2!='' and memo='直'),0)
+set l034=isnull((select SUM(weight) from #xunotmp where (ucolor like '%定尺%' or ucolor like '%工地尺寸%' or ucolor like '%成型%') and ordeno!='' and memo='直'),0)
 --定尺彎料
 update @tmp
-set l035=isnull((select SUM(case when tablea='rc2s' or tablea='inas' or tablea='cubs' or tablea='ucce' then 1 else -1 end*weight) from #xtmp where (ucolor like '%定尺%' or ucolor like '%工地尺寸%' or ucolor like '%成型%') and productno2!='' and memo='彎'),0)
+set l035=isnull((select SUM(weight) from #xunotmp where (ucolor like '%定尺%' or ucolor like '%工地尺寸%' or ucolor like '%成型%') and ordeno!='' and memo='彎'),0)
+--定尺彎料
+update @tmp
+set l025=isnull((select SUM(weight) from #xunotmp where (ucolor='亂尺' or ucolor='籃料')),0)
 
+--A-B 預估在製與成型成品 
+update @tmp
+--set l026=l022-l023-l024-l025
+set l026=l022-l023-l033-l034-l035-l025
 -----------------------------------------------------------------------------------------
 --1剪 上月 本月 本年度 定尺產能
 --106/10/30 不分AB剪 27,29,31

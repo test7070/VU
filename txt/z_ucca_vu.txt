@@ -643,7 +643,7 @@ begin
 	from #tmpa a 
 	outer apply (select mount,total from #tmpa where mon=@t_pmon and productno=a.productno and cno=a.cno)b
 	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
-	and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
+	and LEFT(datea,@t_lenm)=@t_mon and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
 	where mon=@t_mon
 	
 	--更新出貨成本

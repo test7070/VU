@@ -1260,8 +1260,8 @@ select gno,idno,page,typea,noa,noq,datea,mon,custno,comp,addr_invo,tel,onoa,odat
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,tax),1)),@total_decimal,30)) tax
 ,reverse(substring(reverse(convert(nvarchar(30),CONVERT(money,totax),1)),@total_decimal,30)) totax 
 ,pcount ,ucolor,spec ,size,length,carno
-from @result order by custno,page,gno,mon,datea,noa,noq,idno
-
+,isnull((select MAX(page) from @result where custno=a.custno),1)maxpage
+from @result a order by custno,page,gno,mon,datea,noa,noq,idno
 ;
 -------------------------------------------------------------------------------------------------------------------
 z_vcc_sf9:--z_vcc_sf9

@@ -279,6 +279,7 @@ declare @t_bstoreno nvarchar(20)
 declare @t_estoreno nvarchar(20)
 declare @qhref_acomp nvarchar(10) ='' 
 declare @t_check nvarchar(1)
+declare @pageline float=25 --根據XLS
 ------------------------------------------------- 
 set @t_bdate = case when '#non'=[4] then '' else [4] end 
 set @t_edate = case when '#non'=[5] then char(255) else [5] end 
@@ -373,7 +374,9 @@ begin
 	,dbo.getComma(money,0) money 
 	,reverse(substring(reverse(convert(nvarchar(30),pcount,0)),0,30)) pcount,qhref, 
 	row_number()over(partition by tggno,comp order by tggno,gno,bsize,datea) idno ,ucolor,size,spec,lengh,bsize
-	from @result order by tggno,gno,bsize,datea
+	,ceiling(row_number()over(partition by tggno,comp order by tggno,gno,bsize,datea)/@pageline)page
+	,ceiling((select count(*) from @result where tggno=a.tggno and gno='0')/@pageline)maxpage
+	from @result a order by tggno,gno,bsize,datea
 end
 else
 begin
@@ -387,7 +390,9 @@ begin
 	,dbo.getComma(money,0) money 
 	,reverse(substring(reverse(convert(nvarchar(30),pcount,0)),0,30)) pcount,qhref, 
 	row_number()over(partition by tggno,comp order by tggno,gno,datea,noa) idno ,ucolor,size,spec,lengh
-	from @result order by tggno,gno,datea,noa
+	,ceiling(row_number()over(partition by tggno,comp order by tggno,gno,datea,noa)/@pageline)page
+	,ceiling((select count(*) from @result where tggno=a.tggno and gno='0')/@pageline)maxpage
+	from @result a order by tggno,gno,datea,noa
 end
 ;
 --*********************************************************************
@@ -758,4 +763,5 @@ select gno,type,noa,noq,invono,datea,tggno,comp,addr_invo,tel,odate,productno,pr
 ,dbo.getComma(money,0) money 
 ,reverse(substring(reverse(convert(nvarchar(30),pcount,0)),0,30)) pcount,qhref, 
 row_number()over(partition by tggno,comp order by tggno,gno,datea,noa,noq) idno ,ucolor,size,spec,lengh
-from @result order by tggno,page,gno,datea,noa,idno;
+,page,isnull((select MAX(page) from @result where tggno=a.tggno),1)maxpage
+from @result a order by tggno,page,gno,datea,noa,idno;

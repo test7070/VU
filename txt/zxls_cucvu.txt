@@ -17,6 +17,8 @@ create table #z_cucvu(
 	datea nvarchar(10),
 	bdate nvarchar(10),
 	
+	place nvarchar(90),--工地名稱 SF
+	
 	noq nvarchar(3), 
 	ordeno nvarchar(40),
 	no2 nvarchar(10),
@@ -83,6 +85,7 @@ declare	@etime nvarchar(10) --SF 顏色2
 declare	@picno nvarchar(10) --SF 加工型式
 declare	@mechno nvarchar(50) --SF 機台
 declare @no int = 0
+declare @place nvarchar(max) --SF 表頭工地
 
 set @noa = isnull((select c from ztmpxls where CAST(noa as int) = 2),'')
 set @cust = isnull((select c from ztmpxls where CAST(noa as int) = 3),'')
@@ -91,6 +94,8 @@ set @datea = isnull((select c from ztmpxls where CAST(noa as int) = 5),'')
 set @bdate = isnull((select h from ztmpxls where CAST(noa as int) = 5),'')
 set @accy = CAST(LEFT((select c from ztmpxls where CAST(noa as int) = 5),4)-1911 as nvarchar(5))
 set @custno=isnull((select top 1 noa from cust where comp like '%'+@cust+'%'),'')
+set @place = (select l from ztmpxls where CAST(noa as int) = 4)
+
 if(LEN(@custno)='')
 	set @custno=isnull((select custno from view_orde where noa=@noa),'')
 
@@ -171,7 +176,7 @@ begin
 		--	set @noq = (select top 1 noq from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 )
 		
 		insert into #z_cucvu
-		select @isexist,@accy,@noa,@memo,@datea,@bdate,@noq,@ordeno,@no2,@custno,@cust,@product,@ucolor,@class,@size,@size2,@spec,@lengthb,@mount1,@mount,@weight,@bmemo,@btime,@etime
+		select @isexist,@accy,@noa,@memo,@datea,@bdate,@place,@noq,@ordeno,@no2,@custno,@cust,@product,@ucolor,@class,@size,@size2,@spec,@lengthb,@mount1,@mount,@weight,@bmemo,@btime,@etime
 		,@picno,@mechno,isnull((select top 1 mech from mech where noa=@mechno),'')
 	
 		fetch next from cursor_table
@@ -193,14 +198,14 @@ begin
 	--無資料
 	if((select count(*) from view_cuc where noa=@noa)=0)
 	begin
-		--將資料存入資料庫 
-		set @cmd = 'insert into cuc'+@accy+'(noa,custno,cust,memo,datea,bdate)
-					select MAX(noa),MAX(custno),MAX(cust),MAX(memo),MAX(datea),MAX(bdate)
-					from #z_cucvu'
-		execute sp_executesql @cmd
-		
 		if((select count(*) from acomp where acomp like '%三泰%')>0)
 		begin
+			--將資料存入資料庫 
+			set @cmd = 'insert into cuc'+@accy+'(noa,custno,cust,memo,datea,bdate,mech)
+						select MAX(noa),MAX(custno),MAX(cust),MAX(memo),MAX(datea),MAX(bdate),MAX(place)
+						from #z_cucvu'
+			execute sp_executesql @cmd
+			
 			set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2,btime,etime
 						,picno,picname,imgorg,imgdata,imgbarcode,para,mechno,mech)
 						select a.noa,a.noq,a.ordeno,right("000"+a.no2,3)no2,a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2,a.btime,a.etime
@@ -210,6 +215,12 @@ begin
 		end
 		else
 		begin
+			--將資料存入資料庫 
+			set @cmd = 'insert into cuc'+@accy+'(noa,custno,cust,memo,datea,bdate)
+						select MAX(noa),MAX(custno),MAX(cust),MAX(memo),MAX(datea),MAX(bdate)
+						from #z_cucvu'
+			execute sp_executesql @cmd
+		
 			set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2)
 				select noa,noq,ordeno,right("000"+no2,3)no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,bmemo,size2
 				from #z_cucvu'
@@ -224,6 +235,14 @@ begin
 		--更新表身
 		if((select count(*) from acomp where acomp like '%三泰%')>0)
 		begin
+			--更新表頭
+			EXEC("
+				update a
+				set mech='"+@place+"',memo='"+@memo+"',bdate='"+@bdate+"'
+				from cucs"+@accy+" a
+				where a.noa='"+@noa+"'
+			")
+		
 			EXEC("
 			update a
 			set product=b.product,ucolor=b.ucolor,spec=b.spec,size=b.size,lengthb=b.lengthb,class=b.class

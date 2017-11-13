@@ -209,7 +209,7 @@ begin
 			set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2,btime,etime
 						,picno,picname,imgorg,imgdata,imgbarcode,para,mechno,mech,paraf,parag)
 						select a.noa,a.noq,a.ordeno,right("000"+a.no2,3)no2,a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2,a.btime,a.etime
-						,a.picno,b.namea,b.org,b.imgdata,b.barcode,b.para,a.mechno,a.mech,'',''
+						,a.picno,b.namea,b.org,b.imgdata,b.barcode,b.para,a.mechno,a.mech,'''',''''
 						from #z_cucvu a left join img b on a.picno=b.noa '
 			execute sp_executesql @cmd
 		end

@@ -1644,6 +1644,13 @@ select '7',a.accy,'gets' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.s
 from view_get a left join view_gets b on a.noa=b.noa
 where len(b.uno)>0 and a.datea<=@t_enddate 
 
+--互換出
+insert #xunotmp
+select '7',a.accy,'gets' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,-1*b.mount,-1*b.weight,-1*b.lengthc,b.storeno,b.store,b.memo,'','',''
+from view_get a left join view_gett b on a.noa=b.noa
+where len(b.uno)>0 and a.datea<=@t_enddate 
+
 --退貨
 insert #xunotmp
 select '7',a.accy,'rc2t' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class

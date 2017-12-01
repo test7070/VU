@@ -1735,20 +1735,26 @@ from @tmp a
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(b.date2,@t_lenm) = @t_mon
-	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	where left(a.datea,@t_lenm) = @t_mon
+	and isnull(b.uno,'')!='' --and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+	--106/11/20 只餘料入庫也算在內(業績),但不含委外整批入庫批號P開頭
+	and left(b.uno,1)!='P' and b.ucolor!='板料' 
 )b
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(b.date2,@t_lenm) = @t_pmon
-	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	where left(a.datea,@t_lenm) = @t_pmon
+	and isnull(b.uno,'')!='' --and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+	--106/11/20 只餘料入庫也算在內(業績),但不含委外整批入庫批號P開頭
+	and left(b.uno,1)!='P' and b.ucolor!='板料'  
 )c
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(b.date2,@t_len) = left(@t_mon,@t_len)
-	and isnull(b.uno,'')!='' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	where left(a.datea,@t_len) = left(@t_mon,@t_len)
+	and isnull(b.uno,'')!='' --and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+	--106/11/20 只餘料入庫也算在內(業績),但不含委外整批入庫批號P開頭
+	and left(b.uno,1)!='P' and b.ucolor!='板料'  
 )d
 --2剪 上月 本月 本年度 定尺產能
 update a
@@ -1757,19 +1763,19 @@ from @tmp a
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(b.date2,@t_lenm) = @t_mon
+	where left(a.datea,@t_lenm) = @t_mon
 	and isnull(b.uno,'')!='' and a.mechno='C2' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )b
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(b.date2,@t_lenm) = @t_pmon
+	where left(a.datea,@t_lenm) = @t_pmon
 	and isnull(b.uno,'')!='' and a.mechno='C2' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )c
 outer apply(
 	select SUM(b.weight) weight
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
-	where left(b.date2,@t_len) = left(@t_mon,@t_len)
+	where left(a.datea,@t_len) = left(@t_mon,@t_len)
 	and isnull(b.uno,'')!='' and a.mechno='C2' and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
 )d
 ------------------------------------------------------------------------------------------

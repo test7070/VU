@@ -616,11 +616,11 @@ where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
 and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,b.total,0,0
+select '13','inas',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
 from view_ina a left join view_inas b on a.noa=b.noa
 outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
 where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
-and a.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
+and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '14','cubt',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
@@ -630,11 +630,11 @@ where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
 and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
 	
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
-select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,a.storeno,b.mount,b.weight,0,0,0
+select '15','gets',a.datea,a.noa,b.noq,b.product,b.spec,b.size,b.ucolor,b.lengthb,b.class,b.storeno,b.mount,b.weight,0,0,0
 from view_get a left join view_gets b on a.noa=b.noa
 outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
 where a.datea<=@t_enddate and a.datea>=isnull(c.datea,'')
-and a.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
+and b.storeno='7000' and isnull(b.productno,'')='' and b.ucolor='板料'
 
 --105/04/20 出貨板料也要扣
 insert #tmp(gno,tablea,datea,noa,noq,product,spec,size,ucolor,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -652,8 +652,8 @@ select '13','cubs','',b.uno,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.clas
 from view_cub a left join view_cubs b on a.noa=b.noa
 outer apply(select datea,mount umount,weight uweight from view_ucces us where uno=b.uno and exists (select * from view_ucces where uno=us.uno having MAX(datea)=us.datea) )c
 where b.ucolor='板料' and  --散把只顯示板料
-not exists (select * from view_vcct where b.uno=uno) and
-not exists (select * from view_gett where b.uno=uno) and
+not exists (select * from view_vcct where b.uno=uno and datea<=@t_enddate) and
+not exists (select * from view_gett where b.uno=uno and datea<=@t_enddate) and
 a.datea<=@t_enddate and isnull(a.datea,'')>=isnull(c.datea,'')
 --and b.storeno='7000' 
 and isnull(b.productno,'')='' and isnull(b.product,'')!='' --and isnull(b.productno2,'')=''

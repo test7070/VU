@@ -73,6 +73,9 @@ if(@t_cubssheet='Y')
 begin
 	insert #tmpa
 	select uno from view_vcct
+	
+	insert #tmpa
+	select uno from view_gett
 end
 
 insert #tmp (gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)

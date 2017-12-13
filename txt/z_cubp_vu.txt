@@ -271,6 +271,7 @@ declare @result table(
 	stand float,
 	undone float,
 	unfinal float,
+	mech nvarchar(MAX), --106/12/13 黃總要加的
 	memo nvarchar(MAX),
 	gen float,
 	qhrefa nvarchar(MAX)
@@ -286,14 +287,14 @@ select '0',left(a.cust,4),a.noa,a.bdate
 		,(isnull(SUM(c.bweight),0) -isnull(SUM(d.vweight),0)) -isnull(SUM(e.gweight),0) 
 		--+(isnull(sum(b.weight),0)-isnull(sum(c.bweight),0))
 		+(case when isnull(sum(b.weight),0)-isnull(sum(c.bweight),0)<0 then 0 else isnull(sum(b.weight),0)-isnull(sum(c.bweight),0) end)
-		,a.memo,a.gen
+		,a.mech,a.memo,a.gen
 		,"z_cucp_vu?report=\'z_cucp_vu1\' and noa=\'"+a.noa+"\' and "+a.noa+"=$noa"
 from view_cuc a left join view_cucs b on a.noa=b.noa
 outer apply (select SUM(weight) bweight from view_cubs where productno2=a.noa and product2=b.noq)c
 outer apply (select SUM(weight) vweight from view_vcct where ordeno=b.ordeno and no2=b.no2)d
 outer apply (select SUM(weight) gweight from view_gett where ordeno=b.ordeno and no2=b.no2)e
 where left(a.datea,7) between @t_bmon and @t_emon
-group by a.cust,a.noa,a.bdate,a.memo,a.gen
+group by a.cust,a.noa,a.bdate,a.memo,a.mech,a.gen
 
 update a
 set undone=0,unfinal=stand
@@ -323,6 +324,7 @@ dbo.getComma(stand,0) stand,
 dbo.getComma(undone,0) undone,
 dbo.getComma(unfinal,0) unfinal,
 ROW_NUMBER() over (order by gno,noa) recno,
+dbo.charbr(mech,20) mech,
 dbo.charbr(memo,20) memo,
 *
 from @result

@@ -36,6 +36,7 @@ create table #tmp(
 	noa nvarchar(50),
 	noq nvarchar(20),
 	datea nvarchar(10),
+	idate nvarchar(10),
 	productno nvarchar(50),
 	product nvarchar(100),
 	mount float,
@@ -54,7 +55,7 @@ CREATE INDEX tmpindex2 on #tmp (tablea,cno,noa,noq)
 
 --調整(入庫)
 insert #tmp
-select '1','ucceai',b.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
+select '1','ucceai',b.cno,a.noa,b.noq,isnull(a.datea,''),isnull(a.datea,''),b.productno,b.product
 ,b.imount,imoney/nullif(imount,0),b.imoney,imoney/nullif(imount,0),imoney,'uccea?noa=$noa','',''
 from uccea a left join ucceas b on a.noa=b.noa
 where isnull(b.productno,'')!='' and isnull(imount,0)>0
@@ -64,7 +65,7 @@ and isnull(a.datea,'') <=@t_edate
 
 --進
 insert #tmp
-select '2','rc2a',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
+select '2','rc2a',a.cno,a.noa,b.noq,isnull(a.datea,''),isnull(a.datea,''),b.productno,b.product
 ,b.mount,b.price,b.money,b.price,b.money,'rc2a?noa=$noa','',a.comp
 from rc2a a left join rc2as b on a.noa=b.noa
 where isnull(b.productno,'')!='' 
@@ -74,7 +75,7 @@ and isnull(a.datea,'') <=@t_edate
 
 --進退
 insert #tmp
-select '3','vccb3',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
+select '3','vccb3',a.cno,a.noa,b.noq,isnull(a.datea,''),isnull(b.idate,''),b.productno,b.product
 ,-1*b.mount,b.price,-1*b.total,b.price,-1*b.total,'vccb?noa=$noa','',a.tgg
 from vccb a left join vccbs b on a.noa=b.noa
 where (a.typea='3' or a.typea='4') and isnull(b.productno,'')!='' 
@@ -84,7 +85,7 @@ and isnull(a.datea,'') <=@t_edate
 
 --調整(領料)
 insert #tmp
-select '5','ucceag',b.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
+select '5','ucceag',b.cno,a.noa,b.noq,isnull(a.datea,''),isnull(a.datea,''),b.productno,b.product
 ,b.gmount,0,0,0,0,'uccea?noa=$noa','',''
 from uccea a left join ucceas b on a.noa=b.noa
 where isnull(b.productno,'')!='' and isnull(gmount,0)>0
@@ -94,7 +95,7 @@ and isnull(a.datea,'') <=@t_edate
 
 --銷
 insert #tmp
-select '6','vcca',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
+select '6','vcca',a.cno,a.noa,b.noq,isnull(a.datea,''),isnull(a.datea,''),b.productno,b.product
 ,b.mount,b.price,b.money,0,0,'vcca?noa=$noa',a.comp,''
 from vcca a left join vccas b on a.noa=b.noa
 where isnull(b.productno,'')!='' 
@@ -104,7 +105,7 @@ and isnull(a.datea,'') <=@t_edate
 
 --銷退
 insert #tmp
-select '7','vccb1',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product
+select '7','vccb1',a.cno,a.noa,b.noq,isnull(a.datea,''),isnull(b.idate,''),b.productno,b.product
 ,-1*b.mount,b.price,-1*b.total,b.price,-1*b.total,'vccb?noa=$noa',a.comp,''
 from vccb a left join vccbs b on a.noa=b.noa
 where (a.typea='1' or a.typea='2') and isnull(b.productno,'')!='' 
@@ -179,10 +180,22 @@ begin
 	and LEFT(datea,@t_lenm)=@t_mon and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
 	where mon=@t_mon
 	
+	--106/11/08 趙小姐不用月平均加權
+	update a
+	set aprice=
+	case when isnull(r.mount,0)=0 then 0 else 
+	round((isnull(r.cost,0))/(isnull(r.mount,0)),4) end
+	from #tmpb a 
+	outer apply (select mount,total from #tmpb where mon=@t_pmon and productno=a.productno and cno=a.cno)b
+	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
+	--and LEFT(datea,@t_lenm)=@t_mon
+	and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
+	where mon=@t_mon
+	
 	--更新出貨成本
 	update a
-	set cost=a.mount*b.aprice
-	from #tmp a left join #tmpb b on a.cno=b.cno and a.productno=b.productno and LEFT(datea,@t_lenm)=b.mon
+	set cost=a.mount*b.aprice,aprice=b.aprice
+	from #tmp a left join #tmpb b on a.cno=b.cno and a.productno=b.productno and LEFT(idate,@t_lenm)=b.mon
 	where LEFT(datea,@t_lenm)=@t_mon
 	and not(tablea='rc2a' or tablea='ucceai' or tablea='vccb3')
 	
@@ -496,6 +509,7 @@ create table #tmp(
 	noa nvarchar(50),
 	noq nvarchar(20),
 	datea nvarchar(10),
+	idate nvarchar(10),
 	productno nvarchar(50),
 	product nvarchar(100),
 	mount float,
@@ -508,7 +522,7 @@ create table #tmp(
 
 --調整(入庫)
 insert #tmp
-select '1','ucceai',cno,a.noa,noq,datea,productno,product,imount
+select '1','ucceai',cno,a.noa,noq,isnull(a.datea,''),isnull(a.datea,''),productno,product,imount
 ,imoney/nullif(imount,0),imoney,imoney/nullif(imount,0),imoney
 from uccea a left join ucceas b on a.noa=b.noa
 where(a.datea <=@t_edate) and isnull(imount,0)>0
@@ -518,7 +532,7 @@ and (b.productno between @t_bproductno and @t_eproductno)
 
 --進 
 insert #tmp 
-select '2','rc2a',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product 
+select '2','rc2a',a.cno,a.noa,b.noq,isnull(a.datea,''),isnull(a.datea,''),b.productno,b.product 
 ,b.mount,b.price,b.money,b.price,b.money 
 from rc2a a left join rc2as b on a.noa=b.noa 
 where isnull(b.productno,'')!='' 
@@ -528,7 +542,7 @@ and isnull(a.datea,'') <=@t_edate
 
 --進退
 insert #tmp 
-select '3','vccb3',a.cno,a.noa,b.noq,a.datea,b.productno,b.product 
+select '3','vccb3',a.cno,a.noa,b.noq,isnull(a.datea,''),isnull(b.idate,''),b.productno,b.product 
 ,-1*b.mount,b.price,-1*b.total,b.price,-1*b.total 
 from vccb a left join vccbs b on a.noa=b.noa
 where (a.typea='3' or a.typea='4') and isnull(b.productno,'')!='' 
@@ -538,7 +552,7 @@ and isnull(a.datea,'') <=@t_edate
 
 --調整(領料)
 insert #tmp
-select '4','ucceag',cno,a.noa,noq,datea,productno,product,gmount,0,0,0,0
+select '4','ucceag',cno,a.noa,noq,isnull(a.datea,''),isnull(a.datea,''),productno,product,gmount,0,0,0,0
 from uccea a left join ucceas b on a.noa=b.noa
 where(a.datea <=@t_edate) and isnull(gmount,0)>0
 and isnull(b.productno,'')!='' 
@@ -547,7 +561,7 @@ and (b.productno between @t_bproductno and @t_eproductno)
 
 --銷 
 insert #tmp 
-select '5','vcca',a.cno,a.noa,b.noq,isnull(a.datea,''),b.productno,b.product 
+select '5','vcca',a.cno,a.noa,b.noq,isnull(a.datea,''),isnull(a.datea,''),b.productno,b.product 
 ,b.mount,b.price,b.money,0,0 
 from vcca a left join vccas b on a.noa=b.noa 
 where isnull(b.productno,'')!='' 
@@ -557,7 +571,7 @@ and isnull(a.datea,'') <=@t_edate
 
 --銷退
 insert #tmp 
-select '6','vccb1',a.cno,a.noa,b.noq,a.datea,b.productno,b.product 
+select '6','vccb1',a.cno,a.noa,b.noq,isnull(a.datea,''),isnull(b.idate,''),b.productno,b.product 
 ,-1*b.mount,b.price,-1*b.total,b.price,-1*b.total 
 from vccb a left join vccbs b on a.noa=b.noa
 where (a.typea='1' or a.typea='2') and isnull(b.productno,'')!='' 
@@ -649,10 +663,10 @@ begin
 	
 	--更新出貨成本
 	update a
-	set cost=a.mount*b.aprice
-	from #tmp a left join #tmpa b on a.cno=b.cno and a.productno=b.productno and LEFT(datea,@t_lenm)=b.mon
+	set cost=a.mount*b.aprice,aprice=b.aprice
+	from #tmp a left join #tmpa b on a.cno=b.cno and a.productno=b.productno and LEFT(idate,@t_lenm)=b.mon
 	where LEFT(datea,@t_lenm)=@t_mon
-	and not(tablea='rc2a' or tablea='ucceai' or tablea='vccb3')
+	--and not(tablea='rc2a' or tablea='ucceai' or tablea='vccb3')
 	
 	--更新當月期末成本
 	update a
@@ -756,7 +770,7 @@ begin
 end
 */
 
-update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucceai' or a.tablea='vccb3'
+--update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucceai' or a.tablea='vccb3'
 ------------------------------------------------------------------------------------------
 create table #tmpb( 
 	gno nvarchar(1), 

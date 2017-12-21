@@ -81,7 +81,28 @@
                 $('#Xshowend').css('width', '300px').css('height', '30px');
                 $('#Xshowend .label').css('width','0px');
                 $('#chkXshowend').css('width', '220px').css('margin-top', '5px');
-                $('#chkXshowend span').css('width','180px')
+                $('#chkXshowend span').css('width','180px');
+                
+                var t_report=q_getHref()[1];
+				var t_index=-1;
+				for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
+					if($('#q_report').data('info').reportData[i].report=='z_ordhp_vu03'){
+						t_index=i;
+						break;	
+					}
+				}
+				if(t_report!=undefined && t_report=='z_ordhp_vu03'){
+					var t_noa=q_getHref()[3];
+					$('#txtXnoa').val(t_noa);
+					for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
+						if($('#q_report').data('info').reportData[i].report!='z_ordhp_vu03'){
+							$('#q_report div div').eq(i).hide();
+						}
+					}
+					$('#q_report').find('span.radio').eq(t_index).parent().click();	
+					$('#txtXnoa').attr('disabled','disabled');
+					$("#btnOk").click();
+				}
             }
 
             function q_boxClose(s2) {

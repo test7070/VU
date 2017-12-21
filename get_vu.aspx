@@ -483,12 +483,13 @@
 				}
 				
 				//106/06/14 淨重是否等於合約重量
-                var t_weight=dec($('#txtWeight').val());
+				//106/07/25 趙小姐 會先打空重所以不判斷
+                /*var t_weight=dec($('#txtWeight').val());
                 var t_weight2=dec($('#txtMount').val());
                 if(t_weight!=t_weight2){
 					alert('淨重不等於合約重量!!');
 					return;
-                }
+                }*/
 				
 				check_ordh=false;
 				t_nordhno=$('#txtIdno').val();

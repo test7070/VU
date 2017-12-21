@@ -26,7 +26,7 @@ END
 
 create table #tmp(
 	gno nvarchar(2),
-	idno nvarchar(10),
+	idno int,
 	datea nvarchar(50),
 	noa nvarchar(50),
 	cno nvarchar(50),
@@ -135,7 +135,8 @@ dbo.getComma(f9,-1) f9,
 dbo.getComma(f10,-1) f10,
 case when fx>=0 then dbo.getComma(abs(fx),-1) else '<font color=red>('+dbo.getComma(abs(fx),-1)+')</font>' end fx,
 dbo.getComma(tweight,-1) tweight,
-case when gno='0' and len(noa)>0 then 'ordh_sf?noa=$noa' else '' end qhref,
+case when gno='0' and len(noa)>0 then 'ordh_sf?noa=$noa' else '' end qhrefa,
+case when gno='0' and len(noa)>0 then "z_ordhp_vu?report=\'z_ordhp_vu03\' and noa=\'"+noa+"\' and "+cast(idno as nvarchar(100))+"=$idno" else '' end qhrefb,
 dbo.charbr(addr,10) addr,
 * from #tmp order by gno,idno
 
@@ -504,4 +505,139 @@ IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN
 	drop table #tmp
 END
+;
+
+--*******************************************************************************************************
+z_ordhp_vu03:--z_ordhp_vu03
+SET QUOTED_IDENTIFIER OFF 
+declare @t_noa nvarchar(30)
+declare @qhref_acomp nvarchar(10) ='' 
+set @t_noa = case when '#non'=[6] then '' else [6] end
+set @qhref_acomp='_vu' 
+-----------------------------------------------------------------------------------
+
+declare @result table( 
+	gno nvarchar(1), 
+	typea nvarchar(4), 
+	noa nvarchar(30), 
+	invono nvarchar(30),
+	noq nvarchar(3), 
+	datea nvarchar(10), 
+	custno nvarchar(30), 
+	comp nvarchar(90), 
+	onoa nvarchar(20),
+	odate nvarchar(20),
+	oweight float,
+	oprice float,
+	xproduct nvarchar(MAX), 
+	unit nvarchar(8), 
+	mount float, 
+	weight float, 
+	price float, 
+	total float, 
+	pcount int, 
+	qhref nvarchar(MAX) ,
+	tax float,
+	ucolor nvarchar(30),
+	spec nvarchar(30),
+	size nvarchar(30),
+	length nvarchar(30),
+	totax float,
+	carno nvarchar(50),
+	idno int,
+	page int,
+	memo nvarchar(MAX)
+) 
+
+insert @result
+select '0','ina',a.noa,a.place,b.noq,a.datea,a.tggno,isnull(a.comp,'')
+		,c.noa,c.datea,c.weight,c.f5
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')+' '+isnull(b.class,'')
+		,b.unit,case when b.mount=0 then NULL else b.mount end,case when b.weight=0 then NULL else b.weight end,b.mweight,b.lengthc
+		, 0 pcount,'ina'+@qhref_acomp+'?noa=$noa?'+b.accy 
+		,round((a.tax*(case when b.lengthc=0 then 0 else (b.lengthc/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
+		,round((a.tax*(case when b.lengthc=0 then 0 else (b.lengthc/a.money) end)),0)+b.lengthc
+		,a.carno,0,0,b.memo
+from view_ina a left join view_inas b on a.noa=b.noa
+left join ordh c on a.ordeno=c.noa
+where a.ordeno=@t_noa
+
+insert @result
+select '0','get',a.noa,a.vno,b.noq,a.datea,a.custno,isnull(a.comp,'')
+		,c.noa,c.datea,c.weight,c.f5
+		,b.product+' '+isnull(b.size,'')+' '+isnull(b.spec,'')+' '+case when (isnull(convert(nvarchar,b.lengthb),'')='' or isnull(convert(nvarchar,b.lengthb),'') = '0') then '' else isnull(convert(nvarchar,b.lengthb),'')+'M ' end + isnull(b.ucolor,'')+' '+isnull(b.class,'')
+		,b.unit,case when b.mount=0 then NULL else b.mount end,case when b.weight=0 then NULL else b.weight end,b.mweight,b.lengthc
+		, 0 pcount,'get'+@qhref_acomp+'?noa=$noa?'+b.accy 
+		,round((a.tax*(case when b.lengthc=0 then 0 else (b.lengthc/a.money) end)),0),b.ucolor,b.spec,b.size,b.lengthb
+		,round((a.tax*(case when b.lengthc=0 then 0 else (b.lengthc/a.money) end)),0)+b.lengthc
+		,a.carno,0,0,b.memo
+from view_get a left join view_gets b on a.noa=b.noa
+left join ordh c on a.idno=c.noa
+where a.idno=@t_noa
+
+if((select count(*) from @result)>0)
+begin
+	insert into @result(gno,custno,pcount,mount,total,totax,weight) 
+	select '1',CHAR(255), count(*), 
+		sum((case typea when 'get' then mount else (-1)*mount end)), 
+		sum((case typea when 'get' then total else (-1)*total end)),
+		sum((case typea when 'get' then totax else (-1)*totax end)),
+		sum((case typea when 'get' then weight else (-1)*weight end))  
+	from @result a 
+
+	update @result set typea = (case typea when 'ina' then '互進' else '互出' end) where typea ='ina' or typea = 'get' 
+
+	update @result set mount=mount*-1,total=total*-1 ,totax=totax*-1,weight=weight*-1,tax=tax*-1 where typea='互進' 
+
+	declare @pageline int =43
+	declare @custno nvarchar(50) 
+	declare @idno int
+	declare @page int
+
+	update a
+	set idno=xidno,page=ceiling(cast(xidno as float)/@pageline)
+	from (select idno,page,row_number()over( order by gno,datea,case when typea='互進' then 0 else 1 end,noa,noq) xidno from @result)a
+
+	--補空白行
+	declare cursor_table cursor for 
+	select MAX(idno),MAX(page) from @result 
+	open cursor_table 
+	fetch next from cursor_table 
+	into @idno,@page
+	while(@@FETCH_STATUS <> -1) 
+	begin
+		while ((@idno)%@pageline>0)
+		begin
+			set @idno=@idno+1
+			insert @result(gno,page,idno,noa)
+			select '2',@page,@idno,CHAR(255)
+		end
+
+		fetch next from cursor_table 
+		into @idno,@page
+	end 
+	close cursor_table 
+	deallocate cursor_table 
+
+	insert @result(gno,page,idno)
+	select '3',page,MAX(idno)+1
+	from @result group by page
+
+	update a set gno='4'
+	from @result a outer apply (select MAX(page)xpage from @result )b
+	where gno='3' and a.page=b.xpage
+end
+
+select gno,idno,page,typea,noa,noq,datea,custno,comp,onoa,odate
+,dbo.charbr(xproduct+case when len(memo)!=0 then '('+memo+')' else '' end,30) xpdt,invono,unit, qhref 
+,dbo.getComma(mount,-1) mount 
+,dbo.getComma(weight,-1) weight 
+,dbo.getComma(oweight,0) oweight 
+,dbo.getComma(oprice,2) oprice
+,dbo.getComma(price,-1)price 
+,dbo.getComma(total,-1) total 
+,dbo.getComma(tax,-1) tax
+,dbo.getComma(totax,-1) totax 
+,pcount ,ucolor,spec ,size,length,carno
+from @result order by page,gno,datea,idno
 ;

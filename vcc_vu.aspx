@@ -341,7 +341,7 @@
 							$('#textQno1').val(b_ret[0].noa);
 							$('#txtSalesno').val(b_ret[0].salesno);
 							$('#txtSales').val(b_ret[0].sales);
-							$('#txtAddr2').val(b_ret[0].addr2);
+							//$('#txtAddr2').val(b_ret[0].addr2); //106/12/21 趙小姐 要求拿掉
 							if(b_ret[0].atax=="true"){
 								$('#chkAtax').prop('checked',true);
 							}else{
@@ -765,12 +765,12 @@
 									$('#chkAtax').prop('checked',true);
 									$('#txtSalesno').val(as[0].salesno);
 									$('#txtSales').val(as[0].sales);
-									$('#txtAddr2').val(as[0].addr2);
+									//$('#txtAddr2').val(as[0].addr2); //106/12/21 趙小姐 要求拿掉
 								}else{
 									$('#chkAtax').prop('checked',false);
 									$('#txtSalesno').val(as[0].salesno);
 									$('#txtSales').val(as[0].sales);
-									$('#txtAddr2').val(as[0].addr2);
+									//$('#txtAddr2').val(as[0].addr2); //106/12/21 趙小姐 要求拿掉
 								}
 								refreshBbm();
 								sum();
@@ -850,7 +850,7 @@
 							$('#cmbTrantype').val(as[0].trantype);
 							$('#txtPost').val(as[0].post);
 							$('#txtAddr').val(as[0].addr);
-							$('#txtAddr2').val(as[0].addr2);
+							//$('#txtAddr2').val(as[0].addr2);//106/12/21 趙小姐 要求拿掉
 							
 							q_gt('view_cubs', "where=^^uno='"+$('#txtUno__'+n).val()+"' and (weight>=0 and mount>=0) ^^ ", 0, 0, 0, "getcubsuno_"+n);
 						}else{

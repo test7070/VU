@@ -518,7 +518,7 @@ declare @tmp table(
 ) 
 insert into @tmp 
 select '0',a.tggno,(case when isnull(c.nick,'') = '' then c.comp else c.nick end), left(a.datea,[2])
-,sum(b.mount),sum(b.mweight),0,sum(b.weight)
+,sum(b.mount),sum(b.lengthc),0,sum(b.weight)
 ,sum(round((a.tax*(case when a.money=0 then 0 else (b.lengthc/a.money) end)),0)) 
 ,sum((round((a.tax*(case when a.money=0 then 0 else (b.lengthc/a.money) end)),0)+b.lengthc)) 
 from view_ina a left join view_inas b on a.noa = b.noa left join tgg c on a.tggno = c.noa 

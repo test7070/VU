@@ -125,8 +125,12 @@
 				});
 				
 				if(q_getPara('sys.project').toUpperCase()=='SF'){
-					$('.issf').show();	
+					$('.issf').show();
 				}
+				
+				$("#tbbm input[type='checkbox']").click(function() {
+					checkboxbackground();
+				});
 			}
 
 			function q_boxClose(s2) {
@@ -394,6 +398,7 @@
 				_refresh(recno);
 				HiddenField();
 				refreshBbm();
+				checkboxbackground();
 			}
 
 			function readonly(t_para, empty) {
@@ -491,6 +496,36 @@
             function combAddr_chg() {
 				if (q_cur == 1 || q_cur == 2) {
 					$('#txtAddr2').val($('#combAddr').find("option:selected").val());
+				}
+			}
+			
+			function checkboxbackground() {
+				if(q_getPara('sys.project').toUpperCase()=='SF'){
+					if ($('#chkAtax').prop('checked')) {
+						$('#lblAtax').css('background','antiquewhite');
+					}else{
+						$('#lblAtax').css('background','');
+					}
+					if ($('#chkChka1').prop('checked')) {
+						$('#lblChka1').css('background','yellow');
+					}else{
+						$('#lblChka1').css('background','');
+					}
+					if ($('#chkEnda').prop('checked')) {
+						$('#lblEnda').css('background','red');
+					}else{
+						$('#lblEnda').css('background','');
+					}
+					if ($('#chkChka2').prop('checked')) {
+						$('#lblChka2').css('background','aqua');
+					}else{
+						$('#lblChka2').css('background','');
+					}
+					if ($('#chkChka3').prop('checked')) {
+						$('#lblChka3').css('background','chartreuse');
+					}else{
+						$('#lblChka3').css('background','');
+					}
 				}
 			}
 		</script>

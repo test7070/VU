@@ -9,6 +9,10 @@
 		<script src="../script/qbox.js" type="text/javascript"></script>
 		<script src='../script/mask.js' type="text/javascript"></script>
 		<link href="../qbox.css" rel="stylesheet" type="text/css" />
+		<link href="css/jquery/themes/redmond/jquery.ui.all.css" rel="stylesheet" type="text/css" />
+		<script src="css/jquery/ui/jquery.ui.core.js"> </script>
+		<script src="css/jquery/ui/jquery.ui.widget.js"> </script>
+		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
 		<script type="text/javascript">
             this.errorHandler = null;
             function onPageError(error) {
@@ -37,6 +41,7 @@
             $(document).ready(function() {
                 bbmKey = ['noa'];
                 bbsKey = ['noa', 'noq'];
+                q_bbsLen = 30; //106/08/09
                 q_brwCount();
                 q_gt(q_name, q_content, q_sqlCount, 1, 0, '', r_accy);
                 q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
@@ -63,6 +68,10 @@
 				q_cmbParse("cmbBtime", ',棕,紅,白,黃,綠,灰,藍','s');
 				q_cmbParse("cmbEtime", ',棕,紅,白,黃,綠,灰,藍','s');
 				
+				if(r_len==4){                	
+                	$.datepicker.r_len=4;
+					//$.datepicker.setDefaults($.datepicker.regional["ENG"]);
+                }
 				
 				var t_where = "where=^^ 1=1 ^^";
 				q_gt('ucc', t_where, 0, 0, 0, "");
@@ -938,6 +947,13 @@
             function readonly(t_para, empty) {
                 _readonly(t_para, empty);
                 change_check();
+                if(t_para){
+                	$('#txtDatea').datepicker('destroy');
+                	$('#txtBdate').datepicker('destroy');
+                }else{
+                	$('#txtDatea').datepicker();
+                	$('#txtBdate').datepicker();
+                }
             }
             
             function refreshBbm() {

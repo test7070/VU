@@ -73,6 +73,9 @@ if(@t_cubssheet='Y')
 begin
 	insert #tmpa
 	select uno from view_vcct
+	
+	insert #tmpa
+	select uno from view_gett
 end
 
 insert #tmp (gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
@@ -1649,6 +1652,35 @@ select '2','cubs',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor
 from view_cub a left join view_cubs b on a.noa=b.noa
 where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
 
+
+--互進
+insert #tmp
+select '1','inas',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,b.weight,b.mweight,b.lengthc,b.storeno,b.mweight,b.lengthc,'ina_vu?noa=$noa'
+from view_ina a left join view_inas b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+
+--互出
+insert #tmp
+select '5','gets',a.accy,a.noa,b.noq,a.datea,'',b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,b.weight,b.mweight
+,b.lengthc,b.storeno,0,0,'get_vu?noa=$noa'
+from view_get a left join view_gets b on a.noa=b.noa
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+--106/04/11 bbs要扣板料 但不看成品倉
+--and not exists(select* from view_vcct where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)
+--and b.storeno!='7000' 
+and b.storeno!='7000A' --105/07/21 成品倉只看bbt
+
+insert #tmp
+select '5','gett',a.accy,a.noa,b.noq,a.datea,isnull(b.uno,''),b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,b.weight,c.mweight
+,b.weight*c.mweight,case when b.product='鋼筋' and b.ucolor='板料' then '7000' else '7000A' end,0,0
+,'get_vu?noa=$noa'
+from view_get a left join view_gett b on a.noa=b.noa
+outer apply (select top 1 * from view_gets where noa=a.noa and product=b.product and ucolor=b.ucolor and spec=b.spec and size=b.size and class=b.class)c
+where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_edate and isnull(b.weight,0)!=0
+
 CREATE INDEX tmpindex on #tmp (product,spec,size,ucolor,lengthb,class,datea,typea,noa,noq)
 CREATE INDEX tmpindex2 on #tmp (tablea,noa,noq)
 
@@ -1758,7 +1790,7 @@ begin
 	end
 	
 	--進貨
-	if(@tablea='rc2s')
+	if(@tablea='rc2s' or @tablea='inas')
 	begin
 		if(@ttotal<=0 or @tweight<=0) --處理超領導致金額不正確 以最近進貨的單價作為目前超領的單價
 			set @ttotal=@tweight*case when @weight=0 then 0 else round(@total/@weight,4) end
@@ -1878,7 +1910,7 @@ begin
 	end
 	
 	--出貨
-	if(@tablea='vccs' or @tablea='vcct')
+	if(@tablea='vccs' or @tablea='vcct' or @tablea='gets' or @tablea='gett')
 	begin
 		set @tweight=@tweight-@weight
 		set @ttotal=@ttotal-round(@weight*@aprice,4)
@@ -2055,7 +2087,7 @@ begin
 		end
 	end
 	--進貨--入庫
-	if(@tablea='rc2s' or @tablea='cubs')
+	if(@tablea='rc2s' or @tablea='cubs' or @tablea='inas')
 	begin	
 		if(@uno!='')
 		begin
@@ -2070,7 +2102,7 @@ begin
 	end
 	
 	--領料--出貨
-	if(@tablea='cubt' or @tablea='vccs' or @tablea='vcct')
+	if(@tablea='cubt' or @tablea='vccs' or @tablea='vcct' or @tablea='gets' or @tablea='gett')
 	begin
 		if(@uno!='')
 		begin
@@ -2142,6 +2174,9 @@ when tablea='cubs' then '入庫'
 when tablea='cubt' then '領料'
 when tablea='vccs' then '出貨'
 when tablea='vcct' then '出貨'
+when tablea='inas' then '互進'
+when tablea='gets' then '互出'
+when tablea='gett' then '互出'
 else tablea end
 
 update #tmpa set lengthb=null,class='' where product!='鋼筋' or ucolor!='板料'

@@ -248,8 +248,6 @@
 					$('#txtXaddr2').val($('#combXaddr2').find("option:selected").text());
 				});
 				
-				$('#q_report .report').css('width','400px');
-				$('#q_report .report div').css('width','200px');
 				
 				$('#Xshowenda').css('width', '300px').css('height', '30px');
 				$('#Xshowenda .label').css('width','0px');

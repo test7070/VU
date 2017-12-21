@@ -94,7 +94,7 @@
 					<td style="width:1%;"><input name="sel"  id="radSel.*" type="radio" /></td>
 					<td style="width:15%;"><input class="txt" id="txtNoa.*" type="text" style="width:98%;"  readonly="readonly" /></td>		
 					<td style="width:10%;"><input class="txt" id="txtTypea.*" type="text" style="width:98%;"  readonly="readonly" /></td>
-					<td style="width:20%;"><input class="txt" id="txtAddr.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
+					<td style="width:20%;"><input class="txt" id="txtAddr.*" type="text" style="width:98%;"  readonly="readonly" /></td>
 					<td style="width:15%;"><input class="txt" id="txtPrice.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
 					<td style="width:15%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
 					<td style="width:24%;">

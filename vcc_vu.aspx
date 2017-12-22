@@ -583,7 +583,7 @@
 							z_nick = as[0].nick;
 						}
 						break;
-					case 'custms':
+					/*case 'custms':
 						var ass = _q_appendData("custms", "", true);
 						if(ass[0] != undefined){
 							var t_item = " @ ";
@@ -595,7 +595,20 @@
 						}else{
 							$('#combAddr').text('');
 						}
-						break;
+						break;*/
+					case 'getaddr':
+						var ass = _q_appendData("view_cuc", "", true);
+						if(ass[0] != undefined){
+							var t_item = " @ ";
+							for ( i = 0; i < ass.length; i++) {
+								t_item = t_item + (t_item.length > 0 ? ',' : '') + ass[i].mech + '@' + ass[i].mech;
+							}
+							$('#combAddr').text('');
+							q_cmbParse("combAddr", t_item);
+						}else{
+							$('#combAddr').text('');
+						}
+						break;	
 					case 'orde':
 						var as = _q_appendData("orde", "", true);
 						var t_memo = $('#txtMemo').val();
@@ -1492,8 +1505,11 @@
 				});
 				
 				if (!emp($('#txtCustno').val())) {
-					var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
-					q_gt('custms', t_where, 0, 0, 0, "");
+					/*var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
+					q_gt('custms', t_where, 0, 0, 0, "");*/
+					//106/12/22 黃 換成 抓 加工單
+					var t_where = "where=^^ a.custno='" + $('#txtCustno').val() + "' and isnull(a.gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ^^";
+					q_gt('cuc_vu', t_where, 0, 0, 0, "getaddr");
 				}else{
 					$('#combAddr').text('');
 				}
@@ -1712,8 +1728,11 @@
 						break;
 					case 'txtCustno':
 						if (!emp($('#txtCustno').val())) {
-							var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
-							q_gt('custms', t_where, 0, 0, 0, "");
+							/*var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
+							q_gt('custms', t_where, 0, 0, 0, "");*/
+							//106/12/22 黃 換成 抓 加工單
+							var t_where = "where=^^ a.custno='" + $('#txtCustno').val() + "' and isnull(a.gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ^^";
+							q_gt('cuc_vu', t_where, 0, 0, 0, "getaddr");
 						}
 						break;
 				}

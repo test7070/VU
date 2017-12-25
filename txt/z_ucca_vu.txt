@@ -202,7 +202,9 @@ begin
 	--更新當月期末成本
 	update a
 	set mount=isnull(a.mount,0)-isnull(v.mount,0)
-	,total=isnull(a.total,0)-isnull(v.cost,0)
+	--,total=isnull(a.total,0)-isnull(v.cost,0)
+	--106/12/25 趙小姐以剩餘數量*當月進貨成本單價
+	,total=(isnull(a.mount,0)-isnull(v.mount,0))*aprice
 	from #tmpb a 
 	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
 	and LEFT(datea,@t_lenm)=@t_mon and not(tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) v
@@ -359,12 +361,12 @@ declare @qhref nvarchar(100)
 CREATE INDEX tmpindex3 on #tmp (cno,productno ,datea,typea,noa,noq)
 
 declare cursor_table cursor for
-select tablea,typea,noa,noq,datea,cno,productno ,isnull(mount,0),isnull(cost,0),qhref,cust,tgg
+select tablea,typea,noa,noq,datea,cno,productno ,isnull(mount,0),isnull(cost,0),qhref,cust,tgg,isnull(aprice,0)
 from #tmp 
 order by cno,productno ,datea,typea,noa,noq
 open cursor_table
 fetch next from cursor_table
-into @tablea,@typea,@noa,@noq,@datea,@cno,@productno ,@mount,@total,@qhref,@cust,@tgg
+into @tablea,@typea,@noa,@noq,@datea,@cno,@productno ,@mount,@total,@qhref,@cust,@tgg,@aprice
 while(@@FETCH_STATUS <> -1)
 begin
 	if(@tproductno !=@productno  or @tcno!=@cno)
@@ -387,7 +389,9 @@ begin
 			set @total=@mount*case when @tmount=0 then 0 else @ttotal/@tmount end
 				
 		set @tmount=@tmount-@mount
-		set @ttotal=@ttotal-@total
+		--106/12/25 趙小姐以剩餘數量*當月進貨成本單價
+		--set @ttotal=@ttotal-@total
+		set @ttotal=@tmount*@aprice
 	end
 	
 	--避免前期超領負數造成金額溢位
@@ -417,7 +421,7 @@ begin
 	set @tcno=@cno
 	
 	fetch next from cursor_table
-	into @tablea,@typea,@noa,@noq,@datea,@cno,@productno ,@mount,@total,@qhref,@cust,@tgg
+	into @tablea,@typea,@noa,@noq,@datea,@cno,@productno ,@mount,@total,@qhref,@cust,@tgg,@aprice
 end
 close cursor_table
 deallocate cursor_table
@@ -666,12 +670,14 @@ begin
 	set cost=a.mount*b.aprice,aprice=b.aprice
 	from #tmp a left join #tmpa b on a.cno=b.cno and a.productno=b.productno and LEFT(idate,@t_lenm)=b.mon
 	where LEFT(datea,@t_lenm)=@t_mon
-	--and not(tablea='rc2a' or tablea='ucceai' or tablea='vccb3')
+	and not(tablea='rc2a' or tablea='ucceai' or tablea='vccb3')
 	
 	--更新當月期末成本
 	update a
 	set mount=isnull(a.mount,0)-isnull(v.mount,0)
-	,total=isnull(a.total,0)-isnull(v.cost,0)
+	--,total=isnull(a.total,0)-isnull(v.cost,0)
+	--106/12/25 趙小姐以剩餘數量*當月進貨成本單價
+	,total=(isnull(a.mount,0)-isnull(v.mount,0))*aprice
 	from #tmpa a 
 	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
 	and LEFT(datea,@t_lenm)=@t_mon and not(tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) v
@@ -770,7 +776,7 @@ begin
 end
 */
 
---update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucceai' or a.tablea='vccb3'
+update a set cost=total from #tmp a where a.tablea='rc2a' or a.tablea='ucceai' or a.tablea='vccb3'
 ------------------------------------------------------------------------------------------
 create table #tmpb( 
 	gno nvarchar(1), 
@@ -803,12 +809,12 @@ CREATE INDEX tmpindex3 on #tmp (cno,productno,datea,typea,noa,noq)
 
 declare @vtotal float 
 declare cursor_table cursor for 
-select tablea,noa,noq,datea,cno,productno,isnull(mount,0),isnull(cost,0),isnull(total,0) 
+select tablea,noa,noq,datea,cno,productno,isnull(mount,0),isnull(cost,0),isnull(total,0),isnull(aprice,0)
 from #tmp 
 order by cno,productno,datea,typea,noa,noq 
 open cursor_table 
 fetch next from cursor_table 
-into @tablea,@noa,@noq,@datea,@cno,@productno,@mount,@total,@vtotal 
+into @tablea,@noa,@noq,@datea,@cno,@productno,@mount,@total,@vtotal,@aprice
 while(@@FETCH_STATUS <> -1) 
 begin 
 	if(@tproductno!=@productno or @tcno!=@cno) 
@@ -831,7 +837,9 @@ begin
 			set @total=@mount*case when @tmount=0 then 0 else @ttotal/@tmount end
 			
 		set @tmount=@tmount-@mount
-		set @ttotal=@ttotal-@total
+		--106/12/25 趙小姐以剩餘數量*當月進貨成本單價
+		--set @ttotal=@ttotal-@total
+		set @ttotal=@tmount*@aprice
 	end
 
 	--避免前期超領負數造成金額溢位
@@ -863,7 +871,7 @@ begin
 	set @tcno=@cno 
 
 	fetch next from cursor_table 
-	into @tablea,@noa,@noq,@datea,@cno,@productno,@mount,@total,@vtotal 
+	into @tablea,@noa,@noq,@datea,@cno,@productno,@mount,@total,@vtotal,@aprice
 end 
 close cursor_table 
 deallocate cursor_table

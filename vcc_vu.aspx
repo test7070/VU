@@ -1508,7 +1508,20 @@
 					/*var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
 					q_gt('custms', t_where, 0, 0, 0, "");*/
 					//106/12/22 黃 換成 抓 加工單
-					var t_where = "where=^^ a.custno='" + $('#txtCustno').val() + "' and isnull(a.gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ^^";
+					//var t_where = "where=^^ a.custno='" + $('#txtCustno').val() + "' and isnull(a.gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ^^";
+					//106/12/26 依料單報表的方式抓
+					var t_where="a.custno='" + $('#txtCustno').val() + "' ";
+					t_where+="and exists( select xa.noa from view_cuc xa left join view_cucs xb on xa.noa=xb.noa ";
+					t_where+="outer apply (select SUM(weight) bweight from view_cubs where productno2=xa.noa and product2=xb.noq)xc ";
+					t_where+="outer apply (select SUM(weight) vweight from view_vcct where ordeno=xb.ordeno and no2=xb.no2)xd ";
+					t_where+="outer apply (select SUM(weight) gweight from view_gett where ordeno=xb.ordeno and no2=xb.no2)xe ";
+					t_where+="outer apply(select sum(case when mins=0 then 1 else 0 end) mins from view_cucs where noa=xa.noa) xf ";
+					t_where+="group by xa.cust,xa.noa,xa.bdate,xa.memo,xa.mech,xa.gen,xf.mins ";
+					t_where+="having case when xf.mins=0 then isnull(SUM(xc.bweight),0) -isnull(SUM(xd.vweight),0) -isnull(SUM(xe.gweight),0) ";
+					t_where+="else (isnull(SUM(xc.bweight),0) -isnull(SUM(xd.vweight),0)) -isnull(SUM(xe.gweight),0) ";
+					t_where+="+(case when isnull(sum(xb.weight),0)-isnull(sum(xc.bweight),0)<0 then 0 else isnull(sum(xb.weight),0)-isnull(sum(xc.bweight),0) end) end >0 ";
+					t_where+="and xa.noa=a.noa) ";
+					t_where="where=^^ "+t_where+"^^";
 					q_gt('cuc_vu', t_where, 0, 0, 0, "getaddr");
 				}else{
 					$('#combAddr').text('');
@@ -1731,7 +1744,20 @@
 							/*var t_where = "where=^^ noa='" + $('#txtCustno').val() + "' order by noq desc ^^";
 							q_gt('custms', t_where, 0, 0, 0, "");*/
 							//106/12/22 黃 換成 抓 加工單
-							var t_where = "where=^^ a.custno='" + $('#txtCustno').val() + "' and isnull(a.gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ^^";
+							//var t_where = "where=^^ a.custno='" + $('#txtCustno').val() + "' and isnull(a.gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ^^";
+							//106/12/26 依料單報表的方式抓
+							var t_where="a.custno='" + $('#txtCustno').val() + "' ";
+							t_where+="and exists( select xa.noa from view_cuc xa left join view_cucs xb on xa.noa=xb.noa ";
+							t_where+="outer apply (select SUM(weight) bweight from view_cubs where productno2=xa.noa and product2=xb.noq)xc ";
+							t_where+="outer apply (select SUM(weight) vweight from view_vcct where ordeno=xb.ordeno and no2=xb.no2)xd ";
+							t_where+="outer apply (select SUM(weight) gweight from view_gett where ordeno=xb.ordeno and no2=xb.no2)xe ";
+							t_where+="outer apply(select sum(case when mins=0 then 1 else 0 end) mins from view_cucs where noa=xa.noa) xf ";
+							t_where+="group by xa.cust,xa.noa,xa.bdate,xa.memo,xa.mech,xa.gen,xf.mins ";
+							t_where+="having case when xf.mins=0 then isnull(SUM(xc.bweight),0) -isnull(SUM(xd.vweight),0) -isnull(SUM(xe.gweight),0) ";
+							t_where+="else (isnull(SUM(xc.bweight),0) -isnull(SUM(xd.vweight),0)) -isnull(SUM(xe.gweight),0) ";
+							t_where+="+(case when isnull(sum(xb.weight),0)-isnull(sum(xc.bweight),0)<0 then 0 else isnull(sum(xb.weight),0)-isnull(sum(xc.bweight),0) end) end >0 ";
+							t_where+="and xa.noa=a.noa) ";
+							t_where="where=^^ "+t_where+"^^";
 							q_gt('cuc_vu', t_where, 0, 0, 0, "getaddr");
 						}
 						break;

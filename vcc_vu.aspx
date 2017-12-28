@@ -608,6 +608,7 @@
 						}else{
 							$('#combAddr').text('');
 						}
+						Unlock(1);
 						break;	
 					case 'orde':
 						var as = _q_appendData("orde", "", true);
@@ -1523,6 +1524,7 @@
 					t_where+="and xa.noa=a.noa) ";
 					t_where="where=^^ "+t_where+"^^";
 					q_gt('cuc_vu', t_where, 0, 0, 0, "getaddr");
+					Lock(1);
 				}else{
 					$('#combAddr').text('');
 				}
@@ -1759,6 +1761,7 @@
 							t_where+="and xa.noa=a.noa) ";
 							t_where="where=^^ "+t_where+"^^";
 							q_gt('cuc_vu', t_where, 0, 0, 0, "getaddr");
+							Lock(1);
 						}
 						break;
 				}

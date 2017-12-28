@@ -1511,7 +1511,7 @@
 					//106/12/22 黃 換成 抓 加工單
 					//var t_where = "where=^^ a.custno='" + $('#txtCustno').val() + "' and isnull(a.gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ^^";
 					//106/12/26 依料單報表的方式抓
-					var t_where="a.custno='" + $('#txtCustno').val() + "' ";
+					var t_where="a.custno='" + $('#txtCustno').val() + "' and a.mech!='' ";
 					t_where+="and exists( select xa.noa from view_cuc xa left join view_cucs xb on xa.noa=xb.noa ";
 					t_where+="outer apply (select SUM(weight) bweight from view_cubs where productno2=xa.noa and product2=xb.noq)xc ";
 					t_where+="outer apply (select SUM(weight) vweight from view_vcct where ordeno=xb.ordeno and no2=xb.no2)xd ";
@@ -1748,7 +1748,7 @@
 							//106/12/22 黃 換成 抓 加工單
 							//var t_where = "where=^^ a.custno='" + $('#txtCustno').val() + "' and isnull(a.gen,0)=0 and exists (select * from view_cucs where noa=a.noa and isnull(mins,0)=0) ^^";
 							//106/12/26 依料單報表的方式抓
-							var t_where="a.custno='" + $('#txtCustno').val() + "' ";
+							var t_where="a.custno='" + $('#txtCustno').val() + "' and a.mech!='' ";
 							t_where+="and exists( select xa.noa from view_cuc xa left join view_cucs xb on xa.noa=xb.noa ";
 							t_where+="outer apply (select SUM(weight) bweight from view_cubs where productno2=xa.noa and product2=xb.noq)xc ";
 							t_where+="outer apply (select SUM(weight) vweight from view_vcct where ordeno=xb.ordeno and no2=xb.no2)xd ";

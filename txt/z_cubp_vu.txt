@@ -271,7 +271,7 @@ declare @result table(
 	stand float,
 	undone float,
 	unfinal float,
-	mech nvarchar(MAX), --106/12/13 黃總要加的
+	mech nvarchar(MAX), --106/12/13 黃要加的
 	memo nvarchar(MAX),
 	gen float,
 	qhrefa nvarchar(MAX)

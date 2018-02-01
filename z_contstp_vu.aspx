@@ -89,7 +89,12 @@
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();
-				t_date.setMonth(-12);
+				if(q_getPara('sys.project').toUpperCase()=='SF'){
+					t_date.setFullYear(t_date.getFullYear()-2);
+					t_date.setMonth(0);
+				}else{
+					t_date.setFullYear(t_date.getFullYear()-1);
+				}
 				t_date.setDate(1);
 				t_year = t_date.getUTCFullYear();
 				t_month = t_date.getUTCMonth() + 1;

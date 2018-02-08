@@ -134,11 +134,13 @@ create table #tmpb(
 	mount float,
 	total float,
 	aprice float,
+	bmount float,
+	bmoney float,
 	primary key (productno,cno,mon)
 )
 
 insert #tmpb
-select LEFT(datea,@t_lenm),cno,productno ,0,0,0
+select LEFT(datea,@t_lenm),cno,productno ,0,0,0,0,0
 from #tmp group by LEFT(datea,@t_lenm),cno,productno 
 
 --------------------------------------------------------------------
@@ -179,33 +181,53 @@ set @t_pmon=LEFT(dbo.q_cdn(@t_mon+'/01',-5),@t_lenm)
 while(@mon>=@t_mon)
 begin
 	--取得當月進貨成本
+	--update a
+	--set mount=case when isnull(u.mount,0)!=0 then isnull(u.mount,0) else isnull(b.mount,0) end+isnull(r.mount,0)
+	--,total=case when isnull(u.mount,0)!=0 then isnull(u.total,0) else isnull(b.total,0)end+isnull(r.cost,0)
+	--,aprice=
+	--case when isnull(u.mount,0)!=0 then
+	--	case when isnull(u.mount,0)+isnull(r.mount,0)=0 then 0 else round((isnull(u.total,0)+isnull(r.cost,0))/(isnull(u.mount,0)+isnull(r.mount,0)),4) end
+	--else
+	--	case when isnull(b.mount,0)+isnull(r.mount,0)=0 then 0 else round((isnull(b.total,0)+isnull(r.cost,0))/(isnull(b.mount,0)+isnull(r.mount,0)),4) end
+	--end
+	--from #tmpb a 
+	--outer apply (select mount,total from #tmpb where mon=@t_pmon and productno=a.productno and cno=a.cno)b
+	--outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
+	--and LEFT(datea,@t_lenm)=@t_mon and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
+	--outer apply (select mount,price,total from #tmp where productno=a.productno and cno=a.cno and LEFT(datea,@t_lenm)=@t_mon and tablea='uccas')u
+	--where mon=@t_mon
+	
+	--更新盤點
 	update a
-	set mount=case when isnull(u.mount,0)!=0 then isnull(u.mount,0) else isnull(b.mount,0) end+isnull(r.mount,0)
-	,total=case when isnull(u.mount,0)!=0 then isnull(u.total,0) else isnull(b.total,0)end+isnull(r.cost,0)
-	,aprice=
-	case when isnull(u.mount,0)!=0 then
-		case when isnull(u.mount,0)+isnull(r.mount,0)=0 then 0 else round((isnull(u.total,0)+isnull(r.cost,0))/(isnull(u.mount,0)+isnull(r.mount,0)),4) end
-	else
-		case when isnull(b.mount,0)+isnull(r.mount,0)=0 then 0 else round((isnull(b.total,0)+isnull(r.cost,0))/(isnull(b.mount,0)+isnull(r.mount,0)),4) end
-	end
+	set mount=case when isnull(u.mount,0)!=0 then isnull(u.mount,0) else isnull(b.mount,0) end
+	,total=case when isnull(u.mount,0)!=0 then isnull(u.total,0) else isnull(b.total,0)end
+	,bmount=case when isnull(u.mount,0)!=0 then isnull(u.mount,0) else isnull(b.mount,0) end
+	,bmoney=case when isnull(u.mount,0)!=0 then isnull(u.total,0) else isnull(b.total,0)end
 	from #tmpb a 
 	outer apply (select mount,total from #tmpb where mon=@t_pmon and productno=a.productno and cno=a.cno)b
-	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
-	and LEFT(datea,@t_lenm)=@t_mon and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
 	outer apply (select mount,price,total from #tmp where productno=a.productno and cno=a.cno and LEFT(datea,@t_lenm)=@t_mon and tablea='uccas')u
 	where mon=@t_mon
 	
-	--106/11/08 趙小姐不用月平均加權
+	--106/11/08 趙小姐不用月平均加權 >>用年
 	update a
 	set aprice=
-	case when isnull(r.mount,0)=0 then 0 else 
-	round((isnull(r.cost,0))/(isnull(r.mount,0)),4) end
+	case when isnull(b.mount,0)+isnull(r.mount,0)=0 then 0 else 
+	round((isnull(b.total,0)+isnull(r.cost,0))/(isnull(b.mount,0)+isnull(r.mount,0)),4) end
 	from #tmpb a 
-	outer apply (select mount,total from #tmpb where mon=@t_pmon and productno=a.productno and cno=a.cno)b
+	outer apply (select top 1 bmount mount, bmoney total from #tmpb where left(mon,cast(@t_lenm as int)-3)=left(@t_mon,cast(@t_lenm as int)-3) and productno=a.productno and cno=a.cno order by mon)b
 	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
 	--and LEFT(datea,@t_lenm)=@t_mon
-	and LEFT(datea,@t_lenm)<=@t_mon
+	and LEFT(datea,cast(@t_lenm as int)-3)=LEFT(@t_mon,cast(@t_lenm as int)-3)
 	and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
+	where mon=@t_mon
+	
+	--進貨
+	update a
+	set mount=a.mount+isnull(r.mount,0)
+	,total=a.total+isnull(r.cost,0)
+	from #tmpb a 
+	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
+	and LEFT(datea,@t_lenm)=@t_mon and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
 	where mon=@t_mon
 	
 	--更新出貨成本
@@ -639,11 +661,13 @@ create table #tmpa(
 	mount float,
 	total float,
 	aprice float,
+	bmount float,
+	bmoney float,
 	primary key (productno,cno,mon)
 )
 
 insert #tmpa
-select LEFT(datea,@t_lenm),cno,productno,0,0,0
+select LEFT(datea,@t_lenm),cno,productno,0,0,0,0,0
 from #tmp group by LEFT(datea,@t_lenm),cno,productno
 
 ------------------------------------------------------------------------------------------------
@@ -685,32 +709,53 @@ set @t_pmon=LEFT(dbo.q_cdn(@t_mon+'/01',-5),@t_lenm)
 while(@mon>=@t_mon)
 begin
 	--取得當月進貨成本
+	--update a
+	--set mount=case when isnull(u.mount,0)!=0 then isnull(u.mount,0) else isnull(b.mount,0) end+isnull(r.mount,0)
+	--,total=case when isnull(u.mount,0)!=0 then isnull(u.total,0) else isnull(b.total,0)end+isnull(r.cost,0)
+	--,aprice=
+	--case when isnull(u.mount,0)!=0 then
+	--	case when isnull(u.mount,0)+isnull(r.mount,0)=0 then 0 else round((isnull(u.total,0)+isnull(r.cost,0))/(isnull(u.mount,0)+isnull(r.mount,0)),4) end
+	--else
+	--	case when isnull(b.mount,0)+isnull(r.mount,0)=0 then 0 else round((isnull(b.total,0)+isnull(r.cost,0))/(isnull(b.mount,0)+isnull(r.mount,0)),4) end
+	--end
+	--from #tmpa a 
+	--outer apply (select mount,total from #tmpa where mon=@t_pmon and productno=a.productno and cno=a.cno)b
+	--outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
+	--and LEFT(datea,@t_lenm)=@t_mon and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
+	--outer apply (select mount,price,total from #tmp where productno=a.productno and cno=a.cno and LEFT(datea,@t_lenm)=@t_mon and tablea='uccas')u
+	--where mon=@t_mon
+	
+	--更新盤點
 	update a
-	set mount=case when isnull(u.mount,0)!=0 then isnull(u.mount,0) else isnull(b.mount,0) end+isnull(r.mount,0)
-	,total=case when isnull(u.mount,0)!=0 then isnull(u.total,0) else isnull(b.total,0)end+isnull(r.cost,0)
-	,aprice=
-	case when isnull(u.mount,0)!=0 then
-		case when isnull(u.mount,0)+isnull(r.mount,0)=0 then 0 else round((isnull(u.total,0)+isnull(r.cost,0))/(isnull(u.mount,0)+isnull(r.mount,0)),4) end
-	else
-		case when isnull(b.mount,0)+isnull(r.mount,0)=0 then 0 else round((isnull(b.total,0)+isnull(r.cost,0))/(isnull(b.mount,0)+isnull(r.mount,0)),4) end
-	end
+	set mount=case when isnull(u.mount,0)!=0 then isnull(u.mount,0) else isnull(b.mount,0) end
+	,total=case when isnull(u.mount,0)!=0 then isnull(u.total,0) else isnull(b.total,0)end
+	,bmount=case when isnull(u.mount,0)!=0 then isnull(u.mount,0) else isnull(b.mount,0) end
+	,bmoney=case when isnull(u.mount,0)!=0 then isnull(u.total,0) else isnull(b.total,0)end
 	from #tmpa a 
 	outer apply (select mount,total from #tmpa where mon=@t_pmon and productno=a.productno and cno=a.cno)b
-	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
-	and LEFT(datea,@t_lenm)=@t_mon and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
 	outer apply (select mount,price,total from #tmp where productno=a.productno and cno=a.cno and LEFT(datea,@t_lenm)=@t_mon and tablea='uccas')u
 	where mon=@t_mon
 	
-	--106/11/08 趙小姐不用月平均加權
+	--106/11/08 趙小姐不用月平均加權 >>用年
 	update a
 	set aprice=
-	case when isnull(r.mount,0)=0 then 0 else 
-	round((isnull(r.cost,0))/(isnull(r.mount,0)),4) end
+	case when isnull(b.mount,0)+isnull(r.mount,0)=0 then 0 else 
+	round((isnull(b.total,0)+isnull(r.cost,0))/(isnull(b.mount,0)+isnull(r.mount,0)),4) end
 	from #tmpa a 
+	outer apply (select top 1 bmount mount, bmoney total from #tmpa where left(mon,cast(@t_lenm as int)-3)=left(@t_mon,cast(@t_lenm as int)-3) and productno=a.productno and cno=a.cno order by mon)b
 	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
 	--and LEFT(datea,@t_lenm)=@t_mon
-	and LEFT(datea,@t_lenm)<=@t_mon
+	and LEFT(datea,cast(@t_lenm as int)-3)=LEFT(@t_mon,cast(@t_lenm as int)-3)
 	and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
+	where mon=@t_mon
+	
+	--進貨
+	update a
+	set mount=a.mount+isnull(r.mount,0)
+	,total=a.total+isnull(r.cost,0)
+	from #tmpa a 
+	outer apply (select sum(mount)mount,SUM(cost)cost from #tmp where productno=a.productno and cno=a.cno
+	and LEFT(datea,@t_lenm)=@t_mon and (tablea='rc2a' or tablea='ucceai' or tablea='vccb3')) r
 	where mon=@t_mon
 	
 	--更新出貨成本

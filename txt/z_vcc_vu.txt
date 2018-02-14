@@ -1198,8 +1198,12 @@ order by custno,gno,mon,datea,a.noa,b.noq
 
 delete @result where gno='1'
 
-insert into @result(gno,custno,pcount,mount,total,totax,weight) 
-select '1',custno, count(*), 
+insert into @result(gno,custno,comp,onoa,odate,oweight,oprice,pcount,mount,total,totax,weight) 
+select '1',custno,MAX(comp),MAX(onoa)
+	,(select top 1 odate from @result where onoa=MAX(a.onoa))
+	,(select top 1 oweight from @result where onoa=MAX(a.onoa))
+	,(select top 1 oprice from @result where onoa=MAX(a.onoa))
+	, count(*), 
 	sum((case typea when '1' then mount else (-1)*mount end)), 
 	sum((case typea when '1' then total else (-1)*total end)),
 	sum((case typea when '1' then totax else (-1)*totax end)),

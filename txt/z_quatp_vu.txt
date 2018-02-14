@@ -8,6 +8,7 @@ declare @t_option02 nvarchar(10)
 declare @t_xaddr2 nvarchar(100)
 declare @t_xpost2 nvarchar(100)
 declare @t_xorder nvarchar(100)
+declare @t_proj nvarchar(100)='[3]'
 
 set @t_bdate = case when '#non'=[7] then '' else [7] end
 set @t_edate = case when '#non'=[8] then char(255) else [8] end
@@ -268,7 +269,7 @@ begin
 		dbo.getComma(opay,0)opay,
 		dbo.getComma(vmoney,0)vmoney,
 		'quat_vu?noa=$noa?'+a.accy qhrefa,
-		"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when @t_proj='SF' then "z_vcc_sf" else "z_vcc_vu" end+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 		case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
 		* from #tmp a
 		order by grpno,enddate,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
@@ -282,7 +283,7 @@ begin
 		dbo.getComma(opay,0)opay,
 		dbo.getComma(vmoney,0)vmoney,
 		'quat_vu?noa=$noa?'+a.accy qhrefa,
-		"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when @t_proj='SF' then "z_vcc_sf" else "z_vcc_vu" end+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 		case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
 		* from #tmp a
 		order by grpno,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
@@ -299,7 +300,7 @@ begin
 		dbo.getComma(opay,0)opay,
 		dbo.getComma(vmoney,0)vmoney,
 		'quat_vu?noa=$noa?'+a.accy qhrefa, 
-		"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when @t_proj='SF' then "z_vcc_sf" else "z_vcc_vu" end+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 		'' grpname,
 		* from #tmp a
 		order by enddate,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
@@ -313,7 +314,7 @@ begin
 		dbo.getComma(opay,0)opay,
 		dbo.getComma(vmoney,0)vmoney,
 		'quat_vu?noa=$noa?'+a.accy qhrefa, 
-		"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when @t_proj='SF' then "z_vcc_sf" else "z_vcc_vu" end+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
 		'' grpname,
 		* from #tmp a
 		order by custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
@@ -341,6 +342,7 @@ declare @t_ecustno nvarchar(20)
 declare @t_option01 nvarchar(10)
 declare @t_xaddr2 nvarchar(100)
 declare @t_xpost2 nvarchar(100)
+declare @t_proj nvarchar(100)='[3]'
 
 set @t_bdate = case when '#non'=[7] then '' else [7] end
 set @t_edate = case when '#non'=[8] then char(255) else [8] end
@@ -702,7 +704,7 @@ dbo.getComma(vmoney,0)vmoney,
 dbo.getComma(teweight,[5])teweight,
 dbo.getComma(temoney,0)temoney,
 'quat_vu?noa=$noa?'+a.accy ghrefa,
-"z_vcc_vu?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" ghref,
+"z_vcc_sf?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" ghref,
 right(@bndate,5) bndate,right(@endate,5) endate,
 * from #tmp a
 order by pageno,precno,custno,datea,noa,gno,recno

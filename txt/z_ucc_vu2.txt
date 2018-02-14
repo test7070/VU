@@ -1146,6 +1146,9 @@ begin
 	--進貨--入庫
 	if(@tablea='rc2s' or @tablea='vcf' or @tablea='inas')
 	begin
+		if(@ttotal<=0 or @tweight<=0) --處理超領導致金額不正確 以最近進貨的單價作為目前超領的單價
+			set @ttotal=@tweight*case when @weight=0 then 0 else round(@total/@weight,4) end
+	
 		set @tweight=@tweight+@weight
 		set @ttotal=@ttotal+@total
 		

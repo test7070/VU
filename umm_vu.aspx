@@ -769,7 +769,7 @@
 	                else
 	                    wrServer(t_noa);
             	}else{
-            		if($.trim($('#txtCheckno_'+n).val()).length>0 && $('#txtAcc1_'+n).val().substring(0,4)=='1121' && q_float('txtMoney_'+n)<0){
+            		if($.trim($('#txtCheckno_'+n).val()).length>0 && $('#txtAcc1_'+n).val().substring(0,4)=='1131' && q_float('txtMoney_'+n)<0){
             			//收退  ,1121 , 金額負
             			checkGqb_bbs(n-1);
             		}else if($.trim($('#txtCheckno_'+n).val()).length>0){

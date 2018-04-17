@@ -139,7 +139,10 @@
 	                    var t_where = " 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 ";
 	                    t_where += q_sqlPara2("a.noa", t_cucno);
 	                    t_where += q_sqlPara2("b.size", t_size);
-	                    t_where += q_sqlPara2("b.spec", tx_spec);
+	                    //t_where += q_sqlPara2("b.spec", tx_spec);
+	                    if(tx_spec.length>0){
+	                    	t_where += " and b.spec=N'"+tx_spec+"'";
+	                    }
 	                    
 	                    if($('#combOrder').val()=='memo')
 	                    	t_where="where=^^"+t_where+" order by isnull(b.memo,''),b.size,b.spec,b.lengthb desc,b.noa,b.noq ^^";

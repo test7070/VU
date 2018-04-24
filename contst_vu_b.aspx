@@ -10,7 +10,7 @@
 		<script src="../script/qbox.js" type="text/javascript"> </script>
     	<link href="../qbox.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
-            var q_name = 'cont', t_content = ' field=noa,datea,comp,earnest,eweight,memo,atax', bbsKey = ['noa'], as;
+            var q_name = 'cont', t_content = ' field=noa,contract,datea,comp,earnest,eweight,memo,atax', bbsKey = ['noa'], as;
             var isBott = false;
             /// 是否已按過 最後一頁
             var txtfield = [], afield, t_data, t_htm, t_bbsTag = 'tbbs';
@@ -74,14 +74,17 @@
 					<th align="center" style='color:Blue;' ><a id='lblMemo'> </a></th>
 				</tr>
 				<tr>
-					<td style="width:1%;"><input name="sel"  id="radSel.*" type="radio" /></td>
-					<td style="width:15%;"><input class="txt" id="txtNoa.*" type="text" style="width:98%;"  readonly="readonly" /></td>
-					<!--<td style="width:45%;"><input class="txt" id="txtComp.*" type="text" style="width:98%;"  readonly="readonly" /></td>
-					<td style="width:20%;"><input class="txt" id="txtDatea.*" type="text" style="width:98%;"  readonly="readonly" /></td>-->
-					<td style="width:15%;"><input class="txt" id="txtEarnest.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>
-					<td style="width:15%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;"  readonly="readonly" /></td>					
+					<td style="width:1%;">
+						<input name="sel"  id="radSel.*" type="radio" />
+						<input class="txt" id="txtNoa.*" type="hidden" style="width:98%;" readonly="readonly" />
+					</td>
+					<td style="width:15%;"><input class="txt" id="txtContract.*" type="text" style="width:98%;" readonly="readonly" /></td>
+					<!--<td style="width:45%;"><input class="txt" id="txtComp.*" type="text" style="width:98%;" readonly="readonly" /></td>
+					<td style="width:20%;"><input class="txt" id="txtDatea.*" type="text" style="width:98%;" readonly="readonly" /></td>-->
+					<td style="width:15%;"><input class="txt" id="txtEarnest.*" type="text" style="width:98%;text-align: right;" readonly="readonly" /></td>
+					<td style="width:15%;"><input class="txt" id="txtEweight.*" type="text" style="width:98%;text-align: right;" readonly="readonly" /></td>					
 					<td style="width:24%;">
-						<textarea class="txt" id="txtMemo.*" cols="10" rows="2" style="width:98%;text-align: left;"  readonly="readonly" > </textarea>
+						<textarea class="txt" id="txtMemo.*" cols="10" rows="2" style="width:98%;text-align: left;" readonly="readonly" > </textarea>
 					</td>
 				</tr>
 			</table>

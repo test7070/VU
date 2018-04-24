@@ -18,7 +18,7 @@
 			q_desc = 1;
 			q_tables = 's';
 			var q_name = "cont";
-			var q_readonly = ['txtNoa','txtWorker', 'txtWorker2','txtComp', 'txtAcomp','txtOrdeweight','txtGweight','txtEweight','txtTotal'];
+			var q_readonly = ['txtContract','txtWorker', 'txtWorker2','txtComp', 'txtAcomp','txtOrdeweight','txtGweight','txtEweight','txtTotal'];
 			var q_readonlys = ['txtNoq'];
 			var bbmNum = [];
 			var bbsNum = [];
@@ -105,8 +105,7 @@
 			}
 
 			function q_boxClose(s2) {
-				var
-				ret;
+				var ret;
 				switch (b_pop) {
 					case q_name + '_s':
 						q_boxClose2(s2);
@@ -132,7 +131,7 @@
                         if (as[0] != undefined) {
                             alert('合約號碼已存在!!!');
                         } else {
-                            wrServer($('#txtNoa').val());
+                            wrServer($('#txtDatea').val()+'-'+$('#txtContract').val());
                         }
 						break;
 					case 'bbsspec':
@@ -176,7 +175,7 @@
 
 			function btnOk() {
 				t_err = '';
-				t_err = q_chkEmpField([['txtNoa', '合約號碼'], ['txtTggno', '合約廠商'], ['txtDatea', '訂約日期']]);
+				t_err = q_chkEmpField([['txtContract', '合約號碼'], ['txtTggno', '合約廠商'], ['txtDatea', '訂約日期']]);
 				if (t_err.length > 0) {
 					alert(t_err);
 					return;
@@ -199,12 +198,12 @@
 					
 				sum();
 
-				var s1 = $('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val();
+				var s1 = $('#txtContract').val();
 				if (s1.length == 0 || s1 == "AUTO"){
 					q_gtnoa(q_name, replaceAll(q_getPara('sys.key_cont') + (!emp($('#txtDatea').val())?$('#txtDatea').val():q_date()), '/', ''));
 				}else{
 					if (q_cur == 1){
-						t_where = "where=^^ noa='" + $('#txtNoa').val() + "'^^";
+						t_where = "where=^^ contract='" + $('#txtContract').val() + "'^^";
                     	q_gt('cont', t_where, 0, 0, 0, "checkContno_btnOk", r_accy);
 					}else{
 						wrServer(s1);
@@ -284,7 +283,6 @@
 				
 				$('#chkIsproj').attr('checked', true);
 				
-				$('#txt' + bbmKey[0].substr(0, 1).toUpperCase() + bbmKey[0].substr(1)).val('AUTO');
 				//104/08/24開放可以修改
 				refreshBbm();
 				
@@ -307,8 +305,8 @@
 			}
 
 			function btnPrint() {
-					//q_box('z_contstp_vu.aspx' + "?;;;noa=" + trim($('#txtNoa').val()) + ";" + r_accy, '', "95%", "95%", m_print);
-					window.open("./z_contstp_vu.aspx"+ "?"+ r_userno + ";" + r_name + ";" + q_id +";noa=" + trim($('#txtNoa').val()) + ";" + r_accy);
+				//q_box('z_contstp_vu.aspx' + "?;;;noa=" + trim($('#txtContract').val()) + ";" + r_accy, '', "95%", "95%", m_print);
+				window.open("./z_contstp_vu.aspx"+ "?"+ r_userno + ";" + r_name + ";" + q_id +";noa=" + trim($('#txtContract').val()) + ";" + r_accy);
 			}
 
 			function wrServer(key_value) {
@@ -417,9 +415,11 @@
 			
 			function refreshBbm() {
                 if (q_cur == 1) {
-                    $('#txtNoa').css('color', 'black').css('background', 'white').removeAttr('readonly');
-                } else {
-                    $('#txtNoa').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+                    $('#txtContract').css('color', 'black').css('background', 'white').removeAttr('readonly');
+                    $('#txtDatea').css('color', 'black').css('background', 'white').removeAttr('readonly');
+                }else {
+                    $('#txtContract').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
+                    $('#txtDatea').css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
                 }
             }
 		</script>
@@ -577,7 +577,7 @@
 					<tr>
 						<td><input id="chkBrow.*" type="checkbox" style=''/></td>
 						<td align="center" id='datea'>~datea</td>
-						<td align="center" id='noa'>~noa</td>
+						<td align="center" id='contract'>~contract</td>
 						<td align="center" id='tggno comp,4'>~tggno ~comp,4</td>
 					</tr>
 				</table>
@@ -594,7 +594,10 @@
 					</tr>
 					<tr>
 						<td><span> </span><a id='lblNoa' class="lbl"> </a></td>
-						<td><input id="txtNoa" type="text" class="txt c1"/></td>
+						<td>
+							<input id="txtContract" type="text" class="txt c1"/>
+							<input id="txtNoa" type="hidden" class="txt c1"/>
+						</td>
 						<td><span> </span><a id='lblDatea' class="lbl"> </a></td>
 						<td><input id="txtDatea" type="text" class="txt c1"/></td>
 					</tr>

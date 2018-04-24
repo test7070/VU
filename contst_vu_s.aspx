@@ -48,7 +48,7 @@
                 t_tggno = $('#txtTggno').val();
                 t_tgg = $('#txtTgg').val();
 
-                var t_where = " 1=1 " + q_sqlPara2("noa", t_noa)+ q_sqlPara2("datea", t_bdate, t_edate) + q_sqlPara2("tggno", t_tggno) ;
+                var t_where = " 1=1 " + q_sqlPara2("contract", t_noa)+ q_sqlPara2("datea", t_bdate, t_edate) + q_sqlPara2("tggno", t_tggno) ;
                 
 				if (t_tgg.length>0)
 		        	t_where += " and charindex('"+t_tgg+"',comp)>0"

@@ -675,7 +675,7 @@ select '0' gno, (case when a.typea='2' then '退' else '進' end), a.noa,b.noq,a
 		,(case when a.typea='2' then -1 else 1 end)*(round((a.tax*(case when a.money=0 then 0 else (b.total/a.money) end)),0)+b.total)
 		,0 pcount,'rc2'+b.accy ,b.ucolor,b.spec,b.size,b.lengthb,dbo.split(dbo.split(a.transtart,'##',0),'@',0),0,0
 from view_rc2s b left join view_rc2 a on a.noa = b.noa
-left join cont c on case when CHARINDEX('@',a.transtart)=0 then '' else LEFT(a.transtart,CHARINDEX('@',a.transtart)-1) end=c.noa
+left join cont c on case when CHARINDEX('@',a.transtart)=0 then '' else LEFT(a.transtart,CHARINDEX('@',a.transtart)-1) end=c.contract
 outer apply (select  top 1 * from conts where noa=c.noa order by noq desc) d 
 left join tgg e on a.tggno = e.noa
 where (a.datea between @t_bdate and @t_edate) 

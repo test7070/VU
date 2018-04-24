@@ -807,7 +807,7 @@ z_pay_vu05:--z_pay_vu05
 	
 	--105/08/05 日期為合約日 進貨也要判斷
 	insert #tmp(gno,tggno,noa,sale,paysale,opay,unopay)
-	select '9',tggno,noa,0,0,0,0 from cont a
+	select '9',tggno,contract,0,0,0,0 from cont a
 	where a.datea between @t_bdate and @t_edate
 	and a.tggno between @t_btggno and @t_etggno
 	
@@ -836,7 +836,7 @@ z_pay_vu05:--z_pay_vu05
 	
 	insert #tmp(gno,tggno,noa,sale,paysale,opay,unopay,unpay,qhref)
 	select '0',tggno,noa,SUM(sale),SUM(paysale),SUM(opay),SUM(unopay),SUM(sale)-SUM(paysale)-SUM(opay)+SUM(unopay)
-	,'contst_vu?noa=$noa'
+	,'contst_vu?contract=$noa'
 	from #tmp group by tggno,noa
 	
 	delete #tmp where gno!='0'
@@ -855,7 +855,7 @@ z_pay_vu05:--z_pay_vu05
 		--and left(a.transtart,charindex('@',a.transtart)-1)!=''
 	end
 	
-	update a set datea=(select datea from cont where noa=a.noa) from #tmp a
+	update a set datea=(select datea from cont where contract=a.noa) from #tmp a
 	
 	insert #tmp(gno,tggno,noa,datea,sale,paysale,opay,unopay,unpay,qhref)
 	select '0',a.tggno,noa,datea,case when a.typea='1' then 1 else -1 end*isnull(a.total,0),isnull(b.paysale,0),0,0,(case when a.typea='1' then 1 else -1 end*isnull(a.total,0))-isnull(b.paysale,0)

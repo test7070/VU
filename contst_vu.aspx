@@ -206,7 +206,8 @@
 						t_where = "where=^^ contract='" + $('#txtContract').val() + "'^^";
                     	q_gt('cont', t_where, 0, 0, 0, "checkContno_btnOk", r_accy);
 					}else{
-						wrServer(s1);
+						var t_noa = $('#txtNoa').val();
+						wrServer(t_noa);
 					}
 				}
 			}

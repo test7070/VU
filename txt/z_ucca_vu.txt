@@ -993,7 +993,7 @@ outer apply (select SUM(mount)mount,SUM(cost)cost from #tmp where productno=a.pr
 outer apply (select SUM(mount)mount,SUM(cost)cost,SUM(total)total from #tmp where productno=a.productno and (tablea='vcca' or tablea='vccb1') and cno=a.cno and (datea between @t_bdate and @t_edate))c
 outer apply (select SUM(case when tablea='ucceag' then -1 else 1 end *mount)mount,SUM(case when tablea='ucceag' then -1 else 1 end *cost)cost from #tmp where productno=a.productno and cno=a.cno and (tablea='ucceai' or tablea='ucceag') and datea between @t_bdate and @t_edate )d
 
-delete #tmpb where rcmount=0 and rcmount=0 and rcmoney=0 and vcmount=0 and vcmount=0 and imount=0 and atotal=0
+delete #tmpb where rcmount=0 and rcmount=0 and rcmoney=0 and vcmount=0 and vcmount=0 and imount=0 and atotal=0 and lmount=0 and lmoney=0
 
 update a
 set product=b.product

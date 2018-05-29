@@ -618,6 +618,52 @@ enda:--enda
 	")
 ;
 -------------------------------------------------------------------------------------------------------------------------------
+dimeenda:--dimeenda 成型完工
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	
+	--鎖定時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=CONVERT (VARCHAR(20), GETDATE(),20 )
+	select @now_datetime
+	
+	set @accy=isnull((select accy from view_cucs where noa=@noa and noq=@noq),@accy)
+		
+	EXEC("
+		update cucs"+@accy+" set cubno='"+@userno+"'+'##'+'"+@namea+"'+'##'+'"+@now_datetime+"'
+		,dime=1
+		where noa='"+@noa+"' and noq='"+@noq+"'
+	")
+;
+-------------------------------------------------------------------------------------------------------------------------------
+widthenda:--widthenda 車牙完工
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	
+	--鎖定時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=CONVERT (VARCHAR(20), GETDATE(),20 )
+	select @now_datetime
+	
+	set @accy=isnull((select accy from view_cucs where noa=@noa and noq=@noq),@accy)
+		
+	EXEC("
+		update cucs"+@accy+" set cubno='"+@userno+"'+'##'+'"+@namea+"'+'##'+'"+@now_datetime+"'
+		,width=1
+		where noa='"+@noa+"' and noq='"+@noq+"'
+	")
+;
+-------------------------------------------------------------------------------------------------------------------------------
 cucutocubs:--cucutocubs
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max) = ''

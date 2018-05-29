@@ -191,7 +191,12 @@
 				});
  				
  				if(window.parent.q_name=='cuc'){
- 					$('#q_report .report div').eq(3).click();
+ 					var t_index=dec(q_getHref()[1])-1;
+ 					if(t_index<0){
+ 						t_index=3;
+ 					}
+ 					
+ 					$('#q_report .report div').eq(t_index).click();
  					$('#btnOk').click();
  				}
  				

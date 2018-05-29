@@ -24,7 +24,6 @@
 				_q_boxClose();
                 q_getId();
                 q_gf('', q_name);
-                q_gt('ucc', '1=1 ', 0, 0, 0, "");
                 q_gt('spec', '1=1 ', 0, 0, 0, "");
                 q_gt('color', '1=1 ', 0, 0, 0, "");
 				q_gt('class', '1=1 ', 0, 0, 0, "");
@@ -60,12 +59,11 @@
 				}
 			}
 			
-			var t_spec='@',t_ucolor='@',t_class='@',t_mech='@',t_ucc='@';
+			var t_spec='@',t_ucolor='@',t_class='@',t_mech='@';
 			var bbtaddcount=1;//bbt每次新增五筆
 			var isclear=false;
 			var stkupdate=0;
 			var t_endanoa='',t_endanoq='',t_mins_count=0;
-			var t_dime_count=0,t_width_count=0;
 			function q_gfPost() {
 				chk_cucs=new Array();
 				
@@ -119,19 +117,7 @@
 				
 				//料單報表
 				$('#btnCubp').click(function() {
-					q_box("z_cubp_vu.aspx?"+ r_userno + ";" + r_name + ";" + q_id +";report=4;" + r_accy, 'z_ucc_vu', "95%", "95%", $('#btnCubp').val());
-				});
-				
-				$('#btnCubp8').click(function() {
-					q_box("z_cubp_vu.aspx?"+ r_userno + ";" + r_name + ";" + q_id +";report=8;" + r_accy, 'z_ucc_vu', "95%", "95%", $('#btnCubp8').val());
-				});
-				
-				$('#btnCubp2').click(function() {
-					q_box("z_cubp_vu.aspx?"+ r_userno + ";" + r_name + ";" + q_id +";report=2;" + r_accy, 'z_ucc_vu', "95%", "95%", $('#btnCubp2').val());
-				});
-				
-				$('#btnCubp5').click(function() {
-					q_box("z_cubp_vu.aspx?"+ r_userno + ";" + r_name + ";" + q_id +";report=5;" + r_accy, 'z_ucc_vu', "95%", "95%", $('#btnCubp5').val());
+					q_box('z_cubp_vu.aspx', 'z_ucc_vu', "95%", "95%", $('#btnCubp').val());
 				});
 				
 				$('#lblCucnoa').click(function() {
@@ -141,7 +127,6 @@
 				//匯入
                 $('#btnImport').click(function(e) {
                 	var t_cucno = $('#combCucno').val();
-                	var t_product = $('#combProduct').val();
                 	var t_size = $('#combSize').val();
                 	var tx_spec = $('#combSpec').val();
                 	if(t_cucno.length>0){
@@ -153,7 +138,6 @@
                 		
 	                    var t_where = " 1=1 and isnull(a.gen,0)=0 and isnull(b.mins,0)=0 ";
 	                    t_where += q_sqlPara2("a.noa", t_cucno);
-	                    t_where += q_sqlPara2("b.product", t_product);//107/04/11
 	                    t_where += q_sqlPara2("b.size", t_size);
 	                    //t_where += q_sqlPara2("b.spec", tx_spec);
 	                    if(tx_spec.length>0){
@@ -825,92 +809,78 @@
 				switch (t_name) {
 					case 'init':
 						//載入bbs表頭
-						var string = "<table id='cucs_table' style='width:1240px;word-break:break-all;table-layout:fixed;'>";
+						var string = "<table id='cucs_table' style='width:1240px;word-break:break-all;'>";
 						string+='<tr id="cucs_header">';
-						string+='<td id="cucs_chk" align="center" style="width:23px; color:black;">鎖定</td>';
+						string+='<td id="cucs_chk" align="center" style="width:30px; color:black;">鎖定</td>';
 						string+='<td id="cucs_cubno" align="center" style="width:20px; color:black;display:none;">鎖定人</td>'
-						string+='<td id="cucs_noa" align="center" style="width:43px; color:black;">案號</td>'
-						string+='<td id="cucs_noq" align="center" style="width:23px; color:black;">案序</td>'
+						string+='<td id="cucs_noa" align="center" style="width:70px; color:black;">案號</td>'
+						string+='<td id="cucs_noq" align="center" style="width:30px; color:black;">案序</td>'
 						string+='<td id="cucs_odatea" title="預交日" align="center" style="width:80px; color:black;display:none;">預交日</td>';
 						string+='<td id="cucs_ucolor" title="類別" align="center" style="width:120px; color:black;display:none;">類別</td>';
-						string+='<td id="cucs_product" title="品名" align="center" style="width:70px; color:black;display:none;">品名</td>';
-						string+='<td id="cucs_spec" title="材質" align="center" style="width:48px; color:black;">材質</td>';
-						string+='<td id="cucs_size" title="號數" align="center" style="width:33px; color:black;">號數</td>';
-						string+='<td id="cucs_lengthb" title="米數" align="center" style="width:33px; color:black;">米數</td>';
-						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:33px; color:black;" class="co1">訂單<BR>件數</td>';
-						string+='<td id="cucs_1mount" title="訂單支數" align="center" style="width:33px; color:black;" class="co1">訂單<BR>支數</td>';
-						string+='<td id="cucs_weight" title="訂單重量" align="center" style="width:38px; color:black;" class="co1">訂單<BR>重量</td>';
-						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:38px; color:black;display:none;" class="co2">未完工件數</td>';
-						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:38px; color:black;display:none;" class="co2">未完工支數</td>';
-						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:38px; color:black;display:none;" class="co2">未完工重量</td>';
-						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:38px; color:black;" class="co2">已完工<BR>件數</td>';
-						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:38px; color:black;" class="co2">已完工<BR>支數</td>';
-						string+='<td id="cucs_cubweight" title="已完工重量" align="center" style="width:43px; color:black;" class="co2">已完工<BR>重量</td>';
-						string+='<td id="cucs_xmount" title="件數" align="center" style="width:38px; color:black;" class="co3">件數</td>';
-						string+='<td id="cucs_xcount" title="支數" align="center" style="width:38px; color:black;" class="co3">支數<BR><input id="btnAutoxcount" type="button" style="font-size: 10px; font-weight: bold; width: 35px;" value="代入"></td>';
-						string+='<td id="cucs_xweight" title="重量" align="center" style="width:43px; color:black;" class="co3">重量<BR><a class="total_xweight" style="color: forestgreen;font-weight: bold;"></a></td>';
-						string+='<td id="cucs_class" title="廠牌" align="center" style="width:43px; color:black;">廠牌</td>';
-						string+='<td id="cucs_btime" title="顏色1" align="center" style="width:28px; color:black;">顏色<BR>1</td>';
-						string+='<td id="cucs_etime" title="顏色2" align="center" style="width:28px; color:black;">顏色<BR>2</td>';
-						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:83px; color:black;">備註(標籤)</td>';
-						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;">彎</td>';
-						string+='<td id="cucs_parag" title="車" align="center" style="width:28px; color:black;">車</td>';
-						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;">圖形</td>';
-						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:73px; color:black;display:none;">客戶編號</td>';
-						string+='<td id="cucs_cust" title="客戶/工地" align="center" style="width:73px; color:black;">客戶/工地</td>';
-						string+='<td id="cucs_work" title="工令" align="center" style="width:88px; color:black;">工令</td>';
+						string+='<td id="cucs_product" title="品名" align="center" style="width:70px; color:black;">品名</td>';
+						string+='<td id="cucs_spec" title="材質" align="center" style="width:80px; color:black;">材質</td>';
+						string+='<td id="cucs_size" title="號數" align="center" style="width:50px; color:black;">號數</td>';
+						string+='<td id="cucs_lengthb" title="米數" align="center" style="width:50px; color:black;">米數</td>';
+						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:50px; color:black;" class="co1">訂單件數</td>';
+						string+='<td id="cucs_1mount" title="訂單支數" align="center" style="width:50px; color:black;" class="co1">訂單支數</td>';
+						string+='<td id="cucs_weight" title="訂單重量" align="center" style="width:50px; color:black;" class="co1">訂單重量</td>';
+						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;display:none;" class="co2">未完工件數</td>';
+						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:60px; color:black;display:none;" class="co2">未完工支數</td>';
+						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:60px; color:black;display:none;" class="co2">未完工重量</td>';
+						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:60px; color:black;" class="co2">已完工件數</td>';
+						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:60px; color:black;" class="co2">已完工支數</td>';
+						string+='<td id="cucs_cubweight" title="已完工重量" align="center" style="width:60px; color:black;" class="co2">已完工重量</td>';
+						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;" class="co3">件數</td>';
+						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;" class="co3">支數<BR><input id="btnAutoxcount" type="button" style="font-size: medium; font-weight: bold;" value="代入"></td>';
+						string+='<td id="cucs_xweight" title="重量" align="center" style="width:60px; color:black;" class="co3">重量<BR><a class="total_xweight" style="color: forestgreen;font-weight: bold;"></a></td>';
+						string+='<td id="cucs_class" title="廠牌" align="center" style="width:50px; color:black;">廠牌</td>';
+						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:110px; color:black;">備註(標籤)</td>';
+						string+='<td id="cucs_work" title="工令" align="center" style="width:100px; color:black;">工令</td>';
+						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:75px; color:black;display:none;">客戶編號</td>';
+						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
 						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
-						string+="<td id='cucs_mins' align='center' style='width:28px; color:black;'><input type='button' id='btnMins' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
-						string+="<td id='cucs_dime' align='center' style='width:28px; color:black;'><input type='button' id='btnDime' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='成型'/></td>";
-						string+="<td id='cucs_width' align='center' style='width:28px; color:black;'><input type='button' id='btnWidth' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='車牙'/></td>";
+						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins' style='font-size:16px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs').html(string);
 						
 						//浮動表頭
 						var string = "<div id='cucs_float' style='position:absolute;display:block;left:0px; top:0px;'>";
-						string+="<table id='cucs_table2' style='width:1240px;border-bottom: none;table-layout:fixed;'>";
+						string+="<table id='cucs_table2' style='width:1240px;border-bottom: none;'>";
 						string+='<tr id="cucs_header">';
-						string+='<td id="cucs_chk" align="center" style="width:23px; color:black;">鎖定</td>';
+						string+='<td id="cucs_chk" align="center" style="width:30px; color:black;">鎖定</td>';
 						string+='<td id="cucs_cubno" align="center" style="width:20px; color:black;display:none;">鎖定人</td>'
-						string+='<td id="cucs_noa" align="center" style="width:43px; color:black;">案號</td>'
-						string+='<td id="cucs_noq" align="center" style="width:23px; color:black;">案序</td>'
+						string+='<td id="cucs_noa" align="center" style="width:70px; color:black;">案號</td>'
+						string+='<td id="cucs_noq" align="center" style="width:30px; color:black;">案序</td>'
 						string+='<td id="cucs_odatea" title="預交日" align="center" style="width:80px; color:black;display:none;">預交日</td>';
 						string+='<td id="cucs_ucolor" title="類別" align="center" style="width:120px; color:black;display:none;">類別</td>';
-						string+='<td id="cucs_product" title="品名" align="center" style="width:70px; color:black;display:none;">品名</td>';
-						string+='<td id="cucs_spec" title="材質" align="center" style="width:48px; color:black;">材質</td>';
-						string+='<td id="cucs_size" title="號數" align="center" style="width:33px; color:black;">號數</td>';
-						string+='<td id="cucs_lengthb" title="米數" align="center" style="width:33px; color:black;">米數</td>';
-						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:33px; color:black;" class="co1" >訂單<BR>件數</td>';
-						string+='<td id="cucs_1mount" title="訂單支數" align="center" style="width:33px; color:black;" class="co1">訂單<BR>支數</td>';
-						string+='<td id="cucs_weight" title="訂單重量" align="center" style="width:38px; color:black;" class="co1">訂單<BR>重量</td>';
-						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:38px; color:black;display:none;" class="co2">未完工件數</td>';
-						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:38px; color:black;display:none;" class="co2">未完工支數</td>';
-						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:38px; color:black;display:none;" class="co2">未完工重量</td>';
-						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:38px; color:black;" class="co2">已完工<BR>件數</td>';
-						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:38px; color:black;" class="co2">已完工<BR>支數</td>';
-						string+='<td id="cucs_cubweight" title="已完工重量" align="center" style="width:43px; color:black;" class="co2">已完工<BR>重量</td>';
-						string+='<td id="cucs_xmount" title="件數" align="center" style="width:38px; color:black;" class="co3">件數</td>';
-						string+='<td id="cucs_xcount" title="支數" align="center" style="width:38px; color:black;" class="co3">支數<BR><input id="btnAutoxcount2" type="button" style="font-size: 10px; font-weight: bold; width: 35px;" value="代入"></td>';
-						string+='<td id="cucs_xweight" title="重量" align="center" style="width:43px; color:black;" class="co3">重量<BR><a class="total_xweight" style="color: forestgreen;font-weight: bold;"></a></td>';
-						string+='<td id="cucs_class" title="廠牌" align="center" style="width:43px; color:black;">廠牌</td>';
-						string+='<td id="cucs_btime" title="顏色1" align="center" style="width:28px; color:black;">顏色<BR>1</td>';
-						string+='<td id="cucs_etime" title="顏色2" align="center" style="width:28px; color:black;">顏色<BR>2</td>';
-						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:83px; color:black;">備註(標籤)</td>';
-						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;">彎</td>';
-						string+='<td id="cucs_parag" title="車" align="center" style="width:28px; color:black;">車</td>';
-						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;">圖形</td>';
-						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:73px; color:black;display:none;">客戶編號</td>';
-						string+='<td id="cucs_cust" title="客戶/工地" align="center" style="width:73px; color:black;">客戶/工地</td>';
-						string+='<td id="cucs_work" title="工令" align="center" style="width:88px; color:black;">工令</td>';
+						string+='<td id="cucs_product" title="品名" align="center" style="width:70px; color:black;">品名</td>';
+						string+='<td id="cucs_spec" title="材質" align="center" style="width:80px; color:black;">材質</td>';
+						string+='<td id="cucs_size" title="號數" align="center" style="width:50px; color:black;">號數</td>';
+						string+='<td id="cucs_lengthb" title="米數" align="center" style="width:50px; color:black;">米數</td>';
+						string+='<td id="cucs_mount" title="訂單件數" align="center" style="width:50px; color:black;" class="co1" >訂單件數</td>';
+						string+='<td id="cucs_1mount" title="訂單支數" align="center" style="width:50px; color:black;" class="co1">訂單支數</td>';
+						string+='<td id="cucs_weight" title="訂單重量" align="center" style="width:50px; color:black;" class="co1">訂單重量</td>';
+						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:60px; color:black;display:none;" class="co2">未完工件數</td>';
+						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:60px; color:black;display:none;" class="co2">未完工支數</td>';
+						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:60px; color:black;display:none;" class="co2">未完工重量</td>';
+						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:60px; color:black;" class="co2">已完工件數</td>';
+						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:60px; color:black;" class="co2">已完工支數</td>';
+						string+='<td id="cucs_cubweight" title="已完工重量" align="center" style="width:60px; color:black;" class="co2">已完工重量</td>';
+						string+='<td id="cucs_xmount" title="件數" align="center" style="width:50px; color:black;" class="co3">件數</td>';
+						string+='<td id="cucs_xcount" title="支數" align="center" style="width:50px; color:black;" class="co3">支數<BR><input id="btnAutoxcount2" type="button" style="font-size: medium; font-weight: bold;" value="代入"></td>';
+						string+='<td id="cucs_xweight" title="重量" align="center" style="width:60px; color:black;" class="co3">重量<BR><a class="total_xweight" style="color: forestgreen;font-weight: bold;"></a></td>';
+						string+='<td id="cucs_class" title="廠牌" align="center" style="width:50px; color:black;">廠牌</td>';
+						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:110px; color:black;">備註(標籤)</td>';
+						string+='<td id="cucs_work" title="工令" align="center" style="width:100px; color:black;">工令</td>';
+						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:75px; color:black;display:none;">客戶編號</td>';
+						string+='<td id="cucs_cust" title="客戶名稱" align="center" style="width:75px; color:black;">客戶名稱</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
 						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
-						string+="<td id='cucs_mins' align='center' style='width:28px; color:black;'><input type='button' id='btnMins2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
-						string+="<td id='cucs_dime' align='center' style='width:28px; color:black;'><input type='button' id='btnDime2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='成型'/></td>";
-						string+="<td id='cucs_width' align='center' style='width:28px; color:black;'><input type='button' id='btnWidth2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='車牙'/></td>";
+						string+="<td id='cucs_mins' align='center' style='width:30px; color:black;'><input type='button' id='btnMins2' style='font-size:16px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs_float').remove();
@@ -970,22 +940,7 @@
 											var n=$(this).attr('id').replace('cucs_mins','')
 											t_endanoa=$('#cucs_noa'+n).text();
 											t_endanoq=$('#cucs_noq'+n).text();
-											q_func('qtxt.query.enda_'+n, 'cuc_vu.txt,enda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno.toUpperCase()+';'+r_name,r_accy,1);
-											
-											var as = _q_appendData("tmp0", "", true, true);
-											//刪除核取的資料
-											for(var j=0;j<chk_cucs.length;j++){
-							                    if(t_endanoa==chk_cucs[j]['noa'] && t_endanoq==chk_cucs[j]['noq']){
-							                    	chk_cucs.splice(j, 1);
-							                    	t_endanoa='';
-							                    	t_endanoq='';
-					                        		break;
-							                    }
-											}
-											t_mins_count--;
-											//更新畫面
-											if(t_mins_count<=0)
-												cucsupdata();
+											q_func('qtxt.query.enda', 'cuc_vu.txt,enda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno.toUpperCase()+';'+r_name);
 										}
 									});
 								}else{
@@ -998,99 +953,6 @@
 						
 						$('#btnMins2').click(function() {
                         	$('#btnMins').click();
-						});
-						
-						//107/04/11
-						//成型
-		                $('#btnDime').click(function() {
-		                	t_dime_count=0;
-		                	$('#cucs .cucs_dime').each(function(index) {
-								if($(this).prop('checked')){
-									t_dime_count++;
-								}
-							});
-							
-							if(t_dime_count>0){
-								if(confirm("確認要成型?")){
-									$('#cucs .cucs_dime').each(function(index) {
-										if($(this).prop('checked')){
-											var n=$(this).attr('id').replace('cucs_dime','')
-											t_endanoa=$('#cucs_noa'+n).text();
-											t_endanoq=$('#cucs_noq'+n).text();
-											q_func('qtxt.query.dimeenda_'+n, 'cuc_vu.txt,dimeenda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno.toUpperCase()+';'+r_name,r_accy,1);
-											
-											var as = _q_appendData("tmp0", "", true, true);
-											//刪除核取的資料
-											for(var j=0;j<chk_cucs.length;j++){
-							                    if(t_endanoa==chk_cucs[j]['noa'] && t_endanoq==chk_cucs[j]['noq']){
-							                    	chk_cucs.splice(j, 1);
-							                    	t_endanoa='';
-							                    	t_endanoq='';
-					                        		break;
-							                    }
-											}
-											t_dime_count--;
-											//更新畫面
-											if(t_dime_count<=0)
-												cucsupdata();
-										}
-									});
-								}else{
-									t_dime_count=0;
-								}
-							}else{
-								alert('無核取成型資料!');
-							}
-						});
-						
-						$('#btnDime2').click(function() {
-                        	$('#btnDime').click();
-						});
-						
-						//車牙
-		                $('#btnWidth').click(function() {
-		                	t_width_count=0;
-		                	$('#cucs .cucs_width').each(function(index) {
-								if($(this).prop('checked')){
-									t_width_count++;
-								}
-							});
-							
-							if(t_width_count>0){
-								if(confirm("確認要車牙?")){
-									$('#cucs .cucs_width').each(function(index) {
-										if($(this).prop('checked')){
-											var n=$(this).attr('id').replace('cucs_width','')
-											t_endanoa=$('#cucs_noa'+n).text();
-											t_endanoq=$('#cucs_noq'+n).text();
-											q_func('qtxt.query.widthenda_'+n, 'cuc_vu.txt,widthenda,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno.toUpperCase()+';'+r_name,r_accy,1);
-											
-											var as = _q_appendData("tmp0", "", true, true);
-											//刪除核取的資料
-											for(var j=0;j<chk_cucs.length;j++){
-							                    if(t_endanoa==chk_cucs[j]['noa'] && t_endanoq==chk_cucs[j]['noq']){
-							                    	chk_cucs.splice(j, 1);
-							                    	t_endanoa='';
-							                    	t_endanoq='';
-					                        		break;
-							                    }
-											}
-											t_width_count--;
-											//更新畫面
-											if(t_width_count<=0)
-												cucsupdata();
-										}
-									});
-								}else{
-									t_width_count=0;
-								}
-							}else{
-								alert('無核取車牙資料!');
-							}
-						});
-						
-						$('#btnWidth2').click(function() {
-                        	$('#btnWidth').click();
 						});
                         break;
 					case 'importcucs':
@@ -1182,29 +1044,12 @@
 										$('#cucs_cubweight'+j).text(round(dec(as[i].cubweight),3));
 										$('#cucs_cubhmount'+j).text(round(dec(as[i].cubhmount),3));
 										$('#lblCucs_class'+j).text(as[i].class);
-										$('#cucs_btime'+j).text(as[i].btime);
-										$('#cucs_etime'+j).text(as[i].etime);
 										$('#cucs_memo'+j).text(as[i].memo);
-										$('#cucs_radius'+j).text(dec(as[i].radius)>0?'V':'');
-										$('#cucs_parag'+j).text(as[i].parag);
-										$('#Imgcucs_img'+j).attr('src',as[i].imgbarcode);
 										$('#cucs_work'+j).text(as[i].size2);
 										$('#cucs_custno'+j).text(as[i].acustno);
-										$('#cucs_cust'+j).html('<a style="font-size: larger;">'+as[i].acust.substr(0,4)+'</a><BR><a>'+as[i].amech+'</a>');
+										$('#cucs_cust'+j).text(as[i].acust.substr(0,4));
 										$('#cucs_ordeno'+j).text(as[i].ordeno);
 										$('#cucs_no2'+j).text(as[i].no2);
-										if(dec(as[i].dime)>0 || dec(as[i].radius)==0){
-											$('#cucs_dime'+j).css('display','none');
-										}else{
-											$('#cucs_dime'+j).css('display','unset');
-										}
-										$('#cucs_adime'+j).text((dec(as[i].dime)>0 && dec(as[i].radius)>0 ?'V':''));
-										if(dec(as[i].width)>0 || as[i].parag==''){
-											$('#cucs_width'+j).css('display','none');
-										}else{
-											$('#cucs_width'+j).css('display','unset');
-										}
-										$('#cucs_awidth'+j).text((dec(as[i].width)>0 && as[i].parag!='' ?'V':''));
 										
 										//移除已存在的資料
 										as.splice(i, 1);
@@ -1244,22 +1089,13 @@
 									$('#cucs_cubhmount'+j).text('');
 									$('#lblCucs_class'+j).text('');
 									$('#combXclass_'+j).remove();
-									$('#cucs_btime'+j).text('');
-									$('#cucs_etime'+j).text('');
 									$('#cucs_memo'+j).text('');
-									$('#cucs_radius'+j).text('');
-									$('#cucs_parag'+j).text('');
-									$('#Imgcucs_img'+j).attr('src','');
 									$('#cucs_work'+j).text('');
 									$('#cucs_custno'+j).text('');
-									$('#cucs_cust'+j).html('');
+									$('#cucs_cust'+j).text('');
 									$('#cucs_ordeno'+j).text('');
 									$('#cucs_no2'+j).text('');
 									$('#cucs_mins'+j).remove();
-									$('#cucs_dime'+j).remove();
-									$('#cucs_adime'+j).text('');
-									$('#cucs_width'+j).remove();
-									$('#cucs_awidth'+j).text('');
 								}
 							}
 							table_noa=$('#cucs_noa'+(bbsrow-1)).text();
@@ -1276,7 +1112,7 @@
 								string+='<td id="cucs_noq'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_odatea'+(i+bbsrow)+'" style="display:none;font-size: 14px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_ucolor'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_product'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
+								string+='<td id="cucs_product'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_spec'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_size'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_lengthb'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
@@ -1293,20 +1129,13 @@
 								string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_class'+(i+bbsrow)+'"></a></td>';
-								string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><img id="Imgcucs_img'+(i+bbsrow)+'" style="width:100px;"></td>';
+								string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_ordeno'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_no2'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td style="text-align: center;"></td>';
-								string+='<td id="cucs_tdime'+(i+bbsrow)+'" style="text-align: center;"><a id="cucs_adime'+(i+bbsrow)+'"></a></td>';
-								string+='<td id="cucs_twidth'+(i+bbsrow)+'" style="text-align: center;"><a id="cucs_awidth'+(i+bbsrow)+'"></a></td>';
 								string+='</tr>';
 								bbsrow++;
 							}
@@ -1318,7 +1147,7 @@
 							string+='<td id="cucs_noq'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].noq+'</td>';
 							string+='<td id="cucs_odatea'+(i+bbsrow)+'" style="display:none;font-size: 14px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].odatea+'</td>';
 							string+='<td id="cucs_ucolor'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].ucolor+'</td>';
-							string+='<td id="cucs_product'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].product+'</td>';
+							string+='<td id="cucs_product'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].product+'</td>';
 							string+='<td id="cucs_spec'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].spec+'</td>';
 							string+='<td id="cucs_size'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].size+'</td>';
 							string+='<td id="cucs_lengthb'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].lengthb+'</td>';
@@ -1335,20 +1164,13 @@
 							string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXcount_'+(i+bbsrow)+'"  type="text" class="xcount txt c1 num" disabled="disabled"/></td>';
 							string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXweight_'+(i+bbsrow)+'"  type="text" class="xweight txt c1 num" disabled="disabled"/></td>';
 							string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_class'+(i+bbsrow)+'">'+as[i].class+'</a><select id="combXclass_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
-							string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].btime+'</td>';
-							string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].etime+'</td>';
 							string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].memo+'</td>';
-							string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+(dec(as[i].radius)>0?'V':'')+'</td>';
-							string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].parag+'</td>';
-							string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><img id="Imgcucs_img'+(i+bbsrow)+'" src="'+as[i].imgbarcode+'" style="width:100px;"></td>';
-							string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acustno+'</td>';
-							string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a style="font-size: larger;">'+as[i].acust.substr(0,4)+'</a><BR><a>'+as[i].amech+'</a></td>';
 							string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].size2+'</td>';
+							string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acustno+'</td>';
+							string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acust.substr(0,4)+'</td>';
 							string+='<td id="cucs_ordeno'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].ordeno+'</td>';
 							string+='<td id="cucs_no2'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].no2+'</td>';
 							string+='<td style="text-align: center;"><input id="cucs_mins'+(i+bbsrow)+'" class="cucs_mins" type="checkbox"/></td>';
-							string+='<td id="cucs_tdime'+(i+bbsrow)+'" style="text-align: center;"><a id="cucs_adime'+(i+bbsrow)+'">'+(dec(as[i].dime)>0 && dec(as[i].radius)>0 ?'V':'')+'</a><input id="cucs_dime'+(i+bbsrow)+'" class="cucs_dime" type="checkbox" style="display:'+(dec(as[i].dime)>0 || dec(as[i].radius)==0 ?'none':'unset')+';"/></td>';
-							string+='<td id="cucs_twidth'+(i+bbsrow)+'" style="text-align: center;"><a id="cucs_awidth'+(i+bbsrow)+'">'+(dec(as[i].width)>0 && as[i].parag!='' ?'V':'')+'</a><input id="cucs_width'+(i+bbsrow)+'" class="cucs_width" type="checkbox" style="display:'+(dec(as[i].width)>0 || as[i].parag==''?'none':'unset')+';"/></td>';
 							string+='</tr>';
 							
 							table_noa=as[i].noa;
@@ -1641,17 +1463,6 @@
                             alert('無排程單!!');
                     	}
                     	Unlock();
-                    	break;
-                    case 'ucc':
-                    	var as = _q_appendData("ucc", "", true);
-						t_ucc='@';
-						for ( i = 0; i < as.length; i++) {
-							t_ucc+=","+as[i].product;
-						}
-						q_cmbParse("combProduct", t_ucc);
-						
-						$('#combProduct').val('鋼筋');
-                    	
                     	break;
 					case 'spec':
 						var as = _q_appendData("spec", "", true);
@@ -2425,16 +2236,12 @@
                             $('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
                             $('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
                             $('#cucs_mins' + i).attr('disabled', 'disabled');
-                            $('#cucs_dime' + i).attr('disabled', 'disabled');
-                            $('#cucs_width' + i).attr('disabled', 'disabled');
 						}else if (islock && cubno.split('##')[0].toUpperCase()==r_userno.toUpperCase()){//自己鎖定
 							$('#cucs_lbla'+i).text('');
 							$('#cucs_chk' + i).removeAttr('disabled');
                             $('#cucs_chk'+i).prop('checked',true).parent().parent().find('td').css('background', 'darkturquoise');
                             $('#combMechno').val(cubno.split('##')[2]!=undefined?cubno.split('##')[2]:'');
                             $('#cucs_mins' + i).removeAttr('disabled');
-                            $('#cucs_dime' + i).removeAttr('disabled');
-                            $('#cucs_width' + i).removeAttr('disabled');
                             //text寫入
                             for(var j =0 ;j<chk_cucs.length;j++){
                             	if(chk_cucs[j].noa==$('#cucs_noa'+i).text() && chk_cucs[j].noq==$('#cucs_noq'+i).text()){
@@ -2450,8 +2257,6 @@
 							$('#cucs_chk' + i).removeAttr('disabled');
 							$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'lavender');
 							$('#cucs_mins' + i).removeAttr('disabled');
-							$('#cucs_dime' + i).removeAttr('disabled');
-                            $('#cucs_width' + i).removeAttr('disabled');
 							$('#cucs_tr'+i+' .co1').css('background-color', 'antiquewhite');
                             $('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
                             $('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
@@ -2461,8 +2266,6 @@
 						$('#cucs_chk' + i).removeAttr('disabled');
 						$('#cucs_chk'+i).prop('checked',false).parent().parent().find('td').css('background', 'lavender');
 						$('#cucs_mins' + i).removeAttr('disabled');
-						$('#cucs_dime' + i).removeAttr('disabled');
-                        $('#cucs_width' + i).removeAttr('disabled');
 						$('#cucs_tr'+i+' .co1').css('background-color', 'antiquewhite');
 						$('#cucs_tr'+i+' .co2').css('background-color', 'lightpink');
 						$('#cucs_tr'+i+' .co3').css('background-color', 'lightsalmon');
@@ -2599,14 +2402,14 @@
 			}
 			#cucs_table {
                 border: 5px solid gray;
-                font-size: 11px;
+                font-size: medium;
                 background-color: white;
             }
             #cucs_table tr {
                 height: 30px;
             }
             #cucs_table td {
-                /*padding: 2px;*/
+                padding: 2px;
                 text-align: center;
                 border-width: 0px;
                 background-color: lavender;
@@ -2624,14 +2427,14 @@
             
             #cucs_table2 {
                 border: 5px solid gray;
-                font-size: 11px;
+                font-size: medium;
                 background-color: white;
             }
             #cucs_table2 tr {
                 height: 30px;
             }
             #cucs_table2 td {
-                /*padding: 2px;*/
+                padding: 2px;
                 text-align: center;
                 border-width: 0px;
                 background-color: lavender;
@@ -2727,7 +2530,7 @@
 			<input id="textMech"  type="text" class="txt" style="width: 100px;" disabled="disabled"/>-->
 		<a class="lbl">機　台</a>&nbsp;
 			<select id="combMechno2" class="txt" style="font-size: medium;"> </select>
-		<a class="lbl">生產記錄備註</a>&nbsp;<input id="textMemo"  type="text" class="txt" style="width: 270px;"/>
+		<a class="lbl">生產記錄備註</a>&nbsp;<input id="textMemo"  type="text" class="txt" style="width: 300px;"/>
 		<input type='button' id='btnCub' style='font-size:16px;' value="入庫"/>
 		<input type='button' id='btnCancels' style='font-size:16px;' value="取消鎖定"/>
 		<input type='button' id='btnClear' style='font-size:16px;' value="畫面刷新"/>
@@ -2736,8 +2539,6 @@
 		<BR>
 		<a id="lblCucnoa" class="lbl" style="color: #4297D7;cursor: pointer;font-weight: bolder;">案　號</a>&nbsp;
 		<select id="combCucno" class="txt" style="font-size: medium;"> </select>
-		&nbsp;<a class="lbl">品　名</a>&nbsp;<!--107/04/11-->
-		<select id="combProduct" class="txt" style="font-size: medium;"> </select>
 		&nbsp;<a class="lbl">號　數</a>&nbsp;
 		<select id="combSize" class="txt" style="font-size: medium;"> </select>
 		&nbsp;<a class="lbl">材　質</a>&nbsp;
@@ -2746,10 +2547,7 @@
 		<select id="combOrder" class="txt" style="font-size: medium;"> </select>
 		<input type='button' id='btnImport' style='font-size:16px;' value="匯入"/>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<input type='button' id='btnCubp8' style='font-size:16px;' value="生產計劃日程表"/>
-		<input type='button' id='btnCubp2' style='font-size:16px;' value="組別加工明細表"/>
-		<input type='button' id='btnCubp5' style='font-size:16px;' value="板料領料明細表"/>
-		<a style="color: red;display: none;">※機台鎖定時間超過15分鐘將自動解除鎖定</a><!--107/04/11文字隱藏,功能保留-->
+		<a style="color: red;">※機台鎖定時間超過15分鐘將自動解除鎖定</a>
 		<div id="cucs" style="float:left;width:100%;height:500px;overflow:auto;position: relative;"> </div> 
 		<!--<div id="cucs_control" style="width:100%;"> </div>--> 
 		<div id="cuct" style="float:left;width:100%;height:80px;overflow:auto;position: relative;"> </div>

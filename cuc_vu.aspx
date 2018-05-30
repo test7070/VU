@@ -1182,8 +1182,8 @@
 										$('#cucs_cubweight'+j).text(round(dec(as[i].cubweight),3));
 										$('#cucs_cubhmount'+j).text(round(dec(as[i].cubhmount),3));
 										$('#lblCucs_class'+j).text(as[i].class);
-										$('#cucs_btime'+j).text(as[i].btime);
-										$('#cucs_etime'+j).text(as[i].etime);
+										$('#lblCucs_btime'+j).text(as[i].btime);
+										$('#lblCucs_etime'+j).text(as[i].etime);
 										$('#cucs_memo'+j).text(as[i].memo);
 										$('#cucs_radius'+j).text(dec(as[i].radius)>0?'V':'');
 										$('#cucs_parag'+j).text(as[i].parag);
@@ -1244,8 +1244,10 @@
 									$('#cucs_cubhmount'+j).text('');
 									$('#lblCucs_class'+j).text('');
 									$('#combXclass_'+j).remove();
-									$('#cucs_btime'+j).text('');
-									$('#cucs_etime'+j).text('');
+									$('#lblCucs_btime'+j).text('');
+									$('#combXbtime_'+j).remove();
+									$('#lblCucs_etime'+j).text('');
+									$('#combXetime_'+j).remove();
 									$('#cucs_memo'+j).text('');
 									$('#cucs_radius'+j).text('');
 									$('#cucs_parag'+j).text('');
@@ -1293,8 +1295,8 @@
 								string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"></td>';
 								string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_class'+(i+bbsrow)+'"></a></td>';
-								string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
+								string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_btime'+(i+bbsrow)+'"></a></td>';
+								string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_etime'+(i+bbsrow)+'"></a></td>';
 								string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
@@ -1335,8 +1337,8 @@
 							string+='<td id="cucs_xcount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXcount_'+(i+bbsrow)+'"  type="text" class="xcount txt c1 num" disabled="disabled"/></td>';
 							string+='<td id="cucs_xweight'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+';" class="co3"><input id="textXweight_'+(i+bbsrow)+'"  type="text" class="xweight txt c1 num" disabled="disabled"/></td>';
 							string+='<td id="cucs_class'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_class'+(i+bbsrow)+'">'+as[i].class+'</a><select id="combXclass_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
-							string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].btime+'</td>';
-							string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].etime+'</td>';
+							string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_btime'+(i+bbsrow)+'">'+as[i].btime+'</a><select id="combXbtime_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
+							string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_etime'+(i+bbsrow)+'">'+as[i].etime+'</a><select id="combXetime_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
 							string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].memo+'</td>';
 							string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+(dec(as[i].radius)>0?'V':'')+'</td>';
 							string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].parag+'</td>';
@@ -1368,18 +1370,42 @@
 						
 						isupdate=false;
 						
+						var t_coloritem=",棕,紅,白,黃,綠,灰,藍";
 						$('#cucs_table .comb').unbind("change");
                     	$('#cucs_table .comb').each(function(index) {
                     		$(this).text('');
+                    		var id=$(this).attr('id').split('_')[0];
                     		var n=$(this).attr('id').split('_')[1];
-                    		q_cmbParse("combXclass_"+n, t_class);
-                    		$('#combXclass_'+n).val($('#lblCucs_class'+n).text());
-                    		
-                    		$(this).change(function() {
-                    			//1113 更新廠牌到cucs
-                    			q_func('qtxt.query.cucs_class_update', 'cuc_vu.txt,updateclass,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno.toUpperCase()+';'+r_name+';'+$(this).val());
-                    			$('#lblCucs_class'+n).text($(this).val());
-							});
+                    		if(id=='combXclass'){
+	                    		q_cmbParse("combXclass_"+n, t_class);
+	                    		$('#combXclass_'+n).val($('#lblCucs_class'+n).text());
+	                    		
+	                    		$(this).change(function() {
+	                    			//1113 更新廠牌到cucs
+	                    			q_func('qtxt.query.cucs_class_update', 'cuc_vu.txt,updateclass,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno.toUpperCase()+';'+r_name+';'+$(this).val());
+	                    			$('#lblCucs_class'+n).text($(this).val());
+								});
+							}
+							if(id=='combXbtime'){
+	                    		q_cmbParse("combXbtime_"+n, t_coloritem);
+	                    		$('#combXbtime_'+n).val($('#lblCucs_btime'+n).text());
+	                    		
+	                    		$(this).change(function() {
+	                    			//1113 更新顏色1到cucs
+	                    			q_func('qtxt.query.cucs_btime_update', 'cuc_vu.txt,updatebtime,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno.toUpperCase()+';'+r_name+';'+$(this).val());
+	                    			$('#lblCucs_btime'+n).text($(this).val());
+								});
+							}
+							if(id=='combXetime'){
+	                    		q_cmbParse("combXetime_"+n, t_coloritem);
+	                    		$('#combXetime_'+n).val($('#lblCucs_etime'+n).text());
+	                    		
+	                    		$(this).change(function() {
+	                    			//1113 更新顏色2到cucs
+	                    			q_func('qtxt.query.cucs_etime_update', 'cuc_vu.txt,updateetime,'+r_accy+';'+$('#cucs_noa'+n).text()+';'+$('#cucs_noq'+n).text()+';'+r_userno.toUpperCase()+';'+r_name+';'+$(this).val());
+	                    			$('#lblCucs_etime'+n).text($(this).val());
+								});
+							}
                     	})
 						
 						//事件更新
@@ -1824,6 +1850,8 @@
                             $('#textXcount_'+n).val('').attr('disabled', 'disabled');
                             $('#textXweight_'+n).val('').attr('disabled', 'disabled');
                             $('#combXclass_'+n).val('').attr('disabled', 'disabled');
+                            $('#combXbtime_'+n).val('').attr('disabled', 'disabled');
+                            $('#combXetime_'+n).val('').attr('disabled', 'disabled');
 						}else{//未鎖定資料
 							$('#cucs_chk'+n).prop("checked",true).parent().parent().find('td').css('background', 'darkturquoise');
 							//鎖定資料
@@ -1851,6 +1879,8 @@
 							$('#textXweight_'+n).removeAttr('disabled');
 							$('#textXmount_'+n).val(1).blur();
 							$('#combXclass_'+n).removeAttr('disabled');
+							$('#combXbtime_'+n).removeAttr('disabled');
+							$('#combXetime_'+n).removeAttr('disabled');
 						}
 					}else{
 						$('#cucs_chk'+n).prop("checked",false).attr('disabled', 'disabled').parent().parent().find('td').css('background', 'lavender');
@@ -1922,6 +1952,8 @@
 					$('#textXcount_'+n).val('').attr('disabled', 'disabled');
 					$('#textXweight_'+n).val('').attr('disabled', 'disabled');
 					$('#combXclass_'+n).attr('disabled', 'disabled');
+					$('#combXbtime_'+n).attr('disabled', 'disabled');
+					$('#combXetime_'+n).attr('disabled', 'disabled');
 					
 					var cucsno=$('#cucs_noa' + n).text();
 					var eweight=dec($('#cucs_eweight' + n).text());
@@ -2397,6 +2429,8 @@
 					$('#textXcount_'+i).val('').attr('disabled', 'disabled');
 					$('#textXweight_'+i).val('').attr('disabled', 'disabled');
 					$('#combXclass_'+i).attr('disabled', 'disabled');
+					$('#combXbtime_'+i).attr('disabled', 'disabled');
+					$('#combXetime_'+i).attr('disabled', 'disabled');
 					if(cubno!=''){
 						var lock_time=cubno.split('##')[3]!=undefined?cubno.split('##')[3]:'';
 						var islock=false;
@@ -2442,6 +2476,8 @@
 									$('#textXcount_'+i).val(chk_cucs[j].xcount).removeAttr('disabled');
 									$('#textXweight_'+i).val(chk_cucs[j].xweight).removeAttr('disabled');
 									$('#combXclass_'+i).removeAttr('disabled');
+									$('#combXbtime_'+i).removeAttr('disabled');
+									$('#combXetime_'+i).removeAttr('disabled');
 									break;
 								}
 							}

@@ -92,6 +92,64 @@ updateclass:--updateclass
 	
 ;
 -------------------------------------------------------------------------------------------------------------------------------
+updatebtime:--updatebtime
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	declare @btime nvarchar(max) = [6]
+	declare @o_btime nvarchar(max) = ''
+	
+	--鎖定時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=CONVERT (VARCHAR(20), GETDATE(),20 )
+	select @now_datetime
+	
+	set @accy=isnull((select accy from view_cucs where noa=@noa and noq=@noq),@accy)
+	set @o_btime=isnull((select btime from view_cucs where noa=@noa and noq=@noq),'')
+		
+	EXEC("
+		update cucs"+@accy+" set btime='"+@btime+"' where noa='"+@noa+"' and noq='"+@noq+"'
+	")
+	
+	insert drun (datea,timea,usera,action,tablea,memo)
+	select replace(left(@now_datetime,10),' ',''),replace(left(right(@now_datetime,8),5),' ','')
+	,@userno,'update','cuc','btime:'+@o_btime+'=#>'+@btime	
+	
+;
+-------------------------------------------------------------------------------------------------------------------------------
+updateetime:--updateetime
+	SET QUOTED_IDENTIFIER OFF
+	declare @cmd nvarchar(max) = ''
+	declare @accy nvarchar(max) = [1]
+	declare @noa nvarchar(max) = [2]
+	declare @noq nvarchar(max) = [3]
+	declare @userno nvarchar(max) = [4]
+	declare @namea nvarchar(max) = [5]
+	declare @etime nvarchar(max) = [6]
+	declare @o_etime nvarchar(max) = ''
+	
+	--鎖定時間
+	declare @now_datetime nvarchar(20)
+	set @now_datetime=CONVERT (VARCHAR(20), GETDATE(),20 )
+	select @now_datetime
+	
+	set @accy=isnull((select accy from view_cucs where noa=@noa and noq=@noq),@accy)
+	set @o_etime=isnull((select etime from view_cucs where noa=@noa and noq=@noq),'')
+		
+	EXEC("
+		update cucs"+@accy+" set etime='"+@etime+"' where noa='"+@noa+"' and noq='"+@noq+"'
+	")
+	
+	insert drun (datea,timea,usera,action,tablea,memo)
+	select replace(left(@now_datetime,10),' ',''),replace(left(right(@now_datetime,8),5),' ','')
+	,@userno,'update','cuc','etime:'+@o_etime+'=#>'+@etime	
+	
+;
+-------------------------------------------------------------------------------------------------------------------------------
 cucstocub:--cucstocub
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max) = ''

@@ -443,6 +443,19 @@
                     if (!$('#btnMinus_' + j).hasClass('isAssign')) {
                     	
                     	for (var k = 0; k < fbbs.length; k++) {
+                    		$('#'+fbbs[k]+'_'+j).keydown(function(e) {
+                    			t_IdSeq = -1;
+								q_bodyId($(this).attr('id'));
+								b_seq = t_IdSeq;
+								
+                    			if(e.which=='40'){
+                    				if(q_bbsCount==dec(b_seq)+1){
+                    					$('#btnPlus').click();
+                    				}
+                    			}
+							});
+                    		
+                    		
                     		$('#'+fbbs[k]+'_'+j).focusin(function() {
                     			t_IdSeq = -1;
 								q_bodyId($(this).attr('id'));

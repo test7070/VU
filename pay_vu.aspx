@@ -59,13 +59,13 @@
 		        
 		        $('#lblPayc').click(function() {
 		        	if(!emp($('#txtPayc').val())){
-		        		q_box('contst_vu.aspx' + "?" + r_userno + ";" + r_name + ";" + q_time + ";noa='" + trim($('#txtPayc').val())+"';" + r_accy , '', "95%", "95%", "進貨合約");
+		        		q_box('contst_vu.aspx' + "?" + r_userno + ";" + r_name + ";" + q_time + ";contract='" + trim($('#txtPayc').val())+"';" + r_accy , '', "95%", "95%", "進貨合約");
 		        	}
 				});
 				
 				$('#txtPayc').change(function() {
 					if(!emp($('#txtPayc').val())){
-						var t_where = "where=^^ noa='" + $('#txtPayc').val() + "' ^^";
+						var t_where = "where=^^ contract='" + $('#txtPayc').val() + "' ^^";
 	                	q_gt("cont", t_where, 1, 1, 0, 'get_cont', r_accy);
 	                }else{
 	                	getOpay();

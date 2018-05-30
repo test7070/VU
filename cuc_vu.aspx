@@ -2781,7 +2781,7 @@
 		&nbsp;<a class="lbl">排　序</a>&nbsp;
 		<select id="combOrder" class="txt" style="font-size: medium;"> </select>
 		<input type='button' id='btnImport' style='font-size:16px;' value="匯入"/>
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;
 		<input type='button' id='btnCubp8' style='font-size:16px;' value="生產計劃日程表"/>
 		<input type='button' id='btnCubp2' style='font-size:16px;' value="組別加工明細表"/>
 		<input type='button' id='btnCubp5' style='font-size:16px;' value="板料領料明細表"/>

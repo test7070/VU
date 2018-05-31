@@ -319,6 +319,12 @@ begin
 	
 	--106/09/11趙
 	--全部只要撈7000~7000A 互換要看板料
+	
+	--106/09/12陳
+	--改回7000~7000B
+	
+	--107/05/31 趙
+	--只抓7000~7000B
 
 	--調整
 	insert #xtmp
@@ -329,7 +335,7 @@ begin
 	from vcf a left join vcfs b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
+	and (b.storeno='7000' or b.storeno='7000A')-- or b.storeno='7000B'
 	and a.datea>='2017/06/03' and b.weight>0
 	
 	insert #xtmp
@@ -338,7 +344,7 @@ begin
 	from vcf a left join vcfs b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
+	and (b.storeno='7000' or b.storeno='7000A')-- or b.storeno='7000B'
 	and a.datea>='2017/06/03' and b.weight<0
 
 	--進
@@ -350,7 +356,7 @@ begin
 	from view_rc2 a left join view_rc2s b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
+	and (b.storeno='7000' or b.storeno='7000A')-- or b.storeno='7000B'
 	and a.datea>='2017/06/03'
 
 	--銷
@@ -361,7 +367,7 @@ begin
 	from view_vcc a left join view_vccs b on a.noa=b.noa
 	where isnull(b.productno,'')='' and isnull(b.product,'')!='' and isnull(a.datea,'') <=@t_enddate and isnull(b.weight,0)!=0
 	and not(isnull(b.product,'') like '%續接器%' or isnull(b.product,'') like '%水泥方塊%' or isnull(b.product,'') like '%太空包%' or isnull(b.product,'') like '%費' or isnull(b.product,'') like '%工資%')
-	and (b.storeno='7000' or b.storeno='7000A' or b.storeno='7000B')
+	and (b.storeno='7000' or b.storeno='7000A')-- or b.storeno='7000B'
 	and a.datea>='2017/06/03'
 	
 	--互進

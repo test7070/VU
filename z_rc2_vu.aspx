@@ -212,7 +212,7 @@
                 	case 'cont':
                 		var as = _q_appendData("cont", "", true);
 						for ( i = 0; i < as.length; i++) {
-							t_qno+=","+as[i].noa;
+							t_qno+=","+as[i].contract;
 						}
 						$('#combQno').empty();
 						if(t_qno.length != 0){							

@@ -19,6 +19,7 @@
                 alert("An error occurred:\r\n" + error.Message);
             }
 			q_desc=1;
+			q_copy=1;
             q_tables = 's';
             var q_name = "cuc";
             var q_readonly = ['txtWorker', 'txtWorker2','textWeight','textWeight1','textWeight2','textWeight3','textWeight4'];
@@ -329,7 +330,7 @@
 					ctx.drawImage($('#imgPic_'+n)[0],0,0,imgwidth,imgheight);
 					var t_length = 0;
 					//106/05/10 參數不劃入圖中
-					for(var i=0;i<t_para.length;i++){
+					/*for(var i=0;i<t_para.length;i++){
 						value = $('#txtPara'+t_para[i].key.toLowerCase()+'_'+n).val();
 						if(value!=0){
 							t_length += value;
@@ -338,7 +339,7 @@
 							ctx.textAlign="center";
 							ctx.fillText(value+'',t_para[i].left,t_para[i].top);
 						}
-					}
+					}*/
 					createImg4(n);
 				}
 			};
@@ -628,7 +629,7 @@
                             /*滑鼠右鍵*/
                             e.preventDefault();
                             var n = $(this).attr('id').replace('txtPicno_', '');
-                            $('#btnPicno_'+n).click();
+                            //$('#btnPicno_'+n).click();
                             
                             /*if($('#btnPic').val()=='成型參數顯示'){
 								$('#btnPic').val('成型參數關閉');
@@ -1123,6 +1124,16 @@
                 $('#txtDatea').val(q_date()).focus();
                 refreshBbm();
                 $('#txtTypea').val('鋼筋');
+                
+                for (var i = 0; i < q_bbsCount; i++) {
+                	$('#txtOrdeno_'+i).val('');
+                	$('#checkMins_'+i).prop('checked',false);
+                	$('#checkDime_'+i).prop('checked',false);
+                	$('#checkWidth_'+i).prop('checked',false);
+                	$('#txtMins_'+i).val('0');
+                	$('#txtDime_'+i).val('0');
+                	$('#txtWidth_'+i).val('0');
+                }
             }
 
             function btnModi() {
@@ -1193,6 +1204,14 @@
 
             function btnMinus(id) {
                 _btnMinus(id);
+                var n=id.split('_')[1];
+                $('#txtImgorg_'+n).val('');
+                $('#txtImgdata_'+n).val('');
+                $('#txtImgbarcode_'+n).val('');
+                var c=document.getElementById("canvas_"+n);
+                var cxt=c.getContext("2d");
+    			c.height=c.height;
+                $('#imgPic_'+n).attr('src','');
             }
 
             function btnPlus(org_htm, dest_tag, afield) {
@@ -1618,10 +1637,10 @@
 						</td>-->
 						<td><select id="cmbParag.*" class="txt c1"> </select></td>
 						<td>
-							<input class="txt" id="txtPicno.*" type="text" style="width:95%;"/>
+							<input class="txt" id="txtPicno.*" type="text" style="width:70%;"/>
+							<input id="btnPicno.*" type="button" value="." style="width: 1%">
 							<input class="txt" id="txtPicname.*" type="text" style="width:95%;"/>
 							<input class="txt" id="txtPara.*" type="text" style="display:none;"/>
-							<input id="btnPicno.*" type="button" style="display:none;">
 						</td>
 						<td class="img">
 							<canvas id="canvas.*" width="150" height="50"> </canvas>

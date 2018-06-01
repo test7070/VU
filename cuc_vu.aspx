@@ -267,6 +267,25 @@
 					}
                 });
                 
+                //107/05/31 預設 先關閉 成型和車牙欄位
+                $('#btnFhide1').click(function() {
+                	if($('#btnFhide1').val()=='成型顯示'){
+                		$('#btnFhide1').val('成型隱藏');
+                	}else{
+                		$('#btnFhide1').val('成型顯示');
+                	}
+                	cucs_refresh();
+				});
+				
+				$('#btnFhide2').click(function() {
+                	if($('#btnFhide2').val()=='車牙顯示'){
+                		$('#btnFhide2').val('車牙隱藏');
+                	}else{
+                		$('#btnFhide2').val('車牙顯示');
+                	}
+                	cucs_refresh();
+				});
+                                
                 //--cuct內容&事件---------------------------------------
 				var string = "<table id='cuct_table' style='width:1240px;word-break:break-all;'>";
 				string+='<tr id="cuct_header">';
@@ -843,8 +862,8 @@
 						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:38px; color:black;display:none;" class="co2">未完工件數</td>';
 						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:38px; color:black;display:none;" class="co2">未完工支數</td>';
 						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:38px; color:black;display:none;" class="co2">未完工重量</td>';
-						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:38px; color:black;" class="co2">已完工<BR>件數</td>';
-						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:38px; color:black;" class="co2">已完工<BR>支數</td>';
+						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:43px; color:black;" class="co2">已完工<BR>件數</td>';
+						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:43px; color:black;" class="co2">已完工<BR>支數</td>';
 						string+='<td id="cucs_cubweight" title="已完工重量" align="center" style="width:43px; color:black;" class="co2">已完工<BR>重量</td>';
 						string+='<td id="cucs_xmount" title="件數" align="center" style="width:38px; color:black;" class="co3">件數</td>';
 						string+='<td id="cucs_xcount" title="支數" align="center" style="width:38px; color:black;" class="co3">支數<BR><input id="btnAutoxcount" type="button" style="font-size: 10px; font-weight: bold; width: 35px;" value="代入"></td>';
@@ -853,18 +872,18 @@
 						string+='<td id="cucs_btime" title="顏色1" align="center" style="width:28px; color:black;">顏色<BR>1</td>';
 						string+='<td id="cucs_etime" title="顏色2" align="center" style="width:28px; color:black;">顏色<BR>2</td>';
 						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:83px; color:black;">備註(標籤)</td>';
-						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;">彎</td>';
-						string+='<td id="cucs_parag" title="車" align="center" style="width:28px; color:black;">車</td>';
-						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;">圖形</td>';
+						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;" class="fhide1">彎</td>';
+						string+='<td id="cucs_parag" title="車" align="center" style="width:28px; color:black;" class="fhide2">車</td>';
+						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;" class="fhide1">圖形</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:73px; color:black;display:none;">客戶編號</td>';
 						string+='<td id="cucs_cust" title="客戶/工地" align="center" style="width:73px; color:black;">客戶/工地</td>';
-						string+='<td id="cucs_work" title="工令" align="center" style="width:88px; color:black;">工令</td>';
+						string+='<td id="cucs_work" title="工令" align="center" style="width:78px; color:black;">工令</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
 						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
 						string+="<td id='cucs_mins' align='center' style='width:28px; color:black;'><input type='button' id='btnMins' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
-						string+="<td id='cucs_dime' align='center' style='width:28px; color:black;'><input type='button' id='btnDime' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='成型'/></td>";
-						string+="<td id='cucs_width' align='center' style='width:28px; color:black;'><input type='button' id='btnWidth' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='車牙'/></td>";
+						string+="<td id='cucs_dime' align='center' style='width:28px; color:black;' class='fhide1'><input type='button' id='btnDime' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='成型'/></td>";
+						string+="<td id='cucs_width' align='center' style='width:28px; color:black;' class='fhide2'><input type='button' id='btnWidth' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='車牙'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs').html(string);
@@ -889,8 +908,8 @@
 						string+='<td id="cucs_emount" title="未完工件數" align="center" style="width:38px; color:black;display:none;" class="co2">未完工件數</td>';
 						string+='<td id="cucs_ehmount" title="未完工支數" align="center" style="width:38px; color:black;display:none;" class="co2">未完工支數</td>';
 						string+='<td id="cucs_eweight" title="未完工重量" align="center" style="width:38px; color:black;display:none;" class="co2">未完工重量</td>';
-						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:38px; color:black;" class="co2">已完工<BR>件數</td>';
-						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:38px; color:black;" class="co2">已完工<BR>支數</td>';
+						string+='<td id="cucs_cubmount" title="已完工件數" align="center" style="width:43px; color:black;" class="co2">已完工<BR>件數</td>';
+						string+='<td id="cucs_cubhmount" title="已完工支數" align="center" style="width:43px; color:black;" class="co2">已完工<BR>支數</td>';
 						string+='<td id="cucs_cubweight" title="已完工重量" align="center" style="width:43px; color:black;" class="co2">已完工<BR>重量</td>';
 						string+='<td id="cucs_xmount" title="件數" align="center" style="width:38px; color:black;" class="co3">件數</td>';
 						string+='<td id="cucs_xcount" title="支數" align="center" style="width:38px; color:black;" class="co3">支數<BR><input id="btnAutoxcount2" type="button" style="font-size: 10px; font-weight: bold; width: 35px;" value="代入"></td>';
@@ -899,22 +918,24 @@
 						string+='<td id="cucs_btime" title="顏色1" align="center" style="width:28px; color:black;">顏色<BR>1</td>';
 						string+='<td id="cucs_etime" title="顏色2" align="center" style="width:28px; color:black;">顏色<BR>2</td>';
 						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:83px; color:black;">備註(標籤)</td>';
-						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;">彎</td>';
-						string+='<td id="cucs_parag" title="車" align="center" style="width:28px; color:black;">車</td>';
-						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;">圖形</td>';
+						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;" class="fhide1">彎</td>';
+						string+='<td id="cucs_parag" title="車" align="center" style="width:28px; color:black;" class="fhide2">車</td>';
+						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;" class="fhide1">圖形</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:73px; color:black;display:none;">客戶編號</td>';
 						string+='<td id="cucs_cust" title="客戶/工地" align="center" style="width:73px; color:black;">客戶/工地</td>';
-						string+='<td id="cucs_work" title="工令" align="center" style="width:88px; color:black;">工令</td>';
+						string+='<td id="cucs_work" title="工令" align="center" style="width:78px; color:black;">工令</td>';
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
 						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
 						string+="<td id='cucs_mins' align='center' style='width:28px; color:black;'><input type='button' id='btnMins2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
-						string+="<td id='cucs_dime' align='center' style='width:28px; color:black;'><input type='button' id='btnDime2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='成型'/></td>";
-						string+="<td id='cucs_width' align='center' style='width:28px; color:black;'><input type='button' id='btnWidth2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='車牙'/></td>";
+						string+="<td id='cucs_dime' align='center' style='width:28px; color:black;' class='fhide1'><input type='button' id='btnDime2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='成型'/></td>";
+						string+="<td id='cucs_width' align='center' style='width:28px; color:black;' class='fhide2'><input type='button' id='btnWidth2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='車牙'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs_float').remove();
 						$('#cucs').append(string);
+						
+						cucs_refresh();
 						
 						//設定滾動條移動時浮動表頭與div的距離
 						$('#cucs').scroll(function(){
@@ -1298,17 +1319,17 @@
 								string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_btime'+(i+bbsrow)+'"></a></td>';
 								string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_etime'+(i+bbsrow)+'"></a></td>';
 								string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><img id="Imgcucs_img'+(i+bbsrow)+'" style="width:100px;"></td>';
+								string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1"></td>';
+								string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide12></td>';
+								string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1"><img id="Imgcucs_img'+(i+bbsrow)+'" style="width:100px;"></td>';
 								string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_ordeno'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_no2'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td style="text-align: center;"></td>';
-								string+='<td id="cucs_tdime'+(i+bbsrow)+'" style="text-align: center;"><a id="cucs_adime'+(i+bbsrow)+'"></a></td>';
-								string+='<td id="cucs_twidth'+(i+bbsrow)+'" style="text-align: center;"><a id="cucs_awidth'+(i+bbsrow)+'"></a></td>';
+								string+='<td id="cucs_tdime'+(i+bbsrow)+'" style="text-align: center;" class="fhide1"><a id="cucs_adime'+(i+bbsrow)+'"></a></td>';
+								string+='<td id="cucs_twidth'+(i+bbsrow)+'" style="text-align: center;" class="fhide2"><a id="cucs_awidth'+(i+bbsrow)+'"></a></td>';
 								string+='</tr>';
 								bbsrow++;
 							}
@@ -1340,17 +1361,17 @@
 							string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_btime'+(i+bbsrow)+'">'+as[i].btime+'</a><select id="combXbtime_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
 							string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_etime'+(i+bbsrow)+'">'+as[i].etime+'</a><select id="combXetime_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
 							string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].memo+'</td>';
-							string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+(dec(as[i].radius)>0?'V':'')+'</td>';
-							string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].parag+'</td>';
-							string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><img id="Imgcucs_img'+(i+bbsrow)+'" src="'+as[i].imgbarcode+'" style="width:100px;"></td>';
+							string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1">'+(dec(as[i].radius)>0?'V':'')+'</td>';
+							string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide2">'+as[i].parag+'</td>';
+							string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1"><img id="Imgcucs_img'+(i+bbsrow)+'" src="'+as[i].imgbarcode+'" style="width:100px;"></td>';
 							string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acustno+'</td>';
 							string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a style="font-size: larger;">'+as[i].acust.substr(0,4)+'</a><BR><a>'+as[i].amech+'</a></td>';
 							string+='<td id="cucs_work'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].size2+'</td>';
 							string+='<td id="cucs_ordeno'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].ordeno+'</td>';
 							string+='<td id="cucs_no2'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].no2+'</td>';
 							string+='<td style="text-align: center;"><input id="cucs_mins'+(i+bbsrow)+'" class="cucs_mins" type="checkbox"/></td>';
-							string+='<td id="cucs_tdime'+(i+bbsrow)+'" style="text-align: center;"><a id="cucs_adime'+(i+bbsrow)+'">'+(dec(as[i].dime)>0 && dec(as[i].radius)>0 ?'V':'')+'</a><input id="cucs_dime'+(i+bbsrow)+'" class="cucs_dime" type="checkbox" style="display:'+(dec(as[i].dime)>0 || dec(as[i].radius)==0 ?'none':'unset')+';"/></td>';
-							string+='<td id="cucs_twidth'+(i+bbsrow)+'" style="text-align: center;"><a id="cucs_awidth'+(i+bbsrow)+'">'+(dec(as[i].width)>0 && as[i].parag!='' ?'V':'')+'</a><input id="cucs_width'+(i+bbsrow)+'" class="cucs_width" type="checkbox" style="display:'+(dec(as[i].width)>0 || as[i].parag==''?'none':'unset')+';"/></td>';
+							string+='<td id="cucs_tdime'+(i+bbsrow)+'" style="text-align: center;" class="fhide1"><a id="cucs_adime'+(i+bbsrow)+'">'+(dec(as[i].dime)>0 && dec(as[i].radius)>0 ?'V':'')+'</a><input id="cucs_dime'+(i+bbsrow)+'" class="cucs_dime" type="checkbox" style="display:'+(dec(as[i].dime)>0 || dec(as[i].radius)==0 ?'none':'unset')+';"/></td>';
+							string+='<td id="cucs_twidth'+(i+bbsrow)+'" style="text-align: center;" class="fhide2"><a id="cucs_awidth'+(i+bbsrow)+'">'+(dec(as[i].width)>0 && as[i].parag!='' ?'V':'')+'</a><input id="cucs_width'+(i+bbsrow)+'" class="cucs_width" type="checkbox" style="display:'+(dec(as[i].width)>0 || as[i].parag==''?'none':'unset')+';"/></td>';
 							string+='</tr>';
 							
 							table_noa=as[i].noa;
@@ -2510,6 +2531,25 @@
 						$('#cucs_tr'+i).find('td').css('background', 'lightgrey');
 					}
 				}
+				
+				//107/05/31
+                if($('#btnFhide1').val()=='成型顯示'){
+                	$('.fhide1').hide();
+                }else{
+                	$('.fhide1').show();
+                }
+                if($('#btnFhide2').val()=='車牙顯示'){
+                	$('.fhide2').hide();
+                }else{
+                	$('.fhide2').show();
+                }
+                if($('#btnFhide1').val()=='成型顯示' && $('#btnFhide2').val()=='車牙顯示'){
+                	$('#cucs_table').css('font-size','medium');
+                	$('#cucs_table2').css('font-size','medium');
+                }else{
+                	$('#cucs_table').css('font-size','11px');
+                	$('#cucs_table2').css('font-size','11px');
+                }
 			}
 
 		</script>
@@ -2754,6 +2794,10 @@
 		<div id='q_acDiv'> </div>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<input type='button' id='btnAuthority' name='btnAuthority' style='font-size:16px;' value='權限'/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type='button' id='btnFhide1' style='font-size:16px;' value='成型顯示'/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type='button' id='btnFhide2' style='font-size:16px;' value='車牙顯示'/>
 		<a id='logout' class="lbl" style="color: coral;cursor: pointer;font-weight: bolder;float: right;">登出</a>
 		<BR>
 		<a class="lbl">加工日</a>&nbsp;<input id="textDatea" type="text" class="txt" style="width: 100px;" readonly="readonly";/>&nbsp;

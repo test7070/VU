@@ -112,6 +112,12 @@
                         type : '8', //[25]//
                         name : 'xenda',
                         value : "1@日顯示(日報表)".split(',')
+                    }, {
+                        type : '6',//[26]
+                        name : 'ymon' 
+                    }, {
+                        type : '6',//[27]
+                        name : 'yyear' 
                     }]
 				});
                 q_popAssign();
@@ -140,6 +146,12 @@
 	             $('#txtXmon2').mask(r_picm);
 	             $('#txtXtime1').mask('99:99');
 	             $('#txtXtime2').mask('99:99');
+	             
+	             $('#txtYmon').mask(r_picm);
+	             $('#txtYyear').mask(r_pic);
+	             
+	             $('#txtYmon').val(q_date().substr(0,r_lenm));
+	             $('#txtYyear').val(q_date().substr(0,r_len));
            
            	    //1041201 日期預設 當天
                 //$('#txtXdate1').val(q_date());

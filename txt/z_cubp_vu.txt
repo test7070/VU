@@ -1138,3 +1138,217 @@ begin
 	order by pageno,recno,gno
 end
 ;
+---------------------------------------------------------------------------------------------------------------------------------
+z_cubp_vu09:--z_cubp_vu09
+SET QUOTED_IDENTIFIER OFF 
+declare @t_mon nvarchar(30)
+set @t_mon = case when '#non'=[26] then '' else [26] end
+
+declare @result table(
+	gno nvarchar(1),
+	idno int,
+	days nvarchar(10),
+	c01 float, --A剪
+	c02 float, --B剪
+	c03 float, --C剪
+	c04 float, --盤元成型(D)
+	c05 float, --切割成型(E)
+	c06 float, --加工成型(F)
+	c07 float, --車牙頭數(G)
+	total float, --生產合計
+	ttotal float --累計合計
+) 
+
+declare @days float=1
+declare @tdays nvarchar(10)=''
+declare @edays float=case when @t_mon='' then '31' else cast(dbo.q_lastday(@t_mon) as float) end
+
+while(@days<=@edays)
+begin
+	set @tdays=right('00'+cast(@days as nvarchar(10)),2)
+
+	insert @result (gno,idno,days,c01,c02,c03,c04,c05,c06,c07,total)
+	select '0',@days,@tdays
+	,SUM(case when isnull(a.worker,'')='1剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'')='2剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'')='3剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%盤元%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%切割%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%加工%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%車牙%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪' or isnull(a.worker,'')='3剪'
+	or isnull(a.worker,'')  like '%盤元%' or isnull(a.worker,'')  like '%切割%' or isnull(a.worker,'')  like '%加工%' or isnull(a.worker,'')  like '%車牙%' 
+	then b.weight else 0 end)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	where left(isnull(a.datea,''),len(@t_mon)+3) =@t_mon+'/'+@tdays
+	and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+	and isnull(b.uno,'')!='' and b.ucolor!='板料'
+
+	set @days=@days+1
+end
+
+update a
+set ttotal=b.ttotal
+from @result a outer apply (select sum(total)ttotal from @result where idno<=a.idno)b
+
+insert @result(gno,idno,days,c01,c02,c03,c04,c05,c06,c07,total)
+select '1',32,char(255),SUM(c01),SUM(c02),SUM(c03),SUM(c04),SUM(c05),SUM(c06),SUM(c07),SUM(total)
+from @result where gno='0'
+
+select 
+dbo.getComma(round(c01,2),-1)c01,
+dbo.getComma(round(c02,2),-1)c02,
+dbo.getComma(round(c03,2),-1)c03,
+dbo.getComma(round(c04,2),-1)c04,
+dbo.getComma(round(c05,2),-1)c05,
+dbo.getComma(round(c06,2),-1)c06,
+dbo.getComma(round(c07,2),-1)c07,
+dbo.getComma(round(total,2),-1)total,
+dbo.getComma(round(ttotal,2),-1)ttotal,
+* from @result order by idno,gno
+;
+---------------------------------------------------------------------------------------------------------------------------------
+z_cubp_vu10:--z_cubp_vu10
+SET QUOTED_IDENTIFIER OFF 
+declare @t_year nvarchar(30)
+set @t_year = case when '#non'=[27] then '' else [27] end
+
+declare @result table(
+	gno nvarchar(1),
+	idno int,
+	mon nvarchar(10),
+	c01 float, --A剪
+	c02 float, --B剪
+	c03 float, --C剪
+	c04 float, --盤元成型(D)
+	c05 float, --切割成型(E)
+	c06 float, --加工成型(F)
+	c07 float, --車牙頭數(G)
+	total float --生產合計
+) 
+
+declare @mon float=1
+declare @tmon nvarchar(10)=''
+
+while(@mon<=12)
+begin
+	set @tmon=right('00'+cast(@mon as nvarchar(10)),2)
+
+	insert @result (gno,idno,mon,c01,c02,c03,c04,c05,c06,c07,total)
+	select '0',@mon,@tmon+'月'
+	,SUM(case when isnull(a.worker,'')='1剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'')='2剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'')='3剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%盤元%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%切割%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%加工%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%車牙%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪' or isnull(a.worker,'')='3剪'
+	or isnull(a.worker,'')  like '%盤元%' or isnull(a.worker,'')  like '%切割%' or isnull(a.worker,'')  like '%加工%' or isnull(a.worker,'')  like '%車牙%' 
+	then b.weight else 0 end)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	where left(isnull(a.datea,''),len(@t_year)+3) =@t_year+'/'+@tmon
+	and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+	and isnull(b.uno,'')!='' and b.ucolor!='板料'
+
+	set @mon=@mon+1
+end
+
+insert @result(gno,idno,mon,c01,c02,c03,c04,c05,c06,c07,total)
+select '1',13,char(255),SUM(c01),SUM(c02),SUM(c03),SUM(c04),SUM(c05),SUM(c06),SUM(c07),SUM(total)
+from @result where gno='0'
+
+insert @result(gno,idno,mon,c01,c02,c03,c04,c05,c06,c07,total)
+select '2',14,char(255),avg(c01),avg(c02),avg(c03),avg(c04),avg(c05),avg(c06),avg(c07),avg(total)
+from @result where gno='0'
+
+select 
+dbo.getComma(round(c01,2),-1)c01,
+dbo.getComma(round(c02,2),-1)c02,
+dbo.getComma(round(c03,2),-1)c03,
+dbo.getComma(round(c04,2),-1)c04,
+dbo.getComma(round(c05,2),-1)c05,
+dbo.getComma(round(c06,2),-1)c06,
+dbo.getComma(round(c07,2),-1)c07,
+dbo.getComma(round(total,2),-1)total,
+* from @result order by idno,gno
+;
+---------------------------------------------------------------------------------------------------------------------------------
+z_cubp_vu11:--z_cubp_vu11
+SET QUOTED_IDENTIFIER OFF 
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bmechno nvarchar(30)
+declare @t_emechno nvarchar(30)
+
+set @t_bdate = case when '#non'=[6] then '' else [6] end 
+set @t_edate = case when '#non'=[7] then char(255) else [7] end 
+set @t_bmechno = case when '#non'=[8] then '' else [8] end 
+set @t_emechno = case when '#non'=[9] then char(255) else [9] end
+------------------------------------------------------------------------------------------------
+
+declare @result table(
+	recno int,
+	gno nvarchar(2),
+	datea nvarchar(20),
+	mechno nvarchar(50),
+	mech nvarchar(50),
+	product nvarchar(100),
+	ucolor nvarchar(100),
+	spec nvarchar(100),
+	size nvarchar(100),
+	lengthb float,
+	mount float,
+	hmount float,
+	weight float,
+	class nvarchar(100),
+	btime nvarchar(100),
+	etime nvarchar(100),
+	memo nvarchar(MAX),
+	uno nvarchar(100),
+	custno nvarchar(100),
+	comp nvarchar(MAX),
+	addr nvarchar(MAX),
+	date2 nvarchar(100),
+	ordeno nvarchar(100),
+	no2 nvarchar(100),
+	datec nvarchar(100),
+	qhrefa nvarchar(MAX)
+)
+
+insert @result(recno,gno,datea,mechno,mech,product,ucolor,spec,size,lengthb,mount,hmount,weight,class,btime,etime,memo
+,uno,custno,comp,addr,date2,ordeno,no2,datec,qhrefa)
+select 0,'0' gno,a.kind,a.mechno,a.mech,b.product,b.ucolor,b.spec,b.size,b.lengthb
+		,b.mount,b.hmount,b.weight,b.class,c.btime,b.etime,b.memo
+		,b.uno,b.custno,b.comp,d.mech
+		,b.date2,b.ordeno,b.no2,b.datea
+		,"cub_vu?noa=\'"+a.noa+"\' -- noa=$uno?"+a.accy 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+left join view_cucs c on b.productno2=c.noa and b.product2=c.noq
+left join view_cuc d on c.noa=d.noa
+where a.mechno between @t_bmechno and @t_emechno
+      and  a.datea between @t_bdate and @t_edate
+	  and isnull(b.uno,'')!='' and (b.mount>=0 or b.weight>=0)
+
+declare @tmp table(
+	recno int identity(1,1),
+	uno nvarchar(100)
+)
+
+insert @tmp(uno)
+select uno from @result group by uno order by uno
+
+update a
+set recno=b.recno,gno=case when b.recno%2=1 then '1' else '3' end
+from @result a outer apply (select top 1 * from @tmp where uno=a.uno)b
+
+insert @result(gno,recno,uno,mount,hmount,weight)
+select case when gno='1' then '2' else '4' end,recno,uno,sum(mount),sum(hmount),sum(weight)
+from @result group by gno,recno,uno
+
+select 
+dbo.getComma(mount,-1)mount,
+dbo.getComma(hmount,-1)hmount,
+dbo.getComma(weight,-1)weight,
+* from @result order by recno,gno,spec,size,lengthb
+;

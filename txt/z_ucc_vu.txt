@@ -734,6 +734,7 @@ declare @t_bcustno nvarchar(50)
 declare @t_ecustno nvarchar(50)
 declare @t_xordeno nvarchar(50)
 declare @t_sheet nvarchar(30)
+declare @t_xshow nvarchar(30)
 
 set @t_pno = case when '#non'=[5] then '' else [5] end
 set @t_ucolor = case when '#non'=[6] then '' else [6] end
@@ -749,6 +750,7 @@ set @t_ecustno=case when '#non' = [19] then char(255)  else [19] end
 set @t_xordeno=case when '#non' = [17] then '' else [17] end
 set @t_ordeshow = case when '#non'=[20] then '1' else [20] end
 set @t_sheet = case when '#non'=[21] then 'N' else [21] end 
+set @t_xshow = case when '#non'=[26] then '0' else [26] end
 ---------------------------------------------------------------------------------
 SET QUOTED_IDENTIFIER OFF
 declare @cmd nvarchar(max)
@@ -853,13 +855,26 @@ begin
 	from #tmp a where gno='0'
 end
 
-select dbo.getComma(lengthb,-1)glengthb
-,dbo.getComma(mount,[2])mount
-,dbo.getComma(hmount,0)hmount
-,dbo.getComma(weight,[3])weight
-,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
-,* 
-from #tmp order by gno,ucolor,cast(dbo.get_num(size) as int),spec,lengthb,class,uno
+if(@t_xshow='1')
+begin
+	select dbo.getComma(lengthb,-1)glengthb
+	,dbo.getComma(mount,[2])mount
+	,dbo.getComma(hmount,0)hmount
+	,dbo.getComma(weight,[3])weight
+	,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
+	,* 
+	from #tmp where gno!='0' order by gno,ucolor,cast(dbo.get_num(size) as int),spec,lengthb,class,uno
+end
+else
+begin
+	select dbo.getComma(lengthb,-1)glengthb
+	,dbo.getComma(mount,[2])mount
+	,dbo.getComma(hmount,0)hmount
+	,dbo.getComma(weight,[3])weight
+	,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
+	,* 
+	from #tmp where gno!='1' order by gno,ucolor,cast(dbo.get_num(size) as int),spec,lengthb,class,uno
+end
 
 IF OBJECT_ID('tempdb..#tmp')is not null
 BEGIN

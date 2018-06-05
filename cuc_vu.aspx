@@ -873,7 +873,7 @@
 						string+='<td id="cucs_etime" title="顏色2" align="center" style="width:28px; color:black;">顏色<BR>2</td>';
 						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:83px; color:black;">備註(標籤)</td>';
 						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;" class="fhide1">彎</td>';
-						string+='<td id="cucs_parag" title="車" align="center" style="width:28px; color:black;" class="fhide2">車</td>';
+						string+='<td id="cucs_2mount" title="車" align="center" style="width:28px; color:black;" class="fhide2">車</td>';
 						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;" class="fhide1">圖形</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:73px; color:black;display:none;">客戶編號</td>';
 						string+='<td id="cucs_cust" title="客戶/工地" align="center" style="width:73px; color:black;">客戶/工地</td>';
@@ -919,7 +919,7 @@
 						string+='<td id="cucs_etime" title="顏色2" align="center" style="width:28px; color:black;">顏色<BR>2</td>';
 						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:83px; color:black;">備註(標籤)</td>';
 						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;" class="fhide1">彎</td>';
-						string+='<td id="cucs_parag" title="車" align="center" style="width:28px; color:black;" class="fhide2">車</td>';
+						string+='<td id="cucs_2mount" title="車" align="center" style="width:28px; color:black;" class="fhide2">車</td>';
 						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;" class="fhide1">圖形</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:73px; color:black;display:none;">客戶編號</td>';
 						string+='<td id="cucs_cust" title="客戶/工地" align="center" style="width:73px; color:black;">客戶/工地</td>';
@@ -1207,7 +1207,7 @@
 										$('#lblCucs_etime'+j).text(as[i].etime);
 										$('#cucs_memo'+j).text(as[i].memo);
 										$('#cucs_radius'+j).text(dec(as[i].radius)>0?'V':'');
-										$('#cucs_parag'+j).text(as[i].parag);
+										$('#cucs_2mount'+j).text(dec(as[i].mount2)>0?dec(as[i].mount2):'');
 										$('#Imgcucs_img'+j).attr('src',as[i].imgbarcode);
 										$('#cucs_work'+j).text(as[i].size2);
 										$('#cucs_custno'+j).text(as[i].acustno);
@@ -1220,12 +1220,12 @@
 											$('#cucs_dime'+j).css('display','unset');
 										}
 										$('#cucs_adime'+j).text((dec(as[i].dime)>0 && dec(as[i].radius)>0 ?'V':''));
-										if(dec(as[i].width)>0 || as[i].parag==''){
+										if(dec(as[i].width)>0 || dec(as[i].mount2)==0){
 											$('#cucs_width'+j).css('display','none');
 										}else{
 											$('#cucs_width'+j).css('display','unset');
 										}
-										$('#cucs_awidth'+j).text((dec(as[i].width)>0 && as[i].parag!='' ?'V':''));
+										$('#cucs_awidth'+j).text((dec(as[i].width)>0 && dec(as[i].mount2)>0 ?'V':''));
 										
 										//移除已存在的資料
 										as.splice(i, 1);
@@ -1271,7 +1271,7 @@
 									$('#combXetime_'+j).remove();
 									$('#cucs_memo'+j).text('');
 									$('#cucs_radius'+j).text('');
-									$('#cucs_parag'+j).text('');
+									$('#cucs_2mount'+j).text('');
 									$('#Imgcucs_img'+j).attr('src','');
 									$('#cucs_work'+j).text('');
 									$('#cucs_custno'+j).text('');
@@ -1320,7 +1320,7 @@
 								string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_etime'+(i+bbsrow)+'"></a></td>';
 								string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1"></td>';
-								string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide12></td>';
+								string+='<td id="cucs_2mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide12></td>';
 								string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1"><img id="Imgcucs_img'+(i+bbsrow)+'" style="width:100px;"></td>';
 								string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
 								string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
@@ -1362,7 +1362,7 @@
 							string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_etime'+(i+bbsrow)+'">'+as[i].etime+'</a><select id="combXetime_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
 							string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].memo+'</td>';
 							string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1">'+(dec(as[i].radius)>0?'V':'')+'</td>';
-							string+='<td id="cucs_parag'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide2">'+as[i].parag+'</td>';
+							string+='<td id="cucs_2mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide2">'+(dec(as[i].mount2)>0?dec(as[i].mount2):'')+'</td>';
 							string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1"><img id="Imgcucs_img'+(i+bbsrow)+'" src="'+as[i].imgbarcode+'" style="width:100px;"></td>';
 							string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acustno+'</td>';
 							string+='<td id="cucs_cust'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a style="font-size: larger;">'+as[i].acust.substr(0,4)+'</a><BR><a>'+as[i].amech+'</a></td>';
@@ -1371,7 +1371,7 @@
 							string+='<td id="cucs_no2'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].no2+'</td>';
 							string+='<td style="text-align: center;"><input id="cucs_mins'+(i+bbsrow)+'" class="cucs_mins" type="checkbox"/></td>';
 							string+='<td id="cucs_tdime'+(i+bbsrow)+'" style="text-align: center;" class="fhide1"><a id="cucs_adime'+(i+bbsrow)+'">'+(dec(as[i].dime)>0 && dec(as[i].radius)>0 ?'V':'')+'</a><input id="cucs_dime'+(i+bbsrow)+'" class="cucs_dime" type="checkbox" style="display:'+(dec(as[i].dime)>0 || dec(as[i].radius)==0 ?'none':'unset')+';"/></td>';
-							string+='<td id="cucs_twidth'+(i+bbsrow)+'" style="text-align: center;" class="fhide2"><a id="cucs_awidth'+(i+bbsrow)+'">'+(dec(as[i].width)>0 && as[i].parag!='' ?'V':'')+'</a><input id="cucs_width'+(i+bbsrow)+'" class="cucs_width" type="checkbox" style="display:'+(dec(as[i].width)>0 || as[i].parag==''?'none':'unset')+';"/></td>';
+							string+='<td id="cucs_twidth'+(i+bbsrow)+'" style="text-align: center;" class="fhide2"><a id="cucs_awidth'+(i+bbsrow)+'">'+(dec(as[i].width)>0 && dec(as[i].mount2)>0 ?'V':'')+'</a><input id="cucs_width'+(i+bbsrow)+'" class="cucs_width" type="checkbox" style="display:'+(dec(as[i].width)>0 || dec(as[i].mount2)==0?'none':'unset')+';"/></td>';
 							string+='</tr>';
 							
 							table_noa=as[i].noa;

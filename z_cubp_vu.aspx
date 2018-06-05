@@ -118,6 +118,9 @@
                     }, {
                         type : '6',//[27]
                         name : 'yyear' 
+                    }, {
+                        type : '6',//[28]
+                        name : 'xordeno' 
                     }]
 				});
                 q_popAssign();

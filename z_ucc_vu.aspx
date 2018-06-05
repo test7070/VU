@@ -116,7 +116,11 @@
                     }, {
                         type : '1',
                         name : 'xdate' //[24][25]
-                    }]
+                    },{//[26]
+						type : '5',
+						name : 'xshow',
+						value :('0@明細,1@合計').split(',')
+					}]
                 });
                 q_popAssign();
                 q_getFormat();

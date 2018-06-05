@@ -1190,21 +1190,23 @@ end
 update a
 set ttotal=b.ttotal
 from @result a outer apply (select sum(total)ttotal from @result where idno<=a.idno)b
+where isnull(c01,0)>0 or isnull(c02,0)>0 or isnull(c03,0)>0
+or isnull(c04,0)>0 or isnull(c05,0)>0 or isnull(c06,0)>0 or isnull(c07,0)>0
 
 insert @result(gno,idno,days,c01,c02,c03,c04,c05,c06,c07,total)
 select '1',32,char(255),SUM(c01),SUM(c02),SUM(c03),SUM(c04),SUM(c05),SUM(c06),SUM(c07),SUM(total)
 from @result where gno='0'
 
 select 
-dbo.getComma(round(c01,2),-1)c01,
-dbo.getComma(round(c02,2),-1)c02,
-dbo.getComma(round(c03,2),-1)c03,
-dbo.getComma(round(c04,2),-1)c04,
-dbo.getComma(round(c05,2),-1)c05,
-dbo.getComma(round(c06,2),-1)c06,
-dbo.getComma(round(c07,2),-1)c07,
-dbo.getComma(round(total,2),-1)total,
-dbo.getComma(round(ttotal,2),-1)ttotal,
+dbo.getComma(round(c01,0),-1)c01,
+dbo.getComma(round(c02,0),-1)c02,
+dbo.getComma(round(c03,0),-1)c03,
+dbo.getComma(round(c04,0),-1)c04,
+dbo.getComma(round(c05,0),-1)c05,
+dbo.getComma(round(c06,0),-1)c06,
+dbo.getComma(round(c07,0),-1)c07,
+dbo.getComma(round(total,0),-1)total,
+dbo.getComma(round(ttotal,0),-1)ttotal,
 * from @result order by idno,gno
 ;
 ---------------------------------------------------------------------------------------------------------------------------------
@@ -1263,14 +1265,14 @@ select '2',14,char(255),avg(c01),avg(c02),avg(c03),avg(c04),avg(c05),avg(c06),av
 from @result where gno='0'
 
 select 
-dbo.getComma(round(c01,2),-1)c01,
-dbo.getComma(round(c02,2),-1)c02,
-dbo.getComma(round(c03,2),-1)c03,
-dbo.getComma(round(c04,2),-1)c04,
-dbo.getComma(round(c05,2),-1)c05,
-dbo.getComma(round(c06,2),-1)c06,
-dbo.getComma(round(c07,2),-1)c07,
-dbo.getComma(round(total,2),-1)total,
+dbo.getComma(round(c01,0),-1)c01,
+dbo.getComma(round(c02,0),-1)c02,
+dbo.getComma(round(c03,0),-1)c03,
+dbo.getComma(round(c04,0),-1)c04,
+dbo.getComma(round(c05,0),-1)c05,
+dbo.getComma(round(c06,0),-1)c06,
+dbo.getComma(round(c07,0),-1)c07,
+dbo.getComma(round(total,0),-1)total,
 * from @result order by idno,gno
 ;
 ---------------------------------------------------------------------------------------------------------------------------------
@@ -1280,11 +1282,13 @@ declare @t_bdate nvarchar(30)
 declare @t_edate nvarchar(30)
 declare @t_bmechno nvarchar(30)
 declare @t_emechno nvarchar(30)
+declare @t_ordeno nvarchar(30)
 
 set @t_bdate = case when '#non'=[6] then '' else [6] end 
 set @t_edate = case when '#non'=[7] then char(255) else [7] end 
 set @t_bmechno = case when '#non'=[8] then '' else [8] end 
 set @t_emechno = case when '#non'=[9] then char(255) else [9] end
+set @t_ordeno = case when '#non'=[28] then '' else [28] end
 ------------------------------------------------------------------------------------------------
 
 declare @result table(
@@ -1329,6 +1333,7 @@ left join view_cuc d on c.noa=d.noa
 where a.mechno between @t_bmechno and @t_emechno
       and  a.datea between @t_bdate and @t_edate
 	  and isnull(b.uno,'')!='' and (b.mount>=0 or b.weight>=0)
+	  and (isnull(b.ordeno,'')=@t_ordeno or len(@t_ordeno)=0)
 
 declare @tmp table(
 	recno int identity(1,1),
@@ -1342,13 +1347,14 @@ update a
 set recno=b.recno,gno=case when b.recno%2=1 then '1' else '3' end
 from @result a outer apply (select top 1 * from @tmp where uno=a.uno)b
 
+--單一行不用顯示合計
 insert @result(gno,recno,uno,mount,hmount,weight)
 select case when gno='1' then '2' else '4' end,recno,uno,sum(mount),sum(hmount),sum(weight)
-from @result group by gno,recno,uno
+from @result group by gno,recno,uno having count(*)>1
 
 select 
 dbo.getComma(mount,-1)mount,
 dbo.getComma(hmount,-1)hmount,
 dbo.getComma(weight,-1)weight,
-* from @result order by recno,gno,spec,size,lengthb
+* from @result order by recno,gno,no2,spec,size,lengthb
 ;

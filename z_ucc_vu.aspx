@@ -119,7 +119,7 @@
                     },{//[26]
 						type : '5',
 						name : 'xshow',
-						value :('0@明細,1@合計').split(',')
+						value :('0@明細,1@合計,2@合計-廠牌').split(',')
 					}]
                 });
                 q_popAssign();

@@ -1006,11 +1006,11 @@
             		if($('#checkRadius_'+j).prop('checked')){
             			t_weight2=q_add(t_weight2,dec($('#txtWeight_'+j).val()));
             		}
-            		if($.trim($('#cmbMount2_'+j).val())!=''){
+            		if(dec($('#cmbMount2_'+j).val())>0){
             			t_weight3=q_add(t_weight3,dec($('#txtWeight_'+j).val()));
             			t_weight4=q_add(t_weight4,q_mul(dec($('#cmbMount2_'+j).val()),dec($('#txtMount1_'+j).val())));
             		}
-            		if(!$('#checkRadius_'+j).prop('checked') && $.trim($('#cmbMount2_'+j).val())==''){
+            		if(!$('#checkRadius_'+j).prop('checked') && dec($('#cmbMount2_'+j).val())==0){
             			t_weight1=q_add(t_weight1,dec($('#txtWeight_'+j).val()));
             		}
             	}

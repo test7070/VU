@@ -39,18 +39,7 @@ create table #z_cucvu(
 	etime nvarchar(10),
 	picno nvarchar(50),
 	mechno nvarchar(50),
-	mech nvarchar(50),
-	
-	radius float,
-	mount2 float,
-	
-	paraa nvarchar(50),
-	parab nvarchar(50),
-	parac nvarchar(50),
-	parad nvarchar(50),
-	parae nvarchar(50),
-	paraf nvarchar(50),
-	parag nvarchar(50),
+	mech nvarchar(50)
 )
 declare @a nvarchar(max)
 declare @b nvarchar(max)
@@ -62,19 +51,12 @@ declare @g nvarchar(max)
 declare @h nvarchar(max)
 declare @i nvarchar(max)
 declare @j nvarchar(max)
-declare @k nvarchar(max) --顏色1
-declare @l nvarchar(max) --顏色2
-declare @m nvarchar(max) --加工型式
-declare @n nvarchar(max) --SF 品名 --VU 類別
-declare @o nvarchar(max) --SF 類別 --VU 彎
-declare @p nvarchar(max) --SF 機台 --VU 車
-declare @q nvarchar(max) --參數A
-declare @r nvarchar(max) --參數B
-declare @s nvarchar(max) --參數C
-declare @t nvarchar(max) --參數D
-declare @u nvarchar(max) --參數E
-declare @v nvarchar(max) --參數F
-declare @w nvarchar(max) --參數G
+declare @k nvarchar(max) --SF 顏色1
+declare @l nvarchar(max) --SF 顏色2
+declare @m nvarchar(max) --SF 加工型式
+declare @n nvarchar(max) --SF 品名
+declare @o nvarchar(max) --SF 類別
+declare @p nvarchar(max) --SF 機台
 
 declare	@isexist int=0
 declare	@accy nvarchar(10)
@@ -98,23 +80,12 @@ declare	@mount1 float
 declare	@mount float
 declare	@weight float
 declare	@bmemo nvarchar(200)
-declare	@btime nvarchar(10) --顏色1
-declare	@etime nvarchar(10) --顏色2
-declare	@picno nvarchar(10) --加工型式
+declare	@btime nvarchar(10) --SF 顏色1
+declare	@etime nvarchar(10) --SF 顏色2
+declare	@picno nvarchar(10) --SF 加工型式
 declare	@mechno nvarchar(50) --SF 機台
 declare @no int = 0
-declare @place nvarchar(max) --表頭工地
-
-declare	@radius float --VU 彎
-declare	@mount2 float --VU 車
-
-declare	@paraa nvarchar(200) --參數A
-declare	@parab nvarchar(200) --參數B
-declare	@parac nvarchar(200) --參數C
-declare	@parad nvarchar(200) --參數D
-declare	@parae nvarchar(200) --參數E
-declare	@paraf nvarchar(200) --參數F
-declare	@parag nvarchar(200) --參數G
+declare @place nvarchar(max) --SF 表頭工地
 
 set @noa = isnull((select c from ztmpxls where CAST(noa as int) = 2),'')
 set @cust = isnull((select c from ztmpxls where CAST(noa as int) = 3),'')
@@ -124,7 +95,6 @@ set @bdate = isnull((select h from ztmpxls where CAST(noa as int) = 5),'')
 set @accy = CAST(LEFT((select c from ztmpxls where CAST(noa as int) = 5),4)-1911 as nvarchar(5))
 set @custno=isnull((select top 1 noa from cust where comp like '%'+@cust+'%'),'')
 set @place = (select l from ztmpxls where CAST(noa as int) = 4)
-set @product = (select l from ztmpxls where CAST(noa as int) = 5) --VU
 
 if(LEN(@custno)='')
 	set @custno=isnull((select custno from view_orde where noa=@noa),'')
@@ -148,11 +118,10 @@ else if len(@bdate)>0
 if(LEN(@noa)>0)
 begin
 	declare cursor_table cursor for
-	select a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w 
-	from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
+	select a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p from ztmpxls where CAST(noa as int) > 6 and a != '' order by CAST(noa as int)
 	open cursor_table
 	fetch next from cursor_table
-	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w
+	into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p
 	while(@@FETCH_STATUS <> -1)
 	begin
 			
@@ -167,11 +136,9 @@ begin
 		end
 		else
 		begin
-			--set @product = (select product from view_ordes where noa = @ordeno and no2 = @no2)
-			--set @ucolor = (select ucolor from view_ordes where noa = @ordeno and no2 = @no2)
-			set @ucolor = @n
+			set @product = (select product from view_ordes where noa = @ordeno and no2 = @no2)
+			set @ucolor = (select ucolor from view_ordes where noa = @ordeno and no2 = @no2)
 		end
-		
 		set @class = @h
 		set @size = case when len(@c)>0 then '#'+@c else '' end
 		set @spec = @b
@@ -202,24 +169,7 @@ begin
 		set @btime=left(@k,10)
 		set @etime=left(@l,10)
 		set @picno=@m
-		
-		if((select count(*) from acomp where acomp like '%三泰%')>0)
-		begin
-			set @mechno=@p
-		end
-		else
-		begin
-			set @radius=CAST(replace(@o,',','') as float)
-			set @mount2=CAST(replace(@p,',','') as float)
-		end
-		
-		set @paraa=@q
-		set @parab=@r
-		set @parac=@s
-		set @parad=@t
-		set @parae=@u
-		set @paraf=@v
-		set @parag=@w
+		set @mechno=@p
 		
 		--set @isexist = case when (LEN(ISNULL((select noa from view_cucs where noa = @noa and ordeno=@ordeno and no2=@no2 ),''))=0) then 0 else 1 end
 		--if(@isexist=1)
@@ -228,10 +178,9 @@ begin
 		insert into #z_cucvu
 		select @isexist,@accy,@noa,@memo,@datea,@bdate,@place,@noq,@ordeno,@no2,@custno,@cust,@product,@ucolor,@class,@size,@size2,@spec,@lengthb,@mount1,@mount,@weight,@bmemo,@btime,@etime
 		,@picno,@mechno,isnull((select top 1 mech from mech where noa=@mechno),'')
-		,@radius,@mount2,@paraa,@parab,@parac,@parad,@parae,@paraf,@parag
-		
+	
 		fetch next from cursor_table
-		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w
+		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p
 	end
 	close cursor_table
 	deallocate cursor_table
@@ -267,17 +216,14 @@ begin
 		else
 		begin
 			--將資料存入資料庫 
-			set @cmd = 'insert into cuc'+@accy+'(noa,custno,cust,memo,datea,bdate,mech,typea)
-						select MAX(noa),MAX(custno),MAX(cust),MAX(memo),MAX(datea),MAX(bdate),MAX(place),MAX(product)
+			set @cmd = 'insert into cuc'+@accy+'(noa,custno,cust,memo,datea,bdate)
+						select MAX(noa),MAX(custno),MAX(cust),MAX(memo),MAX(datea),MAX(bdate)
 						from #z_cucvu'
 			execute sp_executesql @cmd
 		
-			set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2
-						,btime,etime,picno,picname,imgorg,imgdata,imgbarcode,para,paraa,parab,parac,parad,parae,paraf,parag,radius,mount2)
-						select a.noa,a.noq,a.ordeno,right("000"+a.no2,3)no2,a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2
-						,a.btime,a.etime,a.picno,b.namea,b.org,b.imgdata,b.barcode,b.para
-						,a.paraa,a.parab,a.parac,a.parad,a.parae,a.paraf,a.parag,a.radius,a.mount2
-				from #z_cucvu a left join img b on a.picno=b.noa'
+			set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2)
+				select noa,noq,ordeno,right("000"+no2,3)no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,bmemo,size2
+				from #z_cucvu'
 			execute sp_executesql @cmd
 		end
 	end
@@ -309,22 +255,11 @@ begin
 		end
 		else
 		begin
-			--更新表頭
-			EXEC("
-				update a
-				set mech='"+@place+"',memo='"+@memo+"',bdate='"+@bdate+"',typea='"+@product+"'
-				from cuc"+@accy+" a
-				where a.noa='"+@noa+"'
-			")
-		
 			EXEC("
 			update a
 			set product=b.product,ucolor=b.ucolor,spec=b.spec,size=b.size,lengthb=b.lengthb,class=b.class
 			,mount1=b.mount1,mount=b.mount,weight=b.weight,memo=b.bmemo,size2=b.size2
-			,btime=b.btime,etime=b.etime,picno=b.picno,picname=c.namea,imgorg=c.org,imgdata=c.imgdata,imgbarcode=c.barcode,para=c.para
-			,paraa=b.paraa,parab=b.parab,parac=b.parac,parad=b.parad,parae=b.parae,paraf=b.paraf,parag=b.parag,radius=b.radius,mount2=b.mount2
 			from cucs"+@accy+" a left join #z_cucvu b on a.ordeno=b.ordeno and a.no2=b.no2
-			left join img c on b.picno=c.noa 
 			where a.noa='"+@noa+"' and isnull(b.noa,'')!=''")
 		end
 			
@@ -339,20 +274,17 @@ begin
 				select a.noa,right('000'+cast(ROW_NUMBER() over (order by a.noq,a.ordeno,a.no2)+cast(isnull((select MAX(noq) from view_cucs where noa='"+@noa+"'),0) as int) as nvarchar(50)),3) 
 				,a.ordeno,right('000'+a.no2,3),a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2,a.btime,a.etime
 				,a.picno,b.namea,b.org,b.imgdata,b.barcode,b.para,a.mechno,a.mech,'',''
-				from #z_cucvu a left join img b on a.picno=b.noa
+				from #z_cucvu a  left join img b on a.picno=b.noa
 				where not exists(select * from view_cucs where noa='"+@noa+"' and ordeno=a.ordeno and no2=a.no2) 
 			") 
 		end
 		else
 		begin
 			EXEC(" 
-				insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2
-				,btime,etime,picno,picname,imgorg,imgdata,imgbarcode,para,paraa,parab,parac,parad,parae,paraf,parag,radius,mount2) 
-				select a.noa,right('000'+cast(ROW_NUMBER() over (order by a.noq,a.ordeno,a.no2)+cast(isnull((select MAX(noq) from view_cucs where noa='"+@noa+"'),0) as int) as nvarchar(50)),3) 
-				,a.ordeno,right('000'+a.no2,3),a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2
-				,a.btime,a.etime,a.picno,b.namea,b.org,b.imgdata,b.barcode,b.para,a.paraa,a.parab,a.parac,a.parad,a.parae,a.paraf,a.parag,a.radius,a.mount2
-				from #z_cucvu a left join img b on a.picno=b.noa
-				where not exists(select * from view_cucs where noa='"+@noa+"' and ordeno=a.ordeno and no2=a.no2) 
+				insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2) 
+				select noa,right('000'+cast(ROW_NUMBER() over (order by noq,ordeno,no2)+cast(isnull((select MAX(noq) from view_cucs where noa='"+@noa+"'),0) as int) as nvarchar(50)),3) 
+				,ordeno,right('000'+no2,3),product,ucolor,class,size,spec,lengthb,mount1,mount,weight,bmemo,size2
+				from #z_cucvu a where not exists(select * from view_cucs where noa='"+@noa+"' and ordeno=a.ordeno and no2=a.no2) 
 			") 
 		end
 	end

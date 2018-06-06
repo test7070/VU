@@ -846,16 +846,25 @@ set uno='<a href="JavaScript:q_box(''cub_vu.aspx'','' '+CHAR(59)+'noa='+noa+''+C
 if((select count(*) from #tmp)>0)
 begin
 	--107/05/31 增加小計 107/04/19修改單
-	insert #tmp (gno,datea,ucolor,size,spec,lengthb,class,uno,mount,hmount,weight)
-	select '1',@t_edate,ucolor,size,spec,lengthb,class,CHAR(255),sum(a.mount),sum(a.hmount),sum(a.weight) 
-	from #tmp a where gno='0' group by ucolor,size,spec,lengthb,class
+	if(@t_xshow='1')
+	begin
+		insert #tmp (gno,datea,ucolor,size,spec,lengthb,class,uno,mount,hmount,weight)
+		select '1',@t_edate,ucolor,size,spec,lengthb,'',CHAR(255),sum(a.mount),sum(a.hmount),sum(a.weight) 
+		from #tmp a where gno='0' group by ucolor,size,spec,lengthb
+	end
+	if(@t_xshow='2')
+	begin
+		insert #tmp (gno,datea,ucolor,size,spec,lengthb,class,uno,mount,hmount,weight)
+		select '1',@t_edate,ucolor,size,spec,lengthb,class,CHAR(255),sum(a.mount),sum(a.hmount),sum(a.weight) 
+		from #tmp a where gno='0' group by ucolor,size,spec,lengthb,class
+	end
 
 	insert #tmp (gno,datea,uno,mount,hmount,weight)
 	select '2',@t_edate,CHAR(255),sum(a.mount),sum(a.hmount),sum(a.weight) 
 	from #tmp a where gno='0'
 end
 
-if(@t_xshow='1')
+if(@t_xshow!='0')
 begin
 	select dbo.getComma(lengthb,-1)glengthb
 	,dbo.getComma(mount,[2])mount

@@ -467,8 +467,14 @@
                     			t_IdSeq = -1;
 								q_bodyId($(this).attr('id'));
 								b_seq = t_IdSeq;
+								var t_id=$(this).attr('id').split('_')[0];
 								
                     			if(e.which=='40'){
+                    				if(t_id=='txtLengthb' || t_id=='txtMount1' || t_id=='txtMount'){
+                    					bbsweight(b_seq);
+                        				weighttotal();
+                    				}
+                    				
                     				if(q_bbsCount==dec(b_seq)+1){
                     					$('#btnPlus').click();
                     				}

@@ -1323,7 +1323,7 @@ declare @result table(
 insert @result(recno,gno,datea,mechno,mech,product,ucolor,spec,size,lengthb,mount,hmount,weight,class,btime,etime,memo
 ,uno,custno,comp,addr,date2,ordeno,no2,datec,qhrefa)
 select 0,'0' gno,a.kind,a.mechno,a.mech,b.product,b.ucolor,b.spec,b.size,b.lengthb
-		,b.mount,b.hmount,b.weight,b.class,c.btime,b.etime,b.memo
+		,b.mount,b.hmount,b.weight,b.class,c.btime,b.etime,c.memo
 		,b.uno,b.custno,b.comp,d.mech
 		,b.date2,b.ordeno,b.no2,b.datea
 		,"cub_vu?noa=\'"+a.noa+"\' -- noa=$uno?"+a.accy 

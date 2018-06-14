@@ -2241,3 +2241,262 @@ BEGIN
 	set @cmd = 'drop table #tmpa'
 	EXECUTE sp_executesql @cmd
 END;
+----------------------------------------------------------------------------------------------------------------------------------
+z_ucc_vu06:--z_ucc_vu06智勝-續接器
+declare @t_pno nvarchar(50)
+declare @t_size nvarchar(50)
+declare @t_spec nvarchar(50)
+declare @t_class nvarchar(50)
+declare @t_edate nvarchar(20)
+
+set @t_pno = case when '#non'=[5] then '' else [5] end
+set @t_size = case when '#non'=[27] then '' else [27] end
+set @t_spec = case when '#non'=[28] then '' else [28] end
+set @t_class = case when '#non'=[29] then '' else [29] end
+set @t_edate = case when '#non'=[13] then char(255) else [13] end
+---------------------------------------------------------------------------------
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max)
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #tmp(
+	gno nvarchar(2),
+	tablea nvarchar(50),
+	datea nvarchar(50),
+	noa nvarchar(50),
+	noq nvarchar(50),
+	product nvarchar(100),
+	ucolor nvarchar(100),
+	spec nvarchar(50),
+	size nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	storeno nvarchar(50),
+	mount decimal(20,2),
+	weight decimal(20,2),
+	uweight float
+)
+
+CREATE INDEX tmpindex on #tmp (gno,tablea,datea,storeno,noa,noq)
+
+--107/06/13 黃 像板料一樣 避免出貨多扣一次(暫定全部只抓7000)
+
+insert #tmp (gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+select '11','ucce',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
+,b.mount,b.weight
+from view_ucce a left join view_ucces b on a.noa=b.noa 
+where a.datea<=@t_edate 
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno)
+and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
+and (len(@t_spec)=0 or isnull(b.size,'') like '%'+@t_spec)
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000' 
+and isnull(b.productno,'')='' 
+and (b.product like '%續接器%' or b.product like '%鍛造%')
+and b.product not like '%費%' and b.product not like '%超長%'
+
+--刪除多次盤點的資料 只保留最後一次盤點
+delete a
+from #tmp a outer apply (select MAX(datea) datea from #tmp 
+where product=a.product and size=a.size and class =a.class and storeno=a.storeno)b
+where a.datea!=b.datea
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
+,case when a.typea='2' then -1 else 1 end*b.mount,case when a.typea='2' then -1 else 1 end*b.weight
+from view_rc2 a left join view_rc2s b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce' order by datea desc)c
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
+and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
+and (len(@t_spec)=0 or isnull(b.size,'') like '%'+@t_spec)
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000' 
+and isnull(b.productno,'')=''
+and (b.product like '%續接器%' or b.product like '%鍛造%')
+and b.product not like '%費%' and b.product not like '%超長%'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+select '13','inas',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight
+from view_ina a left join view_inas b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce' order by datea desc)c
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
+and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
+and (len(@t_spec)=0 or isnull(b.size,'') like '%'+@t_spec)
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000' 
+and isnull(b.productno,'')=''
+and (b.product like '%續接器%' or b.product like '%鍛造%')
+and b.product not like '%費%' and b.product not like '%超長%'
+
+--暫不考慮領料退回的續接器
+--insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+--select '13-2','cubs',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight
+--from view_cub a left join view_cubs b on a.noa=b.noa
+--outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and tablea='ucce' order by datea desc)c
+--where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+--and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
+--and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
+--and (len(@t_spec)=0 or isnull(b.size,'') like '%'+@t_spec)
+--and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+----and b.storeno='7000' 
+--and isnull(b.productno,'')=''
+--and (b.product like '%續接器%' or b.product like '%鍛造%')
+--and b.product not like '%費%' and b.product not like '%超長%'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+select '14','cubt',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight
+from view_cub a left join view_cubt b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce' order by datea desc)c
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
+and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
+and (len(@t_spec)=0 or isnull(b.size,'') like '%'+@t_spec)
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000' 
+and isnull(b.productno,'')=''
+and (b.product like '%續接器%' or b.product like '%鍛造%')
+and b.product not like '%費%' and b.product not like '%超長%'
+	
+insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+select '15','gets',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight
+from view_get a left join view_gets b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce' order by datea desc)c
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
+and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
+and (len(@t_spec)=0 or isnull(b.size,'') like '%'+@t_spec)
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000' 
+and isnull(b.productno,'')=''
+and (b.product like '%續接器%' or b.product like '%鍛造%')
+and b.product not like '%費%' and b.product not like '%超長%'
+
+--暫時排除直接出貨的續接器
+insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+select '16','vccs',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
+,case when a.typea='2' then -1 else 1 end*b.mount
+,case when a.typea='2' then -1 else 1 end*b.weight
+from view_vcc a left join view_vccs b on a.noa=b.noa
+outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and tablea='ucce' order by datea desc)c
+where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
+and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
+and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
+and (len(@t_spec)=0 or isnull(b.size,'') like '%'+@t_spec)
+and (len(@t_class)=0 or isnull(b.class,'')=@t_class)
+and b.storeno='7000' 
+and isnull(b.productno,'')=''
+and (b.product like '%續接器%' or b.product like '%鍛造%')
+and b.product not like '%費%' and b.product not like '%超長%'
+
+declare @tablea nvarchar(100)
+declare @storeno nvarchar(100)
+declare @x_storeno nvarchar(100)
+declare @product nvarchar(100)
+declare @x_product nvarchar(100)='~!@#$%^&*'
+declare @ucolor nvarchar(100)
+declare @x_ucolor nvarchar(100)
+declare @spec nvarchar(100)
+declare @x_spec nvarchar(100)
+declare @size nvarchar(100)
+declare @x_size nvarchar(100)
+declare @lengthb float
+declare @x_lengthb float
+declare @class nvarchar(100)
+declare @x_class nvarchar(100)
+declare @mount decimal(18, 4)
+declare @weight decimal(18, 4)
+declare @t_mount decimal(18, 4)
+declare @t_weight decimal(18, 4)
+declare @stktype float
+set @t_mount=0
+set @t_weight=0
+
+declare cursor_table cursor for
+select tablea,isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0) from #tmp --where tablea!='cubs' 
+order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(class,''),isnull(datea,''),gno,noa,noq
+open cursor_table
+fetch next from cursor_table
+into @tablea,@storeno,@product,@ucolor,@spec,@size,@lengthb,@class,@mount,@weight
+while(@@FETCH_STATUS <> -1)
+begin
+	
+	if(@x_product!='~!@#$%^&*' and (@x_product!=@product or @x_size!=@size or @x_class!=@class or @x_storeno!=@storeno))
+	begin
+		insert #tmp(gno,tablea,datea,noa,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+		select '9','datea',CHAR(255),CHAR(255),@x_product,'','',@x_size,0,@x_class,@x_storeno,@t_mount,@t_weight
+	
+		set @t_mount=0
+		set @t_weight=0
+	end
+	
+	if(@tablea='ucce')
+	begin
+		set @t_mount=@mount
+		set @t_weight=@weight
+	end
+	else if(@tablea in ('rc2s','inas','cubs'))
+	begin
+		set @t_mount=@t_mount+@mount
+		set @t_weight=@t_weight+@weight
+	end
+	else
+	begin
+		set @t_mount=@t_mount-@mount
+		set @t_weight=@t_weight-@weight
+	end
+	
+	set @x_storeno=@storeno
+	set @x_product=@product
+	set @x_ucolor=@ucolor
+	set @x_size=@size
+	set @x_spec=@spec
+	set @x_lengthb=@lengthb
+	set @x_class=@class
+	
+	fetch next from cursor_table
+	into @tablea,@storeno,@product,@ucolor,@spec,@size,@lengthb,@class,@mount,@weight
+end
+close cursor_table
+deallocate cursor_table
+
+--最後一筆
+insert #tmp(gno,tablea,datea,noa,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+select '9','datea',CHAR(255),CHAR(255),@x_product,'','',@x_size,0,@x_class,'',@t_mount,@t_weight
+
+delete #tmp where mount=0 or gno!='9'
+
+if((select count(*) from #tmp)>0)
+begin
+	--加總倉庫
+	insert #tmp(gno,tablea,datea,noa,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+	select '0','datea','','',product,char(255),char(255),size,0,class,char(255),sum(mount),SUM(weight)
+	from #tmp where gno='9' group by product,size,class
+
+	insert #tmp(gno,tablea,datea,noa,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
+	select '1','datea','','',char(255),char(255),char(255),char(255),999,char(255),char(255),sum(mount),SUM(weight)
+	from #tmp where gno='9' 
+	
+	delete #tmp where gno='9'
+end
+
+declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')
+
+select ROW_NUMBER() over (order by product,cast(dbo.get_num(size) as int),right(size,1),class,gno) rr
+,dbo.getComma(mount,-1)mount
+,dbo.getComma(weight,-1)weight
+,@today today
+,*
+from #tmp order by product,cast(dbo.get_num(size) as int),right(size,1),class,gno
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+;

@@ -58,7 +58,8 @@
                 }
                 mainForm(1);
             }
-
+			
+			var splicerdiv=false;
             function mainPost() {
             	bbsNum = [ ['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtMount1', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 10, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];//['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1],
                 q_getFormat();
@@ -69,6 +70,11 @@
 				q_cmbParse("cmbBtime", ',棕,紅,白,黃,綠,灰,藍','s');
 				q_cmbParse("cmbEtime", ',棕,紅,白,黃,綠,灰,藍','s');
 				q_cmbParse("cmbMount2", '0@,1@1,2@2','s');
+				q_cmbParse("cmbScolor", ',續接器-直牙,續接器-錐牙,續接器-T頭','s');
+				q_cmbParse("combParaf1", ',#6,#7,#8,#9,#10,#11,#12','s');
+				q_cmbParse("combParag1", ',#6,#7,#8,#9,#10,#11,#12','s');
+				q_cmbParse("combParaf2", ',公,母,T','s');
+				q_cmbParse("combParag2", ',公,母,T','s');
 				
 				if(r_len==4){                	
                 	$.datepicker.r_len=4;
@@ -127,6 +133,113 @@
 						$(this).val('參數顯示');
 					}
 					bbswidth();
+				});
+				
+				$('#lblWeight4').click(function() {
+					//清除表身資料
+					var rowslength=document.getElementById("tbbssplicer").rows.length-1;
+					for (var j = 0; j < rowslength; j++) {
+						document.getElementById("tbbssplicer").deleteRow(1);
+					}
+					var string='',t_j=0;
+					for (var j = 0; j < q_bbsCount; j++) {
+						if(dec($('#cmbMount2_'+j).val())>0){
+							string+='<tr id="trbbs'+j+'" style="background:'+(t_j%2==0?'skyblue':'aliceblue')+'">';
+							string+='<td style="text-align: center;display: none;">'+$('#txtNoq_'+j).val()+'</td>';
+							string+='<td style="text-align: center;">'+$('#txtOrdeno_'+j).val()+'/'+$('#txtNo2_'+j).val()+'</td>';
+							string+='<td style="text-align: center;">'+$('#txtSpec_'+j).val()+'</td>';
+							string+='<td style="text-align: center;">'+$('#txtSize_'+j).val()+'</td>';
+							string+='<td style="text-align: center;">'+$('#txtLengthb_'+j).val()+'</td>';
+							string+='<td style="text-align: center;">'+$('#txtMount1_'+j).val()+'</td>';
+							string+='<td style="text-align: center;">'+$('#txtWeight_'+j).val()+'</td>';
+							string+='<td style="text-align: center;">'+$('#cmbMount2_'+j).val()+'</td>';
+							string+='<td style="text-align: center;"><select id="combScolor_'+j+'" class="txt comb combScolor c1"> </select></td>';
+							string+='<td style="text-align: center;"><select id="combParafa_'+j+'" class="txt comb combParafa"> </select><select id="combParafb_'+j+'" class="txt comb combParafb"> </select>';
+							string+='<a>---</a><select id="combParaga_'+j+'" class="txt comb combParaga"> </select><select id="combParagb_'+j+'" class="txt comb combParagb"> </select></td>';
+							string+='<td style="text-align: center;">'+(dec($('#txtRadius_'+j).val())>0?'V':'')+'</td>';
+							string+='<td style="text-align: center;"><img id="timgpic'+j+'" src="'+$('#imgPic_'+j).attr('src')+'" style="width:100px;"></td>';
+							string+='<td style="text-align: center;">'+$('#txtMemo_'+j).val()+'</td>';
+							t_j++;
+						}
+					}
+					if(string.length>0 && !splicerdiv){
+						$('#tbbssplicer').append(string);
+						
+						$('.combScolor').each(function(index) {
+							var t_id=$(this).attr('id');
+							var t_n=$(this).attr('id').split('_')[1];
+							q_cmbParse(t_id, ',續接器-直牙,續接器-錐牙,續接器-T頭');
+							$('#'+t_id).val($('#cmbScolor_'+t_n).val());
+							
+							$(this).change(function() {
+								var t_ns=$(this).attr('id').split('_')[1];
+								$('#cmbScolor_'+t_ns).val($(this).val());
+							});
+						});
+						
+						$('.combParafa').each(function(index) {
+							var t_id=$(this).attr('id');
+							var t_n=$(this).attr('id').split('_')[1];
+							q_cmbParse(t_id, ',#6,#7,#8,#9,#10,#11,#12');
+							$('#'+t_id).val($('#combParaf1_'+t_n).val());
+							
+							$(this).change(function() {
+								var t_ns=$(this).attr('id').split('_')[1];
+								$('#combParaf1_'+t_ns).val($(this).val());
+								$('#combParaf1_'+t_ns).change();
+							});
+						});
+						
+						$('.combParaga').each(function(index) {
+							var t_id=$(this).attr('id');
+							var t_n=$(this).attr('id').split('_')[1];
+							q_cmbParse(t_id, ',#6,#7,#8,#9,#10,#11,#12');
+							$('#'+t_id).val($('#combParag1_'+t_n).val());
+							
+							$(this).change(function() {
+								var t_ns=$(this).attr('id').split('_')[1];
+								$('#combParag1_'+t_ns).val($(this).val());
+								$('#combParag1_'+t_ns).change();
+							});
+						});
+						
+						$('.combParafb').each(function(index) {
+							var t_id=$(this).attr('id');
+							var t_n=$(this).attr('id').split('_')[1];
+							q_cmbParse(t_id, ',公,母,T');
+							$('#'+t_id).val($('#combParaf2_'+t_n).val());
+							
+							$(this).change(function() {
+								var t_ns=$(this).attr('id').split('_')[1];
+								$('#combParaf2_'+t_ns).val($(this).val());
+								$('#combParaf2_'+t_ns).change();
+							});
+						});
+						
+						$('.combParagb').each(function(index) {
+							var t_id=$(this).attr('id');
+							var t_n=$(this).attr('id').split('_')[1];
+							q_cmbParse(t_id, ',公,母,T');
+							$('#'+t_id).val($('#combParag2_'+t_n).val());
+							
+							$(this).change(function() {
+								var t_ns=$(this).attr('id').split('_')[1];
+								$('#combParag2_'+t_ns).val($(this).val());
+								$('#combParag2_'+t_ns).change();
+							});
+						});
+						
+						$('.dbbs').hide();
+						$('#splicertotal').show();
+						$('#dbbssplicer').show();
+						comb_disabled();
+						splicerdiv=true;
+					}else{
+						$('#splicertotal').hide();
+						$('#dbbssplicer').hide();
+						$('.dbbs').show();
+						splicerdiv=false;
+					}
 				});
                 
                 $('#lblNoa').text('案號'); 
@@ -546,6 +659,7 @@
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							bbsweight(b_seq);
+							splicertotal();
 						});
 						
 						$('#txtWeight_'+j).change(function() {
@@ -608,31 +722,65 @@
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							
+							if($('#cmbMount2_'+b_seq).val()=='0'){
+								$('#cmbScolor_'+b_seq).val('');
+								$('#txtParaf_'+b_seq).val('');
+								$('#txtParag_'+b_seq).val('');
+							}else if($('#cmbMount2_'+b_seq).val()=='1'){
+								if(emp($('#cmbScolor_'+b_seq).val())){
+									$('#cmbScolor_'+b_seq).val('續接器-直牙');
+									
+									var t_size=dec(replaceAll($('#txtSize_'+b_seq).val(),'#',''));
+									if(t_size<6){
+										t_size='#6';
+									}else{
+										t_size=$('#txtSize_'+b_seq).val()
+									}
+									
+									$('#txtParaf_'+b_seq).val(t_size+'公');
+								}
+								$('#txtParag_'+b_seq).val('');
+							}else{
+								if(emp($('#cmbScolor_'+b_seq).val())){
+									$('#cmbScolor_'+b_seq).val('續接器-直牙');
+									var t_size=dec(replaceAll($('#txtSize_'+b_seq).val(),'#',''));
+									if(t_size<6){
+										t_size='#6';
+									}else{
+										t_size=$('#txtSize_'+b_seq).val()
+									}
+									
+									$('#txtParaf_'+b_seq).val(t_size+'公');
+									$('#txtParag_'+b_seq).val(t_size+'母');
+								}
+							}
+							change_parafg();
 							weighttotal();
+							splicertotal();
 						});
 						
-						$('#checkWidth_'+j).click(function() {
+						$('#checkHours_'+j).click(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2){
-								if($('#checkWidth_'+b_seq).prop('checked'))
-									$('#txtWidth_'+b_seq).val(1);
+								if($('#checkHours_'+b_seq).prop('checked'))
+									$('#txtHours_'+b_seq).val(1);
 								else
-									$('#txtWidth_'+b_seq).val(0);
+									$('#txtHours_'+b_seq).val(0);
 							}
 							weighttotal();
 						});
 						
-						$('#checkDime_'+j).click(function() {
+						$('#checkWaste_'+j).click(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2){
-								if($('#checkDime_'+b_seq).prop('checked'))
-									$('#txtDime_'+b_seq).val(1);
+								if($('#checkWaste_'+b_seq).prop('checked'))
+									$('#txtWaste_'+b_seq).val(1);
 								else
-									$('#txtDime_'+b_seq).val(0);
+									$('#txtWaste_'+b_seq).val(0);
 							}
 							weighttotal();
 						});
@@ -648,6 +796,7 @@
 									$('#txtMins_'+b_seq).val(0);
 							}
 							weighttotal();
+							splicertotal();
 						});
 						
 						$('#txtPicno_' + j).bind('contextmenu', function(e) {
@@ -732,16 +881,64 @@
                     	$('#txtParaf_'+j).change(function(e){
                     		var n = $(this).attr('id').replace('txtParaf_', '');
                     		createImg(n);
+                    		splicertotal();
                     	});
                     	$('#txtParag_'+j).change(function(e){
                     		var n = $(this).attr('id').replace('txtParag_', '');
                     		createImg(n);
+                    		splicertotal();
                     	});
+                    	
+                    	$('#combParaf1_'+j).change(function() {
+                    		t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							var t_para1=$('#combParaf1_'+b_seq).val();
+							var t_para2=$('#combParaf2_'+b_seq).val();
+                    		$('#txtParaf_'+b_seq).val(t_para1+t_para2);
+                    		createImg(b_seq);
+                    		change_parafg();
+                    		splicertotal();
+						});
+						$('#combParaf2_'+j).change(function() {
+                    		t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							var t_para1=$('#combParaf1_'+b_seq).val();
+							var t_para2=$('#combParaf2_'+b_seq).val();
+                    		$('#txtParaf_'+b_seq).val(t_para1+t_para2);
+                    		createImg(b_seq);
+                    		change_parafg();
+                    		splicertotal();
+						});
+						$('#combParag1_'+j).change(function() {
+                    		t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							var t_para1=$('#combParag1_'+b_seq).val();
+							var t_para2=$('#combParag2_'+b_seq).val();
+                    		$('#txtParag_'+b_seq).val(t_para1+t_para2);
+                    		createImg(b_seq);
+                    		change_parafg();
+                    		splicertotal();
+						});
+						$('#combParag2_'+j).change(function() {
+                    		t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							var t_para1=$('#combParag1_'+b_seq).val();
+							var t_para2=$('#combParag2_'+b_seq).val();
+                    		$('#txtParag_'+b_seq).val(t_para1+t_para2);
+                    		createImg(b_seq);
+                    		change_parafg();
+                    		splicertotal();
+						});
                     }
                 }
                 _bbsAssign();
                 bbswidth();
                 change_check();
+                change_parafg();
                 $('#lblOrdeno_s').text('訂單編號/訂序');
                 $('#lblProduct_s').text('品名');
                 $('#lblUcolor_s').text('類別');
@@ -755,9 +952,9 @@
                 $('#lblWeight_s').text('重量(KG)');
                 $('#lblMemo_s').text('備註 (標籤)');
                 $('#lblRadius_s').text('彎');
-                $('#lblMins_s').text('完工');
-                $('#lblDime_s').text('成型');
-                $('#lblWidth_s').text('車牙');
+                $('#lblMins_s').text('裁剪完工');
+                $('#lblWaste_s').text('成型完工');
+                $('#lblHours_s').text('車牙完工');
                 $('#vewNoa').text('案號');
                 $('#vewCust').text('客戶');
                 $('#vewMech').text('工地名稱');
@@ -958,7 +1155,9 @@
             		$('#txtParae_'+t_n).val($('#txtParae_'+t_pn).val());
             		$('#txtParaf_'+t_n).val($('#txtParaf_'+t_pn).val());
             		$('#txtParag_'+t_n).val($('#txtParag_'+t_pn).val());
+            		$('#cmbScolor_'+t_n).val($('#cmbScolor_'+t_pn).val());
             	}
+            	change_parafg();
             }
             
             function showimg(n){
@@ -972,6 +1171,9 @@
             }
             
             function bbsweight(n) {
+            	if(!(q_cur==1 || q_cur==2)){
+            		return;
+            	}
             	var t_siez=replaceAll($('#txtSize_'+n).val(),'#','');
             	var t_weight=0;
             	switch(t_siez){
@@ -1166,15 +1368,19 @@
                 $('#txtDatea').val(q_date()).focus();
                 refreshBbm();
                 $('#txtTypea').val('鋼筋');
+                $('#dbbssplicer').hide();
+                $('#splicertotal').hide();
+                $('.dbbs').show();
+                splicerdiv=false;
                 
                 for (var i = 0; i < q_bbsCount; i++) {
                 	$('#txtOrdeno_'+i).val('');
                 	$('#checkMins_'+i).prop('checked',false);
-                	$('#checkDime_'+i).prop('checked',false);
-                	$('#checkWidth_'+i).prop('checked',false);
+                	$('#checkWaste_'+i).prop('checked',false);
+                	$('#checkHours_'+i).prop('checked',false);
                 	$('#txtMins_'+i).val('0');
-                	$('#txtDime_'+i).val('0');
-                	$('#txtWidth_'+i).val('0');
+                	$('#txtWaste_'+i).val('0');
+                	$('#txtHours_'+i).val('0');
                 }
             }
 
@@ -1215,8 +1421,15 @@
             function refresh(recno) {
                 _refresh(recno);
                 change_check();
+                change_parafg();
                 weighttotal();
+                splicertotal();
                 refreshBbm();
+                comb_disabled();
+                $('#dbbssplicer').hide();
+                $('#splicertotal').hide();
+                $('.dbbs').show();
+                splicerdiv=false;
                 
                 if(!emp($('#txtCustno').val())){
 					q_gt('custms', "where=^^noa='"+$('#txtCustno').val()+"'^^ ", 0, 0, 0, "custms");
@@ -1226,6 +1439,7 @@
             function readonly(t_para, empty) {
                 _readonly(t_para, empty);
                 change_check();
+                change_parafg();
                 if(t_para){
                 	$('#txtDatea').datepicker('destroy');
                 	$('#txtBdate').datepicker('destroy');
@@ -1233,6 +1447,7 @@
                 	$('#txtDatea').datepicker();
                 	$('#txtBdate').datepicker();
                 }
+                comb_disabled();
             }
             
             function refreshBbm() {
@@ -1304,6 +1519,14 @@
                 _btnCancel();
             }
             
+            function comb_disabled() {
+            	if(q_cur==1 || q_cur==2){
+            		$('.comb').removeAttr('disabled');
+                }else{
+                	$('.comb').attr('disabled', 'disabled');
+                }
+            }
+            
             function change_check() {
             	if(q_cur==1 || q_cur==2){
             		$('#checkGen').removeAttr('disabled');
@@ -1320,13 +1543,13 @@
 					if(q_cur==1 || q_cur==2){
 						$('#checkMins_'+i).removeAttr('disabled');
 						$('#checkRadius_'+i).removeAttr('disabled');
-						$('#checkWidth_'+i).removeAttr('disabled');
-						$('#checkDime_'+i).removeAttr('disabled');
+						$('#checkHours_'+i).removeAttr('disabled');
+						$('#checkWaste_'+i).removeAttr('disabled');
 					}else{
 						$('#checkMins_'+i).attr('disabled', 'disabled');
 						$('#checkRadius_'+i).attr('disabled', 'disabled');
-						$('#checkWidth_'+i).attr('disabled', 'disabled');
-						$('#checkDime_'+i).attr('disabled', 'disabled');
+						$('#checkHours_'+i).attr('disabled', 'disabled');
+						$('#checkWaste_'+i).attr('disabled', 'disabled');
 					}
 					if($('#txtMins_'+i).val()==0){
 						$('#checkMins_'+i).prop('checked',false);
@@ -1338,15 +1561,40 @@
 					}else{
 						$('#checkRadius_'+i).prop('checked',true);
 					}
-					if($('#txtWidth_'+i).val()==0){
-						$('#checkWidth_'+i).prop('checked',false);
+					if($('#txtHours_'+i).val()==0){
+						$('#checkHours_'+i).prop('checked',false);
 					}else{
-						$('#checkWidth_'+i).prop('checked',true);
+						$('#checkHours_'+i).prop('checked',true);
 					}
-					if($('#txtDime_'+i).val()==0){
-						$('#checkDime_'+i).prop('checked',false);
+					if($('#txtWaste_'+i).val()==0){
+						$('#checkWaste_'+i).prop('checked',false);
 					}else{
-						$('#checkDime_'+i).prop('checked',true);
+						$('#checkWaste_'+i).prop('checked',true);
+					}
+				}
+			}
+			
+			function change_parafg() {
+				for (var i = 0; i < q_bbsCount; i++) {
+					if(!emp($('#txtParaf_'+i).val())){
+						var t_paraf=$.trim($('#txtParaf_'+i).val());
+						var tpara1=replaceAll(replaceAll(replaceAll(t_paraf,'公',''),'母',''),'T','');
+						var tpara2=t_paraf.substr(tpara1.length);
+						$('#combParaf1_'+i).val(tpara1);
+						$('#combParaf2_'+i).val(tpara2);
+					}else{
+						$('#combParaf1_'+i).val('');
+						$('#combParaf2_'+i).val('');
+					}
+					if(!emp($('#txtParag_'+i).val())){
+						var t_parag=$.trim($('#txtParag_'+i).val());
+						var tpara1=replaceAll(replaceAll(replaceAll(t_parag,'公',''),'母',''),'T','');
+						var tpara2=t_parag.substr(tpara1.length);
+						$('#combParag1_'+i).val(tpara1);
+						$('#combParag2_'+i).val(tpara2);
+					}else{
+						$('#combParag1_'+i).val('');
+						$('#combParag2_'+i).val('');
 					}
 				}
 			}
@@ -1366,13 +1614,364 @@
 			function bbswidth() {
 				var t_width=1750; //預設寬度
 				if($('#btnShowpara').val()=='參數關閉'){ //成型參數顯示
-					t_width=t_width+700;
+					t_width=t_width+850;
 					$('.para').show();
 				}else{
 					$('.para').hide();
 				}
 				$('#tbbs').css("width",t_width+"px");
 				$('.dbbs').css("width",t_width+"px");				
+			}
+			
+			function splicertotal() {
+				var t_sp1_6=0,t_sp1_6w=0,t_sp1_7=0,t_sp1_7w=0,t_sp1_8=0,t_sp1_8w=0,t_sp1_9=0,t_sp1_9w=0,t_sp1_10=0,t_sp1_10w=0,t_sp1_11=0,t_sp1_11w=0,t_sp1_12=0,t_sp1_12w=0;
+				var t_sp2_6=0,t_sp2_6w=0,t_sp2_7=0,t_sp2_7w=0,t_sp2_8=0,t_sp2_8w=0,t_sp2_9=0,t_sp2_9w=0,t_sp2_10=0,t_sp2_10w=0,t_sp2_11=0,t_sp2_11w=0,t_sp2_12=0,t_sp2_12w=0;
+				var t_sp3_6=0,t_sp3_6w=0,t_sp3_7=0,t_sp3_7w=0,t_sp3_8=0,t_sp3_8w=0,t_sp3_9=0,t_sp3_9w=0,t_sp3_10=0,t_sp3_10w=0,t_sp3_11=0,t_sp3_11w=0,t_sp3_12=0,t_sp3_12w=0;
+				var t_sp4_6=0,t_sp4_6w=0,t_sp4_7=0,t_sp4_7w=0,t_sp4_8=0,t_sp4_8w=0,t_sp4_9=0,t_sp4_9w=0,t_sp4_10=0,t_sp4_10w=0,t_sp4_11=0,t_sp4_11w=0,t_sp4_12=0,t_sp4_12w=0;
+				var t_sp5_6=0,t_sp5_6w=0,t_sp5_7=0,t_sp5_7w=0,t_sp5_8=0,t_sp5_8w=0,t_sp5_9=0,t_sp5_9w=0,t_sp5_10=0,t_sp5_10w=0,t_sp5_11=0,t_sp5_11w=0,t_sp5_12=0,t_sp5_12w=0;
+				var t_spt_6=0,t_spt_6w=0,t_spt_7=0,t_spt_7w=0,t_spt_8=0,t_spt_8w=0,t_spt_9=0,t_spt_9w=0,t_spt_10=0,t_spt_10w=0,t_spt_11=0,t_spt_11w=0,t_spt_12=0,t_spt_12w=0;
+				
+				for (var j = 0; j < q_bbsCount; j++) {
+					var t_mount=dec($('#txtMount1_'+j).val());
+            		var t_scolor=$.trim($('#cmbScolor_'+j).val());
+            		var t_mount2=dec($('#cmbMount2_'+j).val());
+            		if(t_scolor.length>0 && t_mount2>0){
+	            		var t_paraf1=$.trim(replaceAll(replaceAll(replaceAll($('#txtParaf_'+j).val(),'公',''),'母',''),'T',''));
+	            		var t_paraf2=$.trim(replaceAll($('#txtParaf_'+j).val(),t_paraf1,''));
+	            		var t_parag1=$.trim(replaceAll(replaceAll(replaceAll($('#txtParag_'+j).val(),'公',''),'母',''),'T',''));
+	            		var t_parag2=$.trim(replaceAll($('#txtParag_'+j).val(),t_parag1,''));
+	            		
+	            		switch(t_scolor) {
+		                	case '續接器-直牙':
+		                		if(t_paraf2=='公'){
+		                			if(t_paraf1=='#6'){
+		                				t_sp1_6=q_add(t_sp1_6,t_mount);
+		                				t_sp1_6w=q_add(t_sp1_6w,round(t_mount*0.084,3));
+		                			}else if(t_paraf1=='#7'){
+		                				t_sp1_7=q_add(t_sp1_7,t_mount);
+		                				t_sp1_7w=q_add(t_sp1_7w,round(t_mount*0.124,3));
+		                			}else if(t_paraf1=='#8'){
+		                				t_sp1_8=q_add(t_sp1_8,t_mount);
+		                				t_sp1_8w=q_add(t_sp1_8w,round(t_mount*0.178,3));
+		                			}else if(t_paraf1=='#9'){
+		                				t_sp1_9=q_add(t_sp1_9,t_mount);
+		                			}else if(t_paraf1=='#10'){
+		                				t_sp1_10=q_add(t_sp1_10,t_mount);
+		                				t_sp1_10w=q_add(t_sp1_10w,round(t_mount*0.361,3));
+		                			}else if(t_paraf1=='#11'){
+		                				t_sp1_11=q_add(t_sp1_11,t_mount);
+		                				t_sp1_11w=q_add(t_sp1_11w,round(t_mount*0.532,3));
+		                			}else if(t_paraf1=='#12'){
+		                				t_sp1_12=q_add(t_sp1_12,t_mount);
+		                			}
+		                		}else if(t_paraf2=='母'){
+		                			if(t_paraf1=='#6'){
+		                				t_sp2_6=q_add(t_sp2_6,t_mount);
+		                				t_sp2_6w=q_add(t_sp2_6w,round(t_mount*0.107,3));
+		                			}else if(t_paraf1=='#7'){
+		                				t_sp2_7=q_add(t_sp2_7,t_mount);
+		                				t_sp2_7w=q_add(t_sp2_7w,round(t_mount*0.136,3));
+		                			}else if(t_paraf1=='#8'){
+		                				t_sp2_8=q_add(t_sp2_8,t_mount);
+		                				t_sp2_8w=q_add(t_sp2_8w,round(t_mount*0.205,3));
+		                			}else if(t_paraf1=='#9'){
+		                				t_sp2_9=q_add(t_sp2_9,t_mount);
+		                			}else if(t_paraf1=='#10'){
+		                				t_sp2_10=q_add(t_sp2_10,t_mount);
+		                				t_sp2_10w=q_add(t_sp2_10w,round(t_mount*0.407,3));
+		                			}else if(t_paraf1=='#11'){
+		                				t_sp2_11=q_add(t_sp2_11,t_mount);
+		                				t_sp2_11w=q_add(t_sp2_11w,round(t_mount*0.489,3));
+		                			}else if(t_paraf1=='#12'){
+		                				t_sp2_12=q_add(t_sp2_12,t_mount);
+		                			}
+		                		}
+		                		//------------------------------------------
+		                		if(t_parag2=='公'){
+		                			if(t_parag1=='#6'){
+		                				t_sp1_6=q_add(t_sp1_6,t_mount);
+		                				t_sp1_6w=q_add(t_sp1_6w,round(t_mount*0.084,3));
+		                			}else if(t_parag1=='#7'){
+		                				t_sp1_7=q_add(t_sp1_7,t_mount);
+		                				t_sp1_7w=q_add(t_sp1_7w,round(t_mount*0.124,3));
+		                			}else if(t_parag1=='#8'){
+		                				t_sp1_8=q_add(t_sp1_8,t_mount);
+		                				t_sp1_8w=q_add(t_sp1_8w,round(t_mount*0.178,3));
+		                			}else if(t_parag1=='#9'){
+		                				t_sp1_9=q_add(t_sp1_9,t_mount);
+		                			}else if(t_parag1=='#10'){
+		                				t_sp1_10=q_add(t_sp1_10,t_mount);
+		                				t_sp1_10w=q_add(t_sp1_10w,round(t_mount*0.361,3));
+		                			}else if(t_parag1=='#11'){
+		                				t_sp1_11=q_add(t_sp1_11,t_mount);
+		                				t_sp1_11w=q_add(t_sp1_11w,round(t_mount*0.532,3));
+		                			}else if(t_parag1=='#12'){
+		                				t_sp1_12=q_add(t_sp1_12,t_mount);
+		                			}
+		                		}else if(t_parag2=='母'){
+		                			if(t_parag1=='#6'){
+		                				t_sp2_6=q_add(t_sp2_6,t_mount);
+		                				t_sp2_6w=q_add(t_sp2_6w,round(t_mount*0.107,3));
+		                			}else if(t_parag1=='#7'){
+		                				t_sp2_7=q_add(t_sp2_7,t_mount);
+		                				t_sp2_7w=q_add(t_sp2_7w,round(t_mount*0.136,3));
+		                			}else if(t_parag1=='#8'){
+		                				t_sp2_8=q_add(t_sp2_8,t_mount);
+		                				t_sp2_8w=q_add(t_sp2_8w,round(t_mount*0.205,3));
+		                			}else if(t_parag1=='#9'){
+		                				t_sp2_9=q_add(t_sp2_9,t_mount);
+		                			}else if(t_parag1=='#10'){
+		                				t_sp2_10=q_add(t_sp2_10,t_mount);
+		                				t_sp2_10w=q_add(t_sp2_10w,round(t_mount*0.407,3));
+		                			}else if(t_parag1=='#11'){
+		                				t_sp2_11=q_add(t_sp2_11,t_mount);
+		                				t_sp2_11w=q_add(t_sp2_11w,round(t_mount*0.489,3));
+		                			}else if(t_parag1=='#12'){
+		                				t_sp2_12=q_add(t_sp2_12,t_mount);
+		                			}
+		                		}
+		                		break;
+		                	case '續接器-錐牙':
+		                		if(t_paraf2=='公'){
+		                			if(t_paraf1=='#6'){
+		                				t_sp3_6=q_add(t_sp3_6,t_mount);
+		                				t_sp3_6w=q_add(t_sp3_6w,round(t_mount*0.084,3));
+		                			}else if(t_paraf1=='#7'){
+		                				t_sp3_7=q_add(t_sp3_7,t_mount);
+		                				t_sp3_7w=q_add(t_sp3_7w,round(t_mount*0.124,3));
+		                			}else if(t_paraf1=='#8'){
+		                				t_sp3_8=q_add(t_sp3_8,t_mount);
+		                				t_sp3_8w=q_add(t_sp3_8w,round(t_mount*0.172,3));
+		                			}else if(t_paraf1=='#9'){
+		                				t_sp3_9=q_add(t_sp3_9,t_mount);
+		                			}else if(t_paraf1=='#10'){
+		                				t_sp3_10=q_add(t_sp3_10,t_mount);
+		                				t_sp3_10w=q_add(t_sp3_10w,round(t_mount*0.323,3));
+		                			}else if(t_paraf1=='#11'){
+		                				t_sp3_11=q_add(t_sp3_11,t_mount);
+		                				t_sp3_11w=q_add(t_sp3_11w,round(t_mount*0.445,3));
+		                			}else if(t_paraf1=='#12'){
+		                				t_sp3_12=q_add(t_sp3_12,t_mount);
+		                			}
+		                		}else if(t_paraf2=='母'){
+		                			if(t_paraf1=='#6'){
+		                				t_sp4_6=q_add(t_sp4_6,t_mount);
+		                				t_sp4_6w=q_add(t_sp4_6w,round(t_mount*0.095,3));
+		                			}else if(t_paraf1=='#7'){
+		                				t_sp4_7=q_add(t_sp4_7,t_mount);
+		                				t_sp4_7w=q_add(t_sp4_7w,round(t_mount*0.131,3));
+		                			}else if(t_paraf1=='#8'){
+		                				t_sp4_8=q_add(t_sp4_8,t_mount);
+		                				t_sp4_8w=q_add(t_sp4_8w,round(t_mount*0.188,3));
+		                			}else if(t_paraf1=='#9'){
+		                				t_sp4_9=q_add(t_sp4_9,t_mount);
+		                			}else if(t_paraf1=='#10'){
+		                				t_sp4_10=q_add(t_sp4_10,t_mount);
+		                				t_sp4_10w=q_add(t_sp4_10w,round(t_mount*0.347,3));
+		                			}else if(t_paraf1=='#11'){
+		                				t_sp4_11=q_add(t_sp4_11,t_mount);
+		                				t_sp4_11w=q_add(t_sp4_11w,round(t_mount*0.496,3));
+		                			}else if(t_paraf1=='#12'){
+		                				t_sp4_12=q_add(t_sp4_12,t_mount);
+		                			}
+		                		}
+		                		//------------------------------------------
+		                		if(t_parag2=='公'){
+		                			if(t_parag1=='#6'){
+		                				t_sp3_6=q_add(t_sp3_6,t_mount);
+		                				t_sp3_6w=q_add(t_sp3_6w,round(t_mount*0.084,3));
+		                			}else if(t_parag1=='#7'){
+		                				t_sp3_7=q_add(t_sp3_7,t_mount);
+		                				t_sp3_7w=q_add(t_sp3_7w,round(t_mount*0.124,3));
+		                			}else if(t_parag1=='#8'){
+		                				t_sp3_8=q_add(t_sp3_8,t_mount);
+		                				t_sp3_8w=q_add(t_sp3_8w,round(t_mount*0.172,3));
+		                			}else if(t_parag1=='#9'){
+		                				t_sp3_9=q_add(t_sp3_9,t_mount);
+		                			}else if(t_parag1=='#10'){
+		                				t_sp3_10=q_add(t_sp3_10,t_mount);
+		                				t_sp3_10w=q_add(t_sp3_10w,round(t_mount*0.323,3));
+		                			}else if(t_parag1=='#11'){
+		                				t_sp3_11=q_add(t_sp3_11,t_mount);
+		                				t_sp3_11w=q_add(t_sp3_11w,round(t_mount*0.445,3));
+		                			}else if(t_parag1=='#12'){
+		                				t_sp3_12=q_add(t_sp3_12,t_mount);
+		                			}
+		                		}else if(t_parag2=='母'){
+		                			if(t_parag1=='#6'){
+		                				t_sp4_6=q_add(t_sp4_6,t_mount);
+		                				t_sp4_6w=q_add(t_sp4_6w,round(t_mount*0.095,3));
+		                			}else if(t_parag1=='#7'){
+		                				t_sp4_7=q_add(t_sp4_7,t_mount);
+		                				t_sp4_7w=q_add(t_sp4_7w,round(t_mount*0.131,3));
+		                			}else if(t_parag1=='#8'){
+		                				t_sp4_8=q_add(t_sp4_8,t_mount);
+		                				t_sp4_8w=q_add(t_sp4_8w,round(t_mount*0.188,3));
+		                			}else if(t_parag1=='#9'){
+		                				t_sp4_9=q_add(t_sp4_9,t_mount);
+		                			}else if(t_parag1=='#10'){
+		                				t_sp4_10=q_add(t_sp4_10,t_mount);
+		                				t_sp4_10w=q_add(t_sp4_10w,round(t_mount*0.347,3));
+		                			}else if(t_parag1=='#11'){
+		                				t_sp4_11=q_add(t_sp4_11,t_mount);
+		                				t_sp4_11w=q_add(t_sp4_11w,round(t_mount*0.496,3));
+		                			}else if(t_parag1=='#12'){
+		                				t_sp4_12=q_add(t_sp4_12,t_mount);
+		                			}
+		                		}
+		                		break;
+		                	case '續接器-T頭':
+		                		if(t_paraf2=='T'){
+		                			if(t_paraf1=='#6'){
+		                				t_sp5_6=q_add(t_sp5_6,t_mount);
+		                				t_sp5_6w=q_add(t_sp5_6w,round(t_mount*0.231,3));
+		                			}else if(t_paraf1=='#7'){
+		                				t_sp5_7=q_add(t_sp5_7,t_mount);
+		                				t_sp5_7w=q_add(t_sp5_7w,round(t_mount*0.361,3));
+		                			}else if(t_paraf1=='#8'){
+		                				t_sp5_8=q_add(t_sp5_8,t_mount);
+		                				t_sp5_8w=q_add(t_sp5_8w,round(t_mount*0.547,3));
+		                			}else if(t_paraf1=='#9'){
+		                				t_sp5_9=q_add(t_sp5_9,t_mount);
+		                			}else if(t_paraf1=='#10'){
+		                				t_sp5_10=q_add(t_sp5_10,t_mount);
+		                				t_sp5_10w=q_add(t_sp5_10w,round(t_mount*1.024,3));
+		                			}else if(t_paraf1=='#11'){
+		                				t_sp5_11=q_add(t_sp5_11,t_mount);
+		                			}else if(t_paraf1=='#12'){
+		                				t_sp5_12=q_add(t_sp5_12,t_mount);
+		                			}
+		                		}
+		                		//------------------------------------------
+		                		if(t_parag2=='T'){
+		                			if(t_parag1=='#6'){
+		                				t_sp5_6=q_add(t_sp5_6,t_mount);
+		                				t_sp5_6w=q_add(t_sp5_6w,round(t_mount*0.231,3));
+		                			}else if(t_parag1=='#7'){
+		                				t_sp5_7=q_add(t_sp5_7,t_mount);
+		                				t_sp5_7w=q_add(t_sp5_7w,round(t_mount*0.361,3));
+		                			}else if(t_parag1=='#8'){
+		                				t_sp5_8=q_add(t_sp5_8,t_mount);
+		                				t_sp5_8w=q_add(t_sp5_8w,round(t_mount*0.547,3));
+		                			}else if(t_parag1=='#9'){
+		                				t_sp5_9=q_add(t_sp5_9,t_mount);
+		                			}else if(t_parag1=='#10'){
+		                				t_sp5_10=q_add(t_sp5_10,t_mount);
+		                				t_sp5_10w=q_add(t_sp5_10w,round(t_mount*1.024,3));
+		                			}else if(t_parag1=='#11'){
+		                				t_sp5_11=q_add(t_sp5_11,t_mount);
+		                			}else if(t_parag1=='#12'){
+		                				t_sp5_12=q_add(t_sp5_12,t_mount);
+		                			}
+		                		}
+		                		break;
+		                }
+					}
+				}
+				t_spt_6=q_add(q_add(q_add(q_add(t_sp1_6,t_sp2_6),t_sp3_6),t_sp4_6),t_sp5_6);
+				t_spt_7=q_add(q_add(q_add(q_add(t_sp1_7,t_sp2_7),t_sp3_7),t_sp4_7),t_sp5_7);
+				t_spt_8=q_add(q_add(q_add(q_add(t_sp1_8,t_sp2_8),t_sp3_8),t_sp4_8),t_sp5_8);
+				t_spt_9=q_add(q_add(q_add(q_add(t_sp1_9,t_sp2_9),t_sp3_9),t_sp4_9),t_sp5_9);
+				t_spt_10=q_add(q_add(q_add(q_add(t_sp1_10,t_sp2_10),t_sp3_10),t_sp4_10),t_sp5_10);
+				t_spt_11=q_add(q_add(q_add(q_add(t_sp1_11,t_sp2_11),t_sp3_11),t_sp4_11),t_sp5_11);
+				t_spt_12=q_add(q_add(q_add(q_add(t_sp1_12,t_sp2_12),t_sp3_12),t_sp4_12),t_sp5_12);
+				t_spt_6w=q_add(q_add(q_add(q_add(t_sp1_6w,t_sp2_6w),t_sp3_6w),t_sp4_6w),t_sp5_6w);
+				t_spt_7w=q_add(q_add(q_add(q_add(t_sp1_7w,t_sp2_7w),t_sp3_7w),t_sp4_7w),t_sp5_7w);
+				t_spt_8w=q_add(q_add(q_add(q_add(t_sp1_8w,t_sp2_8w),t_sp3_8w),t_sp4_8w),t_sp5_8w);
+				t_spt_9w=q_add(q_add(q_add(q_add(t_sp1_9w,t_sp2_9w),t_sp3_9w),t_sp4_9w),t_sp5_9w);
+				t_spt_10w=q_add(q_add(q_add(q_add(t_sp1_10w,t_sp2_10w),t_sp3_10w),t_sp4_10w),t_sp5_10w);
+				t_spt_11w=q_add(q_add(q_add(q_add(t_sp1_11w,t_sp2_11w),t_sp3_11w),t_sp4_11w),t_sp5_11w);
+				t_spt_12w=q_add(q_add(q_add(q_add(t_sp1_12w,t_sp2_12w),t_sp3_12w),t_sp4_12w),t_sp5_12w);
+            	
+            	$('#SP1_6').text(t_sp1_6);
+            	$('#SP1_7').text(t_sp1_7);
+            	$('#SP1_8').text(t_sp1_8);
+            	$('#SP1_9').text(t_sp1_9);
+            	$('#SP1_10').text(t_sp1_10);
+            	$('#SP1_11').text(t_sp1_11);
+            	$('#SP1_12').text(t_sp1_12);
+            	$('#SP1_6W').text(t_sp1_6w);
+            	$('#SP1_7W').text(t_sp1_7w);
+            	$('#SP1_8W').text(t_sp1_8w);
+            	$('#SP1_9W').text(t_sp1_9w);
+            	$('#SP1_10W').text(t_sp1_10w);
+            	$('#SP1_11W').text(t_sp1_11w);
+            	$('#SP1_12W').text(t_sp1_12w);
+            	//---------------------------------
+            	$('#SP2_6').text(t_sp2_6);
+            	$('#SP2_7').text(t_sp2_7);
+            	$('#SP2_8').text(t_sp2_8);
+            	$('#SP2_9').text(t_sp2_9);
+            	$('#SP2_10').text(t_sp2_10);
+            	$('#SP2_11').text(t_sp2_11);
+            	$('#SP2_12').text(t_sp2_12);
+            	$('#SP2_6W').text(t_sp2_6w);
+            	$('#SP2_7W').text(t_sp2_7w);
+            	$('#SP2_8W').text(t_sp2_8w);
+            	$('#SP2_9W').text(t_sp2_9w);
+            	$('#SP2_10W').text(t_sp2_10w);
+            	$('#SP2_11W').text(t_sp2_11w);
+            	$('#SP2_12W').text(t_sp2_12w);
+            	//---------------------------------
+            	$('#SP3_6').text(t_sp3_6);
+            	$('#SP3_7').text(t_sp3_7);
+            	$('#SP3_8').text(t_sp3_8);
+            	$('#SP3_9').text(t_sp3_9);
+            	$('#SP3_10').text(t_sp3_10);
+            	$('#SP3_11').text(t_sp3_11);
+            	$('#SP3_12').text(t_sp3_12);
+            	$('#SP3_6W').text(t_sp3_6w);
+            	$('#SP3_7W').text(t_sp3_7w);
+            	$('#SP3_8W').text(t_sp3_8w);
+            	$('#SP3_9W').text(t_sp3_9w);
+            	$('#SP3_10W').text(t_sp3_10w);
+            	$('#SP3_11W').text(t_sp3_11w);
+            	$('#SP3_12W').text(t_sp3_12w);
+            	//---------------------------------
+            	$('#SP4_6').text(t_sp4_6);
+            	$('#SP4_7').text(t_sp4_7);
+            	$('#SP4_8').text(t_sp4_8);
+            	$('#SP4_9').text(t_sp4_9);
+            	$('#SP4_10').text(t_sp4_10);
+            	$('#SP4_11').text(t_sp4_11);
+            	$('#SP4_12').text(t_sp4_12);
+            	$('#SP4_6W').text(t_sp4_6w);
+            	$('#SP4_7W').text(t_sp4_7w);
+            	$('#SP4_8W').text(t_sp4_8w);
+            	$('#SP4_9W').text(t_sp4_9w);
+            	$('#SP4_10W').text(t_sp4_10w);
+            	$('#SP4_11W').text(t_sp4_11w);
+            	$('#SP4_12W').text(t_sp4_12w);
+            	//---------------------------------
+            	$('#SP5_6').text(t_sp5_6);
+            	$('#SP5_7').text(t_sp5_7);
+            	$('#SP5_8').text(t_sp5_8);
+            	$('#SP5_9').text(t_sp5_9);
+            	$('#SP5_10').text(t_sp5_10);
+            	$('#SP5_11').text(t_sp5_11);
+            	$('#SP5_12').text(t_sp5_12);
+            	$('#SP5_6W').text(t_sp5_6w);
+            	$('#SP5_7W').text(t_sp5_7w);
+            	$('#SP5_8W').text(t_sp5_8w);
+            	$('#SP5_9W').text(t_sp5_9w);
+            	$('#SP5_10W').text(t_sp5_10w);
+            	$('#SP5_11W').text(t_sp5_11w);
+            	$('#SP5_12W').text(t_sp5_12w);
+            	//---------------------------------
+            	$('#SPT_6').text(t_spt_6);
+            	$('#SPT_7').text(t_spt_7);
+            	$('#SPT_8').text(t_spt_8);
+            	$('#SPT_9').text(t_spt_9);
+            	$('#SPT_10').text(t_spt_10);
+            	$('#SPT_11').text(t_spt_11);
+            	$('#SPT_12').text(t_spt_12);
+            	$('#SPT_6W').text(t_spt_6w);
+            	$('#SPT_7W').text(t_spt_7w);
+            	$('#SPT_8W').text(t_spt_8w);
+            	$('#SPT_9W').text(t_spt_9w);
+            	$('#SPT_10W').text(t_spt_10w);
+            	$('#SPT_11W').text(t_spt_11w);
+            	$('#SPT_12W').text(t_spt_12w);
 			}
 			
 		</script>
@@ -1566,7 +2165,7 @@
 						<td><input id="textWeight" type="text" class="txt num c1"/></td>
 						<td><span> </span><a id="lblWeight2" class="lbl">彎料重量</a></td>
 						<td><input id="textWeight2" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblWeight4" class="lbl">車牙頭數</a></td>
+						<td><span> </span><a id="lblWeight4" class="lbl btn">車牙頭數</a></td>
 						<td><input id="textWeight4" type="text" class="txt num c1"/></td>
 					</tr>
 				</table>
@@ -1633,12 +2232,13 @@
 						<td style="width:100px;display: none;" class="para"><a id='lblParac_s'> </a></td>
 						<td style="width:100px;display: none;" class="para"><a id='lblParad_s'> </a></td>
 						<td style="width:100px;display: none;" class="para"><a id='lblParae_s'> </a></td>
+						<td style="width:150px;display: none;" class="para"><a id='lblScolor_vu_s'>續接名稱</a></td>
 						<td style="width:110px;display: none;" class="para"><a id='lblParaf_s'> </a></td>
 						<td style="width:110px;display: none;" class="para"><a id='lblParag_s'> </a></td>
 						<td style="width:150px;"><a id='lblSize2_s'> </a><input class="btn"  id="btnSize2Copy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:40px;"><a id='lblMins_s'> </a></td>
-						<td style="width:40px;"><a id='lblDime_s'> </a></td>
-						<td style="width:40px;"><a id='lblWidth_s'> </a></td>
+						<td style="width:40px;"><a id='lblWaste_s'> </a></td>
+						<td style="width:40px;"><a id='lblHours_s'> </a></td>
 					</tr>
 					<tr  style='background:#cad3ff;'>
 						<td align="center"><input class="btn" id="btnMinus.*" type="button" value='-' style=" font-weight: bold;" /></td>
@@ -1649,15 +2249,15 @@
 						</td>
 						<td style="display: none;">
 							<input id="txtProduct.*" type="text" class="txt c1" style="width: 70%;"/>
-							<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
+							<select id="combProduct.*" class="txt comb" style="width: 20px;"> </select>
 						</td>
 						<td>
 							<input id="txtUcolor.*" type="text" class="txt c1" style="width: 110px;"/>
-							<select id="combUcolor.*" class="txt" style="width: 20px;"> </select>
+							<select id="combUcolor.*" class="txt comb" style="width: 20px;"> </select>
 						</td>
 						<td>
 							<input id="txtSpec.*" type="text" class="txt c1" style="width: 70%;"/>
-							<select id="combSpec.*" class="txt" style="width: 20px;"> </select>
+							<select id="combSpec.*" class="txt comb" style="width: 20px;"> </select>
 						</td>
 						<td><input id="txtSize.*" type="text" class="txt c1" /></td>
 						<td><input id="txtLengthb.*" type="text" class="txt num c1" /></td>
@@ -1667,7 +2267,7 @@
 						<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 						<td>
 							<input id="txtClass.*" type="text" class="txt c1" style="width: 70%;"/>
-							<select id="combClass.*" class="txt" style="width: 20px;"> </select>
+							<select id="combClass.*" class="txt comb" style="width: 20px;"> </select>
 						</td>
 						<td><select id="cmbBtime.*" class="txt c1"> </select></td>
 						<td><select id="cmbEtime.*" class="txt c1"> </select></td>
@@ -1695,12 +2295,17 @@
 						<td class="para" style="display: none;"><input id="txtParac.*" type="text" class="txt num c1" /></td>
 						<td class="para" style="display: none;"><input id="txtParad.*" type="text" class="txt num c1" /></td>
 						<td class="para" style="display: none;"><input id="txtParae.*" type="text" class="txt num c1" /></td>
+						<td class="para" style="display: none;"><select id="cmbScolor.*" class="txt c1"> </select></td>
 						<td class="para" style="display: none;">
 							<input id="txtParaf.*" type="text" class="txt c1"/>
+							<select id="combParaf1.*" class="txt comb"> </select>
+							<select id="combParaf2.*" class="txt comb"> </select>
 							<!--<select id="combParaf.*" class="txt" style="width: 20px;"> </select>-->
 						</td>
 						<td class="para" style="display: none;">
 							<input id="txtParag.*" type="text" class="txt c1"/>
+							<select id="combParag1.*" class="txt comb"> </select>
+							<select id="combParag2.*" class="txt comb"> </select>
 							<!--<select id="combParag.*" class="txt" style="width: 20px;"> </select>-->
 						</td>
 						<td><input id="txtSize2.*" type="text" class="txt c1"/></td>
@@ -1709,17 +2314,110 @@
 							<input id="txtMins.*" type="hidden"/>
 						</td>
 						<td>
-							<input id="checkDime.*" type="checkbox"/>
-							<input id="txtDime.*" type="hidden"/>
+							<input id="checkWaste.*" type="checkbox"/>
+							<input id="txtWaste.*" type="hidden"/>
 						</td>
 						<td>
-							<input id="checkWidth.*" type="checkbox"/>
-							<input id="txtWidth.*" type="hidden"/>
+							<input id="checkHours.*" type="checkbox"/>
+							<input id="txtHours.*" type="hidden"/>
 						</td>
 					</tr>
 				</table>
 			</div>
 		</div>
 		<input id="q_sys" type="hidden" />
+		<div id="splicertotal" style="display: none;">
+			<table style="color: White;width: 910px;font-weight: bold;text-align: center;border: 2px white double;padding: 2px;">
+				<tr style="background: forestgreen;">
+					<td style="width: 105px;">牙頭規格</td>
+					<td style="width: 115px;" colspan="2">#6</td>
+					<td style="width: 115px;" colspan="2">#7</td>
+					<td style="width: 115px;" colspan="2">#8</td>
+					<td style="width: 115px;" colspan="2">#9</td>
+					<td style="width: 115px;" colspan="2">#10</td>
+					<td style="width: 115px;" colspan="2">#11</td>
+					<td style="width: 115px;" colspan="2">#12</td>
+				</tr>
+				<tr style="background: darkseagreen;">
+					<td style="background: forestgreen;">公_直牙</td>
+					<td id='SP1_6' style="width: 45px;"> </td><td id='SP1_6W' style="width: 70px;"> </td>
+					<td id='SP1_7' style="width: 45px;"> </td><td id='SP1_7W' style="width: 70px;"> </td>
+					<td id='SP1_8' style="width: 45px;"> </td><td id='SP1_8W' style="width: 70px;"> </td>
+					<td id='SP1_9' style="width: 45px;"> </td><td id='SP1_9W' style="width: 70px;"> </td>
+					<td id='SP1_10' style="width: 45px;"> </td><td id='SP1_10W' style="width: 70px;"> </td>
+					<td id='SP1_11' style="width: 45px;"> </td><td id='SP1_11W' style="width: 70px;"> </td>
+					<td id='SP1_12' style="width: 45px;"> </td><td id='SP1_12W' style="width: 70px;"> </td>
+				</tr>
+				<tr style="background: mediumaquamarine;">
+					<td style="background: forestgreen;">母_直牙</td>
+					<td id='SP2_6'> </td><td id='SP2_6W'> </td>
+					<td id='SP2_7'> </td><td id='SP2_7W'> </td>
+					<td id='SP2_8'> </td><td id='SP2_8W'> </td>
+					<td id='SP2_9'> </td><td id='SP2_9W'> </td>
+					<td id='SP2_10'> </td><td id='SP2_10W'> </td>
+					<td id='SP2_11'> </td><td id='SP2_11W'> </td>
+					<td id='SP2_12'> </td><td id='SP2_12W'> </td>
+				</tr>
+				<tr style="background: darkseagreen;">
+					<td style="background: forestgreen;">公_錐牙</td>
+					<td id='SP3_6'> </td><td id='SP3_6W'> </td>
+					<td id='SP3_7'> </td><td id='SP3_7W'> </td>
+					<td id='SP3_8'> </td><td id='SP3_8W'> </td>
+					<td id='SP3_9'> </td><td id='SP3_9W'> </td>
+					<td id='SP3_10'> </td><td id='SP3_10W'> </td>
+					<td id='SP3_11'> </td><td id='SP3_11W'> </td>
+					<td id='SP3_12'> </td><td id='SP3_12W'> </td>
+				</tr>
+				<tr style="background: mediumaquamarine;">
+					<td style="background: forestgreen;">母_錐牙</td>
+					<td id='SP4_6'> </td><td id='SP4_6W'> </td>
+					<td id='SP4_7'> </td><td id='SP4_7W'> </td>
+					<td id='SP4_8'> </td><td id='SP4_8W'> </td>
+					<td id='SP4_9'> </td><td id='SP4_9W'> </td>
+					<td id='SP4_10'> </td><td id='SP4_10W'> </td>
+					<td id='SP4_11'> </td><td id='SP4_11W'> </td>
+					<td id='SP4_12'> </td><td id='SP4_12W'> </td>
+				</tr>
+				<tr style="background: darkseagreen;">
+					<td style="background: forestgreen;">T頭</td>
+					<td id='SP5_6'> </td><td id='SP5_6W'> </td>
+					<td id='SP5_7'> </td><td id='SP5_7W'> </td>
+					<td id='SP5_8'> </td><td id='SP5_8W'> </td>
+					<td id='SP5_9'> </td><td id='SP5_9W'> </td>
+					<td id='SP5_10'> </td><td id='SP5_10W'> </td>
+					<td id='SP5_11'> </td><td id='SP5_11W'> </td>
+					<td id='SP5_12'> </td><td id='SP5_12W'> </td>
+				</tr>
+				<tr style="background: cornflowerblue;">
+					<td style="background: blue;">合計</td>
+					<td id='SPT_6'> </td><td id='SPT_6W'> </td>
+					<td id='SPT_7'> </td><td id='SPT_7W'> </td>
+					<td id='SPT_8'> </td><td id='SPT_8W'> </td>
+					<td id='SPT_9'> </td><td id='SPT_9W'> </td>
+					<td id='SPT_10'> </td><td id='SPT_10W'> </td>
+					<td id='SPT_11'> </td><td id='SPT_11W'> </td>
+					<td id='SPT_12'> </td><td id='SPT_12W'> </td>
+				</tr>
+			</table>
+		</div>
+		<div id='dbbssplicer' style="display: none;">
+			<table id="tbbssplicer" class='tbbs'  border="1"  cellpadding='2' cellspacing='1'>
+				<tr style='color:White; background:#003366;text-align: center;'>
+					<td style="width:100px;display: none;"><a id='lblNoq_ss'> </a></td>
+					<td style="width:150px;"><a id='lblOrdeno_ss'>訂單編號/訂序</a></td>
+					<td style="width:150px;"><a id='lblSpec_ss'>材質</a></td>
+					<td style="width:85px;"><a id='lblSize_ss'>號數</a></td>
+					<td style="width:85px;"><a id='lblLengthb_ss'>長度</a></td>
+					<td style="width:85px;"><a id='lblMount1_ss'>支數</a></td>
+					<td style="width:85px;"><a id='lblWeight_ss'>重量</a></td>
+					<td style="width:40px;"><a id='lblMount2_ss'>端頭</a></td>
+					<td style="width:160px;"><a id='lblScolor_ss'>產品名稱</a></td>
+					<td style="width:300px;"><a id='lblParafg_ss'>車頭規格套件</a></td>
+					<td style="width:40px;"><a id='lblRadius_ss'>彎</a></td>
+					<td style="width:150px;"><a id='lblPic_ss'>形狀</a></td>
+					<td style="width:150px;"><a id='lblMemo_ss'>備註(標籤)</a></td>
+				</tr>
+			</table>
+		</div>
 	</body>
 </html>

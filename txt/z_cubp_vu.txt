@@ -921,14 +921,14 @@ select '9',a.bdate,case DATEPART(WEEKDAY,bdate) when 1 then '日' when 2 then '�
 ,a.accy,a.noa,b.no2,'',a.custno,a.cust,a.mech
 --,case when b.mins=1 then '■ '+b.size else '□ '+b.size end
 ,case when b.mins=1 then '■ ' else '□ ' end
-+case when isnull(b.radius,0)=0 then '' else case when isnull(b.dime,0)>0 then '● ' else '○ ' end end
-+case when isnull(b.parag,'')='' then '' else case when isnull(b.width,0)>0 then '◆ ' else '◇ ' end end+b.size
++case when isnull(b.radius,0)=0 then '' else case when isnull(b.waste,0)>0 then '● ' else '○ ' end end
++case when isnull(b.parag,'')='' then '' else case when isnull(b.hours,0)>0 then '◆ ' else '◇ ' end end+b.size
 ,b.spec,b.weight,b.class,'',sum(c.weight),'',b.mins
 from view_cuc a left join view_cucs b on a.noa=b.noa
 left join view_vcct c on b.ordeno=c.ordeno and b.no2=c.no2
 where (a.bdate between @t_bdate and @t_edate) and ISDATE(bdate)=1
 group by a.accy,a.noa,b.no2,a.bdate,a.custno,a.cust,a.mech,b.size,b.spec,b.class,b.mins,b.weight
-,isnull(b.radius,0),isnull(b.parag,''),isnull(b.dime,0),isnull(b.width,0)
+,isnull(b.radius,0),isnull(b.parag,''),isnull(b.waste,0),isnull(b.hours,0)
 
 insert @tmp(gno,datea,week,accy,noa,custno,cust,mech,size,spec,pweight,class,stotal,mins)
 select '0',datea,week,accy,noa,custno,cust,mech,size,spec,sum(pweight),class,SUM(stotal),min(mins)

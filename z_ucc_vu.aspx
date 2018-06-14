@@ -120,7 +120,18 @@
 						type : '5',
 						name : 'xshow',
 						value :('0@明細,1@合計,2@合計-廠牌').split(',')
-					}]
+					}, {
+                        type : '5',
+                        name : 'xsize2', //[27]
+                        value:(',#6,#7,#8,#9,#10,#11,#12').split(',')
+                    }, {
+                        type : '5',
+                        name : 'xspec2', //[28]
+                        value:(',公,母,T').split(',')
+                    }, {
+                        type : '6',
+                        name : 'xclass2' //[29]
+                    }]
                 });
                 q_popAssign();
                 q_getFormat();

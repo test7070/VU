@@ -676,7 +676,7 @@ enda:--enda
 	")
 ;
 -------------------------------------------------------------------------------------------------------------------------------
-dimeenda:--dimeenda 成型完工
+wasteenda:--wasteenda 成型完工
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max) = ''
 	declare @accy nvarchar(max) = [1]
@@ -694,12 +694,12 @@ dimeenda:--dimeenda 成型完工
 		
 	EXEC("
 		update cucs"+@accy+" set cubno='"+@userno+"'+'##'+'"+@namea+"'+'##'+'"+@now_datetime+"'
-		,dime=1
+		,waste=1
 		where noa='"+@noa+"' and noq='"+@noq+"'
 	")
 ;
 -------------------------------------------------------------------------------------------------------------------------------
-widthenda:--widthenda 車牙完工
+hoursenda:--hoursenda 車牙完工
 	SET QUOTED_IDENTIFIER OFF
 	declare @cmd nvarchar(max) = ''
 	declare @accy nvarchar(max) = [1]
@@ -717,7 +717,7 @@ widthenda:--widthenda 車牙完工
 		
 	EXEC("
 		update cucs"+@accy+" set cubno='"+@userno+"'+'##'+'"+@namea+"'+'##'+'"+@now_datetime+"'
-		,width=1
+		,hours=1
 		where noa='"+@noa+"' and noq='"+@noq+"'
 	")
 ;

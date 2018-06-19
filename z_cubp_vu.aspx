@@ -121,7 +121,11 @@
                     }, {
                         type : '6',//[28]
                         name : 'xordeno' 
-                    }]
+                    },{
+						type : '5',//[29]
+						name : 'xmechno2',
+						value :('#non@全廠,1剪@A剪,2剪@B剪,3剪@C剪').split(',')
+					}]
 				});
                 q_popAssign();
 				q_getFormat();
@@ -232,6 +236,125 @@
 					$('#q_report').find('span.radio').eq(t_index).parent().click();	
 					$('#txtXnoa').attr('disabled','disabled');
 				}
+				
+				
+				var tpara=q_getHref();
+				if(tpara!=undefined){
+					if(window.parent.q_name=='z_cubp_vu' && tpara[0]=='report'){
+						var t_index=-1;
+						for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
+							if($('#q_report').data('info').reportData[i].report!=tpara[1]){
+								$('#q_report div div').eq(i).hide();
+							}else{
+								t_index=i;
+							}
+						}
+						$('#q_report').find('span.radio').eq(t_index).parent().click();	
+						
+						if(tpara[2]=='mon'){
+							$('#txtYmon').val(tpara[3]);
+						}
+						$('#btnOk').click();
+					}
+				}
+				
+				$('#frameReport').bind('DOMSubtreeModified', function() {
+					var radind=$('#q_report').data('info').radioIndex;
+					var t_report=$('#q_report').data('info').reportData[radind].report;
+					if($('#frameReport table').length>0 ){ //有表再執行
+						if(t_report=='z_cubp_vu09' || t_report=='z_cubp_vu10'){
+							$('.showdiv1').each(function(index) {
+								$(this).click(function(e) {
+									var t_id=$(this).attr('id');
+									var t_mech=t_id.split('_')[0];
+	            					var t_datea=t_id.split('_')[1];
+									q_func('qtxt.query.zcubpdiv9_1', 'cuc_vu.txt,zcubpdiv9_1,' + encodeURI(t_datea)+';'+encodeURI(t_mech),r_accy,1);
+									var as = _q_appendData("tmp0", "", true, true);
+									if (as[0] != undefined) {
+										var rowslength=document.getElementById("zcubptable9_1").rows.length-1;
+										for (var j = 1; j < rowslength; j++) {
+											document.getElementById("zcubptable9_1").deleteRow(1);
+										}
+										var string='';
+										for(var i=0;i<as.length;i++){
+											string+='<tr style="background:'+(as[i].z_spec=='合計'?'cornflowerblue':(i%2==0?'darkseagreen':'mediumaquamarine'))+';">';
+											string+='<td style="background: '+(as[i].z_spec=='合計'?'blue':'forestgreen')+';">'+as[i].z_spec+'</td>';
+											string+='<td>'+as[i].z_3w+'</td>';
+											string+='<td>'+as[i].z_4w+'</td>';
+											string+='<td>'+as[i].z_5w+'</td>';
+											string+='<td>'+as[i].z_6w+'</td>';
+											string+='<td>'+as[i].z_7w+'</td>';
+											string+='<td>'+as[i].z_8w+'</td>';
+											string+='<td>'+as[i].z_9w+'</td>';
+											string+='<td>'+as[i].z_10w+'</td>';
+											string+='<td>'+as[i].z_11w+'</td>';
+											string+='<td>'+as[i].z_12w+'</td>';
+											string+='</tr>';
+										}
+										if(string.length>0){
+											$('#zcubptable9_1_head').after(string);
+											$('#zcubpdiv9_1').css('top',e.pageY);
+											$('#zcubpdiv9_1').css('left',e.pageX-50);
+											$('#zcubpdiv9_1').show();
+										}
+									}
+								});
+							});
+							
+							$('.showdiv2').each(function(index) {
+								$(this).click(function(e) {
+									var t_id=$(this).attr('id');
+									var t_mech=t_id.split('_')[0];
+	            					var t_datea=t_id.split('_')[1];
+	            					
+	            					q_func('qtxt.query.zcubpdiv9_2', 'cuc_vu.txt,zcubpdiv9_2,' + encodeURI(t_datea)+';'+encodeURI(t_mech),r_accy,1);
+									var as = _q_appendData("tmp0", "", true, true);
+									if (as[0] != undefined) {
+										var rowslength=document.getElementById("zcubptable9_2").rows.length-1;
+										for (var j = 1; j < rowslength; j++) {
+											document.getElementById("zcubptable9_2").deleteRow(1);
+										}
+										var string='';
+										for(var i=0;i<as.length;i++){
+											string+='<tr style="background: '+(as[i].s_spec=='合計'?'peachpuff':(i%2==0?'#FFE390':'#FFEA93'))+';">';
+											string+='<td style="background: '+(as[i].s_spec=='合計'?'burlywood':'gold')+';">'+as[i].s_spec+'</td>';
+											string+='<td style="width: 50px;">'+as[i].s_6m+'</td>';
+											string+='<td style="width: 80px;">'+round(as[i].s_6w,3)+'</td>';
+											string+='<td style="width: 50px;">'+as[i].s_7m+'</td>';
+											string+='<td style="width: 80px;">'+round(as[i].s_7w,3)+'</td>';
+											string+='<td style="width: 50px;">'+as[i].s_8m+'</td>';
+											string+='<td style="width: 80px;">'+round(as[i].s_8w,3)+'</td>';
+											string+='<td style="width: 50px;">'+as[i].s_9m+'</td>';
+											string+='<td style="width: 80px;">'+round(as[i].s_9w,3)+'</td>';
+											string+='<td style="width: 50px;">'+as[i].s_10m+'</td>';
+											string+='<td style="width: 80px;">'+round(as[i].s_10w,3)+'</td>';
+											string+='<td style="width: 50px;">'+as[i].s_11m+'</td>';
+											string+='<td style="width: 80px;">'+round(as[i].s_11w,3)+'</td>';
+											string+='<td style="width: 50px;">'+as[i].s_12m+'</td>';
+											string+='<td style="width: 80px;">'+round(as[i].s_12w,3)+'</td>';
+											string+='</tr>';
+										}
+										if(string.length>0){
+											$('#zcubptable9_2_head').after(string);
+											$('#zcubpdiv9_2').css('top',e.pageY);
+											$('#zcubpdiv9_2').css('left',e.pageX-50);
+											$('#zcubpdiv9_2').show();
+										}
+									}
+	            				});
+							});
+						}
+					}
+					$('#zcubpdiv9_1').hide();
+					$('#zcubpdiv9_2').hide();
+				});
+				
+				$('#zcubptable9_1close').click(function() {
+					$('#zcubpdiv9_1').hide();
+				});
+				$('#zcubptable9_2close').click(function() {
+					$('#zcubpdiv9_2').hide();
+				});
 			}
 			
             function q_boxClose(s2) {
@@ -259,6 +382,7 @@
                         break;
                 }
             }
+            
 		</script>
 	</head>
 	<body ondragstart="return false" draggable="false"
@@ -273,6 +397,44 @@
 			<div class="prt" style="margin-left: -40px;">
 				<!--#include file="../inc/print_ctrl.inc"-->
 			</div>
+		</div>
+		
+		<div id="zcubpdiv9_1" style="display: none;position:absolute;background: darkgray;">
+			<table id="zcubptable9_1" style="text-align: center;color: white;font-size: medium;">
+				<tr style="background: forestgreen;" id="zcubptable9_1_head">
+					<td style="width: 75px;">號數</td>
+					<td style="width: 75px;">#3</td>
+					<td style="width: 75px;">#4</td>
+					<td style="width: 75px;">#5</td>
+					<td style="width: 75px;">#6</td>
+					<td style="width: 75px;">#7</td>
+					<td style="width: 75px;">#8</td>
+					<td style="width: 75px;">#9</td>
+					<td style="width: 75px;">#10</td>
+					<td style="width: 75px;">#11</td>
+					<td style="width: 75px;">#12</td>
+				</tr>
+				<tr style="background: forestgreen;">
+					<td colspan="11"><input id="zcubptable9_1close" type="button" value="關閉"></td>
+				</tr>
+			</table>
+		</div>
+		<div id="zcubpdiv9_2" style="display: none;position:absolute;background: darkgray;">
+			<table id="zcubptable9_2" style="text-align: center;color: white;font-size: medium;">
+				<tr style="background: gold;" id="zcubptable9_2_head">
+					<td style="width: 115px;">車牙頭數</td>
+					<td style="width: 130px;" colspan="2">#6</td>
+					<td style="width: 130px;" colspan="2">#7</td>
+					<td style="width: 130px;" colspan="2">#8</td>
+					<td style="width: 130px;" colspan="2">#9</td>
+					<td style="width: 130px;" colspan="2">#10</td>
+					<td style="width: 130px;" colspan="2">#11</td>
+					<td style="width: 130px;" colspan="2">#12</td>
+				</tr>
+				<tr style="background: gold;">
+					<td colspan="15"><input id="zcubptable9_2close" type="button" value="關閉"></td>
+				</tr>
+			</table>
 		</div>
 	</body>
 </html>

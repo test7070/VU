@@ -921,14 +921,14 @@ select '9',a.bdate,case DATEPART(WEEKDAY,bdate) when 1 then '日' when 2 then '�
 ,a.accy,a.noa,b.no2,'',a.custno,a.cust,a.mech
 --,case when b.mins=1 then '■ '+b.size else '□ '+b.size end
 ,case when b.mins=1 then '■ ' else '□ ' end
-+case when isnull(b.radius,0)=0 then '' else case when isnull(b.waste,0)>0 then '● ' else '○ ' end end
-+case when isnull(b.parag,'')='' then '' else case when isnull(b.hours,0)>0 then '◆ ' else '◇ ' end end+b.size
++case when isnull(b.dime,0)=0 then '' else case when isnull(b.waste,0)>0 then '● ' else '○ ' end end
++case when isnull(b.mount2,0)>0 then '' else case when isnull(b.hours,0)>0 then '◆ ' else '◇ ' end end+b.size
 ,b.spec,b.weight,b.class,'',sum(c.weight),'',b.mins
 from view_cuc a left join view_cucs b on a.noa=b.noa
 left join view_vcct c on b.ordeno=c.ordeno and b.no2=c.no2
 where (a.bdate between @t_bdate and @t_edate) and ISDATE(bdate)=1
 group by a.accy,a.noa,b.no2,a.bdate,a.custno,a.cust,a.mech,b.size,b.spec,b.class,b.mins,b.weight
-,isnull(b.radius,0),isnull(b.parag,''),isnull(b.waste,0),isnull(b.hours,0)
+,isnull(b.dime,0),isnull(b.mount2,0),isnull(b.waste,0),isnull(b.hours,0)
 
 insert @tmp(gno,datea,week,accy,noa,custno,cust,mech,size,spec,pweight,class,stotal,mins)
 select '0',datea,week,accy,noa,custno,cust,mech,size,spec,sum(pweight),class,SUM(stotal),min(mins)
@@ -1144,6 +1144,456 @@ SET QUOTED_IDENTIFIER OFF
 declare @t_mon nvarchar(30)
 set @t_mon = case when '#non'=[26] then '' else [26] end
 
+declare @tmpa table(
+	gno nvarchar(1),
+	idno int,
+	days nvarchar(10),
+	c01 float, --A剪
+	c02 float, --B剪
+	c03 float, --C剪
+	c04 float, --盤元成型(D)
+	c05 float, --切割成型(E)
+	c06 float, --加工成型(F)
+	c07 float, --車牙頭數(G)
+	total float, --生產合計
+	ttotal float --累計合計
+) 
+
+declare @days float=1
+declare @tdays nvarchar(10)=''
+declare @edays float=case when @t_mon='' then '31' else cast(dbo.q_lastday(@t_mon) as float) end
+
+while(@days<=@edays)
+begin
+	set @tdays=right('00'+cast(@days as nvarchar(10)),2)
+
+	insert @tmpa (gno,idno,days,c01,c02,c03,c04,c05,c06,c07,total)
+	select '8',@days,@tdays
+	,SUM(case when isnull(a.worker,'')='1剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'')='2剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'')='3剪' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%盤元%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%切割%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%加工%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%車牙%' and b.ucolor like '%續接器%' then 
+	(cast((len(b.ucolor)-len(REPLACE(b.ucolor,'公','')))/len('公') as int)
+	+cast((len(b.ucolor)-len(REPLACE(b.ucolor,'母','')))/len('母') as int)
+	+cast((len(b.ucolor)-len(REPLACE(b.ucolor,'T','')))/len('T') as int))*b.hmount else 0 end)
+	,SUM(case when isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪' or isnull(a.worker,'')='3剪'
+	or isnull(a.worker,'')  like '%盤元%' or isnull(a.worker,'')  like '%切割%' --or isnull(a.worker,'')  like '%加工%' or isnull(a.worker,'')  like '%車牙%' 
+	then b.weight else 0 end)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+	where left(isnull(a.datea,''),len(@t_mon)+3) =@t_mon+'/'+@tdays
+	and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+	and isnull(b.uno,'')!='' and b.ucolor!='板料'
+
+	set @days=@days+1
+end
+
+update a
+set ttotal=b.ttotal
+from @tmpa a outer apply (select sum(total)ttotal from @tmpa where idno<=a.idno)b
+where isnull(c01,0)>0 or isnull(c02,0)>0 or isnull(c03,0)>0
+or isnull(c04,0)>0 or isnull(c05,0)>0 or isnull(c06,0)>0 or isnull(c07,0)>0
+
+insert @tmpa(gno,idno,days,c01,c02,c03,c04,c05,c06,c07,total)
+select '9',32,char(255),SUM(c01),SUM(c02),SUM(c03),SUM(c04),SUM(c05),SUM(c06),SUM(c07),SUM(total)
+from @tmpa where gno='8'
+
+--select 
+--dbo.getComma(round(c01,0),-1)c01,
+--dbo.getComma(round(c02,0),-1)c02,
+--dbo.getComma(round(c03,0),-1)c03,
+--dbo.getComma(round(c04,0),-1)c04,
+--dbo.getComma(round(c05,0),-1)c05,
+--dbo.getComma(round(c06,0),-1)c06,
+--dbo.getComma(round(c07,0),-1)c07,
+--dbo.getComma(round(total,0),-1)total,
+--dbo.getComma(round(ttotal,0),-1)ttotal,
+--* from @tmpa order by idno,gno
+----------------------------------------------------------------------------------------------
+declare @tmpb table(
+	gno nvarchar(1),
+	idno int,
+	s_spec nvarchar(50),
+	s_6m float, --#6
+	s_6w float,
+	s_6tm float,
+	s_6tw float, 
+	s_7m float, --#7
+	s_7w float,
+	s_7tm float,
+	s_7tw float, 
+	s_8m float, --#8
+	s_8w float,
+	s_8tm float,
+	s_8tw float, 
+	s_9m float, --#9
+	s_9w float,
+	s_9tm float,
+	s_9tw float, 
+	s_10m float, --#10
+	s_10w float,
+	s_10tm float,
+	s_10tw float, 
+	s_11m float, --#11
+	s_11w float,
+	s_11tm float,
+	s_11tw float, 
+	s_12m float, --#12
+	s_12w float,
+	s_12tm float,
+	s_12tw float
+) 
+
+insert @tmpb(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '2',1,'公_直牙'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6公','')))/len('#6公') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6公','')))/len('#6公') as int)*b.hmount*0.084 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7公','')))/len('#7公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7公','')))/len('#7公') as int)*b.hmount*0.124 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8公','')))/len('#8公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8公','')))/len('#8公') as int)*b.hmount*0.178 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9公','')))/len('#9公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9公','')))/len('#9公') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10公','')))/len('#10公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10公','')))/len('#10公') as int)*b.hmount*0.361
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11公','')))/len('#11公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11公','')))/len('#11公') as int)*b.hmount*0.532 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12公','')))/len('#12公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12公','')))/len('#12公') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%直牙%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+
+insert @tmpb(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '2',2,'母_直牙'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6母','')))/len('#6母') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6母','')))/len('#6母') as int)*b.hmount*0.107 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7母','')))/len('#7母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7母','')))/len('#7母') as int)*b.hmount*0.136 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8母','')))/len('#8母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8母','')))/len('#8母') as int)*b.hmount*0.205 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9母','')))/len('#9母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9母','')))/len('#9母') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10母','')))/len('#10母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10母','')))/len('#10母') as int)*b.hmount*0.407
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11母','')))/len('#11母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11母','')))/len('#11母') as int)*b.hmount*0.489 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12母','')))/len('#12母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12母','')))/len('#12母') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%直牙%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+--------------------------------------------------------------------------------------------------------
+insert @tmpb(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '2',3,'公_錐牙'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6公','')))/len('#6公') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6公','')))/len('#6公') as int)*b.hmount*0.084 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7公','')))/len('#7公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7公','')))/len('#7公') as int)*b.hmount*0.124 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8公','')))/len('#8公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8公','')))/len('#8公') as int)*b.hmount*0.172 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9公','')))/len('#9公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9公','')))/len('#9公') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10公','')))/len('#10公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10公','')))/len('#10公') as int)*b.hmount*0.323
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11公','')))/len('#11公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11公','')))/len('#11公') as int)*b.hmount*0.445 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12公','')))/len('#12公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12公','')))/len('#12公') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%錐牙%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+
+insert @tmpb(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '2',4,'母_錐牙'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6母','')))/len('#6母') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6母','')))/len('#6母') as int)*b.hmount*0.095 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7母','')))/len('#7母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7母','')))/len('#7母') as int)*b.hmount*0.131 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8母','')))/len('#8母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8母','')))/len('#8母') as int)*b.hmount*0.188 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9母','')))/len('#9母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9母','')))/len('#9母') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10母','')))/len('#10母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10母','')))/len('#10母') as int)*b.hmount*0.347
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11母','')))/len('#11母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11母','')))/len('#11母') as int)*b.hmount*0.496 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12母','')))/len('#12母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12母','')))/len('#12母') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%錐牙%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+--------------------------------------------------------------------------------------------------------
+insert @tmpb(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '2',5,'T頭'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6T','')))/len('#6T') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6T','')))/len('#6T') as int)*b.hmount*0.231 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7T','')))/len('#7T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7T','')))/len('#7T') as int)*b.hmount*0.361 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8T','')))/len('#8T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8T','')))/len('#8T') as int)*b.hmount*0.547 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9T','')))/len('#9T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9T','')))/len('#9T') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10T','')))/len('#10T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10T','')))/len('#10T') as int)*b.hmount*1.024
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11T','')))/len('#11T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11T','')))/len('#11T') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12T','')))/len('#12T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12T','')))/len('#12T') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%T頭%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+
+if((select count(*) from @tmpb)>0)
+begin
+	insert @tmpb(gno,idno,s_spec,s_6tm,s_6tw,s_7tm,s_7tw,s_8tm,s_8tw,s_9tm,s_9tw,s_10tm,s_10tw,s_11tm,s_11tw,s_12tm,s_12tw)
+	select '3',6,'合計',sum(s_6m),sum(s_6w),sum(s_7m),sum(s_7w),sum(s_8m),sum(s_8w),sum(s_9m),sum(s_9w),sum(s_10m),sum(s_10w),sum(s_11m),sum(s_11w),sum(s_12m),sum(s_12w)
+	from @tmpb where gno='2'
+end
+
+--select * from @tmpb order by gno,idno
+----------------------------------------------------------------------------------------
+declare @tmpc table(
+	gno nvarchar(1),
+	idno int,
+	z_spec nvarchar(50),
+	z_3w float,
+	z_3tw float,
+	z_4w float,
+	z_4tw float,
+	z_5w float,
+	z_5tw float,
+	z_6w float,
+	z_6tw float,
+	z_7w float,
+	z_7tw float,
+	z_8w float,
+	z_8tw float,
+	z_9w float,
+	z_9tw float,
+	z_10w float,
+	z_10tw float,
+	z_11w float,
+	z_11tw float,
+	z_12w float,
+	z_12tw float
+)
+
+insert @tmpc(gno,idno,z_spec,z_3w,z_4w,z_5w,z_6w,z_7w,z_8w,z_9w,z_10w,z_11w,z_12w)
+select '5',ROW_NUMBER() over (order by b.spec),b.spec
+,sum(case when size='#3' then b.weight else 0 end)
+,sum(case when size='#4' then b.weight else 0 end)
+,sum(case when size='#5' then b.weight else 0 end)
+,sum(case when size='#6' then b.weight else 0 end)
+,sum(case when size='#7' then b.weight else 0 end)
+,sum(case when size='#8' then b.weight else 0 end)
+,sum(case when size='#9' then b.weight else 0 end)
+,sum(case when size='#10' then b.weight else 0 end)
+,sum(case when size='#11' then b.weight else 0 end)
+,sum(case when size='#12' then b.weight else 0 end)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and (isnull(a.worker,'')='1剪'
+or isnull(a.worker,'')='2剪'
+or isnull(a.worker,'')='3剪'
+or isnull(a.worker,'')like '%盤元%'
+or isnull(a.worker,'')like '%切割%')
+group by b.spec
+
+if((select count(*) from @tmpc)>0)
+begin
+	insert @tmpc(gno,idno,z_spec,z_3tw,z_4tw,z_5tw,z_6tw,z_7tw,z_8tw,z_9tw,z_10tw,z_11tw,z_12tw)
+	select '6','9','合計',SUM(z_3w),SUM(z_4w),SUM(z_5w),SUM(z_6w),SUM(z_7w),SUM(z_8w),SUM(z_9w),SUM(z_10w),SUM(z_11w),SUM(z_12w)
+	from @tmpc
+end
+
+--select * from @tmpc
+--合併//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+declare @tmpd table(
+	gno nvarchar(1),
+	idno int,
+	--tmpb----------------------------
+	s_spec nvarchar(50),
+	s_6m float, --#6
+	s_6w float,
+	s_6tm float,
+	s_6tw float, 
+	s_7m float, --#7
+	s_7w float,
+	s_7tm float,
+	s_7tw float, 
+	s_8m float, --#8
+	s_8w float,
+	s_8tm float,
+	s_8tw float, 
+	s_9m float, --#9
+	s_9w float,
+	s_9tm float,
+	s_9tw float, 
+	s_10m float, --#10
+	s_10w float,
+	s_10tm float,
+	s_10tw float, 
+	s_11m float, --#11
+	s_11w float,
+	s_11tm float,
+	s_11tw float, 
+	s_12m float, --#12
+	s_12w float,
+	s_12tm float,
+	s_12tw float,
+	--tmpc----------------------------
+	z_spec nvarchar(50),
+	z_3w float,
+	z_3tw float,
+	z_4w float,
+	z_4tw float,
+	z_5w float,
+	z_5tw float,
+	z_6w float,
+	z_6tw float,
+	z_7w float,
+	z_7tw float,
+	z_8w float,
+	z_8tw float,
+	z_9w float,
+	z_9tw float,
+	z_10w float,
+	z_10tw float,
+	z_11w float,
+	z_11tw float,
+	z_12w float,
+	z_12tw float,
+	--tmpa----------------------------
+	days nvarchar(10),
+	c01 float, --A剪
+	c02 float, --B剪
+	c03 float, --C剪
+	c04 float, --盤元成型(D)
+	c05 float, --切割成型(E)
+	c06 float, --加工成型(F)
+	c07 float, --車牙頭數(G)
+	total float, --生產合計
+	ttotal float --累計合計
+)
+
+insert @tmpd(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w
+,s_6tm,s_6tw,s_7tm,s_7tw,s_8tm,s_8tw,s_9tm,s_9tw,s_10tm,s_10tw,s_11tm,s_11tw,s_12tm,s_12tw)
+select gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w
+,s_6tm,s_6tw,s_7tm,s_7tw,s_8tm,s_8tw,s_9tm,s_9tw,s_10tm,s_10tw,s_11tm,s_11tw,s_12tm,s_12tw
+from @tmpb
+
+insert @tmpd(gno,idno,z_spec,z_3w,z_4w,z_5w,z_6w,z_7w,z_8w,z_9w,z_10w,z_11w,z_12w
+,z_3tw,z_4tw,z_5tw,z_6tw,z_7tw,z_8tw,z_9tw,z_10tw,z_11tw,z_12tw)
+select gno,idno,z_spec,z_3w,z_4w,z_5w,z_6w,z_7w,z_8w,z_9w,z_10w,z_11w,z_12w
+,z_3tw,z_4tw,z_5tw,z_6tw,z_7tw,z_8tw,z_9tw,z_10tw,z_11tw,z_12tw 
+from @tmpc
+
+insert @tmpd(gno,idno,days,c01,c02,c03,c04,c05,c06,c07,total,ttotal)
+select gno,idno,days,c01,c02,c03,c04,c05,c06,c07,total,ttotal from @tmpa
+
+--表頭
+if((select count(*) from @tmpb)>0)
+begin
+	insert @tmpd(gno,idno)
+	select '1',0
+end
+if((select count(*) from @tmpc)>0)
+begin
+	insert @tmpd(gno,idno)
+	select '4',0
+end
+if((select count(*) from @tmpa)>0)
+begin
+	insert @tmpd(gno,idno)
+	select '7',0
+end
+
+select 
+dbo.getComma(round(s_6m,0),-1)s_6m,
+dbo.getComma(round(s_6w,0),-1)s_6w,
+dbo.getComma(round(s_7m,0),-1)s_7m,
+dbo.getComma(round(s_7w,0),-1)s_7w,
+dbo.getComma(round(s_8m,0),-1)s_8m,
+dbo.getComma(round(s_8w,0),-1)s_8w,
+dbo.getComma(round(s_9m,0),-1)s_9m,
+dbo.getComma(round(s_9w,0),-1)s_9w,
+dbo.getComma(round(s_10m,0),-1)s_10m,
+dbo.getComma(round(s_10w,0),-1)s_10w,
+dbo.getComma(round(s_11m,0),-1)s_11m,
+dbo.getComma(round(s_11w,0),-1)s_11w,
+dbo.getComma(round(s_12m,0),-1)s_12m,
+dbo.getComma(round(s_12w,0),-1)s_12w,
+dbo.getComma(round(s_6tm,0),-1)s_6tm,
+dbo.getComma(round(s_6tw,0),-1)s_6tw,
+dbo.getComma(round(s_7tm,0),-1)s_7tm,
+dbo.getComma(round(s_7tw,0),-1)s_7tw,
+dbo.getComma(round(s_8tm,0),-1)s_8tm,
+dbo.getComma(round(s_8tw,0),-1)s_8tw,
+dbo.getComma(round(s_9tm,0),-1)s_9tm,
+dbo.getComma(round(s_9tw,0),-1)s_9tw,
+dbo.getComma(round(s_10tm,0),-1)s_10tm,
+dbo.getComma(round(s_10tw,0),-1)s_10tw,
+dbo.getComma(round(s_11tm,0),-1)s_11tm,
+dbo.getComma(round(s_11tw,0),-1)s_11tw,
+dbo.getComma(round(s_12tm,0),-1)s_12tm,
+dbo.getComma(round(s_12tw,0),-1)s_12tw,
+dbo.getComma(round(z_3w,0),-1)z_3w,
+dbo.getComma(round(z_4w,0),-1)z_4w,
+dbo.getComma(round(z_5w,0),-1)z_5w,
+dbo.getComma(round(z_6w,0),-1)z_6w,
+dbo.getComma(round(z_7w,0),-1)z_7w,
+dbo.getComma(round(z_8w,0),-1)z_8w,
+dbo.getComma(round(z_9w,0),-1)z_9w,
+dbo.getComma(round(z_10w,0),-1)z_10w,
+dbo.getComma(round(z_11w,0),-1)z_11w,
+dbo.getComma(round(z_12w,0),-1)z_12w,
+dbo.getComma(round(z_3tw,0),-1)z_3tw,
+dbo.getComma(round(z_4tw,0),-1)z_4tw,
+dbo.getComma(round(z_5tw,0),-1)z_5tw,
+dbo.getComma(round(z_6tw,0),-1)z_6tw,
+dbo.getComma(round(z_7tw,0),-1)z_7tw,
+dbo.getComma(round(z_8tw,0),-1)z_8tw,
+dbo.getComma(round(z_9tw,0),-1)z_9tw,
+dbo.getComma(round(z_10tw,0),-1)z_10tw,
+dbo.getComma(round(z_11tw,0),-1)z_11tw,
+dbo.getComma(round(z_12tw,0),-1)z_12tw,
+"<a id='1剪_"+case when gno='9' then @t_mon else @t_mon+"/"+days end+"' class='showdiv1'"+(case when round(c01,0)>0 then " style='cursor: pointer'" else '' end)+">"+dbo.getComma(round(c01,0),-1)+"</a>"c01,
+"<a id='2剪_"+case when gno='9' then @t_mon else @t_mon+"/"+days end+"' class='showdiv1'"+(case when round(c02,0)>0 then " style='cursor: pointer'" else '' end)+">"+dbo.getComma(round(c02,0),-1)+"</a>"c02,
+"<a id='3剪_"+case when gno='9' then @t_mon else @t_mon+"/"+days end+"' class='showdiv1'"+(case when round(c03,0)>0 then " style='cursor: pointer'" else '' end)+">"+dbo.getComma(round(c03,0),-1)+"</a>"c03,
+"<a id='盤元_"+case when gno='9' then @t_mon else @t_mon+"/"+days end+"' class='showdiv1'"+(case when round(c04,0)>0 then " style='cursor: pointer'" else '' end)+">"+dbo.getComma(round(c04,0),-1)+"</a>"c04,
+"<a id='切割_"+case when gno='9' then @t_mon else @t_mon+"/"+days end+"' class='showdiv1'"+(case when round(c05,0)>0 then " style='cursor: pointer'" else '' end)+">"+dbo.getComma(round(c05,0),-1)+"</a>"c05,
+dbo.getComma(round(c06,0),-1)c06,
+"<a id='車牙_"+case when gno='9' then @t_mon else @t_mon+"/"+days end+"' class='showdiv2'"+(case when round(c07,0)>0 then " style='cursor: pointer'" else '' end)+">"+dbo.getComma(round(c07,0),-1)+"</a>"c07,
+dbo.getComma(round(total,0),-1)total,
+dbo.getComma(round(ttotal,0),-1)ttotal,*
+from @tmpd order by gno,idno
+;
+---------------------------------------------------------------------------------------------------------------------------------
+z_cubp_vu09bk:--z_cubp_vu09bk
+SET QUOTED_IDENTIFIER OFF 
+declare @t_mon nvarchar(30)
+set @t_mon = case when '#non'=[26] then '' else [26] end
+
 declare @result table(
 	gno nvarchar(1),
 	idno int,
@@ -1175,9 +1625,12 @@ begin
 	,SUM(case when isnull(a.worker,'') like '%盤元%' then b.weight else 0 end)
 	,SUM(case when isnull(a.worker,'') like '%切割%' then b.weight else 0 end)
 	,SUM(case when isnull(a.worker,'') like '%加工%' then b.weight else 0 end)
-	,SUM(case when isnull(a.worker,'') like '%車牙%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%車牙%' and b.ucolor like '%續接器%' then 
+	(cast((len(b.ucolor)-len(REPLACE(b.ucolor,'公','')))/len('公') as int)
+	+cast((len(b.ucolor)-len(REPLACE(b.ucolor,'母','')))/len('母') as int)
+	+cast((len(b.ucolor)-len(REPLACE(b.ucolor,'T','')))/len('T') as int))*b.hmount else 0 end)
 	,SUM(case when isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪' or isnull(a.worker,'')='3剪'
-	or isnull(a.worker,'')  like '%盤元%' or isnull(a.worker,'')  like '%切割%' or isnull(a.worker,'')  like '%加工%' or isnull(a.worker,'')  like '%車牙%' 
+	or isnull(a.worker,'')  like '%盤元%' or isnull(a.worker,'')  like '%切割%' --or isnull(a.worker,'')  like '%加工%' or isnull(a.worker,'')  like '%車牙%' 
 	then b.weight else 0 end)
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 	where left(isnull(a.datea,''),len(@t_mon)+3) =@t_mon+'/'+@tdays
@@ -1219,6 +1672,7 @@ declare @result table(
 	gno nvarchar(1),
 	idno int,
 	mon nvarchar(10),
+	xmon nvarchar(10),
 	c01 float, --A剪
 	c02 float, --B剪
 	c03 float, --C剪
@@ -1236,17 +1690,20 @@ while(@mon<=12)
 begin
 	set @tmon=right('00'+cast(@mon as nvarchar(10)),2)
 
-	insert @result (gno,idno,mon,c01,c02,c03,c04,c05,c06,c07,total)
-	select '0',@mon,@tmon+'月'
+	insert @result (gno,idno,mon,xmon,c01,c02,c03,c04,c05,c06,c07,total)
+	select '0',@mon,@tmon+'月',@t_year+'/'+@tmon
 	,SUM(case when isnull(a.worker,'')='1剪' then b.weight else 0 end)
 	,SUM(case when isnull(a.worker,'')='2剪' then b.weight else 0 end)
 	,SUM(case when isnull(a.worker,'')='3剪' then b.weight else 0 end)
 	,SUM(case when isnull(a.worker,'') like '%盤元%' then b.weight else 0 end)
 	,SUM(case when isnull(a.worker,'') like '%切割%' then b.weight else 0 end)
 	,SUM(case when isnull(a.worker,'') like '%加工%' then b.weight else 0 end)
-	,SUM(case when isnull(a.worker,'') like '%車牙%' then b.weight else 0 end)
+	,SUM(case when isnull(a.worker,'') like '%車牙%' and b.ucolor like '%續接器%' then 
+	(cast((len(b.ucolor)-len(REPLACE(b.ucolor,'公','')))/len('公') as int)
+	+cast((len(b.ucolor)-len(REPLACE(b.ucolor,'母','')))/len('母') as int)
+	+cast((len(b.ucolor)-len(REPLACE(b.ucolor,'T','')))/len('T') as int))*b.hmount else 0 end)
 	,SUM(case when isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪' or isnull(a.worker,'')='3剪'
-	or isnull(a.worker,'')  like '%盤元%' or isnull(a.worker,'')  like '%切割%' or isnull(a.worker,'')  like '%加工%' or isnull(a.worker,'')  like '%車牙%' 
+	or isnull(a.worker,'')  like '%盤元%' or isnull(a.worker,'')  like '%切割%' --or isnull(a.worker,'')  like '%加工%' or isnull(a.worker,'')  like '%車牙%' 
 	then b.weight else 0 end)
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 	where left(isnull(a.datea,''),len(@t_year)+3) =@t_year+'/'+@tmon
@@ -1265,14 +1722,15 @@ select '2',14,char(255),avg(c01),avg(c02),avg(c03),avg(c04),avg(c05),avg(c06),av
 from @result where gno='0'
 
 select 
-dbo.getComma(round(c01,0),-1)c01,
-dbo.getComma(round(c02,0),-1)c02,
-dbo.getComma(round(c03,0),-1)c03,
-dbo.getComma(round(c04,0),-1)c04,
-dbo.getComma(round(c05,0),-1)c05,
+case when gno='1' then "<a id='1剪_"+@t_year+"' class='showdiv1'"+(case when round(c01,0)>0 then " style='cursor: pointer'" else '' end)+">" else '' end+dbo.getComma(round(c01,0),-1)+(case when gno='1' then "</a>" else '' end) c01,
+case when gno='1' then "<a id='2剪_"+@t_year+"' class='showdiv1'"+(case when round(c02,0)>0 then " style='cursor: pointer'" else '' end)+">" else '' end+dbo.getComma(round(c02,0),-1)+(case when gno='1' then "</a>" else '' end) c02,
+case when gno='1' then "<a id='3剪_"+@t_year+"' class='showdiv1'"+(case when round(c03,0)>0 then " style='cursor: pointer'" else '' end)+">" else '' end+dbo.getComma(round(c03,0),-1)+(case when gno='1' then "</a>" else '' end) c03,
+case when gno='1' then "<a id='盤元_"+@t_year+"' class='showdiv1'"+(case when round(c04,0)>0 then " style='cursor: pointer'" else '' end)+">" else '' end+dbo.getComma(round(c04,0),-1)+(case when gno='1' then "</a>" else '' end) c04,
+case when gno='1' then "<a id='切割_"+@t_year+"' class='showdiv1'"+(case when round(c05,0)>0 then " style='cursor: pointer'" else '' end)+">" else '' end+dbo.getComma(round(c05,0),-1)+(case when gno='1' then "</a>" else '' end) c05,
 dbo.getComma(round(c06,0),-1)c06,
-dbo.getComma(round(c07,0),-1)c07,
-dbo.getComma(round(total,0),-1)total,
+case when gno='1' then "<a id='車牙_"+@t_year+"' class='showdiv2'"+(case when round(c07,0)>0 then " style='cursor: pointer'" else '' end)+">" else '' end+dbo.getComma(round(c07,0),-1)+(case when gno='1' then "</a>" else '' end) c07,
+case when gno='1' then "<a id='#non_"+@t_year+"' class='showdiv1'"+(case when round(total,0)>0 then " style='cursor: pointer'" else '' end)+">" else '' end+dbo.getComma(round(total,0),-1)+(case when gno='1' then "</a>" else '' end) total,
+"z_cubp_vu?report=\'z_cubp_vu09\' and mon=\'"+xmon+"\' and "+cast(total as nvarchar(100))+"=$total" qhrefa,
 * from @result order by idno,gno
 ;
 ---------------------------------------------------------------------------------------------------------------------------------
@@ -1357,4 +1815,287 @@ dbo.getComma(mount,-1)mount,
 dbo.getComma(hmount,-1)hmount,
 dbo.getComma(weight,-1)weight,
 * from @result order by recno,gno,no2,spec,size,lengthb
+;
+---------------------------------------------------------------------------------------------------------------------------------
+z_cubp_vu12:--z_cubp_vu12
+SET QUOTED_IDENTIFIER OFF 
+declare @t_mon nvarchar(30)
+declare @t_worker nvarchar(30)
+set @t_mon = case when '#non'=[26] then '' else [26] end
+set @t_worker = case when '#non'=[29] then '' else [29] end
+
+declare @tmpa table(
+	gno nvarchar(1),
+	idno int,
+	z_spec nvarchar(50),
+	z_3w float,
+	z_3tw float,
+	z_4w float,
+	z_4tw float,
+	z_5w float,
+	z_5tw float,
+	z_6w float,
+	z_6tw float,
+	z_7w float,
+	z_7tw float,
+	z_8w float,
+	z_8tw float,
+	z_9w float,
+	z_9tw float,
+	z_10w float,
+	z_10tw float,
+	z_11w float,
+	z_11tw float,
+	z_12w float,
+	z_12tw float
+)
+
+insert @tmpa(gno,idno,z_spec,z_3w,z_4w,z_5w,z_6w,z_7w,z_8w,z_9w,z_10w,z_11w,z_12w)
+select '2',ROW_NUMBER() over (order by b.spec),b.spec
+,sum(case when size='#3' then b.weight else 0 end)
+,sum(case when size='#4' then b.weight else 0 end)
+,sum(case when size='#5' then b.weight else 0 end)
+,sum(case when size='#6' then b.weight else 0 end)
+,sum(case when size='#7' then b.weight else 0 end)
+,sum(case when size='#8' then b.weight else 0 end)
+,sum(case when size='#9' then b.weight else 0 end)
+,sum(case when size='#10' then b.weight else 0 end)
+,sum(case when size='#11' then b.weight else 0 end)
+,sum(case when size='#12' then b.weight else 0 end)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and (isnull(a.worker,'')='1剪'
+or isnull(a.worker,'')='2剪'
+or isnull(a.worker,'')='3剪'
+or isnull(a.worker,'')like '%盤元%'
+or isnull(a.worker,'')like '%切割%')
+and (len(@t_worker)=0 or a.worker=@t_worker)
+group by b.spec
+
+if((select count(*) from @tmpa)>0)
+begin
+	insert @tmpa(gno,idno,z_spec,z_3tw,z_4tw,z_5tw,z_6tw,z_7tw,z_8tw,z_9tw,z_10tw,z_11tw,z_12tw)
+	select '3','9','合計',SUM(z_3w),SUM(z_4w),SUM(z_5w),SUM(z_6w),SUM(z_7w),SUM(z_8w),SUM(z_9w),SUM(z_10w),SUM(z_11w),SUM(z_12w)
+	from @tmpa
+end
+
+--select * from @tmpa
+
+declare @tmpb table(
+	gno nvarchar(1),
+	idno int,
+	z_spec nvarchar(50),
+	d_01 float,d_02 float,d_03 float,d_04 float,d_05 float,
+	d_06 float,d_07 float,d_08 float,d_09 float,d_10 float,
+	d_11 float,d_12 float,d_13 float,d_14 float,d_15 float,
+	d_16 float,d_17 float,d_18 float,d_19 float,d_20 float,
+	d_21 float,d_22 float,d_23 float,d_24 float,d_25 float,
+	d_26 float,d_27 float,d_28 float,d_29 float,d_30 float,
+	d_31 float
+)
+
+insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+select '5',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
+,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='05' then b.weight else 0 end),sum(case when right(a.datea,2)='06' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='07' then b.weight else 0 end),sum(case when right(a.datea,2)='08' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='09' then b.weight else 0 end),sum(case when right(a.datea,2)='10' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='11' then b.weight else 0 end),sum(case when right(a.datea,2)='12' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='13' then b.weight else 0 end),sum(case when right(a.datea,2)='14' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='15' then b.weight else 0 end),sum(case when right(a.datea,2)='16' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='17' then b.weight else 0 end),sum(case when right(a.datea,2)='18' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='19' then b.weight else 0 end),sum(case when right(a.datea,2)='20' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='21' then b.weight else 0 end),sum(case when right(a.datea,2)='22' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='23' then b.weight else 0 end),sum(case when right(a.datea,2)='24' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and (isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪'or isnull(a.worker,'')='3剪'
+or isnull(a.worker,'')like '%盤元%'or isnull(a.worker,'')like '%切割%')
+and (len(@t_worker)=0 or a.worker=@t_worker)
+and b.size='#3'
+group by b.spec,b.size
+
+insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+select '6',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
+,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='05' then b.weight else 0 end),sum(case when right(a.datea,2)='06' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='07' then b.weight else 0 end),sum(case when right(a.datea,2)='08' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='09' then b.weight else 0 end),sum(case when right(a.datea,2)='10' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='11' then b.weight else 0 end),sum(case when right(a.datea,2)='12' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='13' then b.weight else 0 end),sum(case when right(a.datea,2)='14' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='15' then b.weight else 0 end),sum(case when right(a.datea,2)='16' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='17' then b.weight else 0 end),sum(case when right(a.datea,2)='18' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='19' then b.weight else 0 end),sum(case when right(a.datea,2)='20' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='21' then b.weight else 0 end),sum(case when right(a.datea,2)='22' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='23' then b.weight else 0 end),sum(case when right(a.datea,2)='24' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and (isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪'or isnull(a.worker,'')='3剪'
+or isnull(a.worker,'')like '%盤元%'or isnull(a.worker,'')like '%切割%')
+and (len(@t_worker)=0 or a.worker=@t_worker)
+and b.size='#4'
+group by b.spec,b.size
+
+insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+select '7',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
+,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='05' then b.weight else 0 end),sum(case when right(a.datea,2)='06' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='07' then b.weight else 0 end),sum(case when right(a.datea,2)='08' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='09' then b.weight else 0 end),sum(case when right(a.datea,2)='10' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='11' then b.weight else 0 end),sum(case when right(a.datea,2)='12' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='13' then b.weight else 0 end),sum(case when right(a.datea,2)='14' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='15' then b.weight else 0 end),sum(case when right(a.datea,2)='16' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='17' then b.weight else 0 end),sum(case when right(a.datea,2)='18' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='19' then b.weight else 0 end),sum(case when right(a.datea,2)='20' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='21' then b.weight else 0 end),sum(case when right(a.datea,2)='22' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='23' then b.weight else 0 end),sum(case when right(a.datea,2)='24' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and (isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪'or isnull(a.worker,'')='3剪'
+or isnull(a.worker,'')like '%盤元%'or isnull(a.worker,'')like '%切割%')
+and (len(@t_worker)=0 or a.worker=@t_worker)
+and b.size='#5'
+group by b.spec,b.size
+
+insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+select '8',ROW_NUMBER() over (order by cast(dbo.get_num(b.size) as int),b.spec),b.spec+'<BR>'+b.size
+,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='05' then b.weight else 0 end),sum(case when right(a.datea,2)='06' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='07' then b.weight else 0 end),sum(case when right(a.datea,2)='08' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='09' then b.weight else 0 end),sum(case when right(a.datea,2)='10' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='11' then b.weight else 0 end),sum(case when right(a.datea,2)='12' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='13' then b.weight else 0 end),sum(case when right(a.datea,2)='14' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='15' then b.weight else 0 end),sum(case when right(a.datea,2)='16' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='17' then b.weight else 0 end),sum(case when right(a.datea,2)='18' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='19' then b.weight else 0 end),sum(case when right(a.datea,2)='20' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='21' then b.weight else 0 end),sum(case when right(a.datea,2)='22' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='23' then b.weight else 0 end),sum(case when right(a.datea,2)='24' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and (isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪'or isnull(a.worker,'')='3剪'
+or isnull(a.worker,'')like '%盤元%'or isnull(a.worker,'')like '%切割%')
+and (len(@t_worker)=0 or a.worker=@t_worker)
+and b.size!='#3' and b.size!='#4' and b.size!='#5'
+group by b.spec,b.size
+
+if((select count(*) from @tmpb)>0)
+begin
+	insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
+	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+	select '9',1,'合計'
+	,SUM(d_01),SUM(d_02),SUM(d_03),SUM(d_04),SUM(d_05),SUM(d_06),SUM(d_07),SUM(d_08),SUM(d_09),SUM(d_10)
+	,SUM(d_11),SUM(d_12),SUM(d_13),SUM(d_14),SUM(d_15),SUM(d_16),SUM(d_17),SUM(d_18),SUM(d_19),SUM(d_20)
+	,SUM(d_21),SUM(d_22),SUM(d_23),SUM(d_24),SUM(d_25),SUM(d_26),SUM(d_27),SUM(d_28),SUM(d_29),SUM(d_30),SUM(d_31)
+	from @tmpb
+end
+
+--select * from @tmpb order by gno,idno
+
+--合併--------------------------------------------------------------------------------------------------------------------
+
+declare @tmpc table(
+	gno nvarchar(1),
+	idno int,
+	z_spec nvarchar(50),
+	----------------------------------------------------------
+	z_3w float,z_3tw float,z_4w float,z_4tw float,
+	z_5w float,z_5tw float,z_6w float,z_6tw float,
+	z_7w float,z_7tw float,z_8w float,z_8tw float,
+	z_9w float,z_9tw float,z_10w float,z_10tw float,
+	z_11w float,z_11tw float,z_12w float,z_12tw float,
+	----------------------------------------------------------
+	d_01 float,d_02 float,d_03 float,d_04 float,d_05 float,
+	d_06 float,d_07 float,d_08 float,d_09 float,d_10 float,
+	d_11 float,d_12 float,d_13 float,d_14 float,d_15 float,
+	d_16 float,d_17 float,d_18 float,d_19 float,d_20 float,
+	d_21 float,d_22 float,d_23 float,d_24 float,d_25 float,
+	d_26 float,d_27 float,d_28 float,d_29 float,d_30 float,
+	d_31 float
+)
+
+if((select count(*) from @tmpa)>0)
+begin
+	--表頭
+	insert @tmpc(gno,idno)
+	select '1',0
+	insert @tmpc(gno,idno,z_spec,z_3w,z_4w,z_5w,z_6w,z_7w,z_8w,z_9w,z_10w,z_11w,z_12w
+	,z_3tw,z_4tw,z_5tw,z_6tw,z_7tw,z_8tw,z_9tw,z_10tw,z_11tw,z_12tw)
+	select gno,idno,z_spec,z_3w,z_4w,z_5w,z_6w,z_7w,z_8w,z_9w,z_10w,z_11w,z_12w
+	,z_3tw,z_4tw,z_5tw,z_6tw,z_7tw,z_8tw,z_9tw,z_10tw,z_11tw,z_12tw from @tmpa
+end
+
+if((select count(*) from @tmpb)>0)
+begin
+	--表頭
+	insert @tmpc(gno,idno)
+	select '4',0
+	insert @tmpc(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
+	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+	select gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
+	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31 from @tmpb
+end
+
+select 
+dbo.getComma(round(z_3w,0),-1)z_3w,dbo.getComma(round(z_4w,0),-1)z_4w,
+dbo.getComma(round(z_5w,0),-1)z_5w,dbo.getComma(round(z_6w,0),-1)z_6w,
+dbo.getComma(round(z_7w,0),-1)z_7w,dbo.getComma(round(z_8w,0),-1)z_8w,
+dbo.getComma(round(z_9w,0),-1)z_9w,dbo.getComma(round(z_10w,0),-1)z_10w,
+dbo.getComma(round(z_11w,0),-1)z_11w,dbo.getComma(round(z_12w,0),-1)z_12w,
+dbo.getComma(round(z_3tw,0),-1)z_3tw,dbo.getComma(round(z_4tw,0),-1)z_4tw,
+dbo.getComma(round(z_5tw,0),-1)z_5tw,dbo.getComma(round(z_6tw,0),-1)z_6tw,
+dbo.getComma(round(z_7tw,0),-1)z_7tw,dbo.getComma(round(z_8tw,0),-1)z_8tw,
+dbo.getComma(round(z_9tw,0),-1)z_9tw,dbo.getComma(round(z_10tw,0),-1)z_10tw,
+dbo.getComma(round(z_11tw,0),-1)z_11tw,dbo.getComma(round(z_12tw,0),-1)z_12tw,
+dbo.getComma(round(d_01,0),-1)d_01,dbo.getComma(round(d_02,0),-1)d_02,
+dbo.getComma(round(d_03,0),-1)d_03,dbo.getComma(round(d_04,0),-1)d_04,
+dbo.getComma(round(d_05,0),-1)d_05,dbo.getComma(round(d_06,0),-1)d_06,
+dbo.getComma(round(d_07,0),-1)d_07,dbo.getComma(round(d_08,0),-1)d_08,
+dbo.getComma(round(d_09,0),-1)d_09,dbo.getComma(round(d_10,0),-1)d_10,
+dbo.getComma(round(d_11,0),-1)d_11,dbo.getComma(round(d_12,0),-1)d_12,
+dbo.getComma(round(d_13,0),-1)d_13,dbo.getComma(round(d_14,0),-1)d_14,
+dbo.getComma(round(d_15,0),-1)d_15,dbo.getComma(round(d_16,0),-1)d_16,
+dbo.getComma(round(d_17,0),-1)d_17,dbo.getComma(round(d_18,0),-1)d_18,
+dbo.getComma(round(d_19,0),-1)d_19,dbo.getComma(round(d_20,0),-1)d_20,
+dbo.getComma(round(d_21,0),-1)d_21,dbo.getComma(round(d_22,0),-1)d_22,
+dbo.getComma(round(d_23,0),-1)d_23,dbo.getComma(round(d_24,0),-1)d_24,
+dbo.getComma(round(d_25,0),-1)d_25,dbo.getComma(round(d_26,0),-1)d_26,
+dbo.getComma(round(d_27,0),-1)d_27,dbo.getComma(round(d_28,0),-1)d_28,
+dbo.getComma(round(d_29,0),-1)d_29,dbo.getComma(round(d_30,0),-1)d_30,
+dbo.getComma(round(d_31,0),-1)d_31,*,
+case when @t_worker='1剪' then 'A剪' when @t_worker='2剪' then 'B剪' when @t_worker='3剪' then 'C剪' else '全廠' end yworker
+from @tmpc order by gno,idno
 ;

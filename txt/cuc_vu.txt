@@ -1159,3 +1159,256 @@ EXECUTE sp_executesql @cmd
 
 select noa,noq,storeno,store from view_gets where noa=@noa and noq=@noq
 ;
+---------------------------------------------------------------------------------------
+zcubpdiv9_1:--zcubpdiv9_1
+SET QUOTED_IDENTIFIER OFF
+declare @t_datea nvarchar(30)
+declare @t_worker nvarchar(30)
+set @t_datea = [1]
+set @t_worker=case when '#non'=[2] then '' else [2] end
+
+declare @tmp table(
+	gno nvarchar(1),
+	idno int,
+	z_spec nvarchar(50),
+	z_3w float,
+	z_4w float,
+	z_5w float,
+	z_6w float,
+	z_7w float,
+	z_8w float,
+	z_9w float,
+	z_10w float,
+	z_11w float,
+	z_12w float
+)
+
+insert @tmp(gno,idno,z_spec,z_3w,z_4w,z_5w,z_6w,z_7w,z_8w,z_9w,z_10w,z_11w,z_12w)
+select '1',ROW_NUMBER() over (order by b.spec),b.spec
+,sum(case when size='#3' then b.weight else 0 end)
+,sum(case when size='#4' then b.weight else 0 end)
+,sum(case when size='#5' then b.weight else 0 end)
+,sum(case when size='#6' then b.weight else 0 end)
+,sum(case when size='#7' then b.weight else 0 end)
+,sum(case when size='#8' then b.weight else 0 end)
+,sum(case when size='#9' then b.weight else 0 end)
+,sum(case when size='#10' then b.weight else 0 end)
+,sum(case when size='#11' then b.weight else 0 end)
+,sum(case when size='#12' then b.weight else 0 end)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_datea)) =@t_datea
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and (len(@t_worker)=0 or isnull(a.worker,'') like '%'+@t_worker+'%')
+and (isnull(a.worker,'')='1剪'
+or isnull(a.worker,'')='2剪'
+or isnull(a.worker,'')='3剪'
+or isnull(a.worker,'')like '%盤元%'
+or isnull(a.worker,'')like '%切割%')
+group by b.spec
+
+if((select count(*) from @tmp)>0)
+begin
+	insert @tmp(gno,idno,z_spec,z_3w,z_4w,z_5w,z_6w,z_7w,z_8w,z_9w,z_10w,z_11w,z_12w)
+	select '2','9','合計',SUM(z_3w),SUM(z_4w),SUM(z_5w),SUM(z_6w),SUM(z_7w),SUM(z_8w),SUM(z_9w),SUM(z_10w),SUM(z_11w),SUM(z_12w)
+	from @tmp
+end
+
+select * from @tmp order by gno,idno
+;
+---------------------------------------------------------------------------------------
+zcubpdiv9_2:--zcubpdiv9_2
+SET QUOTED_IDENTIFIER OFF
+declare @t_datea nvarchar(30)
+set @t_datea = [1]
+
+declare @tmp table(
+	gno nvarchar(1),
+	idno int,
+	s_spec nvarchar(50),
+	s_6m float, --#6
+	s_6w float,
+	s_7m float, --#7
+	s_7w float,
+	s_8m float, --#8
+	s_8w float,
+	s_9m float, --#9
+	s_9w float,
+	s_10m float, --#10
+	s_10w float,
+	s_11m float, --#11
+	s_11w float,
+	s_12m float, --#12
+	s_12w float
+) 
+
+insert @tmp(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '1',1,'公_直牙'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6公','')))/len('#6公') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6公','')))/len('#6公') as int)*b.hmount*0.084 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7公','')))/len('#7公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7公','')))/len('#7公') as int)*b.hmount*0.124 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8公','')))/len('#8公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8公','')))/len('#8公') as int)*b.hmount*0.178 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9公','')))/len('#9公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9公','')))/len('#9公') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10公','')))/len('#10公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10公','')))/len('#10公') as int)*b.hmount*0.361
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11公','')))/len('#11公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11公','')))/len('#11公') as int)*b.hmount*0.532 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12公','')))/len('#12公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12公','')))/len('#12公') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_datea)) =@t_datea
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%直牙%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+
+insert @tmp(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '1',2,'母_直牙'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6母','')))/len('#6母') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6母','')))/len('#6母') as int)*b.hmount*0.107 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7母','')))/len('#7母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7母','')))/len('#7母') as int)*b.hmount*0.136 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8母','')))/len('#8母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8母','')))/len('#8母') as int)*b.hmount*0.205 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9母','')))/len('#9母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9母','')))/len('#9母') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10母','')))/len('#10母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10母','')))/len('#10母') as int)*b.hmount*0.407
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11母','')))/len('#11母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11母','')))/len('#11母') as int)*b.hmount*0.489 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12母','')))/len('#12母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12母','')))/len('#12母') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_datea)) =@t_datea
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%直牙%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+--------------------------------------------------------------------------------------------------------
+insert @tmp(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '1',3,'公_錐牙'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6公','')))/len('#6公') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6公','')))/len('#6公') as int)*b.hmount*0.084 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7公','')))/len('#7公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7公','')))/len('#7公') as int)*b.hmount*0.124 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8公','')))/len('#8公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8公','')))/len('#8公') as int)*b.hmount*0.172 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9公','')))/len('#9公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9公','')))/len('#9公') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10公','')))/len('#10公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10公','')))/len('#10公') as int)*b.hmount*0.323
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11公','')))/len('#11公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11公','')))/len('#11公') as int)*b.hmount*0.445 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12公','')))/len('#12公') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12公','')))/len('#12公') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_datea)) =@t_datea
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%錐牙%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+
+insert @tmp(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '1',4,'母_錐牙'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6母','')))/len('#6母') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6母','')))/len('#6母') as int)*b.hmount*0.095 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7母','')))/len('#7母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7母','')))/len('#7母') as int)*b.hmount*0.131 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8母','')))/len('#8母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8母','')))/len('#8母') as int)*b.hmount*0.188 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9母','')))/len('#9母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9母','')))/len('#9母') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10母','')))/len('#10母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10母','')))/len('#10母') as int)*b.hmount*0.347
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11母','')))/len('#11母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11母','')))/len('#11母') as int)*b.hmount*0.496 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12母','')))/len('#12母') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12母','')))/len('#12母') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_datea)) =@t_datea
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%錐牙%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+--------------------------------------------------------------------------------------------------------
+insert @tmp(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+select '1',5,'T頭'
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6T','')))/len('#6T') as int)*b.hmount --出現次數*鋼筋支數
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#6T','')))/len('#6T') as int)*b.hmount*0.231 --出現次數*鋼筋支數*比重
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7T','')))/len('#7T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#7T','')))/len('#7T') as int)*b.hmount*0.361 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8T','')))/len('#8T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#8T','')))/len('#8T') as int)*b.hmount*0.547 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9T','')))/len('#9T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#9T','')))/len('#9T') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10T','')))/len('#10T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#10T','')))/len('#10T') as int)*b.hmount*1.024
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11T','')))/len('#11T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#11T','')))/len('#11T') as int)*b.hmount*null 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12T','')))/len('#12T') as int)*b.hmount 
+,cast((len(b.ucolor)-len(REPLACE(b.ucolor,'#12T','')))/len('#12T') as int)*b.hmount*null 
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_datea)) =@t_datea
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and b.ucolor like '%T頭%' and b.ucolor like '%續接器%'
+and isnull(a.worker,'') like '%車牙%'
+
+if((select count(*) from @tmp)>0)
+begin
+	insert @tmp(gno,idno,s_spec,s_6m,s_6w,s_7m,s_7w,s_8m,s_8w,s_9m,s_9w,s_10m,s_10w,s_11m,s_11w,s_12m,s_12w)
+	select '2',6,'合計',sum(s_6m),sum(s_6w),sum(s_7m),sum(s_7w),sum(s_8m),sum(s_8w),sum(s_9m),sum(s_9w),sum(s_10m),sum(s_10w),sum(s_11m),sum(s_11w),sum(s_12m),sum(s_12w)
+	from @tmp where gno='1'
+end
+
+select * from @tmp order by gno,idno
+;
+---------------------------------------------------------------------------------------
+zcubpsvg9:--zcubpsvg9
+SET QUOTED_IDENTIFIER OFF 
+declare @t_mon nvarchar(30)
+set @t_mon = [1]
+
+declare @tmp table(
+	idno int,
+	worker nvarchar(50),
+	d_01 float,d_02 float,d_03 float,d_04 float,d_05 float,
+	d_06 float,d_07 float,d_08 float,d_09 float,d_10 float,
+	d_11 float,d_12 float,d_13 float,d_14 float,d_15 float,
+	d_16 float,d_17 float,d_18 float,d_19 float,d_20 float,
+	d_21 float,d_22 float,d_23 float,d_24 float,d_25 float,
+	d_26 float,d_27 float,d_28 float,d_29 float,d_30 float,
+	d_31 float
+)
+
+insert @tmp(idno,worker,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+select ROW_NUMBER() over (order by a.worker),a.worker
+,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='05' then b.weight else 0 end),sum(case when right(a.datea,2)='06' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='07' then b.weight else 0 end),sum(case when right(a.datea,2)='08' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='09' then b.weight else 0 end),sum(case when right(a.datea,2)='10' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='11' then b.weight else 0 end),sum(case when right(a.datea,2)='12' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='13' then b.weight else 0 end),sum(case when right(a.datea,2)='14' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='15' then b.weight else 0 end),sum(case when right(a.datea,2)='16' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='17' then b.weight else 0 end),sum(case when right(a.datea,2)='18' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='19' then b.weight else 0 end),sum(case when right(a.datea,2)='20' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='21' then b.weight else 0 end),sum(case when right(a.datea,2)='22' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='23' then b.weight else 0 end),sum(case when right(a.datea,2)='24' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
+where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
+and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
+and isnull(b.uno,'')!='' and b.ucolor!='板料'
+and (isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪'or isnull(a.worker,'')='3剪')
+group by a.worker
+
+select * from @tmp order by idno
+;

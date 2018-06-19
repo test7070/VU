@@ -75,6 +75,7 @@
 				q_cmbParse("combParag1", ',#6,#7,#8,#9,#10,#11,#12','s');
 				q_cmbParse("combParaf2", ',公,母,T','s');
 				q_cmbParse("combParag2", ',公,母,T','s');
+				q_cmbParse("cmbMount3", '0@,10@5.0~5.99,20@6.0~6.99,40@7.0~7.99,60@8.0~8.99,80@9.0~9.99,100@10.0~10.99,120@11.0~11.99,140@12.0~12.99,160@13.0~13.99,180@14.0~14.99,200@15.0~15.99,220@16.0~16.99,240@17.0~17.99,260@18.0~18.99','s');
 				
 				if(r_len==4){                	
                 	$.datepicker.r_len=4;
@@ -156,6 +157,7 @@
 							string+='<td style="text-align: center;"><select id="combScolor_'+j+'" class="txt comb combScolor c1"> </select></td>';
 							string+='<td style="text-align: center;"><select id="combParafa_'+j+'" class="txt comb combParafa"> </select><select id="combParafb_'+j+'" class="txt comb combParafb"> </select>';
 							string+='<a>---</a><select id="combParaga_'+j+'" class="txt comb combParaga"> </select><select id="combParagb_'+j+'" class="txt comb combParagb"> </select></td>';
+							string+='<td style="text-align: center;"><select id="combMount3_'+j+'" class="txt comb combMount3 c1"> </select></td>';
 							string+='<td style="text-align: center;">'+(dec($('#txtRadius_'+j).val())>0?'V':'')+'</td>';
 							string+='<td style="text-align: center;"><img id="timgpic'+j+'" src="'+$('#imgPic_'+j).attr('src')+'" style="width:100px;"></td>';
 							string+='<td style="text-align: center;">'+$('#txtMemo_'+j).val()+'</td>';
@@ -174,6 +176,18 @@
 							$(this).change(function() {
 								var t_ns=$(this).attr('id').split('_')[1];
 								$('#cmbScolor_'+t_ns).val($(this).val());
+							});
+						});
+						
+						$('.combMount3').each(function(index) {
+							var t_id=$(this).attr('id');
+							var t_n=$(this).attr('id').split('_')[1];
+							q_cmbParse(t_id, '0@,10@5.0~5.99,20@6.0~6.99,40@7.0~7.99,60@8.0~8.99,80@9.0~9.99,100@10.0~10.99,120@11.0~11.99,140@12.0~12.99,160@13.0~13.99,180@14.0~14.99,200@15.0~15.99,220@16.0~16.99,240@17.0~17.99,260@18.0~18.99');
+							$('#'+t_id).val($('#cmbMount3_'+t_n).val());
+							
+							$(this).change(function() {
+								var t_ns=$(this).attr('id').split('_')[1];
+								$('#cmbMount3_'+t_ns).val($(this).val());
 							});
 						});
 						
@@ -717,15 +731,31 @@
 							weighttotal();
 						});
 						
+						$('#checkDime_'+j).click(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(q_cur==1 || q_cur==2){
+								if($('#checkDime_'+b_seq).prop('checked'))
+									$('#txtDime_'+b_seq).val(1);
+								else
+									$('#txtDime_'+b_seq).val(0);
+							}
+							weighttotal();
+						});
+						
 						$('#cmbMount2_' + j).change(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							
+							var t_lenb=dec($('#txtLengthb_'+b_seq).val());
+							
 							if($('#cmbMount2_'+b_seq).val()=='0'){
 								$('#cmbScolor_'+b_seq).val('');
 								$('#txtParaf_'+b_seq).val('');
 								$('#txtParag_'+b_seq).val('');
+								$('#cmbMount3_'+b_seq).val('0');
 							}else if($('#cmbMount2_'+b_seq).val()=='1'){
 								if(emp($('#cmbScolor_'+b_seq).val())){
 									$('#cmbScolor_'+b_seq).val('續接器-直牙');
@@ -740,6 +770,39 @@
 									$('#txtParaf_'+b_seq).val(t_size+'公');
 								}
 								$('#txtParag_'+b_seq).val('');
+								if(t_lenb<5){
+									$('#cmbMount3_'+b_seq).val('0');
+								}else if(t_lenb<6){
+									$('#cmbMount3_'+b_seq).val('10');
+								}else if(t_lenb<7){
+									$('#cmbMount3_'+b_seq).val('20');
+								}else if(t_lenb<8){
+									$('#cmbMount3_'+b_seq).val('40');
+								}else if(t_lenb<9){
+									$('#cmbMount3_'+b_seq).val('60');
+								}else if(t_lenb<10){
+									$('#cmbMount3_'+b_seq).val('80');
+								}else if(t_lenb<11){
+									$('#cmbMount3_'+b_seq).val('100');
+								}else if(t_lenb<12){
+									$('#cmbMount3_'+b_seq).val('120');
+								}else if(t_lenb<13){
+									$('#cmbMount3_'+b_seq).val('140');
+								}else if(t_lenb<14){
+									$('#cmbMount3_'+b_seq).val('160');
+								}else if(t_lenb<15){
+									$('#cmbMount3_'+b_seq).val('180');
+								}else if(t_lenb<16){
+									$('#cmbMount3_'+b_seq).val('200');
+								}else if(t_lenb<17){
+									$('#cmbMount3_'+b_seq).val('220');
+								}else if(t_lenb<18){
+									$('#cmbMount3_'+b_seq).val('240');
+								}else if(t_lenb<19){
+									$('#cmbMount3_'+b_seq).val('260');
+								}else{
+									$('#cmbMount3_'+b_seq).val('0');
+								}
 							}else{
 								if(emp($('#cmbScolor_'+b_seq).val())){
 									$('#cmbScolor_'+b_seq).val('續接器-直牙');
@@ -752,6 +815,39 @@
 									
 									$('#txtParaf_'+b_seq).val(t_size+'公');
 									$('#txtParag_'+b_seq).val(t_size+'母');
+								}
+								if(t_lenb<5){
+									$('#cmbMount3_'+b_seq).val('0');
+								}else if(t_lenb<6){
+									$('#cmbMount3_'+b_seq).val('10');
+								}else if(t_lenb<7){
+									$('#cmbMount3_'+b_seq).val('20');
+								}else if(t_lenb<8){
+									$('#cmbMount3_'+b_seq).val('40');
+								}else if(t_lenb<9){
+									$('#cmbMount3_'+b_seq).val('60');
+								}else if(t_lenb<10){
+									$('#cmbMount3_'+b_seq).val('80');
+								}else if(t_lenb<11){
+									$('#cmbMount3_'+b_seq).val('100');
+								}else if(t_lenb<12){
+									$('#cmbMount3_'+b_seq).val('120');
+								}else if(t_lenb<13){
+									$('#cmbMount3_'+b_seq).val('140');
+								}else if(t_lenb<14){
+									$('#cmbMount3_'+b_seq).val('160');
+								}else if(t_lenb<15){
+									$('#cmbMount3_'+b_seq).val('180');
+								}else if(t_lenb<16){
+									$('#cmbMount3_'+b_seq).val('200');
+								}else if(t_lenb<17){
+									$('#cmbMount3_'+b_seq).val('220');
+								}else if(t_lenb<18){
+									$('#cmbMount3_'+b_seq).val('240');
+								}else if(t_lenb<19){
+									$('#cmbMount3_'+b_seq).val('260');
+								}else{
+									$('#cmbMount3_'+b_seq).val('0');
 								}
 							}
 							change_parafg();
@@ -952,6 +1048,7 @@
                 $('#lblWeight_s').text('重量(KG)');
                 $('#lblMemo_s').text('備註 (標籤)');
                 $('#lblRadius_s').text('彎');
+                $('#lblDime_s').text('成');
                 $('#lblMins_s').text('裁剪完工');
                 $('#lblWaste_s').text('成型完工');
                 $('#lblHours_s').text('車牙完工');
@@ -971,6 +1068,8 @@
 				$('#lblParae_s').text('參數E');
 				$('#lblParaf_s').text('續接參數F');
 				$('#lblParag_s').text('續接參數G');
+				$('#lblScolor_vu_s').text('續接名稱');
+				$('#lblMount3_s').text('續接超長加價');
                 
                 //1117複製功能
                 $('#btnProductCopy').click(function() {
@@ -1139,6 +1238,8 @@
             		$('#txtMemo_'+t_n).val($('#txtMemo_'+t_pn).val());
             		$('#checkRadius_'+t_n).prop('checked',$('#checkRadius_'+t_pn).prop('checked'));
             		$('#txtRadius_'+t_n).val($('#txtRadius_'+t_pn).val());
+            		$('#checkDime_'+t_n).prop('checked',$('#checkDime_'+t_pn).prop('checked'));
+            		$('#txtDime_'+t_n).val($('#txtDime_'+t_pn).val());
             		$('#cmbMount2_'+t_n).val($('#cmbMount2_'+t_pn).val());
             		$('#txtPicno_'+t_n).val($('#txtPicno_'+t_pn).val());
             		$('#txtPicname_'+t_n).val($('#txtPicname_'+t_pn).val());
@@ -1156,6 +1257,7 @@
             		$('#txtParaf_'+t_n).val($('#txtParaf_'+t_pn).val());
             		$('#txtParag_'+t_n).val($('#txtParag_'+t_pn).val());
             		$('#cmbScolor_'+t_n).val($('#cmbScolor_'+t_pn).val());
+            		$('#cmbMount3_'+t_n).val($('#cmbMount3_'+t_pn).val());
             	}
             	change_parafg();
             }
@@ -1543,11 +1645,13 @@
 					if(q_cur==1 || q_cur==2){
 						$('#checkMins_'+i).removeAttr('disabled');
 						$('#checkRadius_'+i).removeAttr('disabled');
+						$('#checkDime_'+i).removeAttr('disabled');
 						$('#checkHours_'+i).removeAttr('disabled');
 						$('#checkWaste_'+i).removeAttr('disabled');
 					}else{
 						$('#checkMins_'+i).attr('disabled', 'disabled');
 						$('#checkRadius_'+i).attr('disabled', 'disabled');
+						$('#checkDime_'+i).attr('disabled', 'disabled');
 						$('#checkHours_'+i).attr('disabled', 'disabled');
 						$('#checkWaste_'+i).attr('disabled', 'disabled');
 					}
@@ -1560,6 +1664,11 @@
 						$('#checkRadius_'+i).prop('checked',false);
 					}else{
 						$('#checkRadius_'+i).prop('checked',true);
+					}
+					if($('#txtDime_'+i).val()==0){
+						$('#checkDime_'+i).prop('checked',false);
+					}else{
+						$('#checkDime_'+i).prop('checked',true);
 					}
 					if($('#txtHours_'+i).val()==0){
 						$('#checkHours_'+i).prop('checked',false);
@@ -1613,8 +1722,8 @@
 			
 			function bbswidth() {
 				var t_width=1750; //預設寬度
-				if($('#btnShowpara').val()=='參數關閉'){ //成型參數顯示
-					t_width=t_width+850;
+				if($('#btnShowpara').val()=='參數關閉'){ //參數顯示
+					t_width=t_width+1000;
 					$('.para').show();
 				}else{
 					$('.para').hide();
@@ -2224,6 +2333,7 @@
 						</td>
 						<td style="width:150px;"><a id='lblMemo_s'> </a><input class="btn"  id="btnMemoCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:40px;"><a id='lblRadius_s'> </a></td>
+						<td style="width:40px;"><a id='lblDime_s'> </a></td>
 						<td style="width:40px;"><a id='lblMount2_s'> </a></td>
 						<td class="img" style="width:120px;"><a id='lblStyle_s'> </a></td>
 						<td class="img" style="width:200px;"><a id='lblPic_s'> </a></td>
@@ -2232,9 +2342,10 @@
 						<td style="width:100px;display: none;" class="para"><a id='lblParac_s'> </a></td>
 						<td style="width:100px;display: none;" class="para"><a id='lblParad_s'> </a></td>
 						<td style="width:100px;display: none;" class="para"><a id='lblParae_s'> </a></td>
-						<td style="width:150px;display: none;" class="para"><a id='lblScolor_vu_s'>續接名稱</a></td>
+						<td style="width:150px;display: none;" class="para"><a id='lblScolor_vu_s'> </a></td>
 						<td style="width:110px;display: none;" class="para"><a id='lblParaf_s'> </a></td>
 						<td style="width:110px;display: none;" class="para"><a id='lblParag_s'> </a></td>
+						<td style="width:150px;display: none;" class="para"><a id='lblMount3_s'> </a></td>
 						<td style="width:150px;"><a id='lblSize2_s'> </a><input class="btn"  id="btnSize2Copy" type="button" value='≡' style="font-weight: bold;"  /></td>
 						<td style="width:40px;"><a id='lblMins_s'> </a></td>
 						<td style="width:40px;"><a id='lblWaste_s'> </a></td>
@@ -2276,6 +2387,10 @@
 							<input id="checkRadius.*" type="checkbox"/>
 							<input id="txtRadius.*" type="hidden"/>
 						</td>
+						<td>
+							<input id="checkDime.*" type="checkbox"/>
+							<input id="txtDime.*" type="hidden"/>
+						</td>
 						<td><select id="cmbMount2.*" class="txt c1"> </select></td>
 						<td class="img">
 							<input class="txt" id="txtPicno.*" type="text" style="width:70%;"/>
@@ -2308,6 +2423,7 @@
 							<select id="combParag2.*" class="txt comb"> </select>
 							<!--<select id="combParag.*" class="txt" style="width: 20px;"> </select>-->
 						</td>
+						<td class="para" style="display: none;"><select id="cmbMount3.*" class="txt c1"> </select></td>
 						<td><input id="txtSize2.*" type="text" class="txt c1"/></td>
 						<td>
 							<input id="checkMins.*" type="checkbox"/>
@@ -2404,18 +2520,19 @@
 			<table id="tbbssplicer" class='tbbs'  border="1"  cellpadding='2' cellspacing='1'>
 				<tr style='color:White; background:#003366;text-align: center;'>
 					<td style="width:100px;display: none;"><a id='lblNoq_ss'> </a></td>
-					<td style="width:150px;"><a id='lblOrdeno_ss'>訂單編號/訂序</a></td>
-					<td style="width:150px;"><a id='lblSpec_ss'>材質</a></td>
-					<td style="width:85px;"><a id='lblSize_ss'>號數</a></td>
-					<td style="width:85px;"><a id='lblLengthb_ss'>長度</a></td>
-					<td style="width:85px;"><a id='lblMount1_ss'>支數</a></td>
+					<td style="width:140px;"><a id='lblOrdeno_ss'>訂單編號/訂序</a></td>
+					<td style="width:80px;"><a id='lblSpec_ss'>材質</a></td>
+					<td style="width:55px;"><a id='lblSize_ss'>號數</a></td>
+					<td style="width:65px;"><a id='lblLengthb_ss'>長度</a></td>
+					<td style="width:65px;"><a id='lblMount1_ss'>支數</a></td>
 					<td style="width:85px;"><a id='lblWeight_ss'>重量</a></td>
 					<td style="width:40px;"><a id='lblMount2_ss'>端頭</a></td>
-					<td style="width:160px;"><a id='lblScolor_ss'>產品名稱</a></td>
-					<td style="width:300px;"><a id='lblParafg_ss'>車頭規格套件</a></td>
+					<td style="width:140px;"><a id='lblScolor_ss'>產品名稱</a></td>
+					<td style="width:250px;"><a id='lblParafg_ss'>車頭規格套件</a></td>
+					<td style="width:130px;"><a id='lblMount3_ss'>超長加價</a></td>
 					<td style="width:40px;"><a id='lblRadius_ss'>彎</a></td>
-					<td style="width:150px;"><a id='lblPic_ss'>形狀</a></td>
-					<td style="width:150px;"><a id='lblMemo_ss'>備註(標籤)</a></td>
+					<td style="width:120px;"><a id='lblPic_ss'>形狀</a></td>
+					<td style="width:120px;"><a id='lblMemo_ss'>備註(標籤)</a></td>
 				</tr>
 			</table>
 		</div>

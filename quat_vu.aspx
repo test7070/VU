@@ -86,8 +86,8 @@
 				//q_cmbParse("combProduct", q_getPara('vccs_vu.product'),'s');
 				//q_cmbParse("cmbPost2",'@,1@通案,2@慶欣欣專案,3@威致專案,4@工地');
 				
-				if(q_getPara('sys.project').toUpperCase()=='VU'){
-					q_cmbParse("cmbPost2",',通案,慶欣欣專案,威致專案,工地');
+				if(q_getPara('sys.project').toUpperCase()=='VU'){//CMB合約
+					q_cmbParse("cmbPost2",',通案,慶欣欣專案,威致專案,工地,海光專案,漢泰專案,協勝發專案,源鋼專案');
 				}else{
 					q_cmbParse("cmbPost2",'@');
 				}

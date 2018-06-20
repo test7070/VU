@@ -41,7 +41,7 @@ create table #z_cucvu(
 	mechno nvarchar(50),
 	mech nvarchar(50),
 	
-	radius float,
+	mount4 float,
 	mount2 float,
 	
 	paraa nvarchar(50),
@@ -105,7 +105,7 @@ declare	@mechno nvarchar(50) --SF 機台
 declare @no int = 0
 declare @place nvarchar(max) --表頭工地
 
-declare	@radius float --VU 彎
+declare	@mount4 float --VU 彎
 declare	@mount2 float --VU 車
 
 declare	@paraa nvarchar(200) --參數A
@@ -209,7 +209,7 @@ begin
 		end
 		else
 		begin
-			set @radius=CAST(replace(@o,',','') as float)
+			set @mount4=CAST(replace(@o,',','') as float)
 			set @mount2=CAST(replace(@p,',','') as float)
 		end
 		
@@ -228,7 +228,7 @@ begin
 		insert into #z_cucvu
 		select @isexist,@accy,@noa,@memo,@datea,@bdate,@place,@noq,@ordeno,@no2,@custno,@cust,@product,@ucolor,@class,@size,@size2,@spec,@lengthb,@mount1,@mount,@weight,@bmemo,@btime,@etime
 		,@picno,@mechno,isnull((select top 1 mech from mech where noa=@mechno),'')
-		,@radius,@mount2,@paraa,@parab,@parac,@parad,@parae,@paraf,@parag
+		,@mount4,@mount2,@paraa,@parab,@parac,@parad,@parae,@paraf,@parag
 		
 		fetch next from cursor_table
 		into @a,@b,@c,@d,@e,@f,@g,@h,@i,@j,@k,@l,@m,@n,@o,@p,@q,@r,@s,@t,@u,@v,@w
@@ -273,10 +273,10 @@ begin
 			execute sp_executesql @cmd
 		
 			set @cmd = 'insert into cucs'+@accy+'(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2
-						,btime,etime,picno,picname,imgorg,imgdata,imgbarcode,para,paraa,parab,parac,parad,parae,paraf,parag,radius,mount2)
+						,btime,etime,picno,picname,imgorg,imgdata,imgbarcode,para,paraa,parab,parac,parad,parae,paraf,parag,mount4,mount2)
 						select a.noa,a.noq,a.ordeno,right("000"+a.no2,3)no2,a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2
 						,a.btime,a.etime,a.picno,b.namea,b.org,b.imgdata,b.barcode,b.para
-						,a.paraa,a.parab,a.parac,a.parad,a.parae,a.paraf,a.parag,a.radius,a.mount2
+						,a.paraa,a.parab,a.parac,a.parad,a.parae,a.paraf,a.parag,a.mount4,a.mount2
 				from #z_cucvu a left join img b on a.picno=b.noa'
 			execute sp_executesql @cmd
 		end
@@ -322,7 +322,7 @@ begin
 			set product=b.product,ucolor=b.ucolor,spec=b.spec,size=b.size,lengthb=b.lengthb,class=b.class
 			,mount1=b.mount1,mount=b.mount,weight=b.weight,memo=b.bmemo,size2=b.size2
 			,btime=b.btime,etime=b.etime,picno=b.picno,picname=c.namea,imgorg=c.org,imgdata=c.imgdata,imgbarcode=c.barcode,para=c.para
-			,paraa=b.paraa,parab=b.parab,parac=b.parac,parad=b.parad,parae=b.parae,paraf=b.paraf,parag=b.parag,radius=b.radius,mount2=b.mount2
+			,paraa=b.paraa,parab=b.parab,parac=b.parac,parad=b.parad,parae=b.parae,paraf=b.paraf,parag=b.parag,mount4=b.mount4,mount2=b.mount2
 			from cucs"+@accy+" a left join #z_cucvu b on a.ordeno=b.ordeno and a.no2=b.no2
 			left join img c on b.picno=c.noa 
 			where a.noa='"+@noa+"' and isnull(b.noa,'')!=''")
@@ -347,10 +347,10 @@ begin
 		begin
 			EXEC(" 
 				insert into cucs"+@accy+"(noa,noq,ordeno,no2,product,ucolor,class,size,spec,lengthb,mount1,mount,weight,memo,size2
-				,btime,etime,picno,picname,imgorg,imgdata,imgbarcode,para,paraa,parab,parac,parad,parae,paraf,parag,radius,mount2) 
+				,btime,etime,picno,picname,imgorg,imgdata,imgbarcode,para,paraa,parab,parac,parad,parae,paraf,parag,mount4,mount2) 
 				select a.noa,right('000'+cast(ROW_NUMBER() over (order by a.noq,a.ordeno,a.no2)+cast(isnull((select MAX(noq) from view_cucs where noa='"+@noa+"'),0) as int) as nvarchar(50)),3) 
 				,a.ordeno,right('000'+a.no2,3),a.product,a.ucolor,a.class,a.size,a.spec,a.lengthb,a.mount1,a.mount,a.weight,a.bmemo,a.size2
-				,a.btime,a.etime,a.picno,b.namea,b.org,b.imgdata,b.barcode,b.para,a.paraa,a.parab,a.parac,a.parad,a.parae,a.paraf,a.parag,a.radius,a.mount2
+				,a.btime,a.etime,a.picno,b.namea,b.org,b.imgdata,b.barcode,b.para,a.paraa,a.parab,a.parac,a.parad,a.parae,a.paraf,a.parag,a.mount4,a.mount2
 				from #z_cucvu a left join img b on a.picno=b.noa
 				where not exists(select * from view_cucs where noa='"+@noa+"' and ordeno=a.ordeno and no2=a.no2) 
 			") 

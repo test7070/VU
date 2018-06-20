@@ -872,7 +872,7 @@
 						string+='<td id="cucs_btime" title="顏色1" align="center" style="width:28px; color:black;">顏色<BR>1</td>';
 						string+='<td id="cucs_etime" title="顏色2" align="center" style="width:28px; color:black;">顏色<BR>2</td>';
 						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:83px; color:black;">備註(標籤)</td>';
-						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;" class="fhide1">彎</td>';
+						string+='<td id="cucs_4mount" title="彎" align="center" style="width:28px; color:black;" class="fhide1">彎</td>';
 						string+='<td id="cucs_2mount" title="車" align="center" style="width:28px; color:black;" class="fhide2">車</td>';
 						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;" class="imghide fhide1 fhide2">圖形</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:73px; color:black;display:none;">客戶編號</td>';
@@ -881,9 +881,9 @@
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
 						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
-						string+="<td id='cucs_mins' align='center' style='width:28px; color:black;'><input type='button' id='btnMins' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
-						string+="<td id='cucs_waste' align='center' style='width:28px; color:black;' class='fhide1'><input type='button' id='btnWaste' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='成型'/></td>";
-						string+="<td id='cucs_hours' align='center' style='width:28px; color:black;' class='fhide2'><input type='button' id='btnHours' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='車牙'/></td>";
+						string+="<td id='cucs_mins' align='center' style='width:28px; color:black;'><input type='button' id='btnMins' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='已裁剪'/></td>";
+						string+="<td id='cucs_waste' align='center' style='width:28px; color:black;' class='fhide1'><input type='button' id='btnWaste' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='已成型'/></td>";
+						string+="<td id='cucs_hours' align='center' style='width:28px; color:black;' class='fhide2'><input type='button' id='btnHours' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='已車牙'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs').html(string);
@@ -918,7 +918,7 @@
 						string+='<td id="cucs_btime" title="顏色1" align="center" style="width:28px; color:black;">顏色<BR>1</td>';
 						string+='<td id="cucs_etime" title="顏色2" align="center" style="width:28px; color:black;">顏色<BR>2</td>';
 						string+='<td id="cucs_memo" title="備註(標籤)" align="center" style="width:83px; color:black;">備註(標籤)</td>';
-						string+='<td id="cucs_radius" title="彎" align="center" style="width:28px; color:black;" class="fhide1">彎</td>';
+						string+='<td id="cucs_4mount" title="彎" align="center" style="width:28px; color:black;" class="fhide1">彎</td>';
 						string+='<td id="cucs_2mount" title="車" align="center" style="width:28px; color:black;" class="fhide2">車</td>';
 						string+='<td id="cucs_img" title="圖形" align="center" style="width:103px; color:black;" class="imghide fhide1 fhide2">圖形</td>';
 						string+='<td id="cucs_custno" title="客戶編號" align="center" style="width:73px; color:black;display:none;">客戶編號</td>';
@@ -927,9 +927,9 @@
 						string+='<td id="cucs_ordeno" title="訂單號碼" align="center" style="width:90px; color:black;display:none;">訂單號碼</td>';
 						string+='<td id="cucs_no2" title="訂單序號" align="center" style="width:90px; color:black;display:none;">訂單序號</td>';
 						//string+='<td id="cucs_mins" align="center" style="width:30px; color:black;">完工</td>';
-						string+="<td id='cucs_mins' align='center' style='width:28px; color:black;'><input type='button' id='btnMins2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='完工'/></td>";
-						string+="<td id='cucs_waste' align='center' style='width:28px; color:black;' class='fhide1'><input type='button' id='btnWaste2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='成型'/></td>";
-						string+="<td id='cucs_hours' align='center' style='width:28px; color:black;' class='fhide2'><input type='button' id='btnHours2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='車牙'/></td>";
+						string+="<td id='cucs_mins' align='center' style='width:28px; color:black;'><input type='button' id='btnMins2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='已裁剪'/></td>";
+						string+="<td id='cucs_waste' align='center' style='width:28px; color:black;' class='fhide1'><input type='button' id='btnWaste2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='已成型'/></td>";
+						string+="<td id='cucs_hours' align='center' style='width:28px; color:black;' class='fhide2'><input type='button' id='btnHours2' style='font-size:12px;width: 30px;height: 45px;white-space: inherit;' value='已車牙'/></td>";
 						string+='</tr>';
 						string+='</table>';
 						$('#cucs_float').remove();
@@ -1206,7 +1206,7 @@
 										$('#lblCucs_btime'+j).text(as[i].btime);
 										$('#lblCucs_etime'+j).text(as[i].etime);
 										$('#cucs_memo'+j).text(as[i].memo);
-										$('#cucs_radius'+j).text(dec(as[i].radius)>0?'V':'');
+										$('#cucs_4mount'+j).text(dec(as[i].mount4)>0?'V':'');
 										$('#cucs_2mount'+j).text(dec(as[i].mount2)>0?dec(as[i].mount2):'');
 										$('#Imgcucs_img'+j).attr('src',as[i].imgbarcode);
 										$('#cucs_work'+j).text(as[i].size2);
@@ -1214,12 +1214,12 @@
 										$('#cucs_cust'+j).html('<a style="font-size: larger;">'+as[i].acust.substr(0,4)+'</a><BR><a>'+as[i].amech+'</a>');
 										$('#cucs_ordeno'+j).text(as[i].ordeno);
 										$('#cucs_no2'+j).text(as[i].no2);
-										if(dec(as[i].waste)>0 || dec(as[i].radius)==0){
+										if(dec(as[i].waste)>0 || dec(as[i].mount4)==0){
 											$('#cucs_waste'+j).css('display','none');
 										}else{
 											$('#cucs_waste'+j).css('display','unset');
 										}
-										$('#cucs_awaste'+j).text((dec(as[i].waste)>0 && dec(as[i].radius)>0 ?'V':''));
+										$('#cucs_awaste'+j).text((dec(as[i].waste)>0 && dec(as[i].mount4)>0 ?'V':''));
 										if(dec(as[i].hours)>0 || dec(as[i].mount2)==0){
 											$('#cucs_hours'+j).css('display','none');
 										}else{
@@ -1270,7 +1270,7 @@
 									$('#lblCucs_etime'+j).text('');
 									$('#combXetime_'+j).remove();
 									$('#cucs_memo'+j).text('');
-									$('#cucs_radius'+j).text('');
+									$('#cucs_4mount'+j).text('');
 									$('#cucs_2mount'+j).text('');
 									$('#Imgcucs_img'+j).attr('src','');
 									$('#cucs_work'+j).text('');
@@ -1319,7 +1319,7 @@
 								string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_btime'+(i+bbsrow)+'"></a></td>';
 								string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_etime'+(i+bbsrow)+'"></a></td>';
 								string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
-								string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1"></td>';
+								string+='<td id="cucs_4mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1"></td>';
 								string+='<td id="cucs_2mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide2></td>';
 								string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="imghide fhide1 fhide2"><img id="Imgcucs_img'+(i+bbsrow)+'" style="width:100px;"></td>';
 								string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"></td>';
@@ -1361,7 +1361,7 @@
 							string+='<td id="cucs_btime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_btime'+(i+bbsrow)+'">'+as[i].btime+'</a><select id="combXbtime_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
 							string+='<td id="cucs_etime'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'"><a id="lblCucs_etime'+(i+bbsrow)+'">'+as[i].etime+'</a><select id="combXetime_'+(i+bbsrow)+'" class="txt comb" style="width: 20px;"> </select></td>';
 							string+='<td id="cucs_memo'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].memo+'</td>';
-							string+='<td id="cucs_radius'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1">'+(dec(as[i].radius)>0?'V':'')+'</td>';
+							string+='<td id="cucs_4mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide1">'+(dec(as[i].mount4)>0?'V':'')+'</td>';
 							string+='<td id="cucs_2mount'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="fhide2">'+(dec(as[i].mount2)>0?dec(as[i].mount2):'')+'</td>';
 							string+='<td id="cucs_img'+(i+bbsrow)+'" style="text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'" class="imghide fhide1 fhide2"><img id="Imgcucs_img'+(i+bbsrow)+'" src="'+as[i].imgbarcode+'" style="width:100px;"></td>';
 							string+='<td id="cucs_custno'+(i+bbsrow)+'" style="display:none;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].acustno+'</td>';
@@ -1370,7 +1370,7 @@
 							string+='<td id="cucs_ordeno'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].ordeno+'</td>';
 							string+='<td id="cucs_no2'+(i+bbsrow)+'" style="display:none;font-size: 12px;text-align: center;color:'+t_color[(i+bbsrow)%t_color.length]+'">'+as[i].no2+'</td>';
 							string+='<td style="text-align: center;"><input id="cucs_mins'+(i+bbsrow)+'" class="cucs_mins" type="checkbox"/></td>';
-							string+='<td id="cucs_twaste'+(i+bbsrow)+'" style="text-align: center;" class="fhide1"><a id="cucs_awaste'+(i+bbsrow)+'">'+(dec(as[i].waste)>0 && dec(as[i].radius)>0 ?'V':'')+'</a><input id="cucs_waste'+(i+bbsrow)+'" class="cucs_waste" type="checkbox" style="display:'+(dec(as[i].waste)>0 || dec(as[i].radius)==0 ?'none':'unset')+';"/></td>';
+							string+='<td id="cucs_twaste'+(i+bbsrow)+'" style="text-align: center;" class="fhide1"><a id="cucs_awaste'+(i+bbsrow)+'">'+(dec(as[i].waste)>0 && dec(as[i].mount4)>0 ?'V':'')+'</a><input id="cucs_waste'+(i+bbsrow)+'" class="cucs_waste" type="checkbox" style="display:'+(dec(as[i].waste)>0 || dec(as[i].mount4)==0 ?'none':'unset')+';"/></td>';
 							string+='<td id="cucs_thours'+(i+bbsrow)+'" style="text-align: center;" class="fhide2"><a id="cucs_ahours'+(i+bbsrow)+'">'+(dec(as[i].hours)>0 && dec(as[i].mount2)>0 ?'V':'')+'</a><input id="cucs_hours'+(i+bbsrow)+'" class="cucs_hours" type="checkbox" style="display:'+(dec(as[i].hours)>0 || dec(as[i].mount2)==0?'none':'unset')+';"/></td>';
 							string+='</tr>';
 							

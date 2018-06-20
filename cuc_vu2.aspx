@@ -22,7 +22,7 @@
 			q_copy=1;
             q_tables = 's';
             var q_name = "cuc";
-            var q_readonly = ['txtWorker', 'txtWorker2','textWeight','textWeight1','textWeight2','textWeight3','textWeight4'];
+            var q_readonly = ['txtWorker', 'txtWorker2','textWeight','textWeight1','textWeight2','textWeight3','textWeight4','textWeight3_1','textWeight3_2'];
             var q_readonlys = ['txtPicname'];
             var bbmNum = [];
             var bbsNum = [['txtParaa', 15, 0, 1], ['txtParab', 15, 0, 1], ['txtParac', 15, 0, 1], ['txtParad', 15, 0, 1], ['txtParae', 15, 0, 1]];
@@ -158,7 +158,7 @@
 							string+='<td style="text-align: center;"><select id="combParafa_'+j+'" class="txt comb combParafa"> </select><select id="combParafb_'+j+'" class="txt comb combParafb"> </select>';
 							string+='<a>---</a><select id="combParaga_'+j+'" class="txt comb combParaga"> </select><select id="combParagb_'+j+'" class="txt comb combParagb"> </select></td>';
 							string+='<td style="text-align: center;"><select id="combMount3_'+j+'" class="txt comb combMount3 c1"> </select></td>';
-							string+='<td style="text-align: center;">'+(dec($('#txtRadius_'+j).val())>0?'V':'')+'</td>';
+							string+='<td style="text-align: center;">'+(dec($('#txtMount4_'+j).val())>0?'V':'')+'</td>';
 							string+='<td style="text-align: center;"><img id="timgpic'+j+'" src="'+$('#imgPic_'+j).attr('src')+'" style="width:100px;"></td>';
 							string+='<td style="text-align: center;">'+$('#txtMemo_'+j).val()+'</td>';
 							t_j++;
@@ -718,15 +718,15 @@
 							}*/
 						});
 						
-						$('#checkRadius_'+j).click(function() {
+						$('#checkMount4_'+j).click(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
 							if(q_cur==1 || q_cur==2){
-								if($('#checkRadius_'+b_seq).prop('checked'))
-									$('#txtRadius_'+b_seq).val(1);
+								if($('#checkMount4_'+b_seq).prop('checked'))
+									$('#txtMount4_'+b_seq).val(1);
 								else
-									$('#txtRadius_'+b_seq).val(0);
+									$('#txtMount4_'+b_seq).val(0);
 							}
 							weighttotal();
 						});
@@ -1047,7 +1047,7 @@
                 $('#lblMount_s').text('件數');
                 $('#lblWeight_s').text('重量(KG)');
                 $('#lblMemo_s').text('備註 (標籤)');
-                $('#lblRadius_s').text('彎');
+                $('#lblMount4_s').text('彎');
                 $('#lblDime_s').text('成');
                 $('#lblMins_s').text('裁剪完工');
                 $('#lblWaste_s').text('成型完工');
@@ -1236,8 +1236,8 @@
             		$('#cmbBtime_'+t_n).val($('#cmbBtime_'+t_pn).val());
             		$('#cmbEtime_'+t_n).val($('#cmbEtime_'+t_pn).val());
             		$('#txtMemo_'+t_n).val($('#txtMemo_'+t_pn).val());
-            		$('#checkRadius_'+t_n).prop('checked',$('#checkRadius_'+t_pn).prop('checked'));
-            		$('#txtRadius_'+t_n).val($('#txtRadius_'+t_pn).val());
+            		$('#checkMount4_'+t_n).prop('checked',$('#checkMount4_'+t_pn).prop('checked'));
+            		$('#txtMount4_'+t_n).val($('#txtMount4_'+t_pn).val());
             		$('#checkDime_'+t_n).prop('checked',$('#checkDime_'+t_pn).prop('checked'));
             		$('#txtDime_'+t_n).val($('#txtDime_'+t_pn).val());
             		$('#cmbMount2_'+t_n).val($('#cmbMount2_'+t_pn).val());
@@ -1311,22 +1311,31 @@
             	var t_weight1=0; //直
             	var t_weight2=0; //彎
             	var t_weight3=0; //牙
+            	var t_weight3_1=0; //牙(直)
+            	var t_weight3_2=0; //牙(彎)
             	var t_weight4=0; //牙數
             	for (var j = 0; j < q_bbsCount; j++) {
-            		if($('#checkRadius_'+j).prop('checked')){
+            		if($('#checkMount4_'+j).prop('checked')){
             			t_weight2=q_add(t_weight2,dec($('#txtWeight_'+j).val()));
             		}
             		if(dec($('#cmbMount2_'+j).val())>0){
             			t_weight3=q_add(t_weight3,dec($('#txtWeight_'+j).val()));
+            			if($('#checkMount4_'+j).prop('checked')){
+            				t_weight3_2=q_add(t_weight3_2,dec($('#txtWeight_'+j).val()));
+            			}else{
+            				t_weight3_1=q_add(t_weight3_1,dec($('#txtWeight_'+j).val()));
+            			}
             			t_weight4=q_add(t_weight4,q_mul(dec($('#cmbMount2_'+j).val()),dec($('#txtMount1_'+j).val())));
             		}
-            		if(!$('#checkRadius_'+j).prop('checked') && dec($('#cmbMount2_'+j).val())==0){
+            		if(!$('#checkMount4_'+j).prop('checked')){// && dec($('#cmbMount2_'+j).val())==0
             			t_weight1=q_add(t_weight1,dec($('#txtWeight_'+j).val()));
             		}
             	}
             	$('#textWeight1').val(FormatNumber(t_weight1));
             	$('#textWeight2').val(FormatNumber(t_weight2));
             	$('#textWeight3').val(FormatNumber(t_weight3));
+            	$('#textWeight3_1').val(FormatNumber(t_weight3_1));
+            	$('#textWeight3_2').val(FormatNumber(t_weight3_2));
             	$('#textWeight4').val(FormatNumber(t_weight4));
             	
             	var t_s2_3=0,t_s2_4=0,t_s2_5=0,t_s2_6=0,t_s2_7=0,t_s2_8=0,t_s2_9=0,t_s2_10=0,t_s2_11=0,t_s2_12=0;
@@ -1644,13 +1653,13 @@
 				for (var i = 0; i < q_bbsCount; i++) {
 					if(q_cur==1 || q_cur==2){
 						$('#checkMins_'+i).removeAttr('disabled');
-						$('#checkRadius_'+i).removeAttr('disabled');
+						$('#checkMount4_'+i).removeAttr('disabled');
 						$('#checkDime_'+i).removeAttr('disabled');
 						$('#checkHours_'+i).removeAttr('disabled');
 						$('#checkWaste_'+i).removeAttr('disabled');
 					}else{
 						$('#checkMins_'+i).attr('disabled', 'disabled');
-						$('#checkRadius_'+i).attr('disabled', 'disabled');
+						$('#checkMount4_'+i).attr('disabled', 'disabled');
 						$('#checkDime_'+i).attr('disabled', 'disabled');
 						$('#checkHours_'+i).attr('disabled', 'disabled');
 						$('#checkWaste_'+i).attr('disabled', 'disabled');
@@ -1660,10 +1669,10 @@
 					}else{
 						$('#checkMins_'+i).prop('checked',true);
 					}
-					if($('#txtRadius_'+i).val()==0){
-						$('#checkRadius_'+i).prop('checked',false);
+					if($('#txtMount4_'+i).val()==0){
+						$('#checkMount4_'+i).prop('checked',false);
 					}else{
-						$('#checkRadius_'+i).prop('checked',true);
+						$('#checkMount4_'+i).prop('checked',true);
 					}
 					if($('#txtDime_'+i).val()==0){
 						$('#checkDime_'+i).prop('checked',false);
@@ -2243,6 +2252,7 @@
 							<input id="txtMech"  type="text" class="txt c1" style="width: 90%;"/>
 							<select id="combAccount" class="txt" style="width: 20px;"> </select>
 						</td>
+						<td align="center"><input id="btnShowpara" type="button" value="參數顯示"></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMemo" class="lbl"> </a></td>
@@ -2252,7 +2262,8 @@
 							<input id="txtTypea" type="text" class="txt c1" style="width: 70%;"/>
 							<select id="combProduct" class="txt" style="width: 20px;"> </select>
 						</td>
-						<td align="center"><input id="btnShowpara" type="button" value="參數顯示"></td>
+						<td><span> </span><a id="lblWeight3_1" class="lbl">車(直)重量</a></td>
+						<td><input id="textWeight3_1" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblWorker" class="lbl"> </a></td>
@@ -2261,8 +2272,10 @@
 						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblWeight1" class="lbl">直料重量</a></td>
 						<td><input id="textWeight1" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblWeight3" class="lbl">車牙重量</a></td>
-						<td><input id="textWeight3" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblWeight3_2" class="lbl">車(彎)重量</a></td>
+						<td><input id="textWeight3_2" type="text" class="txt num c1"/></td>
+						<td style="display: none;"><span> </span><a id="lblWeight3" class="lbl">車牙重量</a></td>
+						<td style="display: none;"><input id="textWeight3" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblGen" class="lbl"> </a></td>
@@ -2332,7 +2345,7 @@
 							<input class="btn" id="btnEtimeCopy" type="button" value='≡' style="font-weight: bold;"  />
 						</td>
 						<td style="width:150px;"><a id='lblMemo_s'> </a><input class="btn"  id="btnMemoCopy" type="button" value='≡' style="font-weight: bold;"  /></td>
-						<td style="width:40px;"><a id='lblRadius_s'> </a></td>
+						<td style="width:40px;"><a id='lblMount4_s'> </a></td>
 						<td style="width:40px;"><a id='lblDime_s'> </a></td>
 						<td style="width:40px;"><a id='lblMount2_s'> </a></td>
 						<td class="img" style="width:120px;"><a id='lblStyle_s'> </a></td>
@@ -2384,8 +2397,8 @@
 						<td><select id="cmbEtime.*" class="txt c1"> </select></td>
 						<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
 						<td>
-							<input id="checkRadius.*" type="checkbox"/>
-							<input id="txtRadius.*" type="hidden"/>
+							<input id="checkMount4.*" type="checkbox"/>
+							<input id="txtMount4.*" type="hidden"/>
 						</td>
 						<td>
 							<input id="checkDime.*" type="checkbox"/>
@@ -2530,7 +2543,7 @@
 					<td style="width:140px;"><a id='lblScolor_ss'>產品名稱</a></td>
 					<td style="width:250px;"><a id='lblParafg_ss'>車頭規格套件</a></td>
 					<td style="width:130px;"><a id='lblMount3_ss'>超長加價</a></td>
-					<td style="width:40px;"><a id='lblRadius_ss'>彎</a></td>
+					<td style="width:40px;"><a id='lblMount4_ss'>彎</a></td>
 					<td style="width:120px;"><a id='lblPic_ss'>形狀</a></td>
 					<td style="width:120px;"><a id='lblMemo_ss'>備註(標籤)</a></td>
 				</tr>

@@ -922,7 +922,7 @@ select '9',a.bdate,case DATEPART(WEEKDAY,bdate) when 1 then '日' when 2 then '�
 --,case when b.mins=1 then '■ '+b.size else '□ '+b.size end
 ,case when b.mins=1 then '■ ' else '□ ' end
 +case when isnull(b.dime,0)=0 then '' else case when isnull(b.waste,0)>0 then '● ' else '○ ' end end
-+case when isnull(b.mount2,0)>0 then '' else case when isnull(b.hours,0)>0 then '◆ ' else '◇ ' end end+b.size
++case when isnull(b.mount2,0)=0 then '' else case when isnull(b.hours,0)>0 then '◆ ' else '◇ ' end end+b.size
 ,b.spec,b.weight,b.class,'',sum(c.weight),'',b.mins
 from view_cuc a left join view_cucs b on a.noa=b.noa
 left join view_vcct c on b.ordeno=c.ordeno and b.no2=c.no2
@@ -1893,11 +1893,11 @@ declare @tmpb table(
 	d_16 float,d_17 float,d_18 float,d_19 float,d_20 float,
 	d_21 float,d_22 float,d_23 float,d_24 float,d_25 float,
 	d_26 float,d_27 float,d_28 float,d_29 float,d_30 float,
-	d_31 float
+	d_31 float,d_total float
 )
 
 insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
-,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31,d_total)
 select '5',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
 ,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
@@ -1914,7 +1914,7 @@ select '5',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
 ,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
-,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end),sum(b.weight)
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
 and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
@@ -1926,7 +1926,7 @@ and b.size='#3'
 group by b.spec,b.size
 
 insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
-,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31,d_total)
 select '6',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
 ,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
@@ -1943,7 +1943,7 @@ select '6',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
 ,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
-,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end),sum(b.weight)
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
 and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
@@ -1955,7 +1955,7 @@ and b.size='#4'
 group by b.spec,b.size
 
 insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
-,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31,d_total)
 select '7',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
 ,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
@@ -1972,7 +1972,7 @@ select '7',ROW_NUMBER() over (order by b.spec),b.spec+'<BR>'+b.size
 ,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
-,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end),sum(b.weight)
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
 and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
@@ -1984,7 +1984,7 @@ and b.size='#5'
 group by b.spec,b.size
 
 insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
-,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31,d_total)
 select '8',ROW_NUMBER() over (order by cast(dbo.get_num(b.size) as int),b.spec),b.spec+'<BR>'+b.size
 ,sum(case when right(a.datea,2)='01' then b.weight else 0 end),sum(case when right(a.datea,2)='02' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='03' then b.weight else 0 end),sum(case when right(a.datea,2)='04' then b.weight else 0 end)
@@ -2001,7 +2001,7 @@ select '8',ROW_NUMBER() over (order by cast(dbo.get_num(b.size) as int),b.spec),
 ,sum(case when right(a.datea,2)='25' then b.weight else 0 end),sum(case when right(a.datea,2)='26' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='27' then b.weight else 0 end),sum(case when right(a.datea,2)='28' then b.weight else 0 end)
 ,sum(case when right(a.datea,2)='29' then b.weight else 0 end),sum(case when right(a.datea,2)='30' then b.weight else 0 end)
-,sum(case when right(a.datea,2)='31' then b.weight else 0 end)
+,sum(case when right(a.datea,2)='31' then b.weight else 0 end),sum(b.weight)
 from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy
 where left(isnull(a.datea,''),len(@t_mon)) =@t_mon
 and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫
@@ -2015,11 +2015,11 @@ group by b.spec,b.size
 if((select count(*) from @tmpb)>0)
 begin
 	insert @tmpb(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
-	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31,d_total)
 	select '9',1,'合計'
 	,SUM(d_01),SUM(d_02),SUM(d_03),SUM(d_04),SUM(d_05),SUM(d_06),SUM(d_07),SUM(d_08),SUM(d_09),SUM(d_10)
 	,SUM(d_11),SUM(d_12),SUM(d_13),SUM(d_14),SUM(d_15),SUM(d_16),SUM(d_17),SUM(d_18),SUM(d_19),SUM(d_20)
-	,SUM(d_21),SUM(d_22),SUM(d_23),SUM(d_24),SUM(d_25),SUM(d_26),SUM(d_27),SUM(d_28),SUM(d_29),SUM(d_30),SUM(d_31)
+	,SUM(d_21),SUM(d_22),SUM(d_23),SUM(d_24),SUM(d_25),SUM(d_26),SUM(d_27),SUM(d_28),SUM(d_29),SUM(d_30),SUM(d_31),SUM(d_total)
 	from @tmpb
 end
 
@@ -2044,7 +2044,7 @@ declare @tmpc table(
 	d_16 float,d_17 float,d_18 float,d_19 float,d_20 float,
 	d_21 float,d_22 float,d_23 float,d_24 float,d_25 float,
 	d_26 float,d_27 float,d_28 float,d_29 float,d_30 float,
-	d_31 float
+	d_31 float,d_total float
 )
 
 if((select count(*) from @tmpa)>0)
@@ -2064,9 +2064,9 @@ begin
 	insert @tmpc(gno,idno)
 	select '4',0
 	insert @tmpc(gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
-	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31)
+	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31,d_total)
 	select gno,idno,z_spec,d_01,d_02,d_03,d_04,d_05,d_06,d_07,d_08,d_09,d_10
-	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31 from @tmpb
+	,d_11,d_12,d_13,d_14,d_15,d_16,d_17,d_18,d_19,d_20,d_21,d_22,d_23,d_24,d_25,d_26,d_27,d_28,d_29,d_30,d_31,d_total from @tmpb
 end
 
 select 
@@ -2095,7 +2095,7 @@ dbo.getComma(round(d_23,0),-1)d_23,dbo.getComma(round(d_24,0),-1)d_24,
 dbo.getComma(round(d_25,0),-1)d_25,dbo.getComma(round(d_26,0),-1)d_26,
 dbo.getComma(round(d_27,0),-1)d_27,dbo.getComma(round(d_28,0),-1)d_28,
 dbo.getComma(round(d_29,0),-1)d_29,dbo.getComma(round(d_30,0),-1)d_30,
-dbo.getComma(round(d_31,0),-1)d_31,*,
+dbo.getComma(round(d_31,0),-1)d_31,dbo.getComma(round(d_total,0),-1)d_total,*,
 case when @t_worker='1剪' then 'A剪' when @t_worker='2剪' then 'B剪' when @t_worker='3剪' then 'C剪' else '全廠' end yworker
 from @tmpc order by gno,idno
 ;

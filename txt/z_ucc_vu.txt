@@ -100,7 +100,7 @@ insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,stor
 select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
 ,case when a.typea='2' then -1 else 1 end*b.mount,case when a.typea='2' then -1 else 1 end*b.weight,case when a.typea='2' then -1 else 1 end*b.total,0,0
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') --and b.ucolor='板料'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
@@ -111,7 +111,7 @@ and b.storeno='7000' and isnull(b.productno,'')=''
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '13','inas',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,b.total,0,0
 from view_ina a left join view_inas b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') --and b.ucolor='板料'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
@@ -122,7 +122,7 @@ and b.storeno='7000' and isnull(b.productno,'')=''
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '14','cubt',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight,0,0,0
 from view_cub a left join view_cubt b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') --and b.ucolor='板料'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
@@ -133,7 +133,7 @@ and b.storeno='7000' and isnull(b.productno,'')=''
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '15','gets',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight,0,0,0
 from view_get a left join view_gets b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'') --and b.ucolor='板料'
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
 and (len(@t_spec)=0 or isnull(b.spec,'')=@t_spec) and (len(@t_size)=0 or isnull(b.size,'')=@t_size)
@@ -202,7 +202,7 @@ select '16','vccs',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.length
 ,case when a.typea='2' then -1 else 1 end*b.weight
 ,case when a.typea='2' then -1 else 1 end*b.total,0,0
 from view_vcc a left join view_vccs b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and spec=b.spec and size=b.size and lengthb =b.lengthb and class =b.class and tablea='ucce' )c
 where --b.ucolor='板料' and 
 a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) and (len(@t_ucolor)=0 or isnull(b.ucolor,'')=@t_ucolor)
@@ -460,6 +460,8 @@ create table #tmp(
 	page int,
 	idno int
 )
+
+CREATE INDEX tmpindex on #tmp (gno,tablea,datea,noa,noq)
 
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,money,avgweight,aprice)
 select '11','ucce',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
@@ -2309,7 +2311,7 @@ insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,stor
 select '12','rc2s',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno
 ,case when a.typea='2' then -1 else 1 end*b.mount,case when a.typea='2' then -1 else 1 end*b.weight
 from view_rc2 a left join view_rc2s b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
 and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
@@ -2323,7 +2325,7 @@ and b.product not like '%費%' and b.product not like '%超長%'
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
 select '13','inas',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight
 from view_ina a left join view_inas b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
 and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
@@ -2338,7 +2340,7 @@ and b.product not like '%費%' and b.product not like '%超長%'
 --insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
 --select '13-2','cubs',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight
 --from view_cub a left join view_cubs b on a.noa=b.noa
---outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and tablea='ucce' order by datea desc)c
+--outer apply(select MAX(datea) datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce')c
 --where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 --and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
 --and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
@@ -2352,7 +2354,7 @@ and b.product not like '%費%' and b.product not like '%超長%'
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
 select '14','cubt',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.gmount,b.gweight
 from view_cub a left join view_cubt b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
 and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
@@ -2366,7 +2368,7 @@ and b.product not like '%費%' and b.product not like '%超長%'
 insert #tmp(gno,tablea,datea,noa,noq,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
 select '15','gets',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class,b.storeno,b.mount,b.weight
 from view_get a left join view_gets b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
 and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
@@ -2383,7 +2385,7 @@ select '16','vccs',a.datea,a.noa,b.noq,b.product,b.ucolor,b.spec,b.size,b.length
 ,case when a.typea='2' then -1 else 1 end*b.mount
 ,case when a.typea='2' then -1 else 1 end*b.weight
 from view_vcc a left join view_vccs b on a.noa=b.noa
-outer apply(select top 1 datea from #tmp where product=b.product and size=b.size and class =b.class and tablea='ucce' order by datea desc)c
+outer apply(select MAX(datea) datea from #tmp where product=b.product and size=b.size and class =b.class and storeno=b.storeno and tablea='ucce')c
 where a.datea<=@t_edate and a.datea>=isnull(c.datea,'')
 and (len(@t_pno)=0 or isnull(b.product,'')=@t_pno) 
 and (len(@t_size)=0 or isnull(b.size,'') like @t_size+'%')
@@ -2473,9 +2475,43 @@ delete #tmp where mount=0 or gno!='9'
 
 if((select count(*) from #tmp)>0)
 begin
+	update #tmp
+	set uweight=case 
+	when product like '%直%' and product like '%續接器%' and size like '%#6%' and size like '%公%' then 0.084
+	when product like '%直%' and product like '%續接器%' and size like '%#7%' and size like '%公%' then 0.124
+	when product like '%直%' and product like '%續接器%' and size like '%#8%' and size like '%公%' then 0.178
+	when product like '%直%' and product like '%續接器%' and size like '%#10%' and size like '%公%' then 0.361
+	when product like '%直%' and product like '%續接器%' and size like '%#11%' and size like '%公%' then 0.532
+	when product like '%直%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.107
+	when product like '%直%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.136
+	when product like '%直%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.205
+	when product like '%直%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.407
+	when product like '%直%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.489
+	
+	when product like '%錐%' and product like '%續接器%' and size like '%#6%' and size like '%公%' then 0.084
+	when product like '%錐%' and product like '%續接器%' and size like '%#7%' and size like '%公%' then 0.124
+	when product like '%錐%' and product like '%續接器%' and size like '%#8%' and size like '%公%' then 0.172
+	when product like '%錐%' and product like '%續接器%' and size like '%#10%' and size like '%公%' then 0.323
+	when product like '%錐%' and product like '%續接器%' and size like '%#11%' and size like '%公%' then 0.445
+	when product like '%錐%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.095
+	when product like '%錐%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.131
+	when product like '%錐%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.188
+	when product like '%錐%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.347
+	when product like '%錐%' and product like '%續接器%' and size like '%#6%' and size like '%母%' then 0.496
+	
+	when product like '%續接器%' and size like '%#6%' and size like '%T%' then 0.231
+	when product like '%續接器%' and size like '%#7%' and size like '%T%' then 0.361
+	when product like '%續接器%' and size like '%#8%' and size like '%T%' then 0.547
+	when product like '%續接器%' and size like '%#10%' and size like '%T%' then 1.024
+	
+	else null end
+	
+	update #tmp
+	set weight=round(mount*uweight,3)
+	
 	--加總倉庫
-	insert #tmp(gno,tablea,datea,noa,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
-	select '0','datea','','',product,char(255),char(255),size,0,class,char(255),sum(mount),SUM(weight)
+	insert #tmp(gno,tablea,datea,noa,product,ucolor,spec,size,lengthb,class,storeno,mount,weight,uweight)
+	select '0','datea','','',product,char(255),char(255),size,0,class,char(255),sum(mount),SUM(weight),MAX(uweight)
 	from #tmp where gno='9' group by product,size,class
 
 	insert #tmp(gno,tablea,datea,noa,product,ucolor,spec,size,lengthb,class,storeno,mount,weight)
@@ -2490,6 +2526,7 @@ declare @today nvarchar(20)= replace(convert(varchar(19),getdate(),20),'-','/')
 select ROW_NUMBER() over (order by product,cast(dbo.get_num(size) as int),right(size,1),class,gno) rr
 ,dbo.getComma(mount,-1)mount
 ,dbo.getComma(weight,-1)weight
+,dbo.getComma(uweight,-1)uweight
 ,@today today
 ,*
 from #tmp order by product,cast(dbo.get_num(size) as int),right(size,1),class,gno

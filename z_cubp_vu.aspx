@@ -33,6 +33,30 @@
 				};
 				//將預設語系設定為中文
 				$.datepicker.setDefaults($.datepicker.regional["zh-TW"]);
+				
+				$('#btnSvg').val('點線/柱狀圖');
+				$('#btnSvg').hide();
+				$('#barChart').hide();
+				
+				$('#q_report').click(function(e) {
+					$('#btnSvg').hide();
+					$('#barChart').hide();
+					$('#dataSearch').show();
+					var tindex=$('#q_report').data().info.radioIndex;
+					var txtreport=$('#q_report').data().info.reportData[tindex].report;
+					if(txtreport=='z_cubp_vu09'){
+						$('#btnSvg').show();
+					}
+				});
+				
+				$('#btnSvg').click(function() {
+					var t_mon=$('#txtYmon').val();
+					if(t_mon.length>0){
+						q_func('qtxt.query.zcubpsvg91','cuc_vu.txt,zcubpsvg9,'+encodeURI(t_mon));
+						$('#Loading').Loading();
+						$('#dataSearch').hide();
+					}
+				});
             });
         	
             function q_gfPost() {
@@ -383,6 +407,191 @@
                 }
             }
             
+            function q_funcPost(t_func, result) {
+                switch(t_func) {
+                	case 'qtxt.query.zcubpsvg91'://點線 & //柱狀
+                		var as = _q_appendData("tmp0", "", true, true);
+                		if (as[0] != undefined) {
+                			var bar=$.extend(true,[], as);
+                			var x_maxweight=0,x_minweight=999999999;
+                			for (var i = 0; i < as.length; i++) {
+                				var ttweight=0;
+                				ttweight=
+                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
+                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
+                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
+                				dec(as[i].d_01),dec(as[i].d_02)),dec(as[i].d_03)),dec(as[i].d_04)),dec(as[i].d_05)),
+                				dec(as[i].d_06)),dec(as[i].d_07)),dec(as[i].d_08)),dec(as[i].d_09)),dec(as[i].d_10)),
+                				dec(as[i].d_11)),dec(as[i].d_12)),dec(as[i].d_13)),dec(as[i].d_14)),dec(as[i].d_15)),
+                				dec(as[i].d_16)),dec(as[i].d_17)),dec(as[i].d_18)),dec(as[i].d_19)),dec(as[i].d_20)),
+                				dec(as[i].d_21)),dec(as[i].d_22)),dec(as[i].d_23)),dec(as[i].d_24)),dec(as[i].d_25)),
+                				dec(as[i].d_26)),dec(as[i].d_27)),dec(as[i].d_28)),dec(as[i].d_29)),dec(as[i].d_30)),dec(as[i].d_31));
+                				
+                				x_maxweight=Math.max(x_maxweight,dec(ttweight));
+                				x_minweight=Math.min(x_minweight,dec(as[i].d_01));
+                			}
+                			
+                			$('#barChart').barChart({
+								data : bar,
+								maxweight : x_maxweight,
+								minweight : x_minweight,
+							});
+							$('#Loading').hide();
+	                        $('#barChart').show();
+                		}else{
+                			alert('無資料內容!!');
+                			$('#dataSearch').show();
+                		}
+                		break;
+                }
+			}
+            
+            ;(function($, undefined) {
+				$.fn.Loading = function() {
+                    $(this).data('info', {
+                        init : function(obj) {
+                            obj.html('').width(250).height(100).show();
+                            var tmpPath = '<defs>' + '<filter id="f1" x="0" y="0">' + '<feGaussianBlur in="SourceGraphic" stdDeviation="5" />' + '</filter>' + '<filter id="f2" x="0" y="0">' + '<feGaussianBlur in="SourceGraphic" stdDeviation="5" />' + '</filter>' + '</defs>' + '<rect width="200" height="10" fill="yellow" filter="url(#f1)"/>' + '<rect x="0" y="0" width="20" height="10" fill="RGB(223,116,1)" stroke="yellow" stroke-width="2" filter="url(#f2)">' + '<animate attributeName="x" attributeType="XML" begin="0s" dur="6s" fill="freeze" from="0" to="200" repeatCount="indefinite"/>' + '</rect>';
+                            tmpPath += '<text x="40" y="35" fill="black">資料讀取中...</text>';
+                            obj.append('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="graph">' + tmpPath + '</svg> ');
+                        }
+                    });
+                    $(this).data('info').init($(this));
+                }
+                $.fn.barChart = function(value) {
+                	$(this).data('info', {
+						Data : value.data,
+                		maxWeight : value.maxweight,
+                        minWeight : value.minweight,
+                        init : function(obj) {
+                            if (value.length == 0) {
+                                alert('無資料。');
+                                return;
+                            }
+                            obj.data('info').refresh(obj);
+                        },
+                        refresh : function(obj) {
+                        	obj.width(1200).height(600);
+                        	var objWidth = 1200;
+                            var objHeight = 600;
+                        	//背景
+                            var tmpPath = '<rect x="0" y="0" width="' + objWidth + '" height="' + objHeight + '" style="fill:rgb(255,255,255);stroke-width:1;stroke:rgb(0,0,0)"/>';
+                            //圖表背景顏色
+                            var t_color1 = ['rgb(210,233,255)', 'rgb(235,255,255)'];
+                            var t_n = 20;
+                        	//圖表分幾個區塊
+                            var t_height = 500, t_width = 950;
+                            for (var i = 0; i < t_n; i++)
+                                tmpPath += '<rect x="100" y="' + (50 + (t_height / t_n) * i) + '" width="' + t_width + '" height="' + (t_height / t_n) + '" style="fill:' + t_color1[i % t_color1.length] + ';"/>';                          
+                            
+                            var t_unit = 'KG',t_uweight=1;
+                            var t_maxWeight = obj.data('info').maxWeight;
+                            var t_minWeight = obj.data('info').minWeight;
+                            
+                            if(t_maxWeight>50000){
+                            	t_unit = '頓',t_uweight=1000;
+                            	t_maxWeight=Math.ceil(q_div(t_maxWeight/t_uweight));
+                            	t_minWeight=Math.floor(q_div(t_minWeight/t_uweight));
+                            }else{
+                            	t_maxWeight=q_add(t_maxWeight,500);
+                            }
+                            
+                            //Y軸
+                            tmpPath += '<line x1="100" y1="50" x2="100" y2="' + (50 + t_height) + '" style="stroke:rgb(0,0,0);stroke-width:2"/>';
+                            tmpPath += '<text x="' + (50 + t_width + 50) + '" y="' + (50 + t_height + 30) + '" fill="black">日</text>';
+                            //X軸
+                            var t_Y = 50 + t_height - round((0 - t_minWeight) / (t_maxWeight - t_minWeight) * t_height, 0);
+                            tmpPath += '<line x1="100" y1="' + (t_Y) + '" x2="' + (100 + t_width) + '" y2="' + (t_Y) + '" style="stroke:rgb(0,0,0);stroke-width:1"/>';
+                            tmpPath += '<text x="' + (70) + '" y="' + (20) + '" fill="black">'+t_unit+'</text>';
+                            //X軸旁邊標記
+                            tmpPath += '<line x1="95" y1="' + t_Y + '" x2="100" y2="' + t_Y + '" style="stroke:rgb(0,0,0);stroke-width:2"/>';
+                            tmpPath += '<text text-anchor="end" x="90" y="' + t_Y + '" fill="black">0</text>';
+                            
+                            tmpPath += '<text text-anchor="end" x="90" y="' + (50) + '" fill="black">' + FormatNumber(t_maxWeight) + '</text>';
+                            tmpPath += '<line x1="95" y1="50" x2="100" y2="50" style="stroke:rgb(0,0,0);stroke-width:2"/>';
+                            tmpPath += '<text text-anchor="end" x="90" y="' + (50 + t_height) + '" fill="black">' + FormatNumber(t_minWeight) + '</text>';
+                            tmpPath += '<line x1="95" y1="' + (50 + t_height) + '" x2="100" y2="' + (50 + t_height) + '" style="stroke:rgb(0,0,0);stroke-width:2"/>';
+                            
+                            var t_range = round((t_maxWeight - t_minWeight)/20,0);
+                            var i = Math.pow(10,(t_range+'').length-1);
+                            var t_range = Math.floor(t_range/i)*i;
+                            t_weight = t_range;
+                            while (t_weight < t_maxWeight) {
+                            	if((t_maxWeight-t_weight)/(t_maxWeight - t_minWeight)>0.005){
+	                                y = t_Y - round(t_weight / (t_maxWeight - t_minWeight) * t_height, 0);
+	                                tmpPath += '<line x1="95" y1="' + y + '" x2="100" y2="' + y + '" style="stroke:rgb(0,0,0);stroke-width:2"/>';
+	                                tmpPath += '<text text-anchor="end" x="90" y="' + y + '" fill="black">' + FormatNumber(t_weight)+ '</text>';
+                            	}
+                            	t_weight += t_range;
+                            }
+                            t_weight = -t_range;
+                            while (t_weight > t_minWeight) {
+                            	if(Math.abs(t_minWeight-t_weight)/(t_maxWeight - t_minWeight)>0.005){
+	                                x = 90;
+	                                y = t_Y - round(t_weight / (t_maxWeight - t_minWeight) * t_height, 0);
+	                                tmpPath += '<line x1="95" y1="' + y + '" x2="100" y2="' + y + '" style="stroke:rgb(0,0,0);stroke-width:2"/>';
+	                                tmpPath += '<text text-anchor="end" x="90" y="' + y + '" fill="black">' + FormatNumber(t_weight) + '</text>';
+                               	}
+                               	t_weight -= t_range;
+                            }
+                            
+                            //Y軸旁邊標記 日期
+                            var t_n=round((t_width - 20) / 31, 0);
+                            var t_nw=Math.floor((t_n-10)/3);//柱狀寬度
+                            var x, h, y, bx, by;
+                            for(var j=1; j<=31; j++){
+                            	var str_j=('000'+j).slice(-2);
+                            	x = 100 + 20 + t_n * (j-1);
+                            	tmpPath += '<line x1="' + x + '" y1="' + (t_height+50) + '" x2="' + x + '" y2="' + (t_height+60) + '" style="stroke:rgb(0,0,0);stroke-width:2"/>';
+                            	tmpPath += '<text text-anchor="middle" x="'+(x)+'" y="' + (t_height+75) + '" fill="black">' + str_j + '</text>';
+                            }
+                            
+                            
+                            var t_detail = obj.data('info').Data;
+                            var t_color2 = ['rgb(255,255,0)', 'rgb(0,255,0)', 'rgb(255,0,0)'];
+                            for (var i = 0; i < t_detail.length && i<3; i++) {//連接線
+                            	var t_weight=0; //累加重量
+                            	//符號說明
+                            	tmpPath += '<rect x="1090" y="'+(65+(i*40))+'" width="20" height="20" fill="'+t_color2[i]+'"/>';
+                            	tmpPath += '<line x1="1120" y1="'+(75+(i*40))+'" x2="1140" y2="'+(75+(i*40))+'" style="stroke:rgb(0,0,0);stroke-width:1"/>';
+	                            tmpPath += '<circle class="" cx="1130" cy="'+(75+(i*40))+'" r="5" stroke="black" stroke-width="2" fill="'+t_color2[i]+'"/>';
+	                            tmpPath += '<text x="1150" y="'+(80+(i*40))+'" fill="black">'+t_detail[i].worker+'</text>';
+                            	
+                            	for(var j=1; j<=31; j++){
+									x = 100 + 20 + t_n * (j-1);
+									var str_j=('000'+j).slice(-2);
+									
+									//柱狀
+									eval('h = Math.abs(round(q_div(dec(t_detail[i].d_'+str_j+'),t_uweight) / (t_maxWeight+t_minWeight) * t_height, 0))');
+									tmpPath += '<rect id="barChart_profit'+i+'_'+j+'" x="' + (x-Math.ceil(t_n/3)+(i*t_nw)) + '" y="' + (q_sub(q_add(t_height,50),h)) + '" width="' + t_nw + '" height="' + h + '" fill="'+t_color2[i]+'"/>';
+									
+									//點線
+									eval('t_weight=q_add(t_weight,q_div(dec(t_detail[i].d_'+str_j+'),t_uweight))');
+									y = t_Y - round(t_weight / (t_maxWeight+Math.abs(t_minWeight)) * t_height, 0);
+									
+									if (j > 1) //第一條線不用畫
+										tmpPath += '<line x1="' + bx + '" y1="' + by + '" x2="' + x + '" y2="' + y + '" style="stroke:'+t_color2[i]+';stroke-width:1"/>';
+									tmpPath += '<circle id="barChart_in' + i + '_'+j+'" class="barChart_in" class="" cx="' + x + '" cy="' + y + '" r="5" stroke="black" stroke-width="2" fill="'+t_color2[i]+'"/>';
+									
+									bx = x;
+									by = y;
+								}
+							}
+                        	
+                        	obj.html('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="graph">' + tmpPath + '</svg> ');
+                        }
+                	});
+                	$(this).data('info').init($(this));
+                }
+                
+            })($);
+            
+            function FormatNumber(n) {
+                n += "";
+                var arr = n.split(".");
+                var re = /(\d{1,3})(?=(\d{3})+$)/g;
+                return arr[0].replace(re, "$1,") + (arr.length == 2 ? "." + arr[1] : "");
+            }
 		</script>
 	</head>
 	<body ondragstart="return false" draggable="false"
@@ -394,10 +603,16 @@
 			<div id="container">
 				<div id="q_report"> </div>
 			</div>
-			<div class="prt" style="margin-left: -40px;">
+			<div id="svgbet" style="display:inline-block;width:2000px;">
+				<input id="btnSvg" type="button" style="font-size: medium;"/>
+			</div>
+			<div id='dataSearch' class="prt" style="margin-left: -40px;">
 				<!--#include file="../inc/print_ctrl.inc"-->
 			</div>
-		</div>
+		</div>		
+		
+		<div id='Loading'> </div>
+		<div id='barChart'> </div>
 		
 		<div id="zcubpdiv9_1" style="display: none;position:absolute;background: darkgray;">
 			<table id="zcubptable9_1" style="text-align: center;color: white;font-size: medium;">

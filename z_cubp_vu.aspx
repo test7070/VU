@@ -490,8 +490,8 @@
                             
                             if(t_maxWeight>50000){
                             	t_unit = '頓',t_uweight=1000;
-                            	t_maxWeight=Math.ceil(q_div(t_maxWeight/t_uweight));
-                            	t_minWeight=Math.floor(q_div(t_minWeight/t_uweight));
+                            	t_maxWeight=Math.ceil(q_div(t_maxWeight,t_uweight));
+                            	t_minWeight=Math.floor(q_div(t_minWeight,t_uweight));
                             }else{
                             	t_maxWeight=q_add(t_maxWeight,500);
                             }

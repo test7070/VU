@@ -19,7 +19,7 @@
 			var q_name = "vcc";
 			var q_readonly = ['txtNoa', 'txtAccno', 'txtComp','txtCardeal','txtSales', 'txtAcomp', 'txtMoney', 'txtTotal', 'txtWorker', 'txtWorker2'];
 			var q_readonlys = ['txtOrdeno', 'txtNo2','txtNoq'];
-			var q_readonlyt = ['txtMount','txtWeight','txtProduct','txtUcolor','txtSpec','txtSize','txtLengthb','txtClass'];//105/07/22表身除了批號其他全鎖
+			var q_readonlyt = ['txtMount','txtWeight','txtLengthc','txtProduct','txtUcolor','txtSpec','txtSize','txtLengthb','txtClass'];//105/07/22表身除了批號其他全鎖
 			var bbmNum = [];
 			var bbsNum = [];
 			var bbtNum = [];
@@ -98,7 +98,7 @@
 				,['textQweight1', 15, q_getPara('vcc.weightPrecision'), 1],['textQweight2', 15, q_getPara('vcc.weightPrecision'), 1]
 				,['txtPrice', 12, 3, 1]];
 				bbsNum = [['txtPrice', 12, q_getPara('vcc.pricePrecision'), 1], ['txtMount', 9, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtTotal', 15, 0, 1]];
-				bbtNum = [['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];
+				bbtNum = [['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtLengthc', 15, 0, 1]];
 				//q_cmbParse("cmbTranstyle", q_getPara('sys.transtyle'));
 				q_cmbParse("cmbTypea", q_getPara('vcc.typea'));
 				q_cmbParse("cmbStype", q_getPara('vcc.stype'));
@@ -1344,7 +1344,7 @@
 								var is_exists=false;
 								for (var j = 0; j < as.length; j++) {
 									if(as[j].product==$('#txtProduct__'+i).val() 
-									&& as[j].ucolor==$('#txtUcolor__'+i).val()
+									&& as[j].ucolor==$('#txtUcolor__'+i).val().split(',')[0]
 									&& as[j].spec==$('#txtSpec__'+i).val()
 									&& as[j].size==$('#txtSize__'+i).val()
 									//&& as[j].noa==$('#txtOrdeno__'+i).val()
@@ -1361,7 +1361,7 @@
 								if(!is_exists){	
 									as.push({
 										product:$('#txtProduct__'+i).val(),
-										ucolor:$('#txtUcolor__'+i).val(),
+										ucolor:$('#txtUcolor__'+i).val().split(',')[0],
 										spec:$('#txtSpec__'+i).val(),
 										size:$('#txtSize__'+i).val(),
 										lengthb:0,//$('#txtLengthb__'+i).val()
@@ -1384,6 +1384,83 @@
 						
 						q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtOrdeno,txtNo2,txtStoreno,txtStore,txtItem'
 						, as.length, as, 'product,ucolor,spec,size,lengthb,class,mount,weight,noa,no2,storeno,store,item', 'txtOrdeno,txtNo2');
+						
+						//續接器----------------------------------
+						var ass=[];
+						for (var i = 0; i < q_bbtCount; i++) {
+							if(!emp($('#txtUno__'+i).val()) && $('#txtUcolor__'+i).val().split(',')[1]!=undefined){
+								var t_splicer=$('#txtUcolor__'+i).val().split(',')[1];
+								var t_parapno='';
+								var t_paraf='';
+								var t_parag='';
+								if(t_splicer.indexOf('#')!=-1){
+									t_parapno=t_splicer.split('@')[0];
+									t_paraf=t_splicer.split('@')[1];
+									t_parag=t_splicer.split('@')[2];
+									if(t_parapno==undefined){t_parapno='';}
+									if(t_paraf==undefined){t_paraf='';}
+									if(t_parag==undefined){t_parag='';}
+									
+									var is_exists=false;
+									if(t_parapno.length>0 && t_paraf.length>0){
+										for (var j = 0; j < ass.length; j++) {
+											if(ass[j].product==t_parapno && ass[j].size==t_paraf){
+												is_exists=true;
+												ass[j].mount=q_add(dec(ass[j].mount),dec($('#txtLengthc__'+i).val()));
+											}
+										}
+										if(!is_exists){
+											ass.push({
+												product:t_parapno,
+												ucolor:'',
+												spec:'',
+												size:t_paraf,
+												lengthb:0,
+												class:'',
+												mount:$('#txtLengthc__'+i).val(),
+												weight:0,
+												noa:'',
+												no2:'',
+												storeno:'7000A',
+												store:'智勝-成品',
+												item:'1'
+											});
+										}
+									}
+									is_exists=false;
+									if(t_parapno.length>0 && t_parag.length>0){
+										for (var j = 0; j < ass.length; j++) {
+											if(ass[j].product==t_parapno && ass[j].size==t_parag){
+												is_exists=true;
+												ass[j].mount=q_add(dec(ass[j].mount),dec($('#txtLengthc__'+i).val()));
+											}
+										}
+										if(!is_exists){
+											ass.push({
+												product:t_parapno,
+												ucolor:'',
+												spec:'',
+												size:t_parag,
+												lengthb:0,
+												class:'',
+												mount:$('#txtLengthc__'+i).val(),
+												weight:0,
+												noa:'',
+												no2:'',
+												storeno:'7000A',
+												store:'智勝-成品',
+												item:'1'
+											});
+										}
+									}
+								}
+							}
+						}
+						ass.sort(bbssort);
+						
+						q_gridAddRow(bbsHtm, 'tbbs', 'txtProduct,txtUcolor,txtSpec,txtSize,txtLengthb,txtClass,txtMount,txtWeight,txtOrdeno,txtNo2,txtStoreno,txtStore,txtItem'
+						, ass.length, ass, 'product,ucolor,spec,size,lengthb,class,mount,weight,noa,no2,storeno,store,item', 'txtProduct,txtSize');
+						//-------------------------------------------------------
 						
 						refreshBbs();
                 	}
@@ -1437,8 +1514,9 @@
                 $('#lblLengthb_t').text('米數');
                 $('#lblClass_t').text('廠牌');
                 $('#lblUnit_t').text('單位');
-                $('#lblMount_t').text('領料數');
-                $('#lblWeight_t').text('領料重');
+                $('#lblLengthc_t').text('領料支數');
+                $('#lblMount_t').text('領料件數');
+                $('#lblWeight_t').text('領料重量');
                 $('#lblMemo_t').text('備註');
                 
                 bbtsum();
@@ -1457,7 +1535,7 @@
 			}
             
             function bbtsum() {
-            	var tot_mount=0,tot_weight=0,tot_uno='';
+            	var tot_mount=0,tot_weight=0,tot_lengthc=0,tot_uno='';
                 for (var i = 0; i < q_bbtCount; i++) {
                 	//105/04/07 改成批號計1件
                 	if(!emp($('#txtUno__'+i).val())&& tot_uno.indexOf($('#txtUno__'+i).val())==-1){
@@ -1467,7 +1545,12 @@
                 	
 	                //tot_mount=q_add(tot_mount,dec($('#txtMount__'+i).val()));
 	                tot_weight=q_add(tot_weight,dec($('#txtWeight__'+i).val()));
+	                tot_lengthc=q_add(tot_lengthc,dec($('#txtLengthc__'+i).val()));
 				}
+				if(tot_lengthc!=0)
+					$('#lblTot_lengthc').text(FormatNumber(tot_lengthc));
+				else
+					$('#lblTot_lengthc').text('');
 				if(tot_mount!=0)
 					$('#lblTot_mount').text(FormatNumber(tot_mount));
 				else
@@ -2162,6 +2245,10 @@
 					<td style="width:70px;"><a id='lblLengthb_t'> </a></td>
 					<td style="width:100px;"><a id='lblClass_t'> </a></td>
 					<!--<td style="width:55px;"><a id='lblUnit_t'> </a></td>-->
+					<td style="width:80px;"><!--續接用-->
+						<a id='lblLengthc_t'> </a>
+						<BR><a id='lblTot_lengthc'> </a>
+					</td>
 					<td style="width:80px;">
 						<a id='lblMount_t'> </a>
 						<BR><a id='lblTot_mount'> </a>
@@ -2202,6 +2289,7 @@
 						<select id="combClass..*" class="txt" style="width: 20px;display: none;"> </select>
 					</td>
 					<!--<td><input id="txtUnit..*" type="text" class="txt c1"/></td>-->
+					<td><input id="txtLengthc..*" type="text" class="txt c1 num"/></td><!--續接用-->
 					<td><input id="txtMount..*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtWeight..*" type="text" class="txt c1 num"/></td>
 					<td>
@@ -2210,6 +2298,8 @@
 						<input id="txtNo2..*" type="hidden"/>
 						<input id="txtItemno..*" type="hidden"/>
 						<input id="txtItem..*" type="hidden"/>
+						<input id="txtStoreno..*" type="hidden"/>
+						<input id="txtStore..*" type="hidden"/>
 					</td>
 				</tr>
 			</table>

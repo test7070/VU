@@ -35,17 +35,21 @@
 				$.datepicker.setDefaults($.datepicker.regional["zh-TW"]);
 				
 				$('#btnSvg').val('點線/柱狀圖');
-				$('#btnSvg').hide();
+				q_cmbParse("cmbSvgtype", '#non@全部,1@點線,2@柱狀'); 
+				$('#svgbet').hide();
 				$('#barChart').hide();
 				
 				$('#q_report').click(function(e) {
-					$('#btnSvg').hide();
+					$('#svgbet').hide();
 					$('#barChart').hide();
 					$('#dataSearch').show();
 					var tindex=$('#q_report').data().info.radioIndex;
 					var txtreport=$('#q_report').data().info.reportData[tindex].report;
 					if(txtreport=='z_cubp_vu09'){
-						$('#btnSvg').show();
+						q_cur=2;
+						$('#svgbet').show();
+					}else{
+						q_cur=0;
 					}
 				});
 				
@@ -414,21 +418,33 @@
                 		if (as[0] != undefined) {
                 			var bar=$.extend(true,[], as);
                 			var x_maxweight=0,x_minweight=999999999;
-                			for (var i = 0; i < as.length; i++) {
-                				var ttweight=0;
-                				ttweight=
-                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
-                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
-                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
-                				dec(as[i].d_01),dec(as[i].d_02)),dec(as[i].d_03)),dec(as[i].d_04)),dec(as[i].d_05)),
-                				dec(as[i].d_06)),dec(as[i].d_07)),dec(as[i].d_08)),dec(as[i].d_09)),dec(as[i].d_10)),
-                				dec(as[i].d_11)),dec(as[i].d_12)),dec(as[i].d_13)),dec(as[i].d_14)),dec(as[i].d_15)),
-                				dec(as[i].d_16)),dec(as[i].d_17)),dec(as[i].d_18)),dec(as[i].d_19)),dec(as[i].d_20)),
-                				dec(as[i].d_21)),dec(as[i].d_22)),dec(as[i].d_23)),dec(as[i].d_24)),dec(as[i].d_25)),
-                				dec(as[i].d_26)),dec(as[i].d_27)),dec(as[i].d_28)),dec(as[i].d_29)),dec(as[i].d_30)),dec(as[i].d_31));
-                				
-                				x_maxweight=Math.max(x_maxweight,dec(ttweight));
-                				x_minweight=Math.min(x_minweight,dec(as[i].d_01));
+                			if($('#cmbSvgtype').val()=='2'){
+                				for (var i = 0; i < as.length; i++) {
+                					for(var j=1; j<=31; j++){
+                						var str_j=('000'+j).slice(-2);
+										var n_weight=0;
+										eval('n_weight=dec(as[i].d_'+str_j+')');
+										x_maxweight=Math.max(x_maxweight,n_weight);
+	                					x_minweight=Math.min(x_minweight,n_weight);
+									}
+                				}
+                			}else{
+	                			for (var i = 0; i < as.length; i++) {
+	                				var ttweight=0;
+	                				ttweight=
+	                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
+	                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
+	                				q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(q_add(
+	                				dec(as[i].d_01),dec(as[i].d_02)),dec(as[i].d_03)),dec(as[i].d_04)),dec(as[i].d_05)),
+	                				dec(as[i].d_06)),dec(as[i].d_07)),dec(as[i].d_08)),dec(as[i].d_09)),dec(as[i].d_10)),
+	                				dec(as[i].d_11)),dec(as[i].d_12)),dec(as[i].d_13)),dec(as[i].d_14)),dec(as[i].d_15)),
+	                				dec(as[i].d_16)),dec(as[i].d_17)),dec(as[i].d_18)),dec(as[i].d_19)),dec(as[i].d_20)),
+	                				dec(as[i].d_21)),dec(as[i].d_22)),dec(as[i].d_23)),dec(as[i].d_24)),dec(as[i].d_25)),
+	                				dec(as[i].d_26)),dec(as[i].d_27)),dec(as[i].d_28)),dec(as[i].d_29)),dec(as[i].d_30)),dec(as[i].d_31));
+	                				
+	                				x_maxweight=Math.max(x_maxweight,dec(ttweight));
+	                				x_minweight=Math.min(x_minweight,dec(as[i].d_01));
+	                			}
                 			}
                 			
                 			$('#barChart').barChart({
@@ -471,8 +487,8 @@
                             obj.data('info').refresh(obj);
                         },
                         refresh : function(obj) {
-                        	obj.width(1200).height(600);
-                        	var objWidth = 1200;
+                        	obj.width(1600).height(600);
+                        	var objWidth = 1600;
                             var objHeight = 600;
                         	//背景
                             var tmpPath = '<rect x="0" y="0" width="' + objWidth + '" height="' + objHeight + '" style="fill:rgb(255,255,255);stroke-width:1;stroke:rgb(0,0,0)"/>';
@@ -480,30 +496,37 @@
                             var t_color1 = ['rgb(210,233,255)', 'rgb(235,255,255)'];
                             var t_n = 20;
                         	//圖表分幾個區塊
-                            var t_height = 500, t_width = 950;
+                            var t_height = 500, t_width = 1350;
                             for (var i = 0; i < t_n; i++)
                                 tmpPath += '<rect x="100" y="' + (50 + (t_height / t_n) * i) + '" width="' + t_width + '" height="' + (t_height / t_n) + '" style="fill:' + t_color1[i % t_color1.length] + ';"/>';                          
                             
                             var t_unit = 'KG',t_uweight=1;
                             var t_maxWeight = obj.data('info').maxWeight;
-                            var t_minWeight = obj.data('info').minWeight;
+                            var t_minWeight = 0;//obj.data('info').minWeight;
                             
+                            var t_range = Math.ceil((t_maxWeight - t_minWeight)/20,0);
+	                        var i = Math.pow(10,(t_range+'').length-1);
+							
+							if($('#cmbSvgtype').val()=='2' && t_maxWeight>50000){
+								t_maxWeight=Math.ceil(Math.ceil((t_maxWeight - t_minWeight)/10000)*10000);
+							}else{
+								t_maxWeight = Math.ceil(t_range/i)*i*21;
+							}
+							
                             if(t_maxWeight>50000){
-                            	t_unit = '頓',t_uweight=1000;
+                            	t_unit = '噸',t_uweight=1000;
                             	t_maxWeight=Math.ceil(q_div(t_maxWeight,t_uweight));
                             	t_minWeight=Math.floor(q_div(t_minWeight,t_uweight));
-                            }else{
-                            	t_maxWeight=q_add(t_maxWeight,500);
                             }
                             
                             //Y軸
                             tmpPath += '<line x1="100" y1="50" x2="100" y2="' + (50 + t_height) + '" style="stroke:rgb(0,0,0);stroke-width:2"/>';
-                            tmpPath += '<text x="' + (50 + t_width + 50) + '" y="' + (50 + t_height + 30) + '" fill="black">日</text>';
-                            //X軸
-                            var t_Y = 50 + t_height - round((0 - t_minWeight) / (t_maxWeight - t_minWeight) * t_height, 0);
-                            tmpPath += '<line x1="100" y1="' + (t_Y) + '" x2="' + (100 + t_width) + '" y2="' + (t_Y) + '" style="stroke:rgb(0,0,0);stroke-width:1"/>';
                             tmpPath += '<text x="' + (70) + '" y="' + (20) + '" fill="black">'+t_unit+'</text>';
-                            //X軸旁邊標記
+                            //X軸
+                            tmpPath += '<line x1="100" y1="' + (50 + t_height) + '" x2="' + (100 + t_width) + '" y2="' + (50 + t_height) + '" style="stroke:rgb(0,0,0);stroke-width:1"/>';
+                            tmpPath += '<text x="' + (50 + t_width + 50) + '" y="' + (50 + t_height + 30) + '" fill="black">日</text>';
+                            //Y軸旁邊標記
+                            var t_Y = 50 + t_height - round((0 - t_minWeight) / (t_maxWeight - t_minWeight) * t_height, 0);
                             tmpPath += '<line x1="95" y1="' + t_Y + '" x2="100" y2="' + t_Y + '" style="stroke:rgb(0,0,0);stroke-width:2"/>';
                             tmpPath += '<text text-anchor="end" x="90" y="' + t_Y + '" fill="black">0</text>';
                             
@@ -551,34 +574,75 @@
                             var t_color2 = ['rgb(255,255,0)', 'rgb(0,255,0)', 'rgb(255,0,0)'];
                             for (var i = 0; i < t_detail.length && i<3; i++) {//連接線
                             	var t_weight=0; //累加重量
+                            	var linewrite=false; //判斷是否需劃線
                             	//符號說明
-                            	tmpPath += '<rect x="1090" y="'+(65+(i*40))+'" width="20" height="20" fill="'+t_color2[i]+'"/>';
-                            	tmpPath += '<line x1="1120" y1="'+(75+(i*40))+'" x2="1140" y2="'+(75+(i*40))+'" style="stroke:rgb(0,0,0);stroke-width:1"/>';
-	                            tmpPath += '<circle class="" cx="1130" cy="'+(75+(i*40))+'" r="5" stroke="black" stroke-width="2" fill="'+t_color2[i]+'"/>';
-	                            tmpPath += '<text x="1150" y="'+(80+(i*40))+'" fill="black">'+t_detail[i].worker+'</text>';
+                            	if($('#cmbSvgtype').val()!='1'){
+                            		tmpPath += '<rect x="'+(t_width+140)+'" y="'+(65+(i*40))+'" width="20" height="20" fill="'+t_color2[i]+'"/>';
+                            	}
+                            	if($('#cmbSvgtype').val()!='2'){
+	                            	tmpPath += '<line x1="'+(t_width+170)+'" y1="'+(75+(i*40))+'" x2="'+(t_width+190)+'" y2="'+(75+(i*40))+'" style="stroke:rgb(0,0,0);stroke-width:1"/>';
+		                            tmpPath += '<circle class="" cx="'+(t_width+180)+'" cy="'+(75+(i*40))+'" r="5" stroke="black" stroke-width="2" fill="'+t_color2[i]+'"/>';
+	                            }
+	                            tmpPath += '<text x="'+(t_width+200)+'" y="'+(80+(i*40))+'" fill="black">'+t_detail[i].worker+'</text>';
                             	
                             	for(var j=1; j<=31; j++){
 									x = 100 + 20 + t_n * (j-1);
 									var str_j=('000'+j).slice(-2);
+									var n_weight=0;
+									eval('n_weight=dec(t_detail[i].d_'+str_j+')');
 									
 									//柱狀
-									eval('h = Math.abs(round(q_div(dec(t_detail[i].d_'+str_j+'),t_uweight) / (t_maxWeight+t_minWeight) * t_height, 0))');
-									tmpPath += '<rect id="barChart_profit'+i+'_'+j+'" x="' + (x-Math.ceil(t_n/3)+(i*t_nw)) + '" y="' + (q_sub(q_add(t_height,50),h)) + '" width="' + t_nw + '" height="' + h + '" fill="'+t_color2[i]+'"/>';
+									if($('#cmbSvgtype').val()!='1'){
+										h = Math.abs(round(q_div(n_weight,t_uweight) / (t_maxWeight+t_minWeight) * t_height, 0))
+										tmpPath += '<rect id="barChart_Col'+i+'_'+j+'" class="barChart_Col" x="' + (x-Math.ceil(t_n/3)+(i*t_nw)) + '" y="' + (q_sub(q_add(t_height,50),h)) + '" width="' + t_nw + '" height="' + h + '" fill="'+t_color2[i]+'"/>';
+									}
 									
 									//點線
-									eval('t_weight=q_add(t_weight,q_div(dec(t_detail[i].d_'+str_j+'),t_uweight))');
+									t_weight=q_add(t_weight,q_div(n_weight,t_uweight))
 									y = t_Y - round(t_weight / (t_maxWeight+Math.abs(t_minWeight)) * t_height, 0);
 									
-									if (j > 1) //第一條線不用畫
-										tmpPath += '<line x1="' + bx + '" y1="' + by + '" x2="' + x + '" y2="' + y + '" style="stroke:'+t_color2[i]+';stroke-width:1"/>';
-									tmpPath += '<circle id="barChart_in' + i + '_'+j+'" class="barChart_in" class="" cx="' + x + '" cy="' + y + '" r="5" stroke="black" stroke-width="2" fill="'+t_color2[i]+'"/>';
-									
-									bx = x;
-									by = y;
+									if(n_weight>0 && $('#cmbSvgtype').val()!='2'){
+										if (linewrite) //第一條線不用畫
+											tmpPath += '<line x1="' + bx + '" y1="' + by + '" x2="' + x + '" y2="' + y + '" style="stroke:'+t_color2[i]+';stroke-width:1"/>';
+										tmpPath += '<circle id="barChart_Cir' + i + '_'+j+'" class="barChart_Cir" class="" cx="' + x + '" cy="' + y + '" r="5" stroke="black" stroke-width="2" fill="'+t_color2[i]+'"/>';
+										linewrite=true;
+										
+										bx = x;
+										by = y;
+									}
 								}
 							}
                         	
                         	obj.html('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="graph">' + tmpPath + '</svg> ');
+                        	//事件
+                        	obj.children('svg').find('.barChart_Col').hover(function(e) {
+	                        	var ns = $(this).attr('id').replace('barChart_Col', '');
+	                        	var ni = ns.split('_')[0];
+	                        	var nj = ('000'+(ns.split('_')[1])).slice(-2);
+	                        	
+	                        	var t_detail = obj.data('info').Data;
+	                        	var n_weight=0;
+	                        	eval('n_weight=dec(t_detail[ni].d_'+nj+')');
+	                        	$('#q_acDiv').css('left',e.pageX)
+	                        	q_msg($('#'+$(this).attr('id')),n_weight.toString(),5000);
+	                            
+							});
+                        	obj.children('svg').find('.barChart_Cir').hover(function(e) {
+	                        	var ns = $(this).attr('id').replace('barChart_Cir', '');
+	                        	var ni = ns.split('_')[0];
+	                        	var nj = dec(ns.split('_')[1]);
+	                        	
+	                        	var t_detail = obj.data('info').Data;
+	                        	var n_weight=0;
+	                        	for(var j=1; j<=nj; j++){
+	                        		var str_j=('000'+j).slice(-2);
+	                        		eval('n_weight=q_add(n_weight,dec(t_detail[ni].d_'+str_j+'))');
+	                        	}
+	                        	
+	                        	$('#q_acDiv').css('left',e.pageX)
+	                        	q_msg($('#'+$(this).attr('id')),n_weight.toString(),5000);
+	                            
+							});
                         }
                 	});
                 	$(this).data('info').init($(this));
@@ -599,12 +663,14 @@
 	ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
 	ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();">
 		<div id="q_menu"> </div>
+		<div id="q_acDiv" style="display: none; "> </div>
 		<div style="position: absolute;top: 10px;left:50px;z-index: 1;width:2000px;">
 			<div id="container">
 				<div id="q_report"> </div>
 			</div>
 			<div id="svgbet" style="display:inline-block;width:2000px;">
 				<input id="btnSvg" type="button" style="font-size: medium;"/>
+				<select id="cmbSvgtype" style="font-size: medium;"> </select>
 			</div>
 			<div id='dataSearch' class="prt" style="margin-left: -40px;">
 				<!--#include file="../inc/print_ctrl.inc"-->

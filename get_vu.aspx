@@ -19,7 +19,7 @@
 			var q_name = "get";
 			var q_readonly = ['txtNoa', 'txtWorker','txtWorker2','txtTranstartno','txtCardeal'];
 			var q_readonlys = ['txtStoreno','txtStore'];
-			var q_readonlyt = [];
+			var q_readonlyt = ['txtMount','txtWeight','txtLengthc','txtProduct','txtUcolor','txtSpec','txtSize','txtLengthb','txtClass'];
 			var bbmNum = [];
 			var bbsNum = [];
 			var bbtNum = [];
@@ -98,7 +98,7 @@
 				bbsNum = [['txtLengthb', 10, 2, 1], ['txtMount', 10, q_getPara('vcc.mountPrecision'), 1]
 				, ['txtWeight', 10, q_getPara('vcc.weightPrecision'), 1], ['txtMweight', 10, q_getPara('vcc.pricePrecision'), 1]
 				, ['txtLengthc', 15, 0, 1]];
-				bbtNum = [['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1]];
+				bbtNum = [['txtMount', 10, q_getPara('vcc.mountPrecision'), 1], ['txtWeight', 9, q_getPara('vcc.weightPrecision'), 1], ['txtLengthb', 15, 2, 1], ['txtLengthc', 15, 0, 1]];
 				
 				q_gt('ucc', "1=1", 0, 0, 0, "bbsucc");
 				q_gt('spec', '1=1 ', 0, 0, 0, "bbsspec");
@@ -947,8 +947,9 @@
                 $('#lblLengthb_t').text('米數');
                 $('#lblClass_t').text('廠牌');
                 $('#lblUnit_t').text('單位');
-                $('#lblMount_t').text('領料數');
-                $('#lblWeight_t').text('領料重');
+                $('#lblMount_t').text('領料件數');
+                $('#lblWeight_t').text('領料重量');
+                $('#lblLengthc_t').text('領料支數');
                 $('#lblMemo_t').text('備註');
                 
                 bbtsum();
@@ -983,7 +984,7 @@
             }
             
             function bbtsum() {
-            	var tot_mount=0,tot_weight=0,tot_uno='';
+            	var tot_mount=0,tot_weight=0,tot_lengthc=0,tot_uno='';
                 for (var i = 0; i < q_bbtCount; i++) {
                 	//105/04/07 改成批號計1件
                 	if(!emp($('#txtUno__'+i).val())&& tot_uno.indexOf($('#txtUno__'+i).val())==-1){
@@ -993,7 +994,12 @@
                 	
 	                //tot_mount=q_add(tot_mount,dec($('#txtMount__'+i).val()));
 	                tot_weight=q_add(tot_weight,dec($('#txtWeight__'+i).val()));
+	                tot_lengthc=q_add(tot_lengthc,dec($('#txtLengthc__'+i).val()));
 				}
+				if(tot_lengthc!=0)
+					$('#lblTot_lengthc').text(FormatNumber(tot_lengthc));
+				else
+					$('#lblTot_lengthc').text('');
 				if(tot_mount!=0)
 					$('#lblTot_mount').text(FormatNumber(tot_mount));
 				else
@@ -1729,6 +1735,10 @@
 					<td style="width:70px;"><a id='lblLengthb_t'> </a></td>
 					<td style="width:100px;"><a id='lblClass_t'> </a></td>
 					<!--<td style="width:55px;"><a id='lblUnit_t'> </a></td>-->
+					<td style="width:80px;"><!--續接用-->
+                        <a id='lblLengthc_t'> </a>
+                        <BR><a id='lblTot_lengthc'> </a>
+                    </td>
 					<td style="width:80px;">
 						<a id='lblMount_t'> </a>
 						<BR><a id='lblTot_mount'> </a>
@@ -1769,6 +1779,7 @@
 						<select id="combClass..*" class="txt" style="width: 20px;display: none;"> </select>
 					</td>
 					<!--<td><input id="txtUnit..*" type="text" class="txt c1"/></td>-->
+					<td><input id="txtLengthc..*" type="text" class="txt c1 num"/></td><!--續接用-->
 					<td><input id="txtMount..*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtWeight..*" type="text" class="txt c1 num"/></td>
 					<td>

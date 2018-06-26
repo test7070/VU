@@ -421,11 +421,11 @@
 				
 				//106/06/14批號不使用
 				//判斷批號是否已存在
-				/*if(!check_uno){
+				if(!check_uno){
 					check_uno_count=0;check_uno_err='';
 					for (var i = 0; i < q_bbsCount; i++) {
 						if(!emp($('#txtUno_'+i).val())){
-							q_func('qtxt.query.inacheckuno_'+i, 'cuc_sf.txt,getuno,'+$('#txtUno_'+i).val()+';'+$('#txtNoa').val()+';#non'+';#non');
+							q_func('qtxt.query.inacheckuno_'+i, 'cuc_vu.txt,getuno,'+$('#txtUno_'+i).val()+';'+$('#txtNoa').val()+';#non'+';#non');
 							check_uno_count++;
 						}	
 					}
@@ -434,7 +434,7 @@
 					}else{
 						check_uno=true;
 					}
-				}*/
+				}
 				
 				//取得UNO
 				//106/04/10 用手動的方式產生
@@ -647,7 +647,7 @@
 									if(t_ucolor.length==0){
 										t_ucolor='#non';
 									}
-									q_func('qtxt.query.insertuno_'+b_seq, 'cuc_sf.txt,insert_uno,'
+									q_func('qtxt.query.insertuno_'+b_seq, 'cuc_vu.txt,insert_uno,'
 									+encodeURI(r_accy)+';'+encodeURI('ina')+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'
 									+encodeURI(r_userno)+';'+encodeURI(r_name)+';'+encodeURI(t_ucolor));
 								}
@@ -670,7 +670,7 @@
 							b_seq = t_IdSeq;
 							if(q_cur!=1 && q_cur!=2 && !emp($('#txtUno_'+b_seq).val()) && !emp($('#txtNoa').val()) && !emp($('#txtNoq_'+b_seq).val())){
 								if(confirm("確定要刪除批號【"+$('#txtUno_'+b_seq).val()+"】?")){
-									q_func('qtxt.query.deleuno_'+b_seq, 'cuc_sf.txt,dele_uno,'
+									q_func('qtxt.query.deleuno_'+b_seq, 'cuc_vu.txt,dele_uno,'
 									+encodeURI(r_accy)+';'+encodeURI('ina')+';'+encodeURI($('#txtNoa').val())+';'+encodeURI($('#txtNoq_'+b_seq).val())+';'
 									+encodeURI(r_userno)+';'+encodeURI(r_name)+';'+encodeURI($('#txtUno_'+b_seq).val()));
 								}
@@ -920,6 +920,8 @@
                 		
                 		$('#btnStore7000_'+i).attr('disabled', 'disabled');
                 		$('#btnStore7000B_'+i).attr('disabled', 'disabled');
+                		$('#btnGenuno_'+i).attr('disabled', 'disabled');
+						$('#btnDeleuno_'+i).attr('disabled', 'disabled');
                 	}
             	}else{
             		$('#combAccount').attr('disabled', 'disabled');
@@ -931,6 +933,8 @@
                 		
                 		$('#btnStore7000_'+i).removeAttr('disabled');
                 		$('#btnStore7000B_'+i).removeAttr('disabled');
+                		$('#btnGenuno_'+i).removeAttr('disabled');
+						$('#btnDeleuno_'+i).removeAttr('disabled');
                 	}
             	}
             }
@@ -1461,13 +1465,13 @@
 				</tr>
 			</table>
 		</div>
-		<div class='dbbs' style="width: 1450px;">
+		<div class='dbbs' style="width: 1600px;">
 			<table id="tbbs" class='tbbs' border="1" cellpadding='2' cellspacing='1'>
 				<tr style='color:White; background:#003366;' >
 					<td align="center" style="width:40px;"><input class="btn"  id="btnPlus" type="button" value='＋' style="font-weight: bold;"  /></td>
 					<td align="center" style="width:35px;">列印<input class="checkAll" type="checkbox" onclick="checkAll()"/></td>
 					<td align="center" style="width:35px;">項序</td>
-					<td style="width:120px; text-align: center;display: none;"><a id="lblUno_st" > </a></td>
+					<td style="width:120px; text-align: center;"><a id="lblUno_st" > </a></td><!--續接用-->
 					<td style="width:120px; text-align: center;">品名</td>
 					<td style="width:150px; text-align: center;">類別</td>
 					<td style="width:110px; text-align: center;">材質</td>
@@ -1490,7 +1494,11 @@
 					</td>
 					<td align="center"><input id="checkIsprint.*" class="isPrint" type="checkbox"/></td>
 					<td><a id="lblNo.*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
-					<td style="display: none;"><input id="txtUno.*" type="text" class="txt c1"/></td>
+					<td><!--續接用-->
+						<input id="txtUno.*" type="text" class="txt c1"/>
+						<input id="btnGenuno.*" type="button" value="入庫"/>
+						<input id="btnDeleuno.*" type="button" value="刪除"/>
+					</td>
 					<td>
 						<input id="txtProduct.*" type="text" class="txt c1" style="width: 90px;"/>
 						<select id="combProduct.*" class="txt" style="width: 20px;"> </select>
@@ -1520,8 +1528,6 @@
 					</td>
 					<td>
 						<input id="txtMemo.*" type="text" class="txt c1"/>
-						<input id="btnGenuno.*" type="button" value="入庫" style="display: none;"/>
-						<input id="btnDeleuno.*" type="button" value="刪除" style="display: none;"/>
 						<input id="btnStore7000.*" type="button" value="實體入庫"/>
 						<input id="btnStore7000B.*" type="button" value="取消實體入庫"/>
 					</td>

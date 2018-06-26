@@ -171,6 +171,7 @@ cucstocub:--cucstocub
 	begin
 		set @xcuct=''
 	end
+	declare @itype nvarchar(50) = [13] --1 裁剪 2成型 3續接
 	
 	declare @mech nvarchar(max) = isnull((select mech from mech where noa=@mechno),'')
 	declare @cubno nvarchar(100) --新加工單號
@@ -261,19 +262,61 @@ cucstocub:--cucstocub
 	begin
 		--bbm
 		exec("
-			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
-			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','','"+@namea+"','"+@now_datetime+"'
+			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind,itype)
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','','"+@namea+"','"+@now_datetime+"','"+@itype+"'
 		")
 		--bbs
-		exec("
-			insert cubs"+@accy+" (noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
-			,hmount,mount,weight,need,memo,date2,ordeno,no2,datea,productno2,product2,uno)
-			select '"+@cubno+"',right('000'+cast(ROW_NUMBER() over(order by a.noa,a.noq) as nvarchar(50)),3)
-			,b.custno,b.cust,c.product,c.ucolor,c.spec,c.size,c.lengthb,c.class,a.xcount,a.xmount,a.xweight,'','"+@memo+"','"+@datea+"',c.ordeno,c.no2,d.datea,a.noa,a.noq
-			,isnull(c.ordeno,'')+'-'+'"+@mechno+"'+
-			(right('000'+cast(1+cast(right(isnull((select MAX(uno) from view_cubs where uno like isnull(c.ordeno,'')+'-'+'"+@mechno+"'+'%'),'000'),3) as int) as nvarchar(10)),3))
-			from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq left join view_orde d on d.noa=c.ordeno
-		")
+		if((@itype='2')--成型
+		begin
+			exec("
+				insert cubs"+@accy+" (noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
+				,hmount,mount,weight,need,memo,date2,ordeno,no2,datea,productno2,product2,uno,storeno,store)
+				select '"+@cubno+"',right('000'+cast(ROW_NUMBER() over(order by a.noa,a.noq) as nvarchar(50)),3)
+				,b.custno,b.cust,c.product,c.ucolor
+				+(case when len(isnull(c.scolor,''))>0 then ','+c.scolor
+					+(case when len(isnull(c.paraf,''))>0 then '@'+c.paraf else '' end)
+					+(case when len(isnull(c.parag,''))>0 then '@'+c.parag else '' end)
+				else '' end)
+				+',成型'
+				,c.spec,c.size,c.lengthb,c.class,a.xcount,a.xmount,a.xweight,'','"+@memo+"','"+@datea+"',c.ordeno,c.no2,d.datea,a.noa,a.noq
+				,isnull(c.ordeno,'')+'-'+'"+@mechno+"'+
+				(right('000'+cast(1+cast(right(isnull((select MAX(uno) from view_cubs where uno like isnull(c.ordeno,'')+'-'+'"+@mechno+"'+'%'),'000'),3) as int) as nvarchar(10)),3))
+				,'7000A','智勝-成品'
+				from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq left join view_orde d on d.noa=c.ordeno
+			")
+		end
+		else if((@itype='3')--續接
+		begin
+			exec("
+				insert cubs"+@accy+" (noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
+				,hmount,mount,weight,need,memo,date2,ordeno,no2,datea,productno2,product2,uno,storeno,store)
+				select '"+@cubno+"',right('000'+cast(ROW_NUMBER() over(order by a.noa,a.noq) as nvarchar(50)),3)
+				,b.custno,b.cust,c.product,c.ucolor
+				+(case when len(isnull(c.scolor,''))>0 then ','+c.scolor
+					+(case when len(isnull(c.paraf,''))>0 then '@'+c.paraf else '' end)
+					+(case when len(isnull(c.parag,''))>0 then '@'+c.parag else '' end)
+				else '' end)
+				,c.spec,c.size,c.lengthb,c.class,a.xcount,a.xmount,a.xweight,'','"+@memo+"','"+@datea+"',c.ordeno,c.no2,d.datea,a.noa,a.noq
+				,isnull(c.ordeno,'')+'-'+'"+@mechno+"'+
+				(right('000'+cast(1+cast(right(isnull((select MAX(uno) from view_cubs where uno like isnull(c.ordeno,'')+'-'+'"+@mechno+"'+'%'),'000'),3) as int) as nvarchar(10)),3))
+				,'7000A','智勝-成品'
+				from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq left join view_orde d on d.noa=c.ordeno
+			")
+		end
+		else
+		begin
+			exec("
+				insert cubs"+@accy+" (noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
+				,hmount,mount,weight,need,memo,date2,ordeno,no2,datea,productno2,product2,uno,storeno,store)
+				select '"+@cubno+"',right('000'+cast(ROW_NUMBER() over(order by a.noa,a.noq) as nvarchar(50)),3)
+				,b.custno,b.cust,c.product,c.ucolor,c.spec,c.size,c.lengthb,c.class,a.xcount,a.xmount,a.xweight,'','"+@memo+"','"+@datea+"',c.ordeno,c.no2,d.datea,a.noa,a.noq
+				,isnull(c.ordeno,'')+'-'+'"+@mechno+"'+
+				(right('000'+cast(1+cast(right(isnull((select MAX(uno) from view_cubs where uno like isnull(c.ordeno,'')+'-'+'"+@mechno+"'+'%'),'000'),3) as int) as nvarchar(10)),3))
+				,'7000A','智勝-成品'
+				from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq left join view_orde d on d.noa=c.ordeno
+			")
+		end
+		
 		--bbt
 		exec("
 			insert cubt"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,gmount,gweight,memo2,storeno,store)
@@ -733,6 +776,7 @@ cucutocubs:--cucutocubs
 	declare @namea nvarchar(max) = [6]
 	--cuct資料
 	declare @xcucu nvarchar(max) = [7]
+	declare @itype nvarchar(50) = [8] --1 裁剪 2成型 3續接
 	if(@xcucu='#non')
 	begin
 		set @xcucu=''
@@ -798,14 +842,14 @@ cucutocubs:--cucutocubs
 	begin
 		--bbm
 		exec("
-			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
-			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"','"+@now_datetime+"' 
+			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind,itype)
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"','"+@now_datetime+"','"+@itype+"'  
 		")
 		
 		--bbs
 		exec("
-			insert cubs"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,mount,hmount,weight,memo,uno,date2)
-			select '"+@cubno+"',*,'"+@datea+"' from #tmpa 
+			insert cubs"+@accy+" (noa,noq,product,ucolor,spec,size,lengthb,class,mount,hmount,weight,memo,uno,date2,storeno,store)
+			select '"+@cubno+"',*,'"+@datea+"','7000A',(select top 1 store from store where noa='7000A') from #tmpa 
 		")
 	
 		insert dno (tablea,noa,usera)
@@ -915,19 +959,19 @@ begin
 	--領料
 	--bbm
 	exec("
-		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
-		select '"+@cubno+"','"+@datea+"',mechno,mech,noa+'條碼領料轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"'
+		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind,itype)
+		select '"+@cubno+"','"+@datea+"',mechno,mech,noa+'條碼領料轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"','4'
 		from #bbm 
 	")
 		
 	--bbs
 	exec("
 		insert cubs"+@accy+" (noa,noq,productno2,product2,custno,comp,product,ucolor,spec,size,lengthb,class
-		,hmount,mount,weight,uno,date2,ordeno,no2)
+		,hmount,mount,weight,uno,date2,ordeno,no2,storeno,store)
 		select '"+@cubno+"',right('000'+cast(ROW_NUMBER()over (order by uno,noa,noq) as nvarchar(10)),3)
 		,productno2,product2,custno,comp,product,ucolor,spec,size,lengthb,class
 		,case when hmount>0 then -1*hmount else 0 end,case when mount>0 then -1*mount else 0 end ,case when weight>0 then -1*weight else 0 end
-		,uno,'"+@datea+"',ordeno,no2
+		,uno,'"+@datea+"',ordeno,no2,'7000A',(select top 1 store from store where noa='7000A')
 		from #bbs 
 	")
 	
@@ -940,18 +984,18 @@ begin
 	
 	--bbm
 	exec("
-		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
-		select '"+@scubno+"','"+@datea+"',mechno,mech,noa+'條碼領料轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"'
+		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind,itype)
+		select '"+@scubno+"','"+@datea+"',mechno,mech,noa+'條碼領料轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"','4'
 		from #bbm 
 	")
 		
 	--bbs
 	exec("
 		insert cubs"+@accy+" (noa,noq,productno2,product2,custno,comp,product,ucolor,spec,size,lengthb,class
-		,hmount,mount,weight,uno,date2,ordeno,no2)
+		,hmount,mount,weight,uno,date2,ordeno,no2,storeno,store)
 		select '"+@scubno+"',right('000'+cast(ROW_NUMBER()over (order by uno,noa,noq) as nvarchar(10)),3)
 		,'','','','',product,ucolor,spec,size,lengthb,class,hmount,mount,weight
-		,'"+@scubno+"','"+@datea+"','',''
+		,'"+@scubno+"','"+@datea+"','','','7000A',(select top 1 store from store where noa='7000A')
 		from #bbs 
 	")
 	
@@ -1055,18 +1099,18 @@ begin
 	--轉存貨
 	--bbm
 	exec("
-		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
-		select '"+@cubno+"','"+@datea+"',mechno,mech,'"+@noa+"條碼刪除轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"'
+		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind,itype)
+		select '"+@cubno+"','"+@datea+"',mechno,mech,'"+@noa+"條碼刪除轉庫存'+(case when len(memo)>0 then ',' else '' end )+memo,'"+@namea+"','"+@nowdate+"','5'
 		from #bbm 
 	")
 		
 	--bbs
 	exec("
 		insert cubs"+@accy+" (noa,noq,productno2,product2,custno,comp,product,ucolor,spec,size,lengthb,class
-		,hmount,mount,weight,uno,date2,ordeno,no2)
+		,hmount,mount,weight,uno,date2,ordeno,no2,storeno,store)
 		select '"+@cubno+"',right('000'+cast(ROW_NUMBER()over (order by uno,noa,noq) as nvarchar(10)),3)
 		,'','','','',product,ucolor,spec,size,lengthb,class,hmount,mount,weight
-		,'"+@cubno+"','"+@datea+"','',''
+		,'"+@cubno+"','"+@datea+"','','','7000A',(select top 1 store from store where noa='7000A')
 		from #bbs 
 	")
 	
@@ -1411,4 +1455,542 @@ and (isnull(a.worker,'')='1剪' or isnull(a.worker,'')='2剪'or isnull(a.worker,
 group by a.worker
 
 select * from @tmp order by idno
+;
+-------------------------------------------------------------------------------------------------------------------------------
+getuno:--getuno
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max) = ''
+declare @uno nvarchar(max) = [1] --uno
+declare @noa nvarchar(max) = [2] --排除的領料單號
+declare @xnoa nvarchar(max) = case when '#non'=[3] then '' else [3] end --原入庫單號
+declare @xnoq nvarchar(max) = case when '#non'=[4] then '' else [4] end --原入庫單序
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+--106/03/29 多產品單一批號也要全部顯示出來，但會全部領料
+create table #tmp( 
+	accy nvarchar(50),
+	tablea nvarchar(50), 
+	noa nvarchar(50),
+	noq nvarchar(50),
+	datea nvarchar(50),
+	uno nvarchar(50),
+	product nvarchar(50),
+	ucolor nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	mount float,
+	weight float,
+	lengthc float,
+	storeno nvarchar(50),
+	store nvarchar(50),
+	memo nvarchar(MAX),
+	ordeno nvarchar(100),
+	no2 nvarchar(50),
+	typea nvarchar(10),
+) 
+--盤點
+insert #tmp
+select a.accy,'ucces' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,a.mount,a.weight,a.lengthc,a.storeno,a.store,a.memo,'','','5'
+from view_ucces a left join view_ucce b on a.noa=b.noa
+where len(a.uno)>0 and (len(@uno)=0 or a.uno=@uno) and a.noa!=@noa
+
+--進貨
+insert #tmp
+select a.accy,'rc2s' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,a.mount,a.weight,a.lengthc,a.storeno,a.store,a.memo,'','','6'
+from view_rc2s a left join view_rc2 b on a.noa = b.noa 
+where b.typea='1' and len(a.uno)>0 and (len(@uno)=0 or a.uno=@uno) and a.noa!=@noa
+
+--入庫
+insert #tmp
+select a.accy,'cubs' tablea,a.noa,a.noq,a.date2,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,a.mount,a.weight,a.hmount,a.storeno,a.store,a.memo,a.ordeno,a.no2,'6'
+from view_cubs a left join view_cub b on a.noa=b.noa
+where len(a.uno)>0 and (len(@uno)=0 or a.uno=@uno) and a.noa!=@noa
+
+--互換進
+insert #tmp
+select a.accy,'inas' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,a.mount,a.weight,0,a.storeno,a.store,a.memo,'','','6'
+from view_inas a left join view_ina b on a.noa=b.noa
+where len(a.uno)>0 and (len(@uno)=0 or a.uno=@uno) and a.noa!=@noa
+
+--出貨退回
+insert #tmp
+select a.accy,'vcct' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,b.mount,b.weight,b.lengthc,'','',b.memo,b.ordeno,b.no2,'6'
+from view_vcc a left join view_vcct b on a.noa = b.noa 
+where a.typea='2' and len(b.uno)>0 and (len(@uno)=0 or b.uno=@uno) and a.noa!=@noa
+
+--出貨
+insert #tmp
+select a.accy,'vcct' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,-1*b.mount,-1*b.weight,-1*b.lengthc,'','',b.memo,b.ordeno,b.no2,'7'
+from view_vcc a left join view_vcct b on a.noa = b.noa 
+where a.typea='1' and len(b.uno)>0 and (len(@uno)=0 or b.uno=@uno) and a.noa!=@noa
+
+--領料
+insert #tmp
+select a.accy,'cubt' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,-1*a.gmount,-1*a.gweight,-1*a.lengthc,'','',a.memo,'','','7'
+from view_cubt a left join view_cub b on a.noa=b.noa
+where len(a.uno)>0 and (len(@uno)=0 or a.uno=@uno) and a.noa!=@noa
+
+--互換出
+insert #tmp
+select a.accy,'gets' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,-1*a.mount,-1*a.weight,0,b.storeno,b.store,a.memo,'','','7'
+from view_gett a left join view_get b on a.noa=b.noa
+where len(a.uno)>0 and (len(@uno)=0 or a.uno=@uno) and a.noa!=@noa
+
+--退貨
+insert #tmp
+select a.accy,'rc2t' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,-1*a.mount,-1*a.weight,-1*a.lengthc,a.storeno,a.store,a.memo,'','','7'
+from view_rc2s a left join view_rc2 b on a.noa = b.noa 
+where b.typea='2' and len(a.uno)>0 and (len(@uno)=0 or a.uno=@uno) and a.noa!=@noa
+
+
+--批號一次會全部領 不會剩餘
+--update a
+--set mount=case when vget>((case when tablea='vcct' then 1 else 0 end)+0) or cget>0 or gget>0 or rget>0 then 0 else a.mount end
+--,weight=case when vget>((case when tablea='vcct' then 1 else 0 end)+0) or cget>0 or gget>0 or rget>0 then 0 else a.weight end
+--,lengthc=case when vget>((case when tablea='vcct' then 1 else 0 end)+0) or cget>0 or gget>0 or rget>0 then 0 else a.lengthc end
+--from #tmp a 
+--outer apply (select sum(case when va.typea!='2' then 1 else -1 end)vget from view_vcc va left join view_vcct vb on va.noa=vb.noa where vb.uno=a.uno and va.noa!=@noa)v
+--outer apply (select count(*)cget from view_cubt where uno=a.uno and noa!=@noa)c
+--outer apply (select count(*)gget from view_gets where uno=a.uno and noa!=@noa)g
+--outer apply (select sum(case when ra.typea='2' then 1 else 0 end)rget from view_rc2 ra left join view_rc2s rb on ra.noa=rb.noa where rb.uno=a.uno and ra.noa!=@noa)r
+
+--105/12/08 批號不會一次領完(批號只看總量)
+update #tmp
+set mount=ISNULL(mount,0),weight=ISNULL(weight,0),lengthc=ISNULL(lengthc,0)
+,storeno=ISNULL(storeno,''),store=ISNULL(store,'')
+
+insert #tmp(uno,typea,product,spec,size,ucolor,lengthb,class,memo)
+select uno,'0',product,spec,size,ucolor,lengthb,class,memo from #tmp group by uno,product,spec,size,ucolor,lengthb,class,memo
+
+update a
+set accy=b.accy,tablea=b.tablea,noa=b.noa,noq=b.noq,datea=b.datea
+,storeno=b.storeno,store=b.store,ordeno=b.ordeno,no2=b.no2
+from #tmp a outer apply (select top 1 * from #tmp where uno=a.uno and typea!='0' 
+and product=a.product and spec=a.spec and size=a.size 
+and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and memo=a.memo
+order by datea,typea,noa,noq) b
+where a.typea='0'
+
+delete a
+from #tmp a outer apply (select MAX(datea)datea,MAX(datea+'-'+typea+'-'+noa) maxnoa from #tmp where uno=a.uno and tablea='ucces' and typea!='0')b
+where a.tablea!='0' and a.datea<isnull(b.datea,'') and a.datea+'-'+a.typea+'-'+a.noa< ISNULL(b.maxnoa,'')
+
+update a
+set mount=isnull(b.mount,0),weight=isnull(b.weight,0),lengthc=isnull(b.lengthc,0)
+from #tmp a outer apply (select SUM(mount)mount,SUM(weight)weight,sum(lengthc)lengthc from #tmp 
+where uno=a.uno and typea!='0' and product=a.product and spec=a.spec and size=a.size 
+and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and memo=a.memo) b
+where a.typea='0'
+
+delete #tmp where typea!='0'
+
+--沒有排除單號 只顯示有數量和重量的批號
+--if(len(@noa)=0)
+--	delete #tmp where mount=0 and weight=0 and lengthc=0
+
+select * from #tmp where (len(@xnoa)=0 or noa=@xnoa) and (len(@xnoq)=0 or noq=@xnoq)
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+;
+-------------------------------------------------------------------------------------------------------------------------
+cubnouno_vu:--cubnouno_vu
+SET QUOTED_IDENTIFIER OFF
+declare @accy nvarchar(MAX) = [1]
+declare @uno nvarchar(MAX) = [2]
+declare @mechno nvarchar(max) = case when '#non'=[3] then '' else [3] end
+declare @userno nvarchar(max) = [4]
+declare @namea nvarchar(max) = [5]
+declare @itype nvarchar(50) = [6] --1 裁剪 2成型 3續接
+declare @cmd nvarchar(max) = ''
+
+set @uno=REPLACE(@uno,'#',',')
+
+IF OBJECT_ID('tempdb..#unotable')is not null
+BEGIN
+	set @cmd = 'drop table #unotable'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #unotable( 
+	accy nvarchar(50),
+	tablea nvarchar(50), 
+	noa nvarchar(50),
+	noq nvarchar(50),
+	datea nvarchar(50),
+	uno nvarchar(50),
+	product nvarchar(50),
+	ucolor nvarchar(50),
+	spec nvarchar(50),
+	size nvarchar(50),
+	lengthb float,
+	class nvarchar(50),
+	mount float,
+	weight float,
+	lengthc float,
+	storeno nvarchar(50),
+	store nvarchar(50),
+	typea nvarchar(10),
+	memo nvarchar(MAX)
+) 
+
+--盤點
+insert #unotable
+select a.accy,'ucces' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,a.mount,a.weight,a.lengthc,a.storeno,a.store,'5',a.memo
+from view_ucces a left join view_ucce b on a.noa=b.noa
+where len(a.uno)>0 and exists (select * from dbo.fnSplit(@uno) where n=a.uno)
+
+--進貨
+insert #unotable
+select a.accy,'rc2s' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,a.mount,a.weight,a.lengthc,a.storeno,a.store,'6',a.memo
+from view_rc2s a left join view_rc2 b on a.noa = b.noa 
+where b.typea='1' and exists (select * from dbo.fnSplit(@uno) where n=a.uno)
+
+--入庫
+insert #unotable
+select a.accy,'cubs' tablea,a.noa,a.noq,a.date2,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,a.mount,a.weight,a.hmount,a.storeno,a.store,'6',a.memo
+from view_cubs a left join view_cub b on a.noa=b.noa
+where len(a.uno)>0 and exists (select * from dbo.fnSplit(@uno) where n=a.uno)
+
+--互換進
+insert #unotable
+select a.accy,'inas' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,a.mount,a.weight,0,a.storeno,a.store,'6',a.memo
+from view_inas a left join view_ina b on a.noa=b.noa
+where len(a.uno)>0 and exists (select * from dbo.fnSplit(@uno) where n=a.uno)
+
+--出貨退回
+insert #unotable
+select a.accy,'vcct' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,b.mount,b.weight,b.lengthc,'','','6',b.memo
+from view_vcc a left join view_vcct b on a.noa = b.noa 
+where a.typea='2' and exists (select * from dbo.fnSplit(@uno) where n=b.uno)
+
+--出貨
+insert #unotable
+select a.accy,'vcct' tablea,a.noa,b.noq,a.datea,b.uno,b.product,b.ucolor,b.spec,b.size,b.lengthb,b.class
+,-1*b.mount,-1*b.weight,-1*b.lengthc,'','','7',b.memo
+from view_vcc a left join view_vcct b on a.noa = b.noa 
+where a.typea='1' and exists (select * from dbo.fnSplit(@uno) where n=b.uno)
+
+--領料
+insert #unotable
+select a.accy,'cubt' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,-1*a.gmount,-1*a.gweight,-1*a.lengthc,'','','7',a.memo
+from view_cubt a left join view_cub b on a.noa=b.noa
+where len(a.uno)>0 and exists (select * from dbo.fnSplit(@uno) where n=a.uno)
+
+--互換出
+insert #unotable
+select a.accy,'gets' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,-1*a.mount,-1*a.weight,0,b.storeno,b.store,'7',a.memo
+from view_gett a left join view_get b on a.noa=b.noa
+where len(a.uno)>0 and exists (select * from dbo.fnSplit(@uno) where n=a.uno)
+
+--退貨
+insert #unotable
+select a.accy,'rc2t' tablea,a.noa,a.noq,b.datea,a.uno,a.product,a.ucolor,a.spec,a.size,a.lengthb,a.class
+,-1*a.mount,-1*a.weight,-1*a.lengthc,a.storeno,a.store,'7',a.memo
+from view_rc2s a left join view_rc2 b on a.noa = b.noa 
+where b.typea='2' and len(a.uno)>0 and exists (select * from dbo.fnSplit(@uno) where n=a.uno)
+
+update #unotable
+set mount=ISNULL(mount,0),weight=ISNULL(weight,0),lengthc=ISNULL(lengthc,0)
+,storeno=ISNULL(storeno,''),store=ISNULL(store,'')
+
+insert #unotable(uno,typea,product,spec,size,ucolor,lengthb,class,memo)
+select uno,'0',product,spec,size,ucolor,lengthb,class,memo 
+from #unotable group by uno,product,spec,size,ucolor,lengthb,class,memo
+
+update a
+set accy=b.accy,tablea=b.tablea,noa=b.noa,noq=b.noq,datea=b.datea
+,storeno=b.storeno,store=b.store
+from #unotable a outer apply (select top 1 * from #unotable 
+where uno=a.uno and typea!='0' and product=a.product and spec=a.spec and size=a.size 
+and ucolor=a.ucolor and lengthb=a.lengthb and class=a.class and memo=a.memo
+order by datea,typea,noa,noq) b
+where a.typea='0'
+
+delete #unotable where typea!='0'
+
+--批號一次會全部領 不會剩餘
+--update a
+--set mount=case when vget>((case when tablea='vcct' then 1 else 0 end)+0) or cget>0 or gget>0 or rget>0 then 0 else a.mount end
+--,weight=case when vget>((case when tablea='vcct' then 1 else 0 end)+0) or cget>0 or gget>0 or rget>0 then 0 else a.weight end
+--,lengthc=case when vget>((case when tablea='vcct' then 1 else 0 end)+0) or cget>0 or gget>0 or rget>0 then 0 else a.lengthc end
+--from #unotable a 
+--outer apply (select sum(case when va.typea!='2' then 1 else -1 end)vget from view_vcc va left join view_vcct vb on va.noa=vb.noa where vb.uno=a.uno)v
+--outer apply (select count(*)cget from view_cubt where uno=a.uno)c
+--outer apply (select count(*)gget from view_gets where uno=a.uno)g
+--outer apply (select sum(case when ra.typea='2' then 1 else 0 end)rget from view_rc2 ra left join view_rc2s rb on ra.noa=rb.noa where rb.uno=a.uno )r
+
+--105/12/09 調整會依據輸入的數量重量扣除
+update a
+set mount=dbo.split(b.item,'@',0)
+,weight=dbo.split(b.item,'@',2)
+,lengthc=dbo.split(b.item,'@',1)
+from #unotable a left join dbo.fnSplit(@uno) b on a.uno=b.n
+and a.noa=dbo.split(b.item,'@',3) and a.noq=dbo.split(b.item,'@',4)
+
+--刪除已領料完畢的批號 --1041210顯示已出貨或領料單號
+--delete #unotable where mount<=0 and weight<=0 
+
+declare @xaccy nvarchar(MAX)
+declare @xuno nvarchar(MAX)
+declare @xnoa nvarchar(MAX)
+declare @nowdate nvarchar(30) --今天日期
+set @nowdate=replace(CONVERT (VARCHAR(20), GETDATE(),20 ),'-','/')
+
+--104/10/14 改為 新增加工單做領料(負數)
+declare @datea nvarchar(30)
+set @datea=left(@nowdate,10)
+declare @mech nvarchar(max) = isnull((select mech from mech where noa=@mechno),'')
+declare @cubno nvarchar(100) --新加工單號
+set @cubno=isnull((select MAX(noa) from view_cub where noa like 'M'+replace(@datea,'/','')+'%' ),'')
+set @cubno='M'+REPLACE(@datea,'/','')+right('000'+cast(cast(right(@cubno,3) as int) +1 as nvarchar(50)),3)
+
+declare @itypename nvarchar(30)=case when @itype='1' then '裁剪' when @itype='2' then '成型'  else '續接' end
+
+--產生cub
+if((select count(*) from #unotable where enda='0' )>0)
+begin
+	--bbm
+	exec("
+		insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind,itype)
+		select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@itypename+"領料','"+@namea+"','"+@nowdate+"','"+@itype+"'
+	")
+		
+	--bbt
+	exec("
+		insert cubt"+@accy+" (noa,noq,uno,product,ucolor,spec,size,lengthb,class,lengthc,gmount,gweight,storeno,store,memo)
+		select '"+@cubno+"',right('000'+cast(ROW_NUMBER()over (order by uno) as nvarchar(10)),3)
+		,uno,product,ucolor,spec,size,lengthb,class
+		,lengthc,mount,weight,storeno,store,memo
+		from #unotable 
+	")
+	
+	insert dno (tablea,noa,usera)
+	select 'cub',@cubno,@userno
+end
+else
+begin
+	set @cubno=''
+end
+
+select @cubno cubno,(select uno+' '+memo+'\n' from #unotable where enda='1' group by uno,memo FOR XML PATH('')) err
+
+IF OBJECT_ID('tempdb..#unotable')is not null
+BEGIN
+	set @cmd = 'drop table #unotable'
+	EXECUTE sp_executesql @cmd
+END
+;
+-------------------------------------------------------------------------------------------------------------------------------
+insert_uno:--insert_uno
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max) = ''
+declare @accy nvarchar(max) = [1]
+declare @tablea nvarchar(max) = [2]
+declare @noa nvarchar(max) = [3]
+declare @noq nvarchar(max) = [4]
+declare @userno nvarchar(max) = [5]
+declare @namea nvarchar(max) = [6]
+declare @ucolor nvarchar(max) = case when '#non'=[7] then '' else [7] end
+
+declare @t_err nvarchar(max) = '參數錯誤'
+declare @uno nvarchar(max) = ''
+declare @num nvarchar(max) = ''
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+
+--已使用的uno
+create table #tmp( 
+	uno nvarchar(50)
+)
+-------------------------------------------------------------------
+if(@ucolor not like '%定尺%')
+begin
+	--盤點
+	insert #tmp
+	select a.uno from view_ucces a left join view_ucce b on a.noa=b.noa where len(a.uno)>0 group by a.uno
+	--進貨
+	insert #tmp
+	select a.uno from view_rc2s a left join view_rc2 b on a.noa = b.noa where len(a.uno)>0 group by a.uno
+	--入庫
+	insert #tmp
+	select a.uno from view_cubs a left join view_cub b on a.noa=b.noa where len(a.uno)>0 group by a.uno
+	--互換進
+	insert #tmp
+	select a.uno from view_inas a left join view_ina b on a.noa=b.noa where len(a.uno)>0 group by a.uno
+	--出貨退回
+	insert #tmp
+	select b.uno from view_vcc a left join view_vcct b on a.noa = b.noa where len(b.uno)>0 group by b.uno
+	--領料
+	insert #tmp
+	select a.uno from view_cubt a left join view_cub b on a.noa=b.noa where len(a.uno)>0 group by a.uno
+	--互換出
+	insert #tmp
+	select a.uno from view_gett a left join view_get b on a.noa=b.noa where len(a.uno)>0 group by a.uno
+end
+----------------------------------------------------------------------------------
+
+if(len(@noa)>0 and len(@noq)>0)
+begin
+	if(@tablea='rc2')
+	begin
+		set @accy=isnull((select top 1 accy from view_rc2s where noa=@noa and noq=@noq),'')
+		set @uno=isnull((select top 1 uno from view_rc2s where noa=@noa and noq=@noq),'')
+		if(len(@accy)=0)
+		begin
+			set @t_err='進貨單號或品項不存在!!'
+		end
+		else if (len(@uno)>0)
+		begin
+			set @t_err='進貨批號已存在!!'
+		end
+		else
+		begin
+			if(@ucolor not like '%定尺%')
+			begin
+				set @num=isnull((select left(replace(MAX(uno),@noa+'-',''),3) from #tmp where uno like @noa+'-%'),'000')
+				set @num=right('000'+CAST(CAST(@num as int)+1 as nvarchar(10)),3)
+				set @uno=@noa+'-'+@num
+				--檢查其他tablea批號是否重覆
+				while ((select count(*) from #tmp where uno=@uno)>0)
+				begin
+					set @num=right('000'+CAST(CAST(@num as int)+1 as nvarchar(10)),3)
+					set @uno=@noa+'-'+@num
+				end
+			end
+			else
+			begin
+				set @uno=@noa
+			end
+			
+			EXEC("update rc2s"+@accy+" set uno='"+@uno+"' where noa='"+@noa+"' and noq='"+@noq+"'")
+			set @t_err=''
+		end
+	end
+	else if(@tablea='ina')
+	begin
+		set @accy=isnull((select top 1 accy from view_inas where noa=@noa and noq=@noq),'')
+		set @uno=isnull((select top 1 uno from view_inas where noa=@noa and noq=@noq),'')
+		if(len(@accy)=0)
+		begin
+			set @t_err='互換進貨單號或品項不存在!!'
+		end
+		else if (len(@uno)>0)
+		begin
+			set @t_err='互換進貨批號已存在!!'
+		end
+		else
+		begin
+			if(@ucolor not like '%定尺%')
+			begin
+				set @num=isnull((select left(replace(MAX(uno),@noa+'-',''),3) from #tmp where uno like @noa+'-%'),'000')
+				set @num=right('000'+CAST(CAST(@num as int)+1 as nvarchar(10)),3)
+				set @uno=@noa+'-'+@num
+				--檢查其他tablea批號是否重覆
+				while ((select count(*) from #tmp where uno=@uno)>0)
+				begin
+					set @num=right('000'+CAST(CAST(@num as int)+1 as nvarchar(10)),3)
+					set @uno=@noa+'-'+@num
+				end
+			end
+			else
+			begin
+				set @uno=@noa
+			end
+			
+			EXEC("update inas"+@accy+" set uno='"+@uno+"' where noa='"+@noa+"' and noq='"+@noq+"'")
+			set @t_err=''
+		end
+	end
+	else
+	begin
+		set @t_err='批號寫入錯誤!!'
+	end
+end
+
+select @noa noa,@noq noq,@uno uno,@t_err terr
+
+IF OBJECT_ID('tempdb..#tmp')is not null
+BEGIN
+	set @cmd = 'drop table #tmp'
+	EXECUTE sp_executesql @cmd
+END
+;
+--------------------------------------------------------------------------------------------------------------
+dele_uno:--dele_uno
+SET QUOTED_IDENTIFIER OFF
+declare @cmd nvarchar(max) = ''
+declare @accy nvarchar(max) = [1]
+declare @tablea nvarchar(max) = [2]
+declare @noa nvarchar(max) = [3]
+declare @noq nvarchar(max) = [4]
+declare @userno nvarchar(max) = [5]
+declare @namea nvarchar(max) = [6]
+
+declare @t_err nvarchar(max) = '參數錯誤'
+
+if(len(@noa)>0 and len(@noq)>0)
+begin
+	if(@tablea='rc2')
+	begin
+		set @accy=isnull((select top 1 accy from view_rc2s where noa=@noa and noq=@noq),'')
+		if(len(@accy)=0)
+		begin
+			set @t_err='進貨單號或品項不存在!!'
+		end
+		else
+		begin
+			EXEC("update rc2s"+@accy+" set uno='' where noa='"+@noa+"' and noq='"+@noq+"'")
+			set @t_err=''
+		end
+	end
+	else if(@tablea='ina')
+	begin
+		set @accy=isnull((select top 1 accy from view_inas where noa=@noa and noq=@noq),'')
+		if(len(@accy)=0)
+		begin
+			set @t_err='互換進貨單號或品項不存在!!'
+		end
+		else
+		begin
+			EXEC("update inas"+@accy+" set uno='' where noa='"+@noa+"' and noq='"+@noq+"'")
+			set @t_err=''
+		end
+	end
+	else
+	begin
+		set @t_err='刪除批號錯誤!!'
+	end
+end
+
+select @noa noa,@noq noq,@t_err terr
 ;

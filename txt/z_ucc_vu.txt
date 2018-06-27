@@ -243,7 +243,7 @@ set @aprice=0
 
 --板料倉庫在7000
 declare cursor_table cursor for
-select tablea,isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp where tablea!='cubs' 
+select tablea,isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp where tablea!='cubs' and gno!='2' 
 order by isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa,noq
 open cursor_table
 fetch next from cursor_table
@@ -586,7 +586,8 @@ set @avgweight=0
 set @aprice=0
 
 declare cursor_table cursor for
-select tablea,isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp 
+select tablea,isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0),isnull(money,0) from #tmp
+where gno!='2' 
 order by isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(size,''),isnull(spec,''),isnull(lengthb,''),isnull(class,''),isnull(datea,''),gno,noa
 open cursor_table
 fetch next from cursor_table
@@ -2420,7 +2421,8 @@ set @t_mount=0
 set @t_weight=0
 
 declare cursor_table cursor for
-select tablea,isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0) from #tmp --where tablea!='cubs' 
+select tablea,isnull(storeno,''),isnull(product,''),isnull(ucolor,''),isnull(spec,''),isnull(size,''),isnull(lengthb,''),isnull(class,''),isnull(mount,0),isnull(weight,0) from #tmp --where tablea!='cubs'
+where gno!='9' 
 order by isnull(storeno,''),isnull(product,''),isnull(size,''),isnull(class,''),isnull(datea,''),gno,noa,noq
 open cursor_table
 fetch next from cursor_table

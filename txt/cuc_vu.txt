@@ -266,7 +266,7 @@ cucstocub:--cucstocub
 			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','','"+@namea+"','"+@now_datetime+"','"+@itype+"'
 		")
 		--bbs
-		if((@itype='2')--成型
+		if(@itype='2')--成型
 		begin
 			exec("
 				insert cubs"+@accy+" (noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
@@ -285,7 +285,7 @@ cucstocub:--cucstocub
 				from #tmp a left join view_cuc b on a.noa=b.noa left join view_cucs c on a.noa=c.noa and a.noq=c.noq left join view_orde d on d.noa=c.ordeno
 			")
 		end
-		else if((@itype='3')--續接
+		else if(@itype='3')--續接
 		begin
 			exec("
 				insert cubs"+@accy+" (noa,noq,custno,comp,product,ucolor,spec,size,lengthb,class
@@ -669,8 +669,8 @@ cucttocubt:--cucttocubt
 	begin
 		--bbm
 		exec("
-			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind)
-			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"','"+@now_datetime+"' 
+			insert cub"+@accy+" (noa,datea,mechno,mech,memo,worker,kind,itype)
+			select '"+@cubno+"','"+@datea+"','"+@mechno+"','"+@mech+"','"+@memo+"','"+@namea+"','"+@now_datetime+"','1' 
 		")
 		
 		--bbt

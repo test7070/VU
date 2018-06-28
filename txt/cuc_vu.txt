@@ -1456,6 +1456,83 @@ group by a.worker
 
 select * from @tmp order by idno
 ;
+---------------------------------------------------------------------------------------
+zcubppie9:--zcubppie9
+SET QUOTED_IDENTIFIER OFF 
+declare @t_mon nvarchar(30)
+declare @t_typea nvarchar(30) --空白 spec+size, 1 spec,2 size,3 worker
+set @t_mon = [1]
+set @t_typea=case when '#non'=[2] then '' else [2] end
+
+declare @tmp table(
+	idno int,
+	title nvarchar(50),
+	weight float
+)
+
+if(@t_typea='')
+begin
+	insert @tmp(idno,title,weight) 
+	select ROW_NUMBER()over (order by b.spec,cast(dbo.get_num(b.size) as int)),b.spec+' '+b.size,sum(b.weight)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(isnull(a.datea,''),len(@t_mon)) =@t_mon 
+	and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	and isnull(b.uno,'')!='' and b.ucolor!='板料'
+	and (isnull(a.worker,'')='1剪' 
+	or isnull(a.worker,'')='2剪' 
+	or isnull(a.worker,'')='3剪' 
+	or isnull(a.worker,'')like '%盤元%' 
+	or isnull(a.worker,'')like '%切割%') 
+	group by b.spec,b.size
+end
+if(@t_typea='1')
+begin
+	insert @tmp(idno,title,weight) 
+	select ROW_NUMBER()over (order by b.spec),b.spec,sum(b.weight)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(isnull(a.datea,''),len(@t_mon)) =@t_mon 
+	and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	and isnull(b.uno,'')!='' and b.ucolor!='板料'
+	and (isnull(a.worker,'')='1剪' 
+	or isnull(a.worker,'')='2剪' 
+	or isnull(a.worker,'')='3剪' 
+	or isnull(a.worker,'')like '%盤元%' 
+	or isnull(a.worker,'')like '%切割%') 
+	group by b.spec
+end
+if(@t_typea='2')
+begin
+	insert @tmp(idno,title,weight) 
+	select ROW_NUMBER()over (order by cast(dbo.get_num(b.size) as int)),b.size,sum(b.weight)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(isnull(a.datea,''),len(@t_mon)) =@t_mon 
+	and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	and isnull(b.uno,'')!='' and b.ucolor!='板料'
+	and (isnull(a.worker,'')='1剪' 
+	or isnull(a.worker,'')='2剪' 
+	or isnull(a.worker,'')='3剪' 
+	or isnull(a.worker,'')like '%盤元%' 
+	or isnull(a.worker,'')like '%切割%') 
+	group by b.size
+end
+if(@t_typea='3')
+begin
+	insert @tmp(idno,title,weight) 
+	select ROW_NUMBER()over (order by a.worker),a.worker,sum(b.weight)
+	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
+	where left(isnull(a.datea,''),len(@t_mon)) =@t_mon 
+	and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 
+	and isnull(b.uno,'')!='' and b.ucolor!='板料'
+	and (isnull(a.worker,'')='1剪' 
+	or isnull(a.worker,'')='2剪' 
+	or isnull(a.worker,'')='3剪' 
+	or isnull(a.worker,'')like '%盤元%' 
+	or isnull(a.worker,'')like '%切割%') 
+	group by a.worker
+end
+
+select * from @tmp order by idno
+;
 -------------------------------------------------------------------------------------------------------------------------------
 getuno:--getuno
 SET QUOTED_IDENTIFIER OFF

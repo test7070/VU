@@ -35,19 +35,30 @@
 				$.datepicker.setDefaults($.datepicker.regional["zh-TW"]);
 				
 				$('#btnSvg').val('點線/柱狀圖');
+				$('#btnSvg2').val('圓餅圖');
 				q_cmbParse("cmbSvgtype", '#non@全部,1@點線,2@柱狀'); 
-				$('#svgbet').hide();
+				$('#svgbtn').hide();
 				$('#barChart').hide();
+				$('#pieChart').hide();
 				
 				$('#q_report').click(function(e) {
-					$('#svgbet').hide();
+					$('#svgbtn').hide();
 					$('#barChart').hide();
+					$('#pieChart').hide();
 					$('#dataSearch').show();
 					var tindex=$('#q_report').data().info.radioIndex;
 					var txtreport=$('#q_report').data().info.reportData[tindex].report;
-					if(txtreport=='z_cubp_vu09'){
+					if(txtreport=='z_cubp_vu09' || txtreport=='z_cubp_vu10'){
 						q_cur=2;
-						$('#svgbet').show();
+						if(txtreport=='z_cubp_vu09'){
+							$('#btnSvg').show();
+							$('#cmbSvgtype').show();
+						}else{
+							$('#btnSvg').hide();
+							$('#cmbSvgtype').hide();
+						}
+						
+						$('#svgbtn').show();
 					}else{
 						q_cur=0;
 					}
@@ -59,6 +70,26 @@
 						q_func('qtxt.query.zcubpsvg91','cuc_vu.txt,zcubpsvg9,'+encodeURI(t_mon));
 						$('#Loading').Loading();
 						$('#dataSearch').hide();
+						$('#pieChart').hide();
+					}
+				});
+				
+				$('#btnSvg2').click(function() {
+					var tindex=$('#q_report').data().info.radioIndex;
+					var txtreport=$('#q_report').data().info.reportData[tindex].report;
+					
+					var t_mon=$('#txtYmon').val();
+					
+					if(txtreport=='z_cubp_vu10'){
+						t_mon=$('#txtYyear').val();
+					}
+					
+					var t_typea='#non'; //#non spec+size, 1 spec,2 size,3 worker
+					if(t_mon.length>0){
+						q_func('qtxt.query.zcubppie9','cuc_vu.txt,zcubppie9,'+encodeURI(t_mon)+';'+t_typea);
+						$('#Loading').Loading();
+						$('#dataSearch').hide();
+						$('#barChart').hide();
 					}
 				});
             });
@@ -459,6 +490,30 @@
                 			$('#dataSearch').show();
                 		}
                 		break;
+                	case 'qtxt.query.zcubppie9':
+                		var as = _q_appendData("tmp0", "", true, true);
+                		if (as[0] != undefined) {
+                			var pie=new Array();
+                			for (var i = 0; i < as.length; i++) {
+                				pie[i]={
+		                        	text:as[i].title,
+		                        	value:dec(as[i].weight)
+		                        }
+                			}
+                			
+                			 $('#pieChart').pieChart({
+								data : pie,
+								x: 250,
+								y: 250,
+								radius: 200
+							}); 
+							$('#Loading').hide();
+							$('#pieChart').show();
+                		}else{
+                			alert('無資料內容!!');
+                			$('#dataSearch').show();
+                		}
+                		break;
                 }
 			}
             
@@ -624,7 +679,7 @@
 	                        	var n_weight=0;
 	                        	eval('n_weight=dec(t_detail[ni].d_'+nj+')');
 	                        	$('#q_acDiv').css('left',e.pageX)
-	                        	q_msg($('#'+$(this).attr('id')),n_weight.toString(),5000);
+	                        	q_msg($('#'+$(this).attr('id')),FormatNumber(n_weight).toString(),5000);
 	                            
 							});
                         	obj.children('svg').find('.barChart_Cir').hover(function(e) {
@@ -640,15 +695,128 @@
 	                        	}
 	                        	
 	                        	$('#q_acDiv').css('left',e.pageX)
-	                        	q_msg($('#'+$(this).attr('id')),n_weight.toString(),5000);
+	                        	q_msg($('#'+$(this).attr('id')),FormatNumber(n_weight).toString(),5000);
 	                            
 							});
                         }
                 	});
                 	$(this).data('info').init($(this));
                 }
-                
+                $.fn.pieChart = function(value) {
+                    $(this).data('info', {
+                        value : value,
+                        unit : 'KG',
+                        unitweight : 1,
+                        fillColor : color,
+                        strokeColor : ["#000000"],
+                        focusfillColor : "#FFEEFE",
+                        focusIndex : -1,
+                        init : function(obj) {
+                            obj.addClass('pieChart');
+                            var tmp = 0,t1000=0;
+                            for ( i = 0; i < obj.data('info').value.data.length; i++) {
+                                tmp += obj.data('info').value.data[i].value;
+                                if(dec(obj.data('info').value.data[i].value)>2000){
+                                	t1000++;
+                                }
+                            }
+                            
+                            //表示每個類別全部都超過2噸 單位用噸
+                            if(t1000==obj.data('info').value.data.length){
+                            	obj.data('info').unit='噸';
+                            	obj.data('info').unitweight=1000;
+                            }
+                            
+                            var tmpDegree = 0;
+                            for ( i = 0; i < obj.data('info').value.data.length; i++) {
+                                obj.data('info').value.data[i].rate = obj.data('info').value.data[i].value / tmp;
+                                obj.data('info').value.data[i].degree = 2 * Math.PI * obj.data('info').value.data[i].rate;
+                                obj.data('info').value.data[i].bDegree = tmpDegree;
+                                tmpDegree += obj.data('info').value.data[i].degree;
+                                obj.data('info').value.data[i].eDegree = tmpDegree;
+                                obj.data('info').value.data[i].fillColor = obj.data('info').fillColor[i % obj.data('info').fillColor.length];
+                                obj.data('info').value.data[i].strokeColor = obj.data('info').strokeColor[i % obj.data('info').strokeColor.length];
+                            }
+                            obj.data('info').refresh(obj);
+                        },
+                        refresh : function(obj) {
+                            obj.html('');
+                            var tmpPath = '', shiftX, shiftY, degree, fillColor, strokeColor;
+                            var x = obj.data('info').value.x;
+                            var y = obj.data('info').value.y;
+                            var radius = obj.data('info').value.radius;
+                            var xbranch=0,ybranch=0;//分行
+                            for ( i = 0; i < obj.data('info').value.data.length; i++) {
+                                if (i == obj.data('info').focusIndex) {
+                                    shiftX = Math.round(10 * Math.cos(obj.data('info').value.data[i].bDegree + obj.data('info').value.data[i].degree / 2), 0);
+                                    shiftY = Math.round(10 * Math.sin(obj.data('info').value.data[i].bDegree + obj.data('info').value.data[i].degree / 2), 0);
+                                    fillColor = '"' + obj.data('info').focusfillColor + '"';
+                                    strokeColor = '"' + obj.data('info').value.data[i].strokeColor + '"';
+                                } else {
+                                    shiftX = 0;
+                                    shiftY = 0;
+                                    fillColor = '"' + obj.data('info').value.data[i].fillColor + '"';
+                                    strokeColor = '"' + obj.data('info').value.data[i].strokeColor + '"';
+                                }
+                                degree = Math.round(obj.data('info').value.data[i].degree * 360 / (2 * Math.PI), 0);
+                                obj.data('info').value.data[i].currentFillColor = fillColor;
+                                obj.data('info').value.data[i].currentStrokeColor = strokeColor;
+                                obj.data('info').value.data[i].point1 = [x + shiftX, y + shiftY];
+                                obj.data('info').value.data[i].point2 = [x + shiftX + Math.round(radius * Math.cos(obj.data('info').value.data[i].bDegree), 0), y + shiftY + Math.round(radius * Math.sin(obj.data('info').value.data[i].bDegree), 0)];
+                                obj.data('info').value.data[i].point3 = [x + shiftX + Math.round(radius * Math.cos(obj.data('info').value.data[i].eDegree), 0), y + shiftY + Math.round(radius * Math.sin(obj.data('info').value.data[i].eDegree), 0)];
+                                
+                                if(i>14&&i%35==0){//分行
+                                	xbranch+=120;
+                                	ybranch=i;
+                                }
+                                
+                                var pointLogo = [x + radius + 20+xbranch, (i-ybranch)* 20 + 30];
+                                var pointText = [x + radius + 35+xbranch, (i-ybranch) * 20 + 40];
+                                tmpPath += '<rect class="blockLogo" id="blockLogo_'+i+'" width="10" height="10" x="' + pointLogo[0] + '" y="' + pointLogo[1] + '" fill=' + fillColor + ' stroke=' + strokeColor + '/>';
+                                tmpPath += '<text class="blockText" id="blockText_'+i+'" x="' + pointText[0] + '" y="' + pointText[1] + '" fill="#000000">' + obj.data('info').value.data[i].text + '</text>';
+                                
+                                if (degree != 360)
+                                    tmpPath += '<path class="block" id="block_' + i + '" d="M' + obj.data('info').value.data[i].point1[0] + ' ' + obj.data('info').value.data[i].point1[1] + ' L' + obj.data('info').value.data[i].point2[0] + ' ' + obj.data('info').value.data[i].point2[1] + ' A' + radius + ' ' + radius + ' ' + degree + (degree > 180 ? ' 1 1 ' : ' 0 1 ') + obj.data('info').value.data[i].point3[0] + ' ' + obj.data('info').value.data[i].point3[1] + ' Z" fill=' + obj.data('info').value.data[i].currentFillColor + ' stroke=' + obj.data('info').value.data[i].currentStrokeColor + '/>';
+                                else
+                                    tmpPath += '<circle class="block" id="block_' + i + '" cx="' + x + '" cy="' + y + '" r="' + radius + '" fill=' + obj.data('info').value.data[i].currentFillColor + ' stroke=' + obj.data('info').value.data[i].currentStrokeColor + '/>';
+                            }
+                            
+                            tmpPath += '<text class="UnitText" id="UnitText" x="" y="25" fill="#000000">' + '單位：'+obj.data('info').unit + '</text>';
+                            
+                            obj.append('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" class="graph">' + tmpPath + '</svg> ');
+                                                        
+                            obj.children('svg').find('.block').hover(function(e) {
+                            	
+                            	var t_unitweight=obj.data('info').unitweight;
+                            	var t_detail = obj.data('info').value.data;
+                            	var tid = $(this).attr('id');
+	                        	var ni = $(this).attr('id').split('_')[1];
+	                        	var n_title=t_detail[ni].text;
+	                        	var n_weight=round(q_div(dec(t_detail[ni].value),t_unitweight),0);
+	                        		                        	
+	                        	q_msg($('#'+tid),n_title+'   \n生產數量：'+FormatNumber(n_weight).toString(),5000);
+	                        	$('#q_acDiv').css('left',e.pageX);
+	                        	$('#q_acDiv').css('top',e.pageY);
+	                        	
+                            });
+                        }
+                    });
+                    $(this).data('info').init($(this));
+                }
             })($);
+            
+            //設定色彩
+            var color=[
+            "#FFB7DD","#FFCCCC","#FFC8B4","#FFDDAA","#FFEE99","#FFFFBB","#EEFFBB","#CCFF99","#99FF99","#BBFFEE",
+            "#AAFFEE","#99FFFF","#CCEEFF","#CCDDFF","#CCCCFF","#CCBBFF","#D1BBFF","#E8CCFF","#F0BBFF","#FFB3FF",
+            "#FF44AA","#FF3333","#FF7744","#FFAA33","#FFCC22","#FFFF33","#CCFF33","#99FF33","#33FF33","#33FFAA",
+            "#33FFDD","#33FFFF","#33CCFF","#5599FF","#5555FF","#7744FF","#9955FF","#B94FFF","#E93EFF","#FF3EFF",
+            "#eee7f8", "#f9acc7", "#fbe6b6", "#b5c4ea", "#e8d1fa", "#bafae0", "#d0c7b9", "#edfbec", "#dcebb0",
+            "#cafdbc", "#dbaddb", "#acf8dd", "#dccae0", "#d7b6f0", "#bebaf9", "#dec4e7", "#ead2b5", "#e5beae",
+            "#d6e0b0", "#c8f5fc", "#e5e2d7", "#f7f8c7", "#add3c9", "#b1ffb8", "#d9c0b8", "#b6dac5", "#c0eeec",
+            "#e1f0e0", "#bbf7c7", "#d1ffff", "#d0cec0", "#baacd4", "#f1ffd0", "#c7f1bf", "#fcbbbc", "#b6d3fb",
+            "#f3dfd8", "#f8c5ff", "#fce9c0", "#b6e0b1", "#bdbff7", "#cfb4c7", "#e4f7d6", "#bfb3ab", "#eeacf1", 
+            "#d7f2f2", "#e2f1e1", "#cfb4ca", "#d2c1f7", "#f2c2db", "#d8dabe"];
             
             function FormatNumber(n) {
                 n += "";
@@ -668,9 +836,10 @@
 			<div id="container">
 				<div id="q_report"> </div>
 			</div>
-			<div id="svgbet" style="display:inline-block;width:2000px;">
+			<div id="svgbtn" style="display:inline-block;width:2000px;">
 				<input id="btnSvg" type="button" style="font-size: medium;"/>
 				<select id="cmbSvgtype" style="font-size: medium;"> </select>
+				<input id="btnSvg2" type="button" style="font-size: medium;margin-left: 20px;"/>
 			</div>
 			<div id='dataSearch' class="prt" style="margin-left: -40px;">
 				<!--#include file="../inc/print_ctrl.inc"-->
@@ -678,7 +847,8 @@
 		</div>		
 		
 		<div id='Loading'> </div>
-		<div id='barChart'> </div>
+		<div id='barChart' style="display: none;"> </div>
+		<div id='pieChart' style="height: 500px;display: none;"> </div>
 		
 		<div id="zcubpdiv9_1" style="display: none;position:absolute;background: darkgray;">
 			<table id="zcubptable9_1" style="text-align: center;color: white;font-size: medium;">

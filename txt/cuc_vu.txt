@@ -1473,7 +1473,7 @@ declare @tmp table(
 if(@t_typea='')
 begin
 	insert @tmp(idno,title,weight) 
-	select ROW_NUMBER()over (order by b.spec,cast(dbo.get_num(b.size) as int)),b.spec+' '+b.size,sum(b.weight)
+	select ROW_NUMBER()over (order by cast(dbo.get_num(b.size) as int),b.spec),b.spec+' '+b.size,sum(b.weight)
 	from view_cub a left join view_cubs b on a.noa=b.noa and a.accy=b.accy 
 	where left(isnull(a.datea,''),len(@t_mon)) =@t_mon 
 	and isnull(b.productno2,'')!='' --加工 沒有值表示餘料入庫 

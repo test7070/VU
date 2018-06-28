@@ -695,7 +695,7 @@
 	                        	}
 	                        	
 	                        	$('#q_acDiv').css('left',e.pageX)
-	                        	q_msg($('#'+$(this).attr('id')),FormatNumber(n_weight).toString(),5000);
+	                        	q_msg($('#'+$(this).attr('id')),FormatNumber(n_weight).toString(),0,5000);
 	                            
 							});
                         }
@@ -772,8 +772,18 @@
                                 
                                 var pointLogo = [x + radius + 20+xbranch, (i-ybranch)* 20 + 30];
                                 var pointText = [x + radius + 35+xbranch, (i-ybranch) * 20 + 40];
+                                
+                                var t_unit=obj.data('info').unit;
+                                var t_unitweight=obj.data('info').unitweight;
+                                var n_weight=FormatNumber(round(q_div(dec(obj.data('info').value.data[i].value),t_unitweight),0));
+                                var n_title=obj.data('info').value.data[i].text
+                                n_title=(n_title+(n_title.indexOf('W')==-1?'　':'')+'      ').substr(0,11);
+                                n_title=replaceAll(n_title,' ','&nbsp;');
+                                var n_rate=('      '+FormatNumber(round(obj.data('info').value.data[i].rate*100,2))+'%').slice(-7);
+                                n_rate=replaceAll(n_rate,' ','&nbsp;');
+                                
                                 tmpPath += '<rect class="blockLogo" id="blockLogo_'+i+'" width="10" height="10" x="' + pointLogo[0] + '" y="' + pointLogo[1] + '" fill=' + fillColor + ' stroke=' + strokeColor + '/>';
-                                tmpPath += '<text class="blockText" id="blockText_'+i+'" x="' + pointText[0] + '" y="' + pointText[1] + '" fill="#000000">' + obj.data('info').value.data[i].text + '</text>';
+                                tmpPath += '<text class="blockText" id="blockText_'+i+'" x="' + pointText[0] + '" y="' + pointText[1] + '" fill="#000000">' + n_title +' ('+n_rate+' - 生產:'+n_weight+t_unit+')'+ '</text>';
                                 
                                 if (degree != 360)
                                     tmpPath += '<path class="block" id="block_' + i + '" d="M' + obj.data('info').value.data[i].point1[0] + ' ' + obj.data('info').value.data[i].point1[1] + ' L' + obj.data('info').value.data[i].point2[0] + ' ' + obj.data('info').value.data[i].point2[1] + ' A' + radius + ' ' + radius + ' ' + degree + (degree > 180 ? ' 1 1 ' : ' 0 1 ') + obj.data('info').value.data[i].point3[0] + ' ' + obj.data('info').value.data[i].point3[1] + ' Z" fill=' + obj.data('info').value.data[i].currentFillColor + ' stroke=' + obj.data('info').value.data[i].currentStrokeColor + '/>';
@@ -787,14 +797,16 @@
                                                         
                             obj.children('svg').find('.block').hover(function(e) {
                             	
+                            	var t_unit=obj.data('info').unit;
                             	var t_unitweight=obj.data('info').unitweight;
                             	var t_detail = obj.data('info').value.data;
                             	var tid = $(this).attr('id');
 	                        	var ni = $(this).attr('id').split('_')[1];
 	                        	var n_title=t_detail[ni].text;
 	                        	var n_weight=round(q_div(dec(t_detail[ni].value),t_unitweight),0);
+	                        	var n_rate=round(t_detail[ni].rate*100,2);
 	                        		                        	
-	                        	q_msg($('#'+tid),n_title+'   \n生產數量：'+FormatNumber(n_weight).toString(),5000);
+	                        	q_msg($('#'+tid),n_title+'   \n生產重量：'+FormatNumber(n_weight).toString()+t_unit+' ('+n_rate+' %)',0,900000);
 	                        	$('#q_acDiv').css('left',e.pageX);
 	                        	$('#q_acDiv').css('top',e.pageY);
 	                        	

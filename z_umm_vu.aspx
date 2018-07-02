@@ -82,8 +82,11 @@
                     }, {
 						type : '8',//[15]
 						name : 'xoption01',
-						value : 'detail@明細'.split('&')
-					}]
+						value : 'detail@明細,zero@零值顯示'.split(',')
+					},{
+                        type : '6', //[16]
+                        name : 'xqno'
+                    }]
                 });
                 q_popAssign();
                 q_getFormat();
@@ -96,17 +99,44 @@
                 $('#txtXmon1').mask(r_picm);
                 $('#txtXmon2').mask(r_picm);
                 
-                $('#Xmemo').removeClass('a2').addClass('a1');
-                $('#txtXmemo').css('width', '85%');
-                $('.q_report .report').css('width', '460px');
-                $('.q_report .report div').css('width', '220px');
-                
                 $('#txtXmon1').val(q_date().substr(0,r_lenm));
                 $('#txtXmon2').val(q_date().substr(0,r_lenm));
-                //105/08/05預設抓半年
-                $('#txtXdate1').val(q_cdn(q_date().substr(0,r_lenm)+'/15',-155).substr(0,r_lenm)+'/01');
+                //105/08/05預設抓半年 //107/06/28 SF改成1年半
+                if(q_getPara('sys.project').toUpperCase()=='SF'){
+                	$('#txtXdate1').val(q_cdn(q_date().substr(0,r_lenm)+'/15',-521).substr(0,r_lenm)+'/01');
+                }else{
+                	$('#txtXdate1').val(q_cdn(q_date().substr(0,r_lenm)+'/15',-155).substr(0,r_lenm)+'/01');
+                }
                 $('#txtXdate2').val(q_cdn(q_cdn(q_date().substr(0,r_lenm)+'/01',45).substr(0,r_lenm)+'/01',-1));
                 
+                //107/06/28 預設開啟
+                $('#Xoption01 [type=checkbox]').first().prop('checked',true);
+                
+                
+                if(window.parent.q_name=="z_quatp_vu"){
+                	var t_qno='';
+                	var t_bdate='';
+                	var t_report='';
+                	if(q_getHref()[1]!=undefined){t_qno=q_getHref()[1];}
+                	if(q_getHref()[3]!=undefined){t_bdate=q_getHref()[3];}
+                	if(q_getHref()[5]!=undefined){t_report=q_getHref()[5];}
+                	
+                	var t_i=-1;
+					for(var i=0;i<$('#q_report').data().info.reportData.length;i++){
+						if($('#q_report').data().info.reportData[i].report!=t_report)
+							$('#q_report div div').eq(i).hide();
+						else{
+							t_i=i;
+						}
+					}
+					if(t_i>-1){
+						$('#txtXqno').val(t_qno);
+						$('#txtXdate1').val(t_bdate);
+						
+						$('#q_report .report div').eq(t_i).click();
+	 					$('#btnOk').click();
+ 					}
+				}
             }
 
             function q_boxClose(s2) {

@@ -204,12 +204,10 @@ z_umm_vu02:--z_umm_vu02 ref. z_ummst02
 	)
 
 	declare @tmp table(
-		idno int,
 		gno nvarchar(10),
 		custno nvarchar(20),
 		memo nvarchar(max),
 		
-		punpay float,
 		[money] float,
 		pay float,
 		unpay float
@@ -225,12 +223,10 @@ z_umm_vu02:--z_umm_vu02 ref. z_ummst02
 	---------------------------------------------------------------------------------------
 	declare @custno nvarchar(20)
 	declare @mon nvarchar(10)
-	declare @t_mon nvarchar(10)
 	declare @money float
 	declare @tax float
 	declare @pay float
 	declare @unpay float
-	declare @punpay float
 	
 	declare cursor_table cursor for
 	select custno from @tmpa group by custno
@@ -239,10 +235,9 @@ z_umm_vu02:--z_umm_vu02 ref. z_ummst02
 	into @custno
 	while(@@FETCH_STATUS <> -1)
 	begin
-		set @t_mon=''
 		set @cmd = ''
 		declare cursor_table2 cursor for
-		select top 1 mon,unpay from @tmpa 
+		select mon,unpay from @tmpa 
 		where custno=@custno and unpay !=0 and mon<@t_bmon
 		order by mon
 		open cursor_table2
@@ -250,85 +245,40 @@ z_umm_vu02:--z_umm_vu02 ref. z_ummst02
 		into @mon,@unpay
 		while(@@FETCH_STATUS <> -1)
 		begin
-			set @cmd = @cmd + case when LEN(@cmd)>0 then '<BR>' else '' end 
-				+case when len(@mon)>0 then '<a style="color:red">'+@mon+'</a>' else '<a style="color:red">無帳款月份</a>' end
+			set @cmd = @cmd + case when LEN(@cmd)>0 then ', ' else '' end 
+				+case when len(@mon)>0 then @mon else '無帳款月份'end
 				+'：'+dbo.getComma(@unpay,0)
-
-			set @t_mon=@mon
 		
 			fetch next from cursor_table2
 			into @mon,@unpay
 		end
 		close cursor_table2
 		deallocate cursor_table2
-		--//////////////////////////////////////////////////////////////////////////////////////////////////
+		
 		select @money=0,@pay=0,@unpay=0
 		select @money=SUM(ISNULL(money,0)),@pay=SUM(ISNULL(pay,0)) from @tmpa where custno=@custno and mon between @t_bmon and @t_emon
 		select @unpay=SUM(ISNULL(unpay,0)) from @tmpa where custno=@custno
-		select @punpay=SUM(ISNULL(unpay,0)) from @tmpa where custno=@custno and mon<@t_bmon
-
-		--加入預收款
-		set @pay=isnull(@pay,0)+isnull((select sum(isnull(opay,0)-isnull(unopay,0)) from umm where custno=@custno and datea<=@t_emon+'/32'),0)
-		set @unpay=isnull(@punpay,0)+isnull(@money,0)-@pay
 		
-		insert into @tmp(gno,custno,memo,[money],pay,unpay,punpay)values('1',@custno,@cmd,@money,@pay,@unpay,@punpay)
-
-		--//////////////////////////////////////////////////////////////////////////////////////////////////
-		declare cursor_table2 cursor for
-		select mon,unpay from @tmpa 
-		where custno=@custno and unpay !=0 and mon<@t_bmon and mon!=@t_mon
-		order by mon
-		open cursor_table2
-		fetch next from cursor_table2
-		into @mon,@unpay
-		while(@@FETCH_STATUS <> -1)
-		begin
-			set @cmd = case when len(@mon)>0 then '<a style="color:red">'+@mon+'</a>' else '<a style="color:red">無帳款月份</a>' end	+'：'+dbo.getComma(@unpay,0)
-			set @t_mon=@mon
-			insert into @tmp(gno,custno,memo)values('1-1',@custno,@cmd)
-			fetch next from cursor_table2
-			into @mon,@unpay
-		end
-		close cursor_table2
-		deallocate cursor_table2
-
+		insert into @tmp(gno,custno,memo,[money],pay,unpay)values('1',@custno,@cmd,@money,@pay,@unpay)
+	
 		fetch next from cursor_table
 		into @custno
 	end
 	close cursor_table
 	deallocate cursor_table
-
-	--已預收未出貨
-	insert @tmp(gno,custno,money,pay,unpay)
-	select '1',custno,0,sum(isnull(opay,0)-isnull(unopay,0)),-1*sum(isnull(opay,0)-isnull(unopay,0))
-	from umm a where not exists (select * from @tmp where custno=a.custno)
-	and custno between @t_bcustno and @t_ecustno
-	and datea <=@t_emon+'/32'
-	group by custno
 	
-	--總計
-	insert into @tmp(gno,custno,[money],pay,unpay,punpay)
-	select '2',char(255),SUM(ISNULL([money],0)),SUM(ISNULL(pay,0)),SUM(ISNULL(unpay,0)),SUM(ISNULL(punpay,0)) from @tmp
+	insert into @tmp(gno,[money],pay,unpay)
+	select '2',SUM(ISNULL([money],0)),SUM(ISNULL(pay,0)),SUM(ISNULL(unpay,0)) from @tmp
 	
 	delete @tmp
 	where isnull(money,0)=0 and isnull(pay,0)=0 and isnull(unpay,0)=0 and gno='1'
-
-	update a
-	set idno=rr
-	from (select idno,ROW_NUMBER() over (order by custno,gno,memo) rr from @tmp) a
 	
-	select case when gno='1-1' then '1' else a.gno end gno
-	,case when gno='1-1' then '' else a.custno end custno
-	,case when gno='1-1' then '' else b.nick end nick
-	,case when gno='1-1' then '' else b.[getdate] end [getdate]
-	,a.memo
+	select a.*,b.nick
 	,dbo.getComma(money,0) aa1
 	,dbo.getComma(pay,0) aa2
 	,dbo.getComma(unpay,0) aa3
-	,dbo.getComma(punpay,0) aa4
 	from @tmp a
-	left join cust b on a.custno=b.noa
-	order by idno;
+	left join cust b on a.custno=b.noa;
 --**************************************************************************************************
 z_umm_vu03:--z_umm_vu03 ref. z_ummst03 
 	SET QUOTED_IDENTIFIER OFF 
@@ -922,14 +872,12 @@ z_umm_vu05:--z_umm_vu05
 	declare @t_bcustno nvarchar(30)
 	declare @t_ecustno nvarchar(30)
 	declare @t_detail nvarchar(max)
-	declare @t_qno nvarchar(max)
 	
 	set @t_bdate = case when '#non' = [6] then '' else [6] end
 	set @t_edate = case when '#non' = [7] then CHAR(255) else [7] end
 	set @t_bcustno = case when '#non' = [8] then '' else [8] end
 	set @t_ecustno = case when '#non' = [9] then CHAR(255) else [9] end
 	set @t_detail = case when '#non'=[15] then '' else [15] end
-	set @t_qno = case when '#non'=[16] then '' else [16] end
 	---------------------------------------------------------------------------------
 	IF OBJECT_ID('tempdb..#tmp')is not null
 	BEGIN
@@ -988,13 +936,13 @@ z_umm_vu05:--z_umm_vu05
 	insert #tmp(gno,custno,noa,sale,paysale,opay,unopay,unpay,qhref)
 	select '0',custno,noa,SUM(sale),SUM(paysale),SUM(opay),SUM(unopay),SUM(sale)-SUM(paysale)-SUM(opay)+SUM(unopay)
 	,'quat_vu?noa=$noa'+isnull((select top 1 '?'+accy from view_quat where noa=a.noa  order by datea),'')
-	from #tmp a where (a.noa=@t_qno or len(@t_qno)=0) group by custno,noa
+	from #tmp a group by custno,noa
 	
 	delete #tmp where gno!='0'
 	
 	--delete #tmp where sale=0 and paysale=0 and opay=0 and unopay=0 and unpay=0
 	
-	if (charindex('detail',@t_detail)>0)
+	if LEN(@t_detail)>0
 	begin
 		insert #tmp(gno,custno,noa,vccno,sale,paysale,opay,unopay,ghref)
 		select '1',a.custno,left(a.apvmemo,case when CHARINDEX('@',a.apvmemo)=0 then LEN(a.apvmemo) else charindex('@',a.apvmemo)-1 end),a.noa
@@ -1009,17 +957,13 @@ z_umm_vu05:--z_umm_vu05
 	update a set datea=(select datea from view_quat where noa=a.noa) from #tmp a
 	
 	insert #tmp(gno,custno,noa,datea,sale,paysale,opay,unopay,unpay,qhref)
-	select '0-1',a.custno,noa,datea,(case when a.typea!='1' then -1 else 1 end) *isnull(a.total,0)
+	select '0',a.custno,noa,datea,(case when a.typea!='1' then -1 else 1 end) *isnull(a.total,0)
 	,isnull(b.paysale,0),0,0,((case when a.typea!='1' then -1 else 1 end) *isnull(a.total,0))-isnull(b.paysale,0)
 	,'vcc_vu?noa=$noa?'+a.accy
 	from view_vcc a outer apply (select SUM(paysale)paysale from umms where vccno=a.noa)b
 	where a.datea between @t_bdate and @t_edate
 	and a.custno between @t_bcustno and @t_ecustno
 	and left(a.apvmemo,case when  CHARINDEX('@',a.apvmemo)=0 then LEN(a.apvmemo) else charindex('@',a.apvmemo)-1 end)=''
-	--and (a.noa=@t_qno or len(@t_qno)=0)
-	
-	delete #tmp	where not (noa=@t_qno or len(@t_qno)=0)	and gno='0-1'
-	update #tmp set gno='0' where gno='0-1'
 	
 	insert #tmp(gno,custno,noa,datea,opay,unopay,sale,paysale,unpay,qhref)
 	select '0',custno,noa,datea,isnull(opay,0),isnull(unopay,0),0,0,0-isnull(opay,0)+isnull(unopay,0)
@@ -1029,13 +973,6 @@ z_umm_vu05:--z_umm_vu05
 	and a.custno between @t_bcustno and @t_ecustno
 	and (isnull(opay,0)!=0 or isnull(unopay,0)!=0)
 	and isnull(payc,'')=''
-	and isnull(payc,'')='' and (a.noa=@t_qno or len(@t_qno)=0)
-	
-	if (charindex('zero',@t_detail)=0)
-	begin
-		delete #tmp where gno='0' and isnull(unpay,0)=0
-		delete #tmp where gno='1' and isnull(sale,0)-isnull(paysale,0)=0
-	end
 	
 	update a
 	set recno=rr

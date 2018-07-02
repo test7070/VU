@@ -271,6 +271,8 @@ begin
 		'quat_vu?noa=$noa?'+a.accy qhrefa,
 		dbo.charbr(memo,127) memo,
 		case when @t_proj='SF' then "z_vcc_sf" else "z_vcc_vu" end+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when gno='4' then '*' else '' end star,
+		case when gno='4' then "z_umm_vu"+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and report=\'z_umm_vu05\' and star=$star" else "" end ghref,
 		case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
 		* from #tmp a
 		order by grpno,enddate,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
@@ -286,6 +288,8 @@ begin
 		'quat_vu?noa=$noa?'+a.accy qhrefa,
 		dbo.charbr(memo,127) memo,
 		case when @t_proj='SF' then "z_vcc_sf" else "z_vcc_vu" end+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when gno='4' then '*' else '' end star,
+		case when gno='4' then "z_umm_vu"+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and report=\'z_umm_vu05\' and star=$star" else "" end ghref,
 		case when (select count(*) from #tmp where grpno=a.grpno and gno='0' and custno!=a.grpno)=0   then '' else grpname end grpname,
 		* from #tmp a
 		order by grpno,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
@@ -304,6 +308,8 @@ begin
 		'quat_vu?noa=$noa?'+a.accy qhrefa, 
 		dbo.charbr(memo,127) memo,
 		case when @t_proj='SF' then "z_vcc_sf" else "z_vcc_vu" end+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when gno='4' then '*' else '' end star,
+		case when gno='4' then "z_umm_vu"+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and report=\'z_umm_vu05\' and star=$star" else "" end ghref,
 		'' grpname,
 		* from #tmp a
 		order by enddate,custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno
@@ -319,6 +325,8 @@ begin
 		'quat_vu?noa=$noa?'+a.accy qhrefa, 
 		dbo.charbr(memo,127) memo,
 		case when @t_proj='SF' then "z_vcc_sf" else "z_vcc_vu" end+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and recno=$recno" qhrefb,
+		case when gno='4' then '*' else '' end star,
+		case when gno='4' then "z_umm_vu"+"?qno=\'"+a.noa+"\' and bdate=\'"+a.datea+"\' and report=\'z_umm_vu05\' and star=$star" else "" end ghref,
 		'' grpname,
 		* from #tmp a
 		order by custno,datea,noa,case when gno='4' then '01' when gno='1' then '2' when gno='2' then '1' else gno end,recno

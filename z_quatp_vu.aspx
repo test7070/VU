@@ -112,7 +112,7 @@
                 
 				var t_date, t_year, t_month, t_day;
 				t_date = new Date();
-				if(q_getPara('sys.project').toUpperCase()=='SF'){
+				if(q_getPara('sys.project').toUpperCase()=='SF' || q_getPara('sys.project').toUpperCase()=='VU'){
 					t_date.setYear(t_date.getFullYear()-2);
 					t_date.setMonth(0);
 				}else{

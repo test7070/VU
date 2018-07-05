@@ -875,7 +875,7 @@ begin
 	,dbo.getComma(weight,[3])weight
 	,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
 	,* 
-	from #tmp where gno!='0' order by gno,ucolor,cast(dbo.get_num(size) as int),spec,lengthb,class,uno
+	from #tmp where gno!='0' order by gno,cast(dbo.get_num(size) as int),spec,lengthb,ucolor,class,uno
 end
 else
 begin
@@ -885,7 +885,7 @@ begin
 	,dbo.getComma(weight,[3])weight
 	,dbo.getComma(case when mount=0 then 0 else weight/mount end,[3])avgweight 
 	,* 
-	from #tmp where gno!='1' order by gno,ucolor,cast(dbo.get_num(size) as int),spec,lengthb,class,uno
+	from #tmp where gno!='1' order by gno,cast(dbo.get_num(size) as int),spec,lengthb,ucolor,class,uno
 end
 
 IF OBJECT_ID('tempdb..#tmp')is not null
